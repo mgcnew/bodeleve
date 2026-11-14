@@ -16,7 +16,7 @@ def gphone(fname, title, h, body, logic, bg=OP):
     open(os.path.join(OUT, fname), 'w').write(html)
     print(fname, len(html))
 
-GNAV = [('inicio', 'Início', 'Gestao-Inicio.dc.html'), ('pedidos', 'Pedidos', 'Gestao-Pedidos.dc.html'), ('estoque', 'Estoque', None), ('financeiro', 'Financeiro', None), ('mais', 'Mais', 'Gestao-Mais.dc.html')]
+GNAV = [('inicio', 'Início', 'Gestao-Inicio.dc.html'), ('pedidos', 'Pedidos', 'Gestao-Pedidos.dc.html'), ('estoque', 'Estoque', 'Gestao-Estoque.dc.html'), ('financeiro', 'Financeiro', None), ('mais', 'Mais', 'Gestao-Mais.dc.html')]
 def gnav(active):
     cells = ''
     for i, (ic, t, href) in enumerate(GNAV):
@@ -76,8 +76,8 @@ inicio = (f'<header style="padding: 16px 16px 8px; flex: none; display: flex; ju
     + box(acao('pedidos', IN_T, IN_B, '2 pedidos novos', 'Aguardando aceite · o mais antigo há 10 min', 'Gestao-Pedidos.dc.html')
           + acao('alerta', ER_T, ER_B, 'Aluguel atrasado', 'Venceu em 10/11 · R$ 1.800,00')
           + acao('financeiro', AT_T, AT_B, '2 contas vencem hoje', 'R$ 640,00 · Laticínios Serra Verde e mais 1')
-          + acao('validade', AT_T, AT_B, '3 lotes vencem em até 7 dias', 'Queijo coalho, Doce de leite, Nata')
-          + acao('estoque', AT_T, AT_B, '7 itens com estoque baixo', 'Tapioca granulada, Rapadura e mais 5').replace(f'border-bottom: 1px solid {LN}; ', '', 1).replace('min-height: 64px; padding: 8px 0; text', 'min-height: 64px; padding: 8px 0; text'), 'padding-bottom: 0')
+          + acao('validade', AT_T, AT_B, '3 lotes vencem em até 7 dias', 'Queijo coalho, Doce de leite, Nata', 'Gestao-Estoque.dc.html')
+          + acao('estoque', AT_T, AT_B, '7 itens com estoque baixo', 'Tapioca granulada, Rapadura e mais 5', 'Gestao-Estoque.dc.html').replace(f'border-bottom: 1px solid {LN}; ', '', 1).replace('min-height: 64px; padding: 8px 0; text', 'min-height: 64px; padding: 8px 0; text'), 'padding-bottom: 0')
     + '</section>'
     f'<section style="display: flex; flex-direction: column; gap: 8px">{h2("Hoje na casa")}<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">'
     + kpi('Pedidos em aberto', '4', '2 novos · 2 em preparo', G, 'Gestao-Pedidos.dc.html') + kpi('Em produção', '2 ordens', 'Queijo coalho · Doce de leite')
@@ -169,14 +169,18 @@ logic_pedido = ("renderVals() {\nconst st = this.state || {};\nconst p = st.p ||
 gphone('Gestao-Pedido.dc.html', 'Bodeleve — gestão: pedido', 1020, pedido, logic_pedido)
 
 # ---------- Mais ----------
-def mrow(ic, t, sub, last=False):
+def mrow(ic, t, sub, last=False, href=None):
     bd = '' if last else f'border-bottom: 1px solid {LN}; '
-    return (f'<div style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 0; {bd}color: {G}">{icon(ic, 22, G2)}'
-            f'<span style="flex: 1 1 0; min-width: 0"><span style="display: block; font-weight: 600">{t}</span><span style="display: block; font-size: 13px; line-height: 18px; color: {G2}">{sub}</span></span></div>')
+    inner = (f'{icon(ic, 22, G2)}<span style="flex: 1 1 0; min-width: 0"><span style="display: block; font-weight: 600">{t}</span>'
+             f'<span style="display: block; font-size: 13px; line-height: 18px; color: {G2}">{sub}</span></span>')
+    st = f'display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 0; {bd}color: {G}; text-decoration: none'
+    if href:
+        return f'<a href="{href}" style="{st}">{inner}{icon("avancar", 18, G2)}</a>'
+    return f'<div style="{st}">{inner}</div>'
 grupo = lambda t, inner: f'<section style="display: flex; flex-direction: column; gap: 8px"><div style="{LBL}">{t}</div>{box(inner)}</section>'
 mais = (titulo('Mais', 'Todos os módulos da gestão')
     + f'<main style="display: flex; flex-direction: column; gap: 20px; padding: 8px 16px 24px">'
-    + grupo('Abastecer', mrow('compras', 'Compras', 'Pedidos de compra e recebimento') + mrow('entregas', 'Fornecedores', 'Contatos e histórico de compras') + mrow('producao', 'Produção', 'Fichas técnicas e ordens de produção', True))
+    + grupo('Abastecer', mrow('compras', 'Compras', 'Pedidos de compra e recebimento', False, 'Gestao-Compras.dc.html') + mrow('entregas', 'Fornecedores', 'Contatos e histórico de compras', False, 'Gestao-Fornecedores.dc.html') + mrow('producao', 'Produção', 'Fichas técnicas e ordens de produção', True))
     + grupo('Catálogo', mrow('vender', 'Produtos e categorias', 'Preço, origem, publicação na loja', True))
     + grupo('Relacionamento', mrow('perfil', 'Clientes', 'Histórico e contato') + mrow('local', 'Entregas', 'Atribuir e acompanhar entregadores', True))
     + grupo('Análise', mrow('historico', 'Relatórios', 'Vendas, estoque, financeiro', True))

@@ -19,7 +19,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D10 | 2026-11-14 | Etapa 1 aprovada em bloco ("pode seguir"): valem as propostas P-A a P-I abaixo | Usuário |
 | D11 | 2026-11-14 | Etapa 2 (design system) aprovada ("pode continuar para próxima fase"): valem P-J a P-P | Usuário |
 | D12 | 2026-11-14 | Etapa 3 entregue em lotes; lote 1 = Início, Produto, Sacola, Pedido confirmado; lote 2 = checkout; lote 3 = catálogo, marca, pedidos e conta | Usuário |
-| D13 | 2026-11-14 | Etapa 3 (loja) considerada aprovada ("continue"); Etapa 4 (gestão) iniciada em lotes; lote 1 = Entrar, Início, Pedidos, Pedido, Mais | Usuário |
+| D13 | 2026-11-14 | Etapa 3 (loja) considerada aprovada ("continue"); Etapa 4 (gestão) iniciada em lotes; lote 1 = Entrar, Início, Pedidos, Pedido, Mais; lote 2 = Compras e Fornecedores; lote 3 = Estoque | Usuário |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -74,6 +74,14 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-G3 | Vendas do dia abrem já separadas em balcão e internet, com comparação com ontem no mesmo horário | — |
 | H-G4 | Pedido online passa por Novo → Separando (conferência item a item, com lote) → Pronto → Em rota | H2, H3 |
 | H-G5 | Venda de balcão entra concluída e não aparece na fila de pedidos | H2 |
+| H-G7 | Pedido de compra sugere quantidades pelo estoque mínimo e é enviado ao fornecedor pelo WhatsApp | Q14 |
+| H-G8 | Recebimento confere item a item com lote e validade; aceita recebimento parcial (manter em aberto ou encerrar) | H3 |
+| H-G9 | A conta a pagar nasce no recebimento, com o valor do que chegou, e vence conforme o prazo do fornecedor | H4 |
+| H-G10 | Estoque mostra itens à venda e matérias-primas na mesma lista, diferenciados por selo (Feito na casa, Marca Bodeleve, Revenda, Matéria-prima) | P-E |
+| H-G11 | Saída de estoque segue o lote que vence primeiro; o item indica o "próximo a sair" | H3 |
+| H-G12 | Perda e consumo interno registram lote, motivo e custo; correção de contagem também pode somar | — |
+| H-G13 | Inventário por área (ex.: Queijos e laticínios), com diferença em unidades e em custo antes de aplicar | Q1 |
+| H-G14 | Leite e coalho são matérias-primas compradas; queijos e doce de leite são produzidos na casa | Q3 |
 | H-G6 | "A receber" inclui cartões a liquidar e fiado | Q13 |
 
 ## Pendências
