@@ -1,0 +1,49 @@
+# ROADMAP — Bodeleve
+
+Cada etapa termina com revisão e aprovação antes da seguinte. A documentação é atualizada ao fim de cada uma.
+
+| Etapa | Entrega | Depende de | Situação |
+|---|---|---|---|
+| 1 — Discovery e referências | Visão, pesquisa, arquitetura, mapa de telas, navegação, fluxos, direção visual, pendências | — | Aprovada em 2026-11-14 |
+| 2 — Design system | Tokens finais, tipografia, componentes e estados, padrões de navegação dos 4 ambientes | Aprovação de P-A a P-D | Aprovada em 2026-11-14 |
+| 3 — Loja online | Início, catálogo, produto, sacola, checkout, confirmação, acompanhamento, institucional — protótipo navegável do Fluxo 4 | Etapa 2 · Q6–Q10 | Entregue (18 de 18 telas) |
+| 4 — Gestão | Dashboard, compras, estoque, produção, financeiro — Fluxos 1, 2 e 6 | Etapa 2 · Q1, Q3 | **Em andamento — lote 1 (5 de 36 telas) entregue** |
+| 5 — PDV | Venda, peso, pagamento combinado, caixa — Fluxo 3 | Etapa 2 · Q2, Q5 | A fazer |
+| 6 — Entregas | App do entregador e painel de atribuição — Fluxo 5 | Etapas 3 e 4 · Q11 | A fazer |
+| 7 — Auditoria | Consistência, acessibilidade, responsividade, cobertura dos fluxos | Etapas 2–6 | A fazer |
+
+## Etapa 4 em detalhe (em andamento)
+
+Lote 1 (entregue): Entrar · Início · Pedidos · Pedido · Mais.
+
+Gestão administrativa, em lotes: (1) Início e Mais; (2) Compras e recebimento — Fluxo 1; (3) Estoque; (4) Produção — Fluxo 2; (5) Financeiro — Fluxo 6; (6) Pedidos, Clientes, Entregas, Relatórios, Configurações.
+Ajudam antes: Q1 (tamanho do catálogo), Q3 (produção antecipada ou sob demanda), Q4 (quem usa e em que aparelho).
+
+## Etapa 3 em detalhe (entregue)
+
+Lote 1 (entregue): Início · Produto · Sacola · Pedido confirmado.
+Lote 2 (entregue): Identificação · Entrega ou retirada · Endereços · Pagamento · Revisão.
+Lote 3 (entregue): Categoria · Buscar · Acompanhamento · Meus pedidos · Detalhe e recompra · Perfil · Entrar · Linha Bodeleve · Sobre a Bodeleve.
+
+Plano original:
+
+1. Início, categoria, busca e produto.
+2. Sacola e checkout como convidado (identificação, entrega ou retirada, endereço, pagamento, revisão).
+3. Pedido confirmado e acompanhamento.
+4. Linha Bodeleve e Sobre a Bodeleve.
+5. Protótipo navegável do Fluxo 4 com dados fictícios.
+
+Antes de começar ajudam as respostas a Q6–Q10 (área e taxa de entrega, pedido mínimo, pagamento, falta de item, envio para fora). Sem elas, as telas saem com hipóteses marcadas.
+
+## Etapa 2 — o que foi feito
+
+1. Fechar tokens de cor, tipo, espaço e raio.
+2. Componentes base: botão, campo, etiqueta, selo de origem, cartão.
+3. Componentes de domínio: cartão de produto, linha de PDV, linha de estoque, lançamento financeiro, linha do tempo de pedido.
+4. Navegação: barra inferior dos 4 ambientes, abas, sheet, modal.
+5. Estados: vazio, carregando, erro.
+6. Um quadro por grupo no canvas; revisão; aprovação.
+
+## Depois do design (fora desta fase)
+
+Implementação com Supabase (Auth, PostgreSQL com RLS, Storage, Realtime onde fizer sentido), partindo de DATA_MODEL_DRAFT.md.

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Bodeleve — gestão: entrar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#A9482C}a:hover{color:#8A3920}
+</style>
+</helmet>
+<div style="width: 390px; height: 700px; box-sizing: border-box; display: flex; flex-direction: column; background: #FBFAF6; color: #292621; font-family: 'Inter', system-ui, sans-serif; font-size: 16px; line-height: 24px">
+<main style="flex: 1 1 0; display: flex; flex-direction: column; justify-content: center; gap: 24px; padding: 24px 20px"><div><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 34px; line-height: 40px; letter-spacing: -0.01em">Bodeleve</div><div style="font-size: 14px; line-height: 20px; color: #5E584E">Gestão da casa</div></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="em" style="font-size: 14px; line-height: 20px; font-weight: 600">E-mail</label><input id="em" type="email" value="ana@exemplo.com" placeholder="" autocomplete="username" style="height: 48px; padding: 0 14px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; color: #292621; font: 400 16px 'Inter', system-ui, sans-serif; box-sizing: border-box; width: 100%"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="pw" style="font-size: 14px; line-height: 20px; font-weight: 600">Senha</label><input id="pw" type="password" value="" placeholder="" autocomplete="current-password" style="height: 48px; padding: 0 14px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; color: #292621; font: 400 16px 'Inter', system-ui, sans-serif; box-sizing: border-box; width: 100%"></div><a href="Gestao-Inicio.dc.html" style="height: 56px; padding: 0 20px; border-radius: 12px; background: #A9482C; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-size: 16px; ">Entrar</a><div style="font-size: 14px; line-height: 20px; color: #5E584E">Acesso só para a equipe. Quem cadastra novas pessoas é o dono ou o gestor.</div></main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":700}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

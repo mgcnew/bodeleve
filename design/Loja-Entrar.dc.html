@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Bodeleve — loja: entrar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#A9482C}a:hover{color:#8A3920}
+</style>
+</helmet>
+<div style="width: 390px; height: 620px; box-sizing: border-box; display: flex; flex-direction: column; background: #F7F2E8; color: #292621; font-family: 'Inter', system-ui, sans-serif; font-size: 16px; line-height: 24px">
+<header style="display: flex; align-items: center; gap: 4px; height: 56px; padding: 0 6px; flex: none"><a href="Loja-Perfil.dc.html" aria-label="Voltar" style="width: 44px; height: 44px; border-radius: 12px; color: #292621; display: inline-flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M15 5l-7 7 7 7"></path></svg></a><div style="flex: 1 1 0; font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 20px; line-height: 26px">Entrar</div></header><main style="display: flex; flex-direction: column; gap: 20px; padding: 4px 16px 24px"><sc-if value="{{ p1 }}" hint-placeholder-val="{{ true }}"><h1 style="margin: 0; font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 24px; line-height: 30px">Entre com seu celular</h1><div style="font-size: 14px; line-height: 20px; color: #5E584E">Sem senha: enviamos um código de 4 dígitos pelo WhatsApp. Se for sua primeira vez, a conta é criada na hora.</div><div style="display: flex; flex-direction: column; gap: 6px; min-width: 0"><label for="cel2" style="font-size: 14px; line-height: 20px; font-weight: 600">Celular com WhatsApp</label><input id="cel2" type="tel" inputmode="tel" value="(00) 90000-0000" placeholder="" style="height: 48px; padding: 0 14px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; color: #292621; font: 400 16px 'Inter', system-ui, sans-serif; box-sizing: border-box; width: 100%"></div><button type="button" onClick="{{ pedir }}" style="height: 56px; border: 0; border-radius: 12px; background: #A9482C; color: #FFFFFF; font: 600 16px 'Inter', system-ui, sans-serif">Receber código</button></sc-if><sc-if value="{{ p2 }}" hint-placeholder-val="{{ false }}"><h1 style="margin: 0; font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 24px; line-height: 30px">Digite o código</h1><div style="font-size: 14px; line-height: 20px; color: #5E584E; font-variant-numeric: tabular-nums">Enviado para (00) 90000-0000.</div><div role="group" aria-label="Código de 4 dígitos" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px"><input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 1" style="height: 56px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; text-align: center; font: 600 22px 'Inter', system-ui, sans-serif; color: #292621; box-sizing: border-box; width: 100%"><input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 2" style="height: 56px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; text-align: center; font: 600 22px 'Inter', system-ui, sans-serif; color: #292621; box-sizing: border-box; width: 100%"><input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 3" style="height: 56px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; text-align: center; font: 600 22px 'Inter', system-ui, sans-serif; color: #292621; box-sizing: border-box; width: 100%"><input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 4" style="height: 56px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; text-align: center; font: 600 22px 'Inter', system-ui, sans-serif; color: #292621; box-sizing: border-box; width: 100%"></div><a href="Loja-Perfil.dc.html" style="height: 56px; padding: 0 20px; border-radius: 12px; background: #A9482C; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-size: 16px; ">Entrar</a><button type="button" onClick="{{ voltar }}" style="height: 48px; border: 0; background: transparent; color: #A9482C; font: 600 16px 'Inter', system-ui, sans-serif">Usar outro número</button></sc-if><div style="padding-top: 8px; border-top: 1px solid #E4DCCB"><a href="Loja-Inicio.dc.html" style="align-self: flex-start; min-height: 44px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; text-decoration: none; color: #A9482C">Continuar sem conta<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M9 5l7 7-7 7"></path></svg></a></div></main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":620}}'>
+class Component extends DCLogic {
+renderVals() {
+const p = (this.state && this.state.p) || 1;
+return { p1: p === 1, p2: p === 2, pedir: () => this.setState({ p: 2 }), voltar: () => this.setState({ p: 1 }) };
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Bodeleve — fluxos prioritários</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#A9482C}a:hover{color:#8A3920}
+</style>
+</helmet>
+<div style="width: 1600px; height: 1040px; box-sizing: border-box; padding: 64px; display: flex; flex-direction: column; gap: 40px; background: #F7F2E8; color: #292621; font-family: 'Inter', system-ui, sans-serif; font-size: 16px; line-height: 24px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 48px">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #A9482C">Etapa 1 · proposta para aprovação</div>
+<h1 style="margin: 0; font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 56px; line-height: 60px; letter-spacing: -0.02em">Seis fluxos, em ordem de prioridade</h1>
+<p style="margin: 0; max-width: 820px; font-size: 18px; line-height: 28px; color: #5E584E">O número à esquerda é a ordem recomendada de prototipação. Todos usarão dados fictícios e estados simulados; nenhuma operação real.</p>
+</div>
+<div style="max-width: 360px; padding: 16px 20px; border: 1px solid #E4DCCB; border-radius: 12px; background: #FFFFFF; font-size: 14px; line-height: 20px; color: #5E584E"><b style="color: #292621">Por que a loja primeiro.</b> É a vitrine da marca, e carrinho e checkout são onde o setor de mercado online mais falha.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; gap: 32px; align-items: center; padding: 20px 24px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB">
+<div style="flex: none; width: 300px; display: flex; gap: 16px; align-items: center">
+<div style="flex: none; width: 40px; height: 40px; border-radius: 999px; background: #292621; color: #F7F2E8; display: flex; align-items: center; justify-content: center; font-weight: 700">1</div>
+<div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start"><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 20px; line-height: 24px">Fluxo 4 · E-commerce</div><span style="padding: 2px 10px; border-radius: 999px; background: #A9482C; color: #FFFFFF; font-size: 12px; line-height: 16px; font-weight: 600">Loja online</span></div>
+</div>
+<div style="flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Catálogo</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Produto</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Sacola</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Endereço</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Entrega</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Pagamento</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Pedido confirmado</div>
+</div>
+</div>
+<div style="display: flex; gap: 32px; align-items: center; padding: 20px 24px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB">
+<div style="flex: none; width: 300px; display: flex; gap: 16px; align-items: center">
+<div style="flex: none; width: 40px; height: 40px; border-radius: 999px; background: #292621; color: #F7F2E8; display: flex; align-items: center; justify-content: center; font-weight: 700">2</div>
+<div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start"><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 20px; line-height: 24px">Fluxo 3 · PDV</div><span style="padding: 2px 10px; border-radius: 999px; background: #D9A441; color: #292621; font-size: 12px; line-height: 16px; font-weight: 600">PDV</span></div>
+</div>
+<div style="flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Produto</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Carrinho</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Pagamento</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Venda concluída</div>
+</div>
+</div>
+<div style="display: flex; gap: 32px; align-items: center; padding: 20px 24px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB">
+<div style="flex: none; width: 300px; display: flex; gap: 16px; align-items: center">
+<div style="flex: none; width: 40px; height: 40px; border-radius: 999px; background: #292621; color: #F7F2E8; display: flex; align-items: center; justify-content: center; font-weight: 700">3</div>
+<div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start"><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 20px; line-height: 24px">Fluxo 1 · Compras</div><span style="padding: 2px 10px; border-radius: 999px; background: #315C46; color: #FFFFFF; font-size: 12px; line-height: 16px; font-weight: 600">Gestão</span></div>
+</div>
+<div style="flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Fornecedor</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Pedido de compra</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Recebimento</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Estoque</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Financeiro</div>
+</div>
+</div>
+<div style="display: flex; gap: 32px; align-items: center; padding: 20px 24px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB">
+<div style="flex: none; width: 300px; display: flex; gap: 16px; align-items: center">
+<div style="flex: none; width: 40px; height: 40px; border-radius: 999px; background: #292621; color: #F7F2E8; display: flex; align-items: center; justify-content: center; font-weight: 700">4</div>
+<div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start"><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 20px; line-height: 24px">Fluxo 2 · Produção</div><span style="padding: 2px 10px; border-radius: 999px; background: #315C46; color: #FFFFFF; font-size: 12px; line-height: 16px; font-weight: 600">Gestão</span></div>
+</div>
+<div style="flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Ficha técnica</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Ordem de produção</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Consumo de ingredientes</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Rendimento</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Produto acabado</div>
+</div>
+</div>
+<div style="display: flex; gap: 32px; align-items: center; padding: 20px 24px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB">
+<div style="flex: none; width: 300px; display: flex; gap: 16px; align-items: center">
+<div style="flex: none; width: 40px; height: 40px; border-radius: 999px; background: #292621; color: #F7F2E8; display: flex; align-items: center; justify-content: center; font-weight: 700">5</div>
+<div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start"><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 20px; line-height: 24px">Fluxo 6 · Financeiro</div><span style="padding: 2px 10px; border-radius: 999px; background: #315C46; color: #FFFFFF; font-size: 12px; line-height: 16px; font-weight: 600">Gestão</span></div>
+</div>
+<div style="flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Lançamentos</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Contas</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Pagamentos / recebimentos</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Fluxo de caixa</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Relatórios</div>
+</div>
+</div>
+<div style="display: flex; gap: 32px; align-items: center; padding: 20px 24px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB">
+<div style="flex: none; width: 300px; display: flex; gap: 16px; align-items: center">
+<div style="flex: none; width: 40px; height: 40px; border-radius: 999px; background: #292621; color: #F7F2E8; display: flex; align-items: center; justify-content: center; font-weight: 700">6</div>
+<div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start"><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 20px; line-height: 24px">Fluxo 5 · Entregas</div><span style="padding: 2px 10px; border-radius: 999px; background: #292621; color: #F7F2E8; font-size: 12px; line-height: 16px; font-weight: 600">Gestão + Entregas</span></div>
+</div>
+<div style="flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Pedido pronto</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Atribuição</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Coleta</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Em rota</div>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5E584E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 3l5 5-5 5"></path></svg>
+<div style="padding: 10px 16px; border-radius: 10px; background: #F7F2E8; border: 1px solid #E4DCCB; font-weight: 500; white-space: nowrap">Entrega confirmada</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

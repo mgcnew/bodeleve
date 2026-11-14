@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Bodeleve — arquitetura, navegação e mapa de telas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#A9482C}a:hover{color:#8A3920}
+ul{margin:0;padding:0;list-style:none}
+</style>
+</helmet>
+<div style="width: 1760px; height: 1200px; box-sizing: border-box; padding: 64px; display: flex; flex-direction: column; gap: 40px; background: #F7F2E8; color: #292621; font-family: 'Inter', system-ui, sans-serif; font-size: 16px; line-height: 24px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 48px">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #A9482C">Etapa 1 · proposta para aprovação</div>
+<h1 style="margin: 0; font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 56px; line-height: 60px; letter-spacing: -0.02em">Quatro ambientes, 75 telas</h1>
+<p style="margin: 0; max-width: 820px; font-size: 18px; line-height: 28px; color: #5E584E">Barra inferior com 3 a 5 destinos por ambiente. Ela some dentro de tarefas focadas: checkout, pagamento e entrega em rota. Nenhuma tela foi desenhada ainda.</p>
+</div>
+<div style="max-width: 360px; padding: 16px 20px; border: 1px solid #E4DCCB; border-radius: 12px; background: #FFFFFF; font-size: 14px; line-height: 20px; color: #5E584E"><b style="color: #292621">Base comum.</b> Produtos, estoque, pedidos e clientes pertencem a um estabelecimento e são os mesmos nos quatro ambientes.</div>
+</div>
+
+<div style="display: flex; gap: 24px; align-items: stretch">
+
+<div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 20px; padding: 24px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB">
+<div style="display: flex; gap: 12px; align-items: center">
+<div style="width: 40px; height: 40px; border-radius: 10px; background: #A9482C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700">C</div>
+<div><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 22px; line-height: 26px">Loja online</div><div style="font-size: 14px; line-height: 20px; color: #5E584E">Cliente, com ou sem conta</div></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5E584E">Barra inferior · 4</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid #292621; border-radius: 10px; overflow: hidden; font-size: 12px; line-height: 16px; font-weight: 600; text-align: center">
+<div style="padding: 12px 2px; background: #292621; color: #F7F2E8">Início</div>
+<div style="padding: 12px 2px">Buscar</div>
+<div style="padding: 12px 2px">Pedidos</div>
+<div style="padding: 12px 2px">Perfil</div>
+</div>
+<div style="font-size: 14px; line-height: 20px; color: #5E584E">Sacola é uma barra fixa acima da navegação, não uma aba.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5E584E">18 telas</div>
+<ul style="font-size: 15px; line-height: 24px">
+<li>Início</li><li>Categoria / catálogo</li><li>Buscar e resultados</li><li>Produto</li><li>Linha Bodeleve</li><li>Sacola</li><li>Identificação (sem conta · entrar)</li><li>Endereços</li><li>Entrega ou retirada</li><li>Pagamento</li><li>Revisão do pedido</li><li>Pedido confirmado</li><li>Acompanhamento</li><li>Meus pedidos</li><li>Detalhe do pedido e recompra</li><li>Perfil</li><li>Sobre a Bodeleve</li><li>Entrar / criar conta</li>
+</ul>
+</div>
+</div>
+
+<div style="flex: 2 1 0; min-width: 0; display: flex; flex-direction: column; gap: 20px; padding: 24px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB">
+<div style="display: flex; gap: 12px; align-items: center">
+<div style="width: 40px; height: 40px; border-radius: 10px; background: #315C46; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700">A</div>
+<div><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 22px; line-height: 26px">Gestão administrativa</div><div style="font-size: 14px; line-height: 20px; color: #5E584E">Dono, gestor e equipe · 12 módulos</div></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5E584E">Barra inferior · 5</div>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1px solid #292621; border-radius: 10px; overflow: hidden; font-size: 12px; line-height: 16px; font-weight: 600; text-align: center">
+<div style="padding: 12px 2px; background: #292621; color: #F7F2E8">Início</div>
+<div style="padding: 12px 2px">Pedidos</div>
+<div style="padding: 12px 2px">Estoque</div>
+<div style="padding: 12px 2px">Financeiro</div>
+<div style="padding: 12px 2px">Mais</div>
+</div>
+<div style="font-size: 14px; line-height: 20px; color: #5E584E">“Mais” agrupa: Abastecer · Catálogo · Relacionamento · Análise · Sistema. Em tablet e desktop vira menu lateral com os 12 módulos.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5E584E">36 telas</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 32px; font-size: 14px; line-height: 20px">
+<div><b>Acesso · 1</b><br><span style="color: #5E584E">Entrar</span></div>
+<div><b>Vendas e pedidos · 2</b><br><span style="color: #5E584E">Lista · Pedido</span></div>
+<div><b>Dashboard · 1</b><br><span style="color: #5E584E">Início</span></div>
+<div><b>Financeiro · 4</b><br><span style="color: #5E584E">Visão e fluxo de caixa · Lançamentos · Contas a pagar e a receber · Lançamento (baixa)</span></div>
+<div><b>Mais · 1</b><br><span style="color: #5E584E">Hub de módulos</span></div>
+<div><b>Clientes · 2</b><br><span style="color: #5E584E">Lista · Cliente</span></div>
+<div><b>Compras · 4</b><br><span style="color: #5E584E">Pedidos de compra · Novo pedido · Detalhe · Recebimento</span></div>
+<div><b>Entregas · 2</b><br><span style="color: #5E584E">Painel de entregas · Atribuição</span></div>
+<div><b>Fornecedores · 2</b><br><span style="color: #5E584E">Lista · Fornecedor</span></div>
+<div><b>Relatórios · 2</b><br><span style="color: #5E584E">Hub · Relatório</span></div>
+<div><b>Produtos · 3</b><br><span style="color: #5E584E">Lista · Produto · Categorias</span></div>
+<div><b>Configurações · 3</b><br><span style="color: #5E584E">Hub · Estabelecimento · Usuários e permissões</span></div>
+<div><b>Estoque · 5</b><br><span style="color: #5E584E">Visão geral · Item (saldos e lotes) · Movimentações · Ajuste / perda · Inventário</span></div>
+<div><b>Produção · 4</b><br><span style="color: #5E584E">Fichas técnicas · Ficha técnica · Ordens de produção · Ordem (apontamento)</span></div>
+</div>
+</div>
+<div style="margin-top: auto; padding: 16px 20px; border-radius: 10px; background: #F8EBC9; color: #7A5A12; font-size: 14px; line-height: 20px"><b>A validar:</b> se a produção for diária, Produção troca de lugar com Financeiro na barra.</div>
+</div>
+
+<div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 20px; padding: 24px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB">
+<div style="display: flex; gap: 12px; align-items: center">
+<div style="width: 40px; height: 40px; border-radius: 10px; background: #D9A441; color: #292621; display: flex; align-items: center; justify-content: center; font-weight: 700">B</div>
+<div><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 22px; line-height: 26px">PDV</div><div style="font-size: 14px; line-height: 20px; color: #5E584E">Atendente de balcão</div></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5E584E">Barra inferior · 3</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid #292621; border-radius: 10px; overflow: hidden; font-size: 12px; line-height: 16px; font-weight: 600; text-align: center">
+<div style="padding: 12px 2px; background: #292621; color: #F7F2E8">Vender</div>
+<div style="padding: 12px 2px">Vendas</div>
+<div style="padding: 12px 2px">Caixa</div>
+</div>
+<div style="font-size: 14px; line-height: 20px; color: #5E584E">Em Vender, abas no topo: Favoritos · Categorias · Buscar. Sem caixa aberto, Vender leva à abertura.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5E584E">12 telas</div>
+<ul style="font-size: 15px; line-height: 24px">
+<li>Abertura de caixa</li><li>Vender</li><li>Quantidade / peso (sheet)</li><li>Sacola</li><li>Desconto (sheet)</li><li>Pagamento</li><li>Pagamento combinado</li><li>Venda concluída</li><li>Vendas (histórico)</li><li>Detalhe da venda</li><li>Sangria / suprimento (sheet)</li><li>Fechamento de caixa</li>
+</ul>
+</div>
+</div>
+
+<div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 20px; padding: 24px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB">
+<div style="display: flex; gap: 12px; align-items: center">
+<div style="width: 40px; height: 40px; border-radius: 10px; background: #292621; color: #F7F2E8; display: flex; align-items: center; justify-content: center; font-weight: 700">D</div>
+<div><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 22px; line-height: 26px">Entregas</div><div style="font-size: 14px; line-height: 20px; color: #5E584E">Entregador próprio ou parceiro</div></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5E584E">Barra inferior · 3</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid #292621; border-radius: 10px; overflow: hidden; font-size: 12px; line-height: 16px; font-weight: 600; text-align: center">
+<div style="padding: 12px 2px; background: #292621; color: #F7F2E8">Entregas</div>
+<div style="padding: 12px 2px">Histórico</div>
+<div style="padding: 12px 2px">Perfil</div>
+</div>
+<div style="font-size: 14px; line-height: 20px; color: #5E584E">Entregas tem dois segmentos: Disponíveis e Minhas. Parceiro vê só o que foi publicado para parceiros.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5E584E">9 telas</div>
+<ul style="font-size: 15px; line-height: 24px">
+<li>Entrar</li><li>Entregas</li><li>Detalhe e aceite</li><li>Coleta</li><li>Em rota</li><li>Confirmação de entrega</li><li>Problema na entrega</li><li>Histórico</li><li>Perfil</li>
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1760,"height":1200}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
