@@ -54,8 +54,8 @@ tipo = col(''.join([
 esp = ''.join(f'<div style="display: flex; align-items: center; gap: 16px"><div style="flex: none; width: 28px; font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums">{n}</div><div style="width: {n*4}px; height: 16px; border-radius: 4px; background: {T}"></div></div>' for n in (4, 8, 12, 16, 24, 32, 48))
 raios = row(''.join(f'<div style="display: flex; flex-direction: column; gap: 8px; align-items: center"><div style="width: 72px; height: 72px; border: 1.5px solid {G}; border-radius: {r}; box-sizing: border-box; background: {C}"></div><div style="font-size: 13px; line-height: 18px; color: {G2}; text-align: center">{n}<br>{u}</div></div>'
                     for r, n, u in (('8px', '8', 'campos'), ('12px', '12', 'cartões'), ('20px', '20', 'sheets'), ('999px', 'total', 'pílulas'))), 24)
-toque = row(''.join(f'<div style="width: {s}px; height: {s}px; border-radius: 12px; background: {TS}; border: 1.5px dashed {T}; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: {TP}">{s}</div>' for s in (48, 56))
-            + f'<div style="{SM}">Alvo mínimo de toque: 48 px.<br>No PDV, 56 px.</div>', 16)
+toque = row(''.join(f'<div style="width: {s}px; height: {s}px; border-radius: 12px; background: {TS}; border: 1.5px dashed {T}; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: {TP}">{s}</div>' for s in (44, 56))
+            + f'<div style="{SM}">Alvo mínimo de toque: 44 px.<br>Ações principais e PDV: 48 a 56 px.</div>', 16)
 
 nomes = ['inicio', 'buscar', 'sacola', 'pedidos', 'perfil', 'estoque', 'financeiro', 'mais', 'vender', 'historico', 'caixa', 'entregas',
          'compras', 'producao', 'adicionar', 'remover', 'avancar', 'voltar', 'confirmar', 'fechar', 'alerta', 'validade', 'local', 'sem-conexao']

@@ -3,8 +3,8 @@ from b13_financeiro import *   # regenera lotes 1 a 5 e traz os auxiliares
 def switch(lbl_id, label, sub, val, on):
     return (f'<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 8px 0; border-bottom: 1px solid {LN}">'
             f'<span id="{lbl_id}" style="min-width: 0"><span style="display: block; font-weight: 600">{label}</span><span style="display: block; font-size: 13px; line-height: 18px; color: {G2}">{sub}</span></span>'
-            f'<button type="button" role="switch" aria-checked="{H(val)}" aria-labelledby="{lbl_id}" onClick="{H(on)}" style="flex: none; width: 52px; height: 32px; border-radius: 999px; border: 0; '
-            f'background: {H(val + "Bg")}; padding: 4px; display: flex; justify-content: {H(val + "Js")}"><span style="width: 24px; height: 24px; border-radius: 999px; background: {W}"></span></button></div>')
+            f'<button type="button" role="switch" aria-checked="{H(val)}" aria-labelledby="{lbl_id}" onClick="{H(on)}" style="flex: none; width: 60px; height: 44px; border: 0; padding: 0; background: transparent; display: flex; align-items: center; justify-content: center">'
+            f'<span aria-hidden="true" style="width: 52px; height: 32px; box-sizing: border-box; border-radius: 999px; background: {H(val + "Bg")}; padding: 4px; display: flex; justify-content: {H(val + "Js")}"><span style="width: 24px; height: 24px; border-radius: 999px; background: {W}"></span></span></button></div>')
 def switch_logic(name, default):
     return (f"const {name} = st.{name} === undefined ? {str(default).lower()} : st.{name};\n"
             f"out.{name} = {name}; out.{name}Bg = {name} ? '{V}' : '{LN}'; out.{name}Js = {name} ? 'flex-end' : 'flex-start'; out.t_{name} = () => this.setState({{ {name}: !{name} }});\n")
@@ -204,7 +204,7 @@ def barcol(i):
     return (f'<button type="button" aria-label="{DAYS[i]}: {H("bl" + str(i))}" onClick="{H("pick" + str(i))}" style="flex: 1 1 0; min-width: 0; height: 160px; border: 0; padding: 0; background: transparent; '
             f'display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px">'
             f'<span style="width: 22px; height: {H("bh" + str(i))}; border-radius: 4px 4px 0 0; background: {H("bc" + str(i))}"></span>'
-            f'<span style="font-size: 11px; line-height: 14px; color: {G2}; {NUM}">{DAYS[i][:2]}</span></button>')
+            f'<span style="font-size: 12px; line-height: 16px; color: {G2}; {NUM}">{DAYS[i][:2]}</span></button>')
 rel = (bar('Vendas', 'Gestao-Relatorios.dc.html')
     + f'<main style="display: flex; flex-direction: column; gap: 16px; padding: 16px 16px 24px">'
     f'<div role="group" aria-label="Período" style="display: flex; gap: 8px">' + chips(['Hoje', '7 dias', 'Mês']) + '</div>'
@@ -249,7 +249,7 @@ gphone('Gestao-Configuracoes.dc.html', 'Bodeleve — gestão: configurações', 
 # ---------- Estabelecimento ----------
 estab = (bar('A casa', 'Gestao-Configuracoes.dc.html')
     + f'<main style="display: flex; flex-direction: column; gap: 16px; padding: 16px 16px 24px">'
-    f'<div style="display: flex; gap: 12px; align-items: center"><div role="img" aria-label="Espaço para o logotipo" style="flex: none; width: 72px; height: 72px; border-radius: 16px; background: {C}; border: 1px dashed {G2}; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: {G2}; text-align: center">[LOGO]</div>'
+    f'<div style="display: flex; gap: 12px; align-items: center"><div role="img" aria-label="Espaço para o logotipo" style="flex: none; width: 72px; height: 72px; border-radius: 16px; background: {C}; border: 1px dashed {G2}; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: {G2}; text-align: center">[LOGO]</div>'
     f'<div style="{SM}">Logotipo oficial ainda não aprovado. Até lá, a marca aparece só como texto.</div></div>'
     + campo('en', 'Nome', 'Bodeleve') + campo('ec', 'CNPJ', '', '[CNPJ]') + campo('ee', 'Endereço', '', '[ENDEREÇO DA LOJA]')
     + campo('ew', 'WhatsApp de atendimento', '', '[WHATSAPP DA LOJA]', 'tel')

@@ -1,6 +1,6 @@
 # DESIGN_SYSTEM — Bodeleve
 
-Status: direção aprovada na Etapa 1 (D10). Sistema construído na **Etapa 2**, aguardando aprovação (P-J a P-P em DECISIONS.md). Os cinco quadros estão na página "Etapa 2 · Design system" do canvas Bodeleve.
+Status: aprovado (D10, D11) e auditado na Etapa 7. Tokens em código: `design/tokens.css`. Os cinco quadros estão na página "Etapa 2 · Design system" do canvas Bodeleve.
 
 ## Direção
 
@@ -56,7 +56,7 @@ Todo preço, saldo e valor usa números tabulares.
 
 - Espaçamento: 4 · 8 · 12 · 16 · 24 · 32 · 48.
 - Raios: 8 (campos, etiquetas) · 12 (botões, cartões) · 20 (sheets, modais) · total (pílulas, selos).
-- Toque: mínimo 48 px; ações do PDV e da entrega 56 px.
+- Toque: mínimo 44 px em qualquer controle (chips, segmentados, botões de quantidade, liga/desliga com área de 60 × 44 px); botões comuns 48 px; ação principal de rodapé, PDV e entregas 56 px. (Ajustado na auditoria: antes 48 px no texto, 40 px em alguns controles.)
 - Ícones: 24 no conjunto, traço 1,75 px, grade 24 px; sem emoji.
 
 ## Componentes
@@ -80,10 +80,20 @@ Todo preço, saldo e valor usa números tabulares.
 - Carregamento de tela usa esqueleto no formato do conteúdo; ação em andamento mostra indicador no próprio botão.
 - Selos de origem: "Marca Bodeleve" (terracota) e "Feito na casa" (verde) aparecem na loja; "Revenda" só na gestão.
 
+## Responsivo
+
+| Faixa | Loja | Gestão | PDV | Entregas |
+|---|---|---|---|---|
+| < 768 px (celular) | Barra inferior de 4 abas, grade de 2 colunas | Barra inferior de 5 abas | Barra de 3 abas, grade de 2 colunas | Barra de 3 abas |
+| 768–1023 px (tablet) | Grade de 3 colunas | Menu lateral recolhível | Grade de 4 colunas + sacola fixa à direita (referência `Resp-PDV-Tablet`) | Igual ao celular |
+| ≥ 1024 px (computador) | Topo com seções, busca e sacola; grade de 4 colunas; checkout em coluna de até 560 px (`Resp-Loja-Desktop`) | Menu lateral fixo com os 12 módulos; cartões em grade (`Resp-Gestao-Desktop`) | Igual ao tablet | Não previsto |
+
+Folhas (bottom sheets) viram janelas centrais a partir de 768 px.
+
 ## Pendências
 
 - Aprovação de P-J a P-P.
 - Logotipo oficial.
 - Fotografia própria: até lá, marcador `[FOTO DO PRODUTO]`.
 - Tema escuro: não previsto; decidir na auditoria (Etapa 7) se faz sentido para Entregas à noite.
-- Os quadros não foram renderizados para conferência visual por mim; alturas foram estimadas.
+- Passada visual no canvas (A1 em AUDIT.md): os quadros não foram renderizados para conferência; alturas foram estimadas.

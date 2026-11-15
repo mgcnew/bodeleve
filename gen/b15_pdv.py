@@ -58,7 +58,7 @@ vender = (f'<div style="position: relative; flex: 1 1 0; display: flex; flex-dir
     + f'<div role="tablist" style="flex: none; display: flex; background: {W}; border-bottom: 1px solid {LN}">{ptab(0, "Favoritos")}{ptab(1, "Categorias")}{ptab(2, "Buscar")}</div>'
     + f'<main style="flex: 1 1 0; display: flex; flex-direction: column; gap: 12px; padding: 12px 16px">'
     f'<sc-if value="{H("isCat")}" hint-placeholder-val="{H("false")}"><div role="group" aria-label="Categoria" style="display: flex; gap: 8px; flex-wrap: wrap">'
-    + ''.join(f'<button type="button" aria-pressed="{H("ca" + str(k))}" onClick="{H("cat" + str(k))}" style="height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {G}; background: {H("cb" + str(k))}; color: {H("cc" + str(k))}; font: 600 14px {FB}">{t}</button>'
+    + ''.join(f'<button type="button" aria-pressed="{H("ca" + str(k))}" onClick="{H("cat" + str(k))}" style="height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {G}; background: {H("cb" + str(k))}; color: {H("cc" + str(k))}; font: 600 14px {FB}">{t}</button>'
               for k, t in enumerate(['Laticínios', 'Carnes', 'Farinhas e grãos', 'Doces'])) + '</div></sc-if>'
     f'<sc-if value="{H("isBusca")}" hint-placeholder-val="{H("false")}"><div style="display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 16px; border-radius: 999px; background: {W}; border: 1.5px solid {G}; color: {G2}">{icon("buscar", 20)}'
     f'<input type="search" aria-label="Buscar produto" placeholder="Nome do produto" onChange="{H("onBusca")}" style="flex: 1 1 0; min-width: 0; border: 0; background: transparent; font: 400 16px {FB}; color: {G}; outline: none"></div></sc-if>'
@@ -98,7 +98,7 @@ SITENS = [('Queijo coalho', '32,90 cada', 32.90, 2, False), ('Carne de sol', '0,
 def sitem(i):
     n, d, p, q, kg = SITENS[i]
     ctrl = (stepper('Quantidade de ' + n, H('m' + str(i)), H('p' + str(i)), H('q' + str(i)), True) if not kg
-            else f'<button type="button" aria-label="Remover {n}" onClick="{H("r" + str(i))}" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid {LN}; background: {C}; color: {G}; display: inline-flex; align-items: center; justify-content: center">{icon("fechar", 18)}</button>')
+            else f'<button type="button" aria-label="Remover {n}" onClick="{H("r" + str(i))}" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid {LN}; background: {C}; color: {G}; display: inline-flex; align-items: center; justify-content: center">{icon("fechar", 18)}</button>')
     return (f'<sc-if value="{H("v" + str(i))}" hint-placeholder-val="{H("true")}"><div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid {LN}; {NUM}">'
             f'<span style="flex: 1 1 0; min-width: 0"><b>{n}</b><span style="display: block; font-size: 13px; line-height: 18px; color: {G2}">{d}</span><span style="display: block; font-weight: 600">{H("s" + str(i))}</span></span>{ctrl}</div></sc-if>')
 desc_sheet = sheet_wrap('dOpen',

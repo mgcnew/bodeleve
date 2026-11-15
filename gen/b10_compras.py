@@ -1,7 +1,7 @@
 from b9_gestao1 import *   # regenera o lote 1 da gestão (hub Mais com links) e traz os auxiliares
 
 def stepper(label, minus, plus, val, small=False):
-    s = 40 if small else 44
+    s = 44
     b = lambda l, ic, on, fg, bg, bd: (f'<button type="button" aria-label="{l}" onClick="{on}" style="flex: none; width: {s}px; height: {s}px; border-radius: 12px; border: {bd}; background: {bg}; '
                                        f'color: {fg}; display: inline-flex; align-items: center; justify-content: center">{icon(ic, 20)}</button>')
     return (f'<div role="group" aria-label="{label}" style="display: inline-flex; align-items: center; gap: 2px">' + b('Diminuir', 'remover', minus, G, C, f'1px solid {LN}')
@@ -28,7 +28,7 @@ def pccard(i):
     c = f'<a href="{href}" style="{st}">{inner}</a>' if href else f'<div style="{st}">{inner}</div>'
     return f'<sc-if value="{H("v" + str(i))}" hint-placeholder-val="{H("true" if aba == 0 else "false")}">{c}</sc-if>'
 def ptab(i, t, n):
-    return (f'<button type="button" aria-pressed="{H("a" + str(i))}" onClick="{H("t" + str(i))}" style="flex: none; height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {G}; '
+    return (f'<button type="button" aria-pressed="{H("a" + str(i))}" onClick="{H("t" + str(i))}" style="flex: none; height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {G}; '
             f'background: {H("b" + str(i))}; color: {H("c" + str(i))}; font: 600 14px {FB}; {NUM}">{t} · {n}</button>')
 compras = (bar('Compras', 'Gestao-Mais.dc.html')
     + f'<main style="display: flex; flex-direction: column; gap: 16px; padding: 16px 16px 24px">'

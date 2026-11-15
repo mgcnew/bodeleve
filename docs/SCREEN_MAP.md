@@ -82,3 +82,116 @@ Legenda: `[S]` = bottom sheet · sem marca = tela.
 | **Total** | **75** |
 
 O número pode mudar conforme as respostas às pendências em BUSINESS_RULES.md.
+
+## Arquivos de design por tela
+
+Cada tela está em `design/<arquivo>`. A ordem segue o canvas.
+
+### Etapa 3 · Loja online
+
+| Quadro | Arquivo |
+|---|---|
+| 1 · Início | `Loja-Inicio.dc.html` |
+| 2 · Produto | `Loja-Produto.dc.html` |
+| 3 · Sacola | `Loja-Sacola.dc.html` |
+| 4 · Pedido confirmado | `Loja-Confirmado.dc.html` |
+| Checkout 1 · Identificação | `Loja-Identificacao.dc.html` |
+| Checkout 2 · Entrega ou retirada | `Loja-Entrega.dc.html` |
+| Checkout 2b · Endereço | `Loja-Endereco.dc.html` |
+| Checkout 3 · Pagamento | `Loja-Pagamento.dc.html` |
+| Checkout 4 · Revisão | `Loja-Revisao.dc.html` |
+| Categoria | `Loja-Categoria.dc.html` |
+| Buscar | `Loja-Buscar.dc.html` |
+| Linha Bodeleve | `Loja-Linha.dc.html` |
+| Sobre a Bodeleve | `Loja-Sobre.dc.html` |
+| Pedidos | `Loja-Pedidos.dc.html` |
+| Acompanhamento | `Loja-Acompanhamento.dc.html` |
+| Detalhe e recompra | `Loja-Pedido.dc.html` |
+| Perfil | `Loja-Perfil.dc.html` |
+| Entrar | `Loja-Entrar.dc.html` |
+
+### Etapa 4 · Gestão
+
+| Quadro | Arquivo |
+|---|---|
+| Entrar | `Gestao-Entrar.dc.html` |
+| 1 · Início | `Gestao-Inicio.dc.html` |
+| 2 · Pedidos | `Gestao-Pedidos.dc.html` |
+| 3 · Pedido | `Gestao-Pedido.dc.html` |
+| 4 · Mais | `Gestao-Mais.dc.html` |
+| 5 · Compras | `Gestao-Compras.dc.html` |
+| 6 · Novo pedido de compra | `Gestao-CompraNova.dc.html` |
+| 7 · Pedido de compra | `Gestao-Compra.dc.html` |
+| 8 · Recebimento | `Gestao-Recebimento.dc.html` |
+| 9 · Fornecedores | `Gestao-Fornecedores.dc.html` |
+| 10 · Fornecedor | `Gestao-Fornecedor.dc.html` |
+| 11 · Estoque | `Gestao-Estoque.dc.html` |
+| 12 · Item: saldos e lotes | `Gestao-EstoqueItem.dc.html` |
+| 13 · Movimentações | `Gestao-Movimentacoes.dc.html` |
+| 14 · Ajuste ou perda | `Gestao-Ajuste.dc.html` |
+| 15 · Inventário | `Gestao-Inventario.dc.html` |
+| 16 · Produção | `Gestao-Producao.dc.html` |
+| 17 · Fichas técnicas | `Gestao-Fichas.dc.html` |
+| 18 · Ficha técnica e nova ordem | `Gestao-Ficha.dc.html` |
+| 19 · Ordem: apontamento | `Gestao-Ordem.dc.html` |
+| 20 · Financeiro | `Gestao-Financeiro.dc.html` |
+| 21 · Contas a pagar e a receber | `Gestao-Contas.dc.html` |
+| 22 · Pagar conta | `Gestao-Baixa.dc.html` |
+| 23 · Lançamentos | `Gestao-Lancamentos.dc.html` |
+| 24 · Produtos | `Gestao-Produtos.dc.html` |
+| 25 · Produto | `Gestao-Produto.dc.html` |
+| 26 · Categorias | `Gestao-Categorias.dc.html` |
+| 27 · Clientes | `Gestao-Clientes.dc.html` |
+| 28 · Cliente | `Gestao-Cliente.dc.html` |
+| 29 · Entregas | `Gestao-Entregas.dc.html` |
+| 30 · Atribuir entrega | `Gestao-Atribuir.dc.html` |
+| 31 · Relatórios | `Gestao-Relatorios.dc.html` |
+| 32 · Relatório de vendas | `Gestao-Relatorio.dc.html` |
+| 33 · Configurações | `Gestao-Configuracoes.dc.html` |
+| 34 · A casa | `Gestao-Estabelecimento.dc.html` |
+| 35 · Equipe e permissões | `Gestao-Usuarios.dc.html` |
+
+### Etapa 5 · PDV
+
+| Quadro | Arquivo |
+|---|---|
+| 1 · Abrir caixa | `PDV-Abertura.dc.html` |
+| 2 · Vender (+ peso) | `PDV-Vender.dc.html` |
+| 3 · Sacola (+ desconto) | `PDV-Sacola.dc.html` |
+| 4 · Pagamento | `PDV-Pagamento.dc.html` |
+| 5 · Pagamento combinado | `PDV-Combinado.dc.html` |
+| 6 · Venda concluída | `PDV-Concluida.dc.html` |
+| 7 · Vendas de hoje | `PDV-Vendas.dc.html` |
+| 8 · Detalhe e cancelamento | `PDV-Venda.dc.html` |
+| 9 · Caixa: sangria e fechamento | `PDV-Caixa.dc.html` |
+
+### Etapa 6 · Entregas
+
+| Quadro | Arquivo |
+|---|---|
+| Entrar | `Ent-Entrar.dc.html` |
+| 1 · Entregas | `Ent-Lista.dc.html` |
+| 2 · Detalhe e aceite | `Ent-Detalhe.dc.html` |
+| 3 · Coleta | `Ent-Coleta.dc.html` |
+| 4 · Em rota | `Ent-Rota.dc.html` |
+| 5 · Confirmar entrega | `Ent-Confirmacao.dc.html` |
+| 6 · Problema na entrega | `Ent-Problema.dc.html` |
+| 7 · Histórico | `Ent-Historico.dc.html` |
+| 8 · Perfil | `Ent-Perfil.dc.html` |
+
+### PDV: telas do mapa dentro de outros quadros
+
+| Tela do mapa | Onde está |
+|---|---|
+| Quantidade / peso [S] | `PDV-Vender.dc.html` (folha ao tocar produto por peso) |
+| Desconto [S] | `PDV-Sacola.dc.html` (folha "Dar desconto") |
+| Sangria / suprimento [S] | `PDV-Caixa.dc.html` (folha) |
+| Fechamento de caixa | `PDV-Caixa.dc.html` (bloco "Fechar caixa") |
+
+### Referências de tablet e computador
+
+| Quadro | Arquivo |
+|---|---|
+| Gestão no computador | `Resp-Gestao-Desktop.dc.html` |
+| PDV no tablet do balcão | `Resp-PDV-Tablet.dc.html` |
+| Loja no computador | `Resp-Loja-Desktop.dc.html` |

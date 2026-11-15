@@ -32,7 +32,7 @@ step = (f'<div style="display: inline-flex; align-items: center; border: 1.5px s
         f'<button type="button" aria-label="Diminuir" style="width: 48px; height: 48px; border: 0; background: transparent; color: {G}; display: inline-flex; align-items: center; justify-content: center">{icon("remover", 20)}</button>'
         f'<div style="min-width: 40px; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums">2</div>'
         f'<button type="button" aria-label="Aumentar" style="width: 48px; height: 48px; border: 0; background: transparent; color: {T}; display: inline-flex; align-items: center; justify-content: center">{icon("adicionar", 20)}</button></div>')
-chip = lambda t, on=False: f'<button type="button" style="height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {G if on else LN}; background: {G if on else W}; color: {W if on else G}; font: 600 14px {FB}">{t}</button>'
+chip = lambda t, on=False: f'<button type="button" style="height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {G if on else LN}; background: {G if on else W}; color: {W if on else G}; font: 600 14px {FB}">{t}</button>'
 peso = col(
     f'<label for="p1" style="font-size: 14px; line-height: 20px; font-weight: 600">Peso</label>'
     f'<div style="display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 16px; border-radius: 8px; border: 2px solid {G}; background: {W}">'
@@ -44,10 +44,10 @@ qtd = col(lbl('Por unidade') + step + lbl('Por peso') + peso, 12)
 chk = lambda fid, t, on: (f'<label for="{fid}" style="display: flex; align-items: center; gap: 12px; min-height: 48px"><input id="{fid}" type="checkbox"{" checked" if on else ""} style="width: 22px; height: 22px; accent-color: {T}; margin: 0"><span>{t}</span></label>')
 rad = lambda fid, t, on: (f'<label for="{fid}" style="display: flex; align-items: center; gap: 12px; min-height: 48px"><input id="{fid}" type="radio" name="ent"{" checked" if on else ""} style="width: 22px; height: 22px; accent-color: {T}; margin: 0"><span>{t}</span></label>')
 seg = (f'<div role="group" aria-label="Tipo de entrega" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 4px; border-radius: 12px; background: {C}; border: 1px solid {LN}">'
-       f'<button type="button" aria-pressed="true" style="height: 40px; border: 0; border-radius: 8px; background: {W}; color: {G}; font: 600 14px {FB}; box-shadow: 0 1px 2px rgba(41,38,33,0.12)">Entrega</button>'
-       f'<button type="button" aria-pressed="false" style="height: 40px; border: 0; border-radius: 8px; background: transparent; color: {G2}; font: 600 14px {FB}">Retirada</button></div>')
+       f'<button type="button" aria-pressed="true" style="height: 44px; border: 0; border-radius: 8px; background: {W}; color: {G}; font: 600 14px {FB}; box-shadow: 0 1px 2px rgba(41,38,33,0.12)">Entrega</button>'
+       f'<button type="button" aria-pressed="false" style="height: 44px; border: 0; border-radius: 8px; background: transparent; color: {G2}; font: 600 14px {FB}">Retirada</button></div>')
 sw_ = (f'<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px"><span id="swl">Publicar na loja</span>'
-       f'<button type="button" role="switch" aria-checked="true" aria-labelledby="swl" style="width: 52px; height: 32px; border-radius: 999px; border: 0; background: {V}; padding: 4px; display: flex; justify-content: flex-end"><span style="width: 24px; height: 24px; border-radius: 999px; background: {W}"></span></button></div>')
+       f'<button type="button" role="switch" aria-checked="true" aria-labelledby="swl" style="flex: none; width: 60px; height: 44px; border: 0; padding: 0; background: transparent; display: flex; align-items: center; justify-content: center"><span aria-hidden="true" style="width: 52px; height: 32px; box-sizing: border-box; border-radius: 999px; background: {V}; padding: 4px; display: flex; justify-content: flex-end"><span style="width: 24px; height: 24px; border-radius: 999px; background: {W}"></span></span></button></div>')
 selecao = col(lbl('Controle segmentado') + seg + lbl('Opção única') + rad('r1', 'Pix', True) + rad('r2', 'Cartão na entrega', False)
               + lbl('Múltipla e liga/desliga') + chk('c1', 'Controlar validade por lote', True) + sw_, 8)
 

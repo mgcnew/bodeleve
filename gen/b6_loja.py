@@ -34,14 +34,14 @@ def card(i):
     s = seal('Feito na casa', V) if o == 'casa' else seal('Marca Bodeleve', T) if o == 'marca' else ''
     return (f'<article style="padding: 10px; border-radius: 12px; background: {W}; border: 1px solid {LN}; display: flex; flex-direction: column; gap: 8px; min-width: 0">'
             f'<a href="Loja-Produto.dc.html" style="display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: {G}">'
-            f'<div role="img" aria-label="Espaço para foto do produto" style="height: 110px; border-radius: 10px; background: {C}; border: 1px dashed {G2}; display: flex; align-items: center; justify-content: center; font-size: 11px; line-height: 16px; font-weight: 600; color: {G2}">[FOTO DO PRODUTO]</div>'
+            f'<div role="img" aria-label="Espaço para foto do produto" style="height: 110px; border-radius: 10px; background: {C}; border: 1px dashed {G2}; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 16px; font-weight: 600; color: {G2}">[FOTO DO PRODUTO]</div>'
             f'<div style="min-height: 24px">{s}</div><div><div style="font-weight: 600; line-height: 22px">{n}</div><div style="font-size: 13px; line-height: 18px; color: {G2}">{u}</div></div></a>'
             f'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px"><div style="font-weight: 600; font-size: 17px; {NUM}">{p}</div>'
             + ibtn('Adicionar ' + n + ' à sacola', 'adicionar', H('add' + str(i)), W, T) + '</div></article>')
 def secao(idn, titulo, sub, idx):
     return (f'<section id="{idn}" style="display: flex; flex-direction: column; gap: 12px"><div><h2 style="margin: 0; font-family: {FD}; font-weight: 700; font-size: 22px; line-height: 28px">{titulo}</h2>'
             f'<div style="{SM}">{sub}</div></div><div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">' + ''.join(card(i) for i in idx) + '</div></section>')
-chipa = lambda t, href: f'<a href="{href}" style="flex: none; height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid {G}; background: {W}; color: {G}; text-decoration: none; display: inline-flex; align-items: center; font-weight: 600; font-size: 14px">{t}</a>'
+chipa = lambda t, href: f'<a href="{href}" style="flex: none; height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid {G}; background: {W}; color: {G}; text-decoration: none; display: inline-flex; align-items: center; font-weight: 600; font-size: 14px">{t}</a>'
 def navitem(ic, t, on=False):
     if on:
         return f'<a href="#topo" aria-current="page" style="flex: 1 1 0; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {T}; font-size: 12px; line-height: 16px; font-weight: 700">{icon(ic)}<span>{t}</span></a>'
@@ -112,11 +112,11 @@ def item(i):
             f'<div style="flex: none; width: 56px"><div role="img" aria-label="Espaço para foto do produto" style="height: 56px; border-radius: 10px; background: {C}; border: 1px dashed {G2}"></div></div>'
             f'<div style="flex: 1 1 0; min-width: 0"><div style="font-weight: 600; line-height: 22px">{n}</div><div style="font-size: 13px; line-height: 18px; color: {G2}; {NUM}">{d}</div>'
             f'<div style="font-weight: 600; {NUM}">{H("s" + str(i))}</div></div>'
-            f'<div role="group" aria-label="Quantidade de {n}" style="display: inline-flex; align-items: center; gap: 2px">' + ibtn('Diminuir', 'remover', H('m' + str(i)), G, C, f'1px solid {LN}', 40)
-            + f'<div style="min-width: 28px; text-align: center; font-weight: 600; {NUM}">{H("q" + str(i))}</div>' + ibtn('Aumentar', 'adicionar', H('p' + str(i)), W, T, '0', 40) + '</div></div></sc-if>')
+            f'<div role="group" aria-label="Quantidade de {n}" style="display: inline-flex; align-items: center; gap: 2px">' + ibtn('Diminuir', 'remover', H('m' + str(i)), G, C, f'1px solid {LN}', 44)
+            + f'<div style="min-width: 28px; text-align: center; font-weight: 600; {NUM}">{H("q" + str(i))}</div>' + ibtn('Aumentar', 'adicionar', H('p' + str(i)), W, T, '0', 44) + '</div></div></sc-if>')
 def segm(ent):
-    on = f'height: 40px; border: 0; border-radius: 8px; background: {W}; color: {G}; font: 600 14px {FB}; box-shadow: 0 1px 2px rgba(41,38,33,0.12)'
-    off = f'height: 40px; border: 0; border-radius: 8px; background: transparent; color: {G2}; font: 600 14px {FB}'
+    on = f'height: 44px; border: 0; border-radius: 8px; background: {W}; color: {G}; font: 600 14px {FB}; box-shadow: 0 1px 2px rgba(41,38,33,0.12)'
+    off = f'height: 44px; border: 0; border-radius: 8px; background: transparent; color: {G2}; font: 600 14px {FB}'
     return (f'<div role="group" aria-label="Como receber" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 4px; border-radius: 12px; background: {W}; border: 1px solid {LN}">'
             f'<button type="button" aria-pressed="{"true" if ent else "false"}" onClick="{H("setEntrega")}" style="{on if ent else off}">Entrega</button>'
             f'<button type="button" aria-pressed="{"false" if ent else "true"}" onClick="{H("setRetirada")}" style="{off if ent else on}">Retirar na loja</button></div>')

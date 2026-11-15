@@ -10,7 +10,7 @@ Cada etapa termina com revisão e aprovação antes da seguinte. A documentaçã
 | 4 — Gestão | Dashboard, compras, estoque, produção, financeiro — Fluxos 1, 2 e 6 | Etapa 2 · Q1, Q3 | Entregue (36 de 36 telas) |
 | 5 — PDV | Venda, peso, pagamento combinado, caixa — Fluxo 3 | Etapa 2 · Q2, Q5 | Entregue (12 telas em 9 quadros) |
 | 6 — Entregas | App do entregador e painel de atribuição — Fluxo 5 | Etapas 3 e 4 · Q11 | Entregue (9 telas) |
-| 7 — Auditoria | Consistência, acessibilidade, responsividade, cobertura dos fluxos | Etapas 2–6 | **Em andamento** |
+| 7 — Auditoria | Consistência, acessibilidade, responsividade, cobertura dos fluxos | Etapas 2–6 | Entregue (AUDIT.md) |
 
 ## Etapa 4 em detalhe (em andamento)
 
@@ -52,3 +52,7 @@ Antes de começar ajudam as respostas a Q6–Q10 (área e taxa de entrega, pedid
 ## Depois do design (fora desta fase)
 
 Implementação com Supabase (Auth, PostgreSQL com RLS, Storage, Realtime onde fizer sentido), partindo de DATA_MODEL_DRAFT.md.
+
+## Próxima fase: implementação
+
+O design está completo. O pacote de passagem para o Claude Code está no repositório: `CLAUDE.md` (regras e ordem de implementação), `design/tokens.css`, `docs/SCREEN_MAP.md` (tela → arquivo) e `docs/AUDIT.md`. Antes de pagamentos reais, área de entrega e nota fiscal, resolver as pendências P2 e P8 de DECISIONS.md.

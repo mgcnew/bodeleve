@@ -1,7 +1,7 @@
 from b10_compras import *   # regenera lotes 1 e 2 da gestão (aba Estoque ativa) e traz os auxiliares
 
 def chips(n_list, prefix='t'):
-    return ''.join(f'<button type="button" aria-pressed="{H("a" + str(i))}" onClick="{H(prefix + str(i))}" style="flex: none; height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {G}; '
+    return ''.join(f'<button type="button" aria-pressed="{H("a" + str(i))}" onClick="{H(prefix + str(i))}" style="flex: none; height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {G}; '
                    f'background: {H("b" + str(i))}; color: {H("c" + str(i))}; font: 600 14px {FB}; {NUM}">{t}</button>' for i, t in enumerate(n_list))
 def chips_logic(n, var='t'):
     return ("[" + ', '.join(str(i) for i in range(n)) + "].forEach((k) => { out['a' + k] = " + var + " === k; out['b' + k] = " + var + " === k ? '" + G + "' : '" + W + "'; out['c' + k] = " + var + " === k ? '" + W + "' : '" + G + "'; out['t' + k] = () => this.setState({ " + var + ": k }); });\n")

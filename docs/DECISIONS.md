@@ -22,6 +22,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D13 | 2026-11-14 | Etapa 3 (loja) considerada aprovada ("continue"); Etapa 4 (gestão) iniciada em lotes; lote 1 = Entrar, Início, Pedidos, Pedido, Mais; lote 2 = Compras e Fornecedores; lote 3 = Estoque; lote 4 = Produção; lote 5 = Financeiro; lote 6 = Produtos, Clientes, Entregas, Relatórios, Configurações | Usuário |
 | D15 | 2026-11-15 | Etapa 5 (PDV) entregue: 12 telas do mapa em 9 quadros (peso, desconto e sangria como folhas dentro de Vender, Sacola e Caixa) | — |
 | D16 | 2026-11-15 | Etapa 6 (Entregas) entregue: 9 telas; próprio × parceiro mostrado pelo ajuste “perfil” nos quadros | — |
+| D17 | 2026-11-15 | Etapa 7 (auditoria) concluída: alvo mínimo de toque passa a 44 px; referências de tablet e computador; pacote de passagem (CLAUDE.md, tokens.css, mapa tela → arquivo) | — |
 | D14 | 2026-11-15 | Seguir até concluir todas as etapas sem parar; o que depender do usuário é documentado como pendência | Usuário |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
@@ -129,11 +130,36 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 
 ## Pendências
 
-| ID | Pendência | Bloqueia |
-|---|---|---|
-| P1 | Refazer a pesquisa visual no Mobbin quando o plano estiver ativo e atualizar MOBBIN_REFERENCES.md | Refinamento visual da Etapa 2 |
-| P2 | Respostas às questões Q1–Q16 | Ver BUSINESS_RULES.md; Q2, Q3, Q6–Q8 pesam nas Etapas 3–5 |
-| P3 | Logotipo e material fotográfico próprios | Etapa 3 (loja) |
+O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
+
+| ID | Pendência | Afeta | Onde ver |
+|---|---|---|---|
+| P1 | Pesquisa visual no Mobbin (exige plano pago); refazer e atualizar MOBBIN_REFERENCES.md | Acabamento visual | MOBBIN_REFERENCES.md |
+| P2 | Responder Q1–Q16 | Regras de entrega, pagamento, produção, fiado, nota fiscal | BUSINESS_RULES.md |
+| P3 | Logotipo oficial e fotos próprias (produtos e casa) | Loja, gestão | `[LOGO]`, `[FOTO DO PRODUTO]`, `[FOTO DA CASA]` |
+| P4 | Conteúdo da casa: história, texto da Linha Bodeleve, compromisso da marca, endereço, horários, WhatsApp, CNPJ | Loja, configurações | Lista de marcadores abaixo |
+| P5 | Conteúdo por produto: descrição, ingredientes, conservação, validade, modo de preparo | Loja, fichas | Lista de marcadores abaixo |
+| P6 | Confirmar ou corrigir as hipóteses H-L*, H-G*, H-P*, H-E* | Todas as telas | Seções de hipóteses acima |
+| P7 | Passada visual no canvas e teste com atendente, cliente e entregador | Ajustes finos | AUDIT.md (A1, A3) |
+| P8 | Escolher provedor de pagamento (Pix/cartão) e de mensagens (WhatsApp) antes da implementação | Implementação | Q8, Q14 |
+
+Marcadores de conteúdo nas telas:
+
+| Marcador | Telas |
+|---|---|
+| [ENDEREÇO DA LOJA] | Ent-Detalhe, Gestao-Estabelecimento, Loja-Entrega, Loja-Sobre |
+| [HORÁRIO DE FUNCIONAMENTO] / [HORÁRIO] | Loja-Entrega, Loja-Perfil, Loja-Sobre, Gestao-Estabelecimento |
+| [WHATSAPP DA LOJA] | Gestao-Estabelecimento, Loja-Acompanhamento, Loja-Perfil |
+| [CNPJ] | Gestao-Estabelecimento |
+| [NOME DO DONO] | Gestao-Usuarios |
+| [TEXTO DA CASA] / [HISTÓRIA DA CASA] | Loja-Inicio, Loja-Sobre |
+| [TEXTO DA LINHA] / [COMPROMISSO DA MARCA] / [NA CASA OU POR PARCEIRO] / [PRÓXIMOS PRODUTOS DA LINHA] | Loja-Linha |
+| [DESCRIÇÃO DO PRODUTO] / [INGREDIENTES] / [COMO CONSERVAR] / [PRAZO DE VALIDADE] | Loja-Produto, Gestao-Produto |
+| [MODO DE PREPARO DA CASA] | Gestao-Ficha |
+| [E-MAIL] / [CNPJ OU CPF] do fornecedor | Gestao-Fornecedor |
+| [PLACA] / [CHAVE PIX] do entregador | Ent-Perfil |
+| [LOGO], [FOTO DO PRODUTO], [FOTO DA CASA] | Várias (P3) |
+| [MAPA DA ROTA], [QR CODE PIX] | Ent-Rota, PDV-Pagamento (gerados pelo sistema na implementação) |
 
 ## Alterações de decisões aprovadas
 

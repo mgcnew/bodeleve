@@ -781,6 +781,35 @@
       "w": 390,
       "x": 470,
       "y": 0
+    },
+    "Resp-Gestao-Desktop.dc.html": {
+      "expand": "fill",
+      "h": 980,
+      "is_interactive": true,
+      "page": "etapa7",
+      "title": "Gestão no computador",
+      "w": 1280,
+      "x": 0,
+      "y": 0
+    },
+    "Resp-Loja-Desktop.dc.html": {
+      "expand": "fill",
+      "h": 1500,
+      "is_interactive": true,
+      "page": "etapa7",
+      "title": "Loja no computador",
+      "w": 1280,
+      "x": 0,
+      "y": 1280
+    },
+    "Resp-PDV-Tablet.dc.html": {
+      "h": 768,
+      "is_interactive": true,
+      "page": "etapa7",
+      "title": "PDV no tablet do balcão",
+      "w": 1024,
+      "x": 1360,
+      "y": 0
     }
   },
   "createdOnFiles": {
@@ -789,7 +818,7 @@
   },
   "designSystems": [],
   "launch": {
-    "page": "etapa6",
+    "page": "etapa7",
     "view": "canvas"
   },
   "noteOrder": [
@@ -809,7 +838,9 @@
     "titulo5",
     "guia5",
     "titulo6",
-    "guia6"
+    "guia6",
+    "titulo7",
+    "guia7"
   ],
   "notes": {
     "guia3": {
@@ -843,6 +874,14 @@
       "w": 440,
       "x": 4230,
       "y": 0
+    },
+    "guia7": {
+      "fill": "green",
+      "page": "etapa7",
+      "text": "Auditoria (detalhes em docs/AUDIT.md no GitHub):\n\n• 75 telas do mapa cobertas; os 6 fluxos do briefing navegáveis.\n• Cores só dos tokens; contraste AA em todos os pares de texto.\n• Todos os campos com rótulo e todos os botões de ícone com nome.\n• Corrigido: alvos de toque de 40 e 32 px → mínimo 44 px; textos de 10–11 px → 12 px.\n\nReferências: Gestão e Loja no computador (páginas fluidas, abra em tela cheia) e PDV no tablet do balcão (toque nos produtos para somar).\n\nPendente: passada visual no canvas, teste com usuários, Mobbin, conteúdo e respostas Q1–Q16 (lista completa em docs/DECISIONS.md).",
+      "w": 520,
+      "x": 1360,
+      "y": 1280
     },
     "titulo": {
       "kind": "title1",
@@ -959,6 +998,15 @@
       "w": 240,
       "x": 0,
       "y": -300
+    },
+    "titulo7": {
+      "kind": "title1",
+      "maxW": 2384,
+      "page": "etapa7",
+      "text": "Etapa 7 — Auditoria e referências de tablet e computador",
+      "w": 240,
+      "x": 0,
+      "y": -300
     }
   },
   "order": [
@@ -1041,7 +1089,10 @@
     "Ent-Confirmacao.dc.html",
     "Ent-Problema.dc.html",
     "Ent-Historico.dc.html",
-    "Ent-Perfil.dc.html"
+    "Ent-Perfil.dc.html",
+    "Resp-Gestao-Desktop.dc.html",
+    "Resp-PDV-Tablet.dc.html",
+    "Resp-Loja-Desktop.dc.html"
   ],
   "pages": [
     {
@@ -1067,6 +1118,10 @@
     {
       "id": "etapa6",
       "name": "Etapa 6 · Entregas"
+    },
+    {
+      "id": "etapa7",
+      "name": "Etapa 7 · Auditoria e responsivo"
     }
   ],
   "title": "Bodeleve",

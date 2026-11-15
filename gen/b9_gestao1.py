@@ -108,7 +108,7 @@ def pcard(i):
     return f'<sc-if value="{H("v" + str(i))}" hint-placeholder-val="{H("true" if aba == 0 else "false")}">{card}</sc-if>'
 def tab(i, t):
     cnt = sum(1 for p in PED if p[6] == i)
-    return (f'<button type="button" aria-pressed="{H("a" + str(i))}" onClick="{H("t" + str(i))}" style="flex: none; height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {G}; '
+    return (f'<button type="button" aria-pressed="{H("a" + str(i))}" onClick="{H("t" + str(i))}" style="flex: none; height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {G}; '
             f'background: {H("b" + str(i))}; color: {H("c" + str(i))}; font: 600 14px {FB}; {NUM}">{t} · {cnt}</button>')
 pedidos = (titulo('Pedidos', 'Loja e balcão, do dia')
     + f'<main style="display: flex; flex-direction: column; gap: 16px; padding: 8px 16px 24px"><div role="group" aria-label="Filtrar por situação" style="display: flex; gap: 8px; flex-wrap: wrap">'

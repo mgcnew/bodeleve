@@ -35,11 +35,11 @@ def tabs(items, active=0):
     return (f'<div role="tablist" style="display: flex; background: {W}; border-bottom: 1px solid {LN}">'
             + ''.join(f'<button type="button" role="tab" aria-selected="{"true" if i == active else "false"}" style="flex: 1 1 0; height: 48px; border: 0; background: transparent; border-bottom: 3px solid {T if i == active else "transparent"}; color: {G if i == active else G2}; font: {700 if i == active else 500} 14px {FB}">{t}</button>' for i, t in enumerate(items)) + '</div>')
 seg = (f'<div style="padding: 12px"><div role="group" aria-label="Lista de entregas" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 4px; border-radius: 12px; background: {C}; border: 1px solid {LN}">'
-       f'<button type="button" aria-pressed="true" style="height: 40px; border: 0; border-radius: 8px; background: {W}; color: {G}; font: 600 14px {FB}; box-shadow: 0 1px 2px rgba(41,38,33,0.12)">Disponíveis · 4</button>'
-       f'<button type="button" aria-pressed="false" style="height: 40px; border: 0; border-radius: 8px; background: transparent; color: {G2}; font: 600 14px {FB}">Minhas · 1</button></div></div>')
+       f'<button type="button" aria-pressed="true" style="height: 44px; border: 0; border-radius: 8px; background: {W}; color: {G}; font: 600 14px {FB}; box-shadow: 0 1px 2px rgba(41,38,33,0.12)">Disponíveis · 4</button>'
+       f'<button type="button" aria-pressed="false" style="height: 44px; border: 0; border-radius: 8px; background: transparent; color: {G2}; font: 600 14px {FB}">Minhas · 1</button></div></div>')
 c1 = col(lbl('Barra superior') + frame(topo) + lbl('Abas · PDV') + frame(tabs(['Favoritos', 'Categorias', 'Buscar'])) + lbl('Segmentos · Entregas') + frame(seg), 10)
 
-chip = lambda t, on=False: f'<button type="button" style="height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {G if on else LN}; background: {G if on else W}; color: {W if on else G}; font: 600 14px {FB}">{t}</button>'
+chip = lambda t, on=False: f'<button type="button" style="height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {G if on else LN}; background: {G if on else W}; color: {W if on else G}; font: 600 14px {FB}">{t}</button>'
 sheet = (f'<div style="width: 390px; max-width: 100%; box-sizing: border-box; border: 1px solid {LN}; border-radius: 20px; overflow: hidden; background: rgba(41,38,33,0.45); display: flex; flex-direction: column; justify-content: flex-end; padding-top: 72px">'
          f'<div role="dialog" aria-label="Informar peso" style="background: {W}; border-radius: 20px 20px 0 0; padding: 12px 20px 20px; display: flex; flex-direction: column; gap: 16px">'
          f'<div aria-hidden="true" style="align-self: center; width: 40px; height: 4px; border-radius: 999px; background: {LN}"></div>'

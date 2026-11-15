@@ -15,7 +15,7 @@ def pcard(n, u, p, o, add):
     s = seal('Feito na casa', V) if o == 'casa' else seal('Marca Bodeleve', T) if o == 'marca' else ''
     return (f'<article style="padding: 10px; border-radius: 12px; background: {W}; border: 1px solid {LN}; display: flex; flex-direction: column; gap: 8px; min-width: 0">'
             f'<a href="Loja-Produto.dc.html" style="display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: {G}">'
-            f'<div role="img" aria-label="Espaço para foto do produto" style="height: 110px; border-radius: 10px; background: {C}; border: 1px dashed {G2}; display: flex; align-items: center; justify-content: center; font-size: 11px; line-height: 16px; font-weight: 600; color: {G2}">[FOTO DO PRODUTO]</div>'
+            f'<div role="img" aria-label="Espaço para foto do produto" style="height: 110px; border-radius: 10px; background: {C}; border: 1px dashed {G2}; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 16px; font-weight: 600; color: {G2}">[FOTO DO PRODUTO]</div>'
             f'<div style="min-height: 24px">{s}</div><div><div style="font-weight: 600; line-height: 22px">{n}</div><div style="font-size: 13px; line-height: 18px; color: {G2}">{u}</div></div></a>'
             f'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px"><div style="font-weight: 600; font-size: 17px; {NUM}">{p}</div>'
             + ibtn('Adicionar ' + n + ' à sacola', 'adicionar', H(add), W, T) + '</div></article>')
@@ -32,7 +32,7 @@ VAZIO = 'renderVals() {\nreturn {};\n}'
 CAT = [('Queijo coalho', '500 g', 'R$ 32,90', 'casa'), ('Queijo manteiga', '500 g', 'R$ 36,90', 'casa'), ('Manteiga de garrafa', '200 ml', 'R$ 28,00', 'marca'),
        ('Doce de leite', '400 g', 'R$ 18,90', 'casa'), ('Requeijão', '250 g', 'R$ 11,90', ''), ('Nata', '200 g', 'R$ 9,50', '')]
 def fchip(i, t):
-    return (f'<button type="button" aria-pressed="{H("a" + str(i))}" onClick="{H("f" + str(i))}" style="flex: none; height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid {G}; '
+    return (f'<button type="button" aria-pressed="{H("a" + str(i))}" onClick="{H("f" + str(i))}" style="flex: none; height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid {G}; '
             f'background: {H("b" + str(i))}; color: {H("c" + str(i))}; font: 600 14px {FB}">{t}</button>')
 cat = (topbar('Queijos e laticínios', 'Loja-Buscar.dc.html')
     + f'<main style="display: flex; flex-direction: column; gap: 16px; padding: 4px 16px 24px"><div role="group" aria-label="Filtrar por origem" style="display: flex; gap: 8px; flex-wrap: wrap">{fchip(0, "Todos")}{fchip(1, "Feitos na casa")}{fchip(2, "Marca Bodeleve")}</div>'

@@ -1,0 +1,59 @@
+/*
+ * Bodeleve — tokens do design system (fonte: docs/DESIGN_SYSTEM.md)
+ * Use estas variáveis no código; não redigite valores soltos.
+ * Fontes: Bricolage Grotesque (títulos, 500/700) e Inter (interface, 400/500/600), via Google Fonts.
+ */
+:root {
+  /* Marca */
+  --cor-terracota: #A9482C;              /* ação principal, destino ativo, selo Marca Bodeleve */
+  --cor-terracota-pressionado: #8A3920;
+  --cor-terracota-suave: #F4E1D8;
+  --cor-verde: #315C46;                  /* positivo, selo Feito na casa */
+  --cor-mostarda: #D9A441;               /* só preenchimento; nunca texto */
+  --cor-creme: #F7F2E8;
+  --cor-grafite: #292621;
+
+  /* Superfícies e texto */
+  --fundo-loja: #F7F2E8;
+  --fundo-operacao: #FBFAF6;             /* gestão, PDV, entregas */
+  --superficie: #FFFFFF;
+  --linha: #E4DCCB;
+  --texto: #292621;
+  --texto-secundario: #5E584E;
+
+  /* Semânticos (texto / fundo) */
+  --sucesso: #315C46;     --sucesso-fundo: #E3EDE6;
+  --atencao: #7A5A12;     --atencao-fundo: #F8EBC9;
+  --erro: #8C1D18;        --erro-fundo: #F6E0DC;
+  --info: #2F5D7C;        --info-fundo: #DDE8EF;
+
+  /* Tipografia */
+  --fonte-titulo: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
+  --fonte-texto: 'Inter', system-ui, sans-serif;
+  --titulo-xl: 700 34px/40px var(--fonte-titulo);
+  --titulo-l: 700 28px/34px var(--fonte-titulo);
+  --titulo-m: 700 22px/28px var(--fonte-titulo);
+  --titulo-s: 600 18px/26px var(--fonte-texto);
+  --corpo: 400 16px/24px var(--fonte-texto);
+  --apoio: 400 14px/20px var(--fonte-texto);
+  --legenda: 600 12px/16px var(--fonte-texto);   /* caixa alta, letter-spacing 0.06em */
+  --valor: 600 22px/28px var(--fonte-texto);     /* font-variant-numeric: tabular-nums */
+
+  /* Espaço (base 4) */
+  --esp-1: 4px; --esp-2: 8px; --esp-3: 12px; --esp-4: 16px; --esp-6: 24px; --esp-8: 32px; --esp-12: 48px;
+
+  /* Raios */
+  --raio-campo: 8px;     /* campos, etiquetas */
+  --raio-cartao: 12px;   /* botões, cartões */
+  --raio-folha: 20px;    /* bottom sheets, modais */
+  --raio-pilula: 999px;  /* chips, selos */
+
+  /* Toque */
+  --toque-min: 44px;      /* mínimo de qualquer controle */
+  --toque-acao: 48px;     /* botões comuns */
+  --toque-principal: 56px;/* ação principal de rodapé, PDV, entregas */
+
+  /* Pontos de quebra */
+  --bp-tablet: 768px;
+  --bp-desktop: 1024px;
+}
