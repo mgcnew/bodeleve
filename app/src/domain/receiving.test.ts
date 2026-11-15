@@ -7,7 +7,7 @@ import { buildPurchaseSeed, buildStockSeed, suppliersSeed } from '@/mocks/stockS
 const now = new Date('2026-11-14T15:30:00')
 const fresh = (): ReceivingState & { items: ReturnType<typeof buildStockSeed>['items'] } => {
   const s = buildStockSeed(now)
-  return { purchaseOrders: buildPurchaseSeed(now), lots: s.lots, movements: s.movements, payables: [], receipts: [], items: s.items }
+  return { purchaseOrders: buildPurchaseSeed(now), lots: s.lots, movements: s.movements, entries: [], receipts: [], items: s.items }
 }
 const supplier = suppliersSeed.find((s) => s.id === 'serra')!.name
 const lines = (leite: number, req: number, nata: number) => [
@@ -37,7 +37,7 @@ describe('receber PC-0057 (quadro Recebimento)', () => {
     expect(r.payable?.amountCents).toBe(63240)
     expect(r.payable?.description).toBe('Laticínios Serra Verde · boleto')
     expect(new Date(r.payable!.dueAt).getDate()).toBe(28) // 14/11 + 14 dias = 28/11
-    expect(st.payables).toHaveLength(1)
+    expect(st.entries).toHaveLength(1)
   })
   it('recebimento parcial (nata 10 de 12): valor da nota é o do que chegou e o restante pode ficar em aberto', () => {
     const st = fresh()
@@ -99,12 +99,12 @@ describe('corrigir conferência', () => {
     expect(o.status).toBe('sent')
     expect(o.items.every((i) => i.receivedQty === 0)).toBe(true)
     expect(st.movements).toHaveLength(movs)
-    expect(st.payables).toHaveLength(0)
+    expect(st.entries).toHaveLength(0)
   })
   it('não corrige se a conta já foi paga', () => {
     const st = fresh()
     receive(st, 'PC-0057', lines(140, 20, 12), { closeShort: false, now, supplierName: supplier, items: st.items })
-    st.payables[0].paidAt = now.toISOString()
+    st.entries[0].paidAt = now.toISOString()
     expect(() => reverseLastReceipt(st, 'PC-0057')).toThrowError('cannot_reverse')
   })
   it('não corrige se já saiu mercadoria do lote', () => {

@@ -247,4 +247,8 @@ Rotas em `app/src/app/routes.tsx` (`/gestao/...`); telas em `app/src/pages/gesta
 | 17 · Fichas técnicas | `/gestao/producao/fichas` | `production.tsx` | 4 |
 | 18 · Ficha técnica e nova ordem | `/gestao/producao/fichas/:id` | `RecipePage.tsx` | 4 |
 | 19 · Ordem: apontamento | `/gestao/producao/ordens/:id` | `ProductionOrderPage.tsx` | 4 |
+| 20 · Financeiro | `/gestao/financeiro` | `finance.tsx` | 4 |
+| 21 · Contas a pagar e a receber | `/gestao/financeiro/contas` | `finance.tsx` | 4 |
+| 22 · Pagar conta | `/gestao/financeiro/pagar/:id` | `PayPage.tsx` | 4 |
+| 23 · Lançamentos | `/gestao/financeiro/lancamentos` | `finance.tsx` | 4 |
 

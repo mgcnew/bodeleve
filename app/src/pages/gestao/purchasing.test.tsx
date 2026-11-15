@@ -223,7 +223,7 @@ describe('fornecedores', () => {
     ]
     await svc.admin.purchasing.receive('PC-0057', { lines, closeShort: false })
     const f = await svc.admin.purchasing.getSupplier('serra')
-    expect(f?.openPayablesCents).toBe(63240)
+    expect(f?.openPayablesCents).toBe(63240 + 42000) // a conta nova + o boleto do PC-0053 que vence hoje
     expect(f?.openOrders).toBe(0)
   })
 })

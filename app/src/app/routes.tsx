@@ -26,6 +26,8 @@ import { ModulePlaceholder } from '@/pages/gestao/ModulePlaceholder'
 import { MorePage } from '@/pages/gestao/MorePage'
 import { AdminOrderPage } from '@/pages/gestao/OrderPage'
 import { AdminOrdersPage } from '@/pages/gestao/OrdersPage'
+import { AccountsPage, FinancePage, LedgerPage } from '@/pages/gestao/finance'
+import { PayPage } from '@/pages/gestao/PayPage'
 import { NewPurchasePage } from '@/pages/gestao/NewPurchasePage'
 import { PurchasePage } from '@/pages/gestao/PurchasePage'
 import { PurchasesPage } from '@/pages/gestao/purchasing'
@@ -77,7 +79,10 @@ export const routes: RouteObject[] = [
           { path: 'estoque/:id', element: <StockItemPage />, handle: g('stock') },
           { path: 'estoque/:id/movimentacoes', element: <StockMovementsPage />, handle: g('stock') },
           { path: 'estoque/:id/ajuste', element: <StockAdjustPage />, handle: g('stock') },
-          { path: 'financeiro/*', element: <ModulePlaceholder />, handle: g('finance', true) },
+          { path: 'financeiro', element: <FinancePage />, handle: g('finance', true) },
+          { path: 'financeiro/contas', element: <AccountsPage />, handle: g('finance') },
+          { path: 'financeiro/pagar/:id', element: <PayPage />, handle: g('finance') },
+          { path: 'financeiro/lancamentos', element: <LedgerPage />, handle: g('finance') },
           { path: 'compras', element: <PurchasesPage />, handle: g('purchasing') },
           { path: 'compras/novo', element: <NewPurchasePage />, handle: g('purchasing') },
           { path: 'compras/:id', element: <PurchasePage />, handle: g('purchasing') },

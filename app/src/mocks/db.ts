@@ -1,4 +1,4 @@
-import type { FinancialEntry } from '@/domain/finance'
+import type { CashTransaction, FinancialEntry } from '@/domain/finance'
 import type { Lot, StockItem, StockMovement } from '@/domain/inventory'
 import type { PurchaseOrder, Supplier } from '@/domain/purchasing'
 import type { Receipt } from '@/domain/receiving'
@@ -6,13 +6,13 @@ import type { Order } from '@/domain/types'
 import { buildSeedOrders, DEVICE_SEED_IDS } from './seedOrders'
 import type { ProductionOrder, Recipe } from '@/domain/production'
 import type { Reservation } from '@/domain/stock'
-import { buildProductionSeed, buildPurchaseSeed, buildStockSeed, recipesSeed, reservationsSeed, suppliersSeed } from './stockSeed'
+import { buildFinanceSeed, buildProductionSeed, buildPurchaseSeed, buildStockSeed, recipesSeed, reservationsSeed, suppliersSeed } from './stockSeed'
 
 /**
  * Banco simulado, único para a loja e a gestão: um pedido feito na loja aparece na fila da gestão.
  * Fica no localStorage (D19: sem banco). Lido de novo a cada operação, então duas abas enxergam a mesma coisa.
  */
-const KEY = 'bodeleve.mock.db.v4'
+const KEY = 'bodeleve.mock.db.v5'
 
 type Storage = Pick<globalThis.Storage, 'getItem' | 'setItem'>
 
@@ -25,7 +25,10 @@ export type MockState = {
   stockItems: StockItem[]
   lots: Lot[]
   movements: StockMovement[]
-  payables: FinancialEntry[]
+  /** Contas a pagar e a receber. */
+  entries: FinancialEntry[]
+  /** Lançamentos de dinheiro nas duas contas (banco e caixa): o saldo é a soma deles. */
+  transactions: CashTransaction[]
   receipts: Receipt[]
   /** Reservas feitas à mão; as dos pedidos online são calculadas a partir dos pedidos abertos. */
   reservations: Reservation[]
@@ -44,7 +47,7 @@ export function createDb(opts: { storage: Storage | null; withSeed: boolean; now
   let memory: MockState | null = null
 
   const initial = (): MockState => {
-    const empty: MockState = { orders: [], deviceOrderIds: [], suppliers: [], purchaseOrders: [], stockItems: [], lots: [], movements: [], payables: [], receipts: [], reservations: [], recipes: [], productionOrders: [], outbox: [] }
+    const empty: MockState = { orders: [], deviceOrderIds: [], suppliers: [], purchaseOrders: [], stockItems: [], lots: [], movements: [], entries: [], transactions: [], receipts: [], reservations: [], recipes: [], productionOrders: [], outbox: [] }
     if (!opts.withSeed) return empty
     const now = opts.now()
     const stock = buildStockSeed(now)
@@ -60,6 +63,7 @@ export function createDb(opts: { storage: Storage | null; withSeed: boolean; now
       reservations: reservationsSeed,
       recipes: recipesSeed,
       productionOrders: buildProductionSeed(now),
+      ...buildFinanceSeed(now),
     }
   }
 

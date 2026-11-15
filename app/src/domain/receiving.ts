@@ -20,7 +20,7 @@ export type ReceivingState = {
   purchaseOrders: PurchaseOrder[]
   lots: Lot[]
   movements: StockMovement[]
-  payables: FinancialEntry[]
+  entries: FinancialEntry[]
   receipts: Receipt[]
 }
 
@@ -110,9 +110,12 @@ export function receive(
     const term = paymentTerms[order.payment]
     const dueAt = addDays(opts.now, term.dueDays ?? 0)
     const kind = order.payment === 'boleto14' ? 'boleto' : order.payment === 'pix_on_delivery' ? 'Pix' : 'dinheiro'
-    payableId = next('fe-', state.payables.map((p) => p.id))
+    payableId = next('fe-', state.entries.map((p) => p.id))
     const description = `${opts.supplierName} · ${kind}`
-    state.payables.push({ id: payableId, direction: 'payable', description, amountCents: amount, dueAt, paidAt: null, origin: 'purchase', ref: order.id, supplierId: order.supplierId })
+    state.entries.push({
+      id: payableId, direction: 'payable', description, amountCents: amount, dueAt, paidAt: null, origin: 'purchase', ref: order.id, supplierId: order.supplierId,
+      createdAt: nowIso, title: opts.supplierName, kindLabel: `${kind.charAt(0).toUpperCase()}${kind.slice(1)} · compra ${order.id}`, forecastLabel: `${opts.supplierName} · ${order.id}`,
+    })
     payable = { description, amountCents: amount, dueAt }
   }
 
@@ -136,7 +139,7 @@ export function reverseLastReceipt(state: ReceivingState, orderId: string): Purc
   const order = state.purchaseOrders.find((o) => o.id === orderId)
   const receipt = [...state.receipts].reverse().find((r) => r.orderId === orderId)
   if (!order || !receipt) throw new ReceivingError('not_found')
-  const payable = receipt.payableId ? state.payables.find((p) => p.id === receipt.payableId) : null
+  const payable = receipt.payableId ? state.entries.find((p) => p.id === receipt.payableId) : null
   if (payable?.paidAt) throw new ReceivingError('cannot_reverse')
   for (const mvId of receipt.movementIds) {
     const m = state.movements.find((x) => x.id === mvId)
@@ -145,7 +148,7 @@ export function reverseLastReceipt(state: ReceivingState, orderId: string): Purc
   }
   state.movements = state.movements.filter((m) => !receipt.movementIds.includes(m.id))
   state.lots = state.lots.filter((l) => !receipt.lotIds.includes(l.id))
-  if (receipt.payableId) state.payables = state.payables.filter((p) => p.id !== receipt.payableId)
+  if (receipt.payableId) state.entries = state.entries.filter((p) => p.id !== receipt.payableId)
   order.status = receipt.before.status
   order.closedShort = receipt.before.closedShort
   order.receivedAt = receipt.before.receivedAt

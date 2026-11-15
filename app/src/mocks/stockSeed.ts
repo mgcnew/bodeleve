@@ -1,5 +1,6 @@
 import type { Lot, StockItem, StockMovement } from '@/domain/inventory'
 import type { PurchaseOrder, Supplier } from '@/domain/purchasing'
+import type { CashTransaction, FinancialEntry } from '@/domain/finance'
 import type { Recipe, ProductionOrder } from '@/domain/production'
 import type { Reservation } from '@/domain/stock'
 
@@ -162,4 +163,45 @@ export function buildProductionSeed(now: Date): ProductionOrder[] {
     base({ id: 'OP-0031', recipeId: 'ficha-queijo-coalho', itemId: 'queijo-coalho', batches: 1, plannedQty: 10, status: 'done', startsAt: inDays(now, -1, 9), startedAt: inDays(now, -1, 9), doneAt: inDays(now, -1, 17), goodQty: 10, lotCode: 'QC-1112', expiresAt: inDays(now, 18, 12), costPerUnitCents: 1420 }),
     base({ id: 'OP-0030', recipeId: 'ficha-doce-de-leite', itemId: 'doce-de-leite', batches: 1, plannedQty: 12, status: 'done', startsAt: inDays(now, -4, 9), startedAt: inDays(now, -4, 9), doneAt: inDays(now, -4, 17), goodQty: 11, lotCode: 'DL-1110', expiresAt: inDays(now, 6, 12), costPerUnitCents: 790 }),
   ]
+}
+
+
+// ───────── Financeiro (lote 5) ─────────
+
+/**
+ * Contas e lançamentos de EXEMPLO dos quadros. Saldo: banco R$ 6.380,40 + caixa R$ 412,00 = R$ 6.792,40.
+ * A pagar R$ 3.097,00 (os R$ 622,00 do PC-0057 nascem no recebimento) e a receber R$ 1.150,00.
+ */
+export function buildFinanceSeed(now: Date): { entries: FinancialEntry[]; transactions: CashTransaction[] } {
+  const d = (plus: number, hour = 12) => new Date(now.getFullYear(), now.getMonth(), now.getDate() + plus, hour).toISOString()
+  const e = (id: string, o: Partial<FinancialEntry> & Pick<FinancialEntry, 'direction' | 'description' | 'amountCents' | 'dueAt' | 'origin'>): FinancialEntry => ({ paidAt: null, ref: '', supplierId: null, ...o, id })
+  const entries: FinancialEntry[] = [
+    e('fe-1', { direction: 'payable', description: 'Aluguel', title: 'Aluguel', kindLabel: 'Despesa fixa', forecastLabel: 'Aluguel', amountCents: 180000, dueAt: d(-4), origin: 'fixed', recurring: true }),
+    e('fe-2', { direction: 'payable', description: 'Laticínios Serra Verde · boleto', title: 'Laticínios Serra Verde', kindLabel: 'Boleto · compra PC-0053', forecastLabel: 'Laticínios', amountCents: 42000, dueAt: d(0), origin: 'purchase', ref: 'PC-0053', supplierId: 'serra' }),
+    e('fe-3', { direction: 'payable', description: 'Energia elétrica', title: 'Energia elétrica', kindLabel: 'Despesa fixa', note: 'débito automático', forecastLabel: 'energia', amountCents: 22000, dueAt: d(0), origin: 'fixed', recurring: true }),
+    e('fe-4', { direction: 'payable', description: 'Moinho Sertão · boleto', title: 'Moinho Sertão', kindLabel: 'Boleto · compra PC-0054', forecastLabel: 'Moinho Sertão · PC-0054', amountCents: 51200, dueAt: d(7), origin: 'purchase', ref: 'PC-0054', supplierId: 'moinho' }),
+    e('fe-5', { direction: 'payable', description: 'Gás', title: 'Gás', kindLabel: 'Despesa fixa', forecastLabel: 'Gás', amountCents: 14500, dueAt: d(11), origin: 'fixed', recurring: true }),
+    // Já pagas (histórico do fornecedor Engenho Boa Vista e da Charqueada Norte)
+    e('fe-6', { direction: 'payable', description: 'Engenho Boa Vista · boleto', title: 'Engenho Boa Vista', kindLabel: 'Boleto · compra PC-0049', amountCents: 23640, dueAt: d(-3), paidAt: d(-3), paidCents: 23640, origin: 'purchase', ref: 'PC-0049', supplierId: 'engenho' }),
+    e('fe-7', { direction: 'payable', description: 'Engenho Boa Vista · boleto', title: 'Engenho Boa Vista', kindLabel: 'Boleto · compra PC-0038', amountCents: 31200, dueAt: d(-36), paidAt: d(-36), paidCents: 31200, origin: 'purchase', ref: 'PC-0038', supplierId: 'engenho' }),
+    e('fe-8', { direction: 'payable', description: 'Charqueada Norte · boleto', title: 'Charqueada Norte', kindLabel: 'Boleto · compra PC-0050', amountCents: 68400, dueAt: d(-3), paidAt: d(-3), paidCents: 68400, origin: 'purchase', ref: 'PC-0050', supplierId: 'charqueada' }),
+    // A receber
+    e('fe-9', { direction: 'receivable', description: 'Cartão de débito', title: 'Cartão de débito', kindLabel: 'Liquidação das vendas de hoje', forecastLabel: 'Cartão de débito · liquidação', amountCents: 21000, dueAt: d(1), origin: 'sale' }),
+    e('fe-10', { direction: 'receivable', description: 'Cartão de crédito', title: 'Cartão de crédito', kindLabel: 'Vendas de 15/10', forecastLabel: 'Cartão de crédito · vendas de outubro', amountCents: 78000, dueAt: d(3), origin: 'sale' }),
+    e('fe-11', { direction: 'receivable', description: 'Dona Zefa', title: 'Dona Zefa', kindLabel: 'Fiado · combinado para', forecastLabel: 'Fiado · Dona Zefa', amountCents: 16000, dueAt: d(6), origin: 'manual', tag: 'Fiado' }),
+  ]
+  const ago = (minutes: number) => new Date(now.getTime() - minutes * 60_000).toISOString()
+  const tx = (id: string, o: Omit<CashTransaction, 'id'>): CashTransaction => ({ id, ...o })
+  const transactions: CashTransaction[] = [
+    tx('tx-1', { at: d(-30), accountId: 'cash', amountCents: 70000, kind: 'opening', title: 'Saldo inicial', note: '' }),
+    tx('tx-2', { at: d(-30), accountId: 'bank', amountCents: 562790, kind: 'opening', title: 'Saldo inicial', note: '' }),
+    tx('tx-3', { at: d(-3, 16), accountId: 'bank', amountCents: -68400, kind: 'payment', title: 'Charqueada Norte · PC-0050', note: 'boleto · categoria Compras', entryId: 'fe-8', principalCents: 68400 }),
+    tx('tx-4', { at: d(-2, 9), accountId: 'bank', amountCents: 54000, kind: 'settlement', title: 'Cartão de débito · liquidação', note: 'vendas de 11/11' }),
+    tx('tx-5', { at: d(-1, 15), accountId: 'cash', amountCents: -60000, kind: 'transfer', title: 'Sangria do caixa', note: '', transferId: 'tr-1' }),
+    tx('tx-6', { at: d(-1, 15), accountId: 'bank', amountCents: 60000, kind: 'transfer', title: 'Sangria do caixa', note: '', transferId: 'tr-1' }),
+    tx('tx-7', { at: d(-1, 17), accountId: 'bank', amountCents: -9600, kind: 'payment', title: 'Embalagens a vácuo', note: 'Pix · categoria Insumos' }),
+    tx('tx-8', { at: ago(140), accountId: 'cash', amountCents: 31200, kind: 'sale', title: 'Vendas no balcão · dinheiro', note: '14 vendas' }),
+    tx('tx-9', { at: ago(150), accountId: 'bank', amountCents: 39250, kind: 'sale', title: 'Vendas no Pix', note: 'balcão e loja online' }),
+  ]
+  return { entries, transactions }
 }

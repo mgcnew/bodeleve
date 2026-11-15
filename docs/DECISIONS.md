@@ -33,6 +33,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D24 | 2026-11-15 | Etapa 4, lote 2 (Compras e Fornecedores) implementado: pedido de compra com sugestão pelo estoque mínimo, recebimento item a item com lote e validade, recebimento parcial, conta a pagar criada no recebimento, e modelo de estoque por movimentações (saldo nunca editável). Envio ao fornecedor só simulado | Usuário (D18–D21) |
 | D25 | 2026-11-15 | Etapa 4, lote 3 (Estoque) implementado: visão geral, item (disponível = físico − reservado, projetado, lotes pelo que vence primeiro), movimentações com saldo, perda/consumo/correção e inventário por área. Início passa a calcular "estoque baixo" e "lotes vencendo" dos dados | Usuário (D18–D21) |
 | D26 | 2026-11-15 | Etapa 4, lote 4 (Produção) implementado: ordens (em produção, planejadas, concluídas; para estoque ou para pedido), fichas técnicas com custo por unidade e margem, conferência de insumos (H-G17) e apontamento com consumo real, unidades boas, lote do acabado e custo real (H-G18) | Usuário (D18–D21) |
+| D27 | 2026-11-15 | Etapa 4, lote 5 (Financeiro) implementado: saldo por conta (banco e caixa), contas que pedem ação hoje, previsão de 7 dias, contas a pagar e a receber, pagamento de conta (total ou em parte, com multa e juros, desfazível) e lançamentos. Contas de compra nascem no recebimento; despesas fixas se repetem todo mês | Usuário (D18–D21) |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -214,6 +215,22 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-I46 | "Começar em": hoje (agora), amanhã 08h ou depois de amanhã 08h (o quadro tem um campo de texto). "Para um pedido" escolhe entre os pedidos online abertos. A OP-0034 de exemplo aponta para o pedido #1041 (o quadro cita #1045, número que a loja ainda vai gerar) | `RecipePage.tsx` |
 | H-I47 | Ordem planejada tem "Iniciar produção" (não desenhado). As fichas de queijo manteiga, doce de leite e manteiga de garrafa têm insumos de exemplo escolhidos para fechar o custo por unidade do quadro | `mocks/stockSeed.ts` |
 
+
+## Hipóteses de implementação do Financeiro — a confirmar
+
+| ID | O que foi feito | Onde |
+|---|---|---|
+| H-I48 | Saldo agora = conta no banco + caixa (gaveta). Cada saldo é a soma dos lançamentos da conta; transferência entre caixa e banco (sangria) não conta como entrada nem saída | `domain/finance.ts` |
+| H-I49 | A conta a pagar de uma compra nasce no recebimento da mercadoria (PC-0057 recebido cria R$ 622,00 "Criada hoje"). Receber de novo ou parcial usa o valor realmente recebido | `receiving.ts` |
+| H-I50 | Pagar sai do banco por padrão; o caixa só paga o que tem (R$ 412,00): se não cobre, o botão fica bloqueado e a tela diz o saldo do caixa. Pagamento parcial é permitido e deixa o restante em aberto | `payEntry` |
+| H-I51 | Multa e juros saem da mesma conta junto com o valor e entram nos lançamentos como parte da saída; o saldo "depois do pagamento" já os considera | `PayPage.tsx` |
+| H-I52 | Despesa fixa paga lança a do mês seguinte (mesmo dia, +1 mês). "Desfazer" estorna o pagamento e remove a próxima enquanto ela não foi mexida; o histórico nunca é apagado | `payEntry`, `undoPay` |
+| H-I53 | Previsão de 7 dias: parte do saldo de hoje, soma o que vence e o que se espera receber por dia; o atrasado entra em "Hoje". Mostra o saldo final e a data | `forecast` |
+| H-I54 | Contas a receber (cartão de débito, fiado) aparecem em Contas e na previsão, mas ainda não têm baixa: a tela avisa. Liquidação de cartão e recebimento de fiado entram quando o PDV existir | `PayPage.tsx` |
+| H-I55 | O comprovante é escolhido e o nome fica no lançamento; o arquivo ainda não é guardado (depende do armazenamento do Supabase) | `PayPage.tsx` |
+| H-I56 | As cifras do Início (aluguel atrasado, 2 contas hoje, a pagar hoje, a receber na semana) saem das mesmas contas do Financeiro | `dashboard` |
+| H-I57 | Acesso: dono e gestor veem o Financeiro; atendente, produção e entregador não (matriz H-G27) | `permissions/` |
+
 ## Pendências
 
 O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
@@ -253,6 +270,10 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P31 | Definir o custo de gás e energia por fornada (hoje R$ 3,00 de exemplo) e se entra no custo do produto | Gestão · Produção | H-G19 |
 | P32 | Confirmar se produção deve poder ser concluída com consumo acima do estoque (hoje bloqueia) e se perda tem motivo | Gestão · Produção | H-I41 |
 | P33 | Desenhar o estado "ordem planejada" (iniciar produção) e o cancelamento de ordem | Gestão · Produção | H-I47 |
+| P34 | Desenhar a baixa de contas a receber (liquidação de cartão, recebimento de fiado) e o lançamento manual de despesa ou receita | Gestão · Financeiro | H-I54 |
+| P35 | Decidir onde guardar o comprovante (armazenamento) e por quanto tempo | Gestão · Financeiro | H-I55 |
+| P36 | Confirmar se pagamento parcial e multa/juros devem existir, e a categoria financeira de cada despesa (hoje só Compras e Insumos de exemplo) | Gestão · Financeiro | H-I50, H-I51 |
+| P37 | Passar as despesas fixas reais (aluguel, energia, gás, internet, folha) com dia de vencimento e valor, e as regras de cartão (prazo, taxa) | Gestão · Financeiro | Q6, H-I53 |
 
 Marcadores de conteúdo nas telas:
 

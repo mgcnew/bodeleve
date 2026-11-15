@@ -3,11 +3,13 @@ import { stageOf } from '@/domain/orders'
 import type { Order } from '@/domain/types'
 import { adjust, applyCount, buildRows, expiringLots, lowRows, reverse, stockValueCents, undoCount, reservedByItem, type StockState } from '@/domain/stock'
 import { products } from './seed'
+import { formatBRL } from '@/lib/format'
 import { batchCostCents, checkInputs, finishOrder, formatContent, marginPercent, needs, nextOrderId, ProductionError, suggestLotCode, undoFinish, unitCostCents, type ProductionOrder } from '@/domain/production'
-import type { AdminOrder, AdminServices, Dashboard, FinishDefaults, MovementView, ProductionOrderView, PurchaseSuggestion, PurchaseView, RecipeView, StockItemView, SupplierView } from '@/services/types'
+import type { AccountView, AdminOrder, AdminServices, Dashboard, EntryView, FinanceOverview, FinishDefaults, MovementView, ProductionOrderView, PurchaseSuggestion, PurchaseView, RecipeView, StockItemView, SupplierView } from '@/services/types'
 import { daysUntil, itemBalance, itemLabel, lotsFefo, nextLot } from '@/domain/inventory'
 import { orderTotal, paymentTerms, purchaseMessage, receivedTotal, suggestQty, isOpen, type PurchaseOrder } from '@/domain/purchasing'
 import { closeShortOrder, receive, reverseLastReceipt } from '@/domain/receiving'
+import { accountName, balanceOf, daysFromToday, forecast, isOpen as entryOpen, ledger, ledgerTotals, payEntry, remaining, standingOf, totals as financeTotals, undoPayment, type FinancialEntry } from '@/domain/finance'
 import { adminUsers, dashboardSeed, MOCK_ADMIN_PASSWORD } from './adminSeed'
 import type { MockDb, MockState } from './db'
 import { customersSeed, hhmm } from './seedOrders'
@@ -19,6 +21,58 @@ const stateOf = (st: MockState): StockState => {
   for (const o of st.productionOrders) if (o.status === 'in_progress') production.set(o.itemId, (production.get(o.itemId) ?? 0) + o.plannedQty)
   return { stockItems: st.stockItems, lots: st.lots, movements: st.movements, orders: st.orders, reservations: st.reservations, purchaseOrders: st.purchaseOrders, production }
 }
+
+const brDay = (iso: string) => {
+  const d = new Date(iso)
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+const entryView = (e: FinancialEntry, t: Date): EntryView => {
+  const { standing, daysLate } = standingOf(e, t)
+  const date = brDay(e.dueAt)
+  const open = entryOpen(e)
+  const createdToday = !!e.createdAt && daysFromToday(e.createdAt, t) === 0
+  let detail = e.kindLabel ?? e.description
+  if (e.direction === 'payable') {
+    if (standing === 'overdue') detail += ` · venceu ${date}`
+    else if (e.note) detail += ` · ${e.note}`
+    if (standing === 'upcoming') detail += ` · ${date}`
+  } else {
+    detail += e.tag === 'Fiado' ? ` ${date}` : ` · ${date}`
+  }
+  const tag: EntryView['tag'] = !open ? null : e.direction === 'receivable' ? (e.tag ? { label: e.tag, tone: 'neutral' } : null)
+    : standing === 'overdue' ? { label: 'Atrasado', tone: 'error' }
+    : standing === 'today' ? { label: 'Vence hoje', tone: 'warning' }
+    : createdToday ? { label: 'Criada hoje', tone: 'info' } : null
+  return {
+    id: e.id, direction: e.direction, title: e.title ?? e.description, detail, amountCents: e.amountCents, remainingCents: remaining(e),
+    dueAt: e.dueAt, standing, daysLate, tag, ref: e.ref, recurring: !!e.recurring, paid: !open,
+  }
+}
+
+/** Contas que pedem ação hoje: cada atrasada e as que vencem hoje (juntas). Usado no Financeiro e no Início. */
+const financeAttention = (st: MockState, t: Date): FinanceOverview['attention'] => {
+  const open = st.entries.filter((e) => e.direction === 'payable' && entryOpen(e))
+  const overdue = open.filter((e) => standingOf(e, t).standing === 'overdue')
+  const today = open.filter((e) => standingOf(e, t).standing === 'today')
+  const out: FinanceOverview['attention'] = []
+  for (const e of overdue) {
+    const v = entryView(e, t)
+    out.push({ id: e.id, title: v.title, detail: `Venceu em ${brDay(e.dueAt)} · ${v.daysLate} ${v.daysLate === 1 ? 'dia' : 'dias'} de atraso`, amountCents: remaining(e), tag: 'Atrasado', href: `/gestao/financeiro/pagar/${e.id}` })
+  }
+  if (today.length > 0) {
+    const names = today.map((e, i) => (i === 0 ? e.title ?? e.description : (e.forecastLabel ?? e.title ?? e.description).toLowerCase()))
+    out.push({
+      id: 'today', title: today.length === 1 ? (today[0].title ?? today[0].description) : `${today.length} contas vencem hoje`,
+      detail: today.length === 1 ? entryView(today[0], t).detail : `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}`,
+      amountCents: today.reduce((a, e) => a + remaining(e), 0), tag: 'Vence hoje', href: today.length === 1 ? `/gestao/financeiro/pagar/${today[0].id}` : '/gestao/financeiro/contas',
+    })
+  }
+  return out
+}
+
+const accountsOf = (st: MockState): AccountView[] =>
+  (['bank', 'cash'] as const).map((id) => ({ id, name: accountName[id], balanceCents: balanceOf(st.transactions, id) }))
 
 const costOfItem = (st: MockState) => (itemId: string) => {
   const it = st.stockItems.find((i) => i.id === itemId)
@@ -77,7 +131,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
       arrivingToday: open.filter((o) => sameDay(o.expectedAt, t)).length,
       lastPurchaseAt: received[0]?.receivedAt ?? null,
       purchasedThisYearCents: sp.previousPurchasesCents + received.filter((o) => new Date(o.receivedAt!).getFullYear() === t.getFullYear()).reduce((a, o) => a + receivedTotal(o), 0),
-      openPayablesCents: st.payables.filter((p) => p.supplierId === id && !p.paidAt).reduce((a, p) => a + p.amountCents, 0),
+      openPayablesCents: st.entries.filter((p) => p.supplierId === id && p.direction === 'payable').reduce((a, p) => a + remaining(p), 0),
       products: st.stockItems.filter((i) => i.supplierId === id).map((i) => ({ itemId: i.id, name: itemLabel(i), lastCostCents: i.lastCostCents })),
       recentOrders: received.slice(0, 2).map((o) => ({ id: o.id, receivedAt: o.receivedAt!, totalCents: receivedTotal(o) })),
     }
@@ -486,6 +540,48 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
       },
     },
 
+    finance: {
+      async overview() {
+        const st = db.read()
+        const t = now()
+        const accounts = accountsOf(st)
+        const total = accounts.reduce((a, x) => a + x.balanceCents, 0)
+        const attention = financeAttention(st, t)
+        return { totalCents: total, accounts, attention, forecast: forecast(st.entries, total, t) }
+      },
+      async entries() {
+        const st = db.read()
+        const t = now()
+        const view = (dir: 'payable' | 'receivable') => st.entries.filter((e) => e.direction === dir && entryOpen(e)).sort((a, b) => a.dueAt.localeCompare(b.dueAt)).map((e) => entryView(e, t))
+        const tot = financeTotals(st.entries)
+        return { payables: view('payable'), receivables: view('receivable'), payableTotalCents: tot.payableCents, receivableTotalCents: tot.receivableCents }
+      },
+      async getEntry(id) {
+        const st = db.read()
+        const e = st.entries.find((x) => x.id === id)
+        return e ? { entry: entryView(e, now()), accounts: accountsOf(st) } : null
+      },
+      async pay(id, input) {
+        let out!: ReturnType<typeof payEntry>
+        const st = db.update((s) => {
+          out = payEntry(s, id, input, now())
+        })
+        return { entry: entryView(out.entry, now()), accountName: accountName[input.accountId], balanceAfter: out.balanceAfter, next: out.next ? entryView(out.next, now()) : null, transactionId: out.transactionId, ...(st ? {} : {}) }
+      },
+      async undoPay(transactionId) {
+        db.update((s) => {
+          undoPayment(s, transactionId, now())
+        })
+      },
+      async ledger() {
+        const st = db.read()
+        const t = now()
+        // Últimos 7 dias, como no quadro.
+        const rows = ledger(st.transactions).filter((r) => daysFromToday(r.at, t) >= -7)
+        return { rows, ...ledgerTotals(rows) }
+      },
+    },
+
     dashboard: {
       async get(): Promise<Dashboard> {
         const { orders } = db.read()
@@ -510,7 +606,13 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
             href: '/gestao/pedidos',
           })
         }
-        attention.push(...dashboardSeed.alerts) // contas: valores de exemplo até o Financeiro (lote 5)
+        for (const a of financeAttention(db.read(), t)) {
+          attention.push(
+            a.tag === 'Atrasado'
+              ? { id: `late-${a.id}`, icon: 'alerta', title: `${a.title} atrasado`, detail: `${a.detail.split(' · ')[0]} · ${formatBRL(a.amountCents)}`, href: a.href }
+              : { id: 'due-today', icon: 'financeiro', title: a.title, detail: `${formatBRL(a.amountCents)} · ${a.detail}`, href: a.href },
+          )
+        }
         const stockState = stateOf(db.read())
         const expiring = expiringLots(stockState.lots, stockState.movements, stockState.stockItems, t)
         if (expiring.length > 0) {
@@ -544,8 +646,14 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
               const names = [...new Set(going.map((o) => db.read().stockItems.find((i) => i.id === o.itemId)?.name ?? ''))]
               return { count: going.length, detail: names.join(' · ') }
             })(),
-            payableToday: dashboardSeed.payableToday,
-            receivableWeek: dashboardSeed.receivableWeek,
+            payableToday: (() => {
+              const due = db.read().entries.filter((e) => e.direction === 'payable' && entryOpen(e) && standingOf(e, t).standing === 'today')
+              return { cents: due.reduce((a, e) => a + remaining(e), 0), count: due.length }
+            })(),
+            receivableWeek: (() => {
+              const rec = db.read().entries.filter((e) => e.direction === 'receivable' && entryOpen(e) && daysFromToday(e.dueAt, t) <= 7)
+              return { cents: rec.reduce((a, e) => a + remaining(e), 0), detail: 'cartões e fiado' }
+            })(),
           },
         }
       },

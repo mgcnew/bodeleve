@@ -3,6 +3,7 @@ import type { AreaCheck, Category, HomeSection, Order, OrderItem, PlaceOrderInpu
 import type { StockLevel } from '@/domain/inventory'
 import type { AdjustKind, StockRow } from '@/domain/stock'
 import type { Destination, ProductionOrder } from '@/domain/production'
+import type { AccountId, ForecastRow, LedgerRow, PayInput, Standing } from '@/domain/finance'
 import type { PaymentTermId, PurchaseOrder, ReceiptLine, Supplier } from '@/domain/purchasing'
 import type { ReceiveResult } from '@/domain/receiving'
 import type { Role } from '@/permissions'
@@ -254,6 +255,50 @@ export interface ProductionService {
   undoFinish(id: string): Promise<ProductionOrderView>
 }
 
+// ───────── Financeiro ─────────
+
+export type AccountView = { id: AccountId; name: string; balanceCents: number }
+
+export type EntryView = {
+  id: string
+  direction: 'payable' | 'receivable'
+  title: string
+  /** "Despesa fixa · venceu 10/11", "Boleto · compra PC-0054 · 21/11". */
+  detail: string
+  amountCents: number
+  remainingCents: number
+  dueAt: string
+  standing: Standing
+  daysLate: number
+  /** "Atrasado", "Vence hoje", "Criada hoje", "Fiado" ou nada. */
+  tag: { label: string; tone: 'error' | 'warning' | 'info' | 'neutral' } | null
+  ref: string
+  recurring: boolean
+  paid: boolean
+}
+
+export type FinanceAttention = { id: string; title: string; detail: string; amountCents: number; tag: 'Atrasado' | 'Vence hoje'; href: string }
+
+export type FinanceOverview = {
+  totalCents: number
+  accounts: AccountView[]
+  attention: FinanceAttention[]
+  forecast: { rows: ForecastRow[]; finalBalance: number; finalLabel: string | null }
+}
+
+export type PayResult = { entry: EntryView; accountName: string; balanceAfter: number; next: EntryView | null; transactionId: string }
+
+export interface FinanceService {
+  overview(): Promise<FinanceOverview>
+  entries(): Promise<{ payables: EntryView[]; receivables: EntryView[]; payableTotalCents: number; receivableTotalCents: number }>
+  getEntry(id: string): Promise<{ entry: EntryView; accounts: AccountView[] } | null>
+  /** Lança `insufficient_balance` (com o saldo da conta em `detail`), `invalid_amount` ou `already_paid`. */
+  pay(id: string, input: PayInput): Promise<PayResult>
+  /** Desfaz com um lançamento contrário. */
+  undoPay(transactionId: string): Promise<void>
+  ledger(): Promise<{ rows: LedgerRow[]; inCents: number; outCents: number }>
+}
+
 export type AdminServices = {
   auth: AdminAuthService
   orders: AdminOrderService
@@ -261,6 +306,7 @@ export type AdminServices = {
   purchasing: PurchasingService
   stock: StockService
   production: ProductionService
+  finance: FinanceService
 }
 
 export type Services = {

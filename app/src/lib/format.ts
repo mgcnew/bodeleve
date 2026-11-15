@@ -70,3 +70,12 @@ export function greeting(d: Date): string {
   const h = d.getHours()
   return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'
 }
+
+/** Lê dinheiro digitado ("R$ 1.800,00", "1800,5", "12") e devolve centavos; null se não for um valor válido (zero é válido). */
+export function parseMoney(text: string): number | null {
+  const cleaned = text.replace(/R\$\s?/i, '').replace(/\s/g, '')
+  if (cleaned === '' || /[^0-9.,]/.test(cleaned)) return null
+  const normalized = cleaned.includes(',') ? cleaned.replace(/\./g, '').replace(',', '.') : cleaned.replace(/\.(?=\d{3}(\D|$))/g, '')
+  const n = Number(normalized)
+  return Number.isFinite(n) && n >= 0 ? Math.round(n * 100) : null
+}

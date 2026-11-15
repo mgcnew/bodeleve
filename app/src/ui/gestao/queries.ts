@@ -135,3 +135,32 @@ export function useInvalidateProduction() {
   return () =>
     Promise.all(['production', 'production-order', 'recipes', 'recipe', 'finish-defaults', 'stock', 'stock-item', 'stock-movements', 'suggest', 'dashboard', 'count-items'].map((k) => client.invalidateQueries({ queryKey: ['admin', k] })))
 }
+
+// ───────── Financeiro ─────────
+
+export function useFinanceOverview() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'finance'], queryFn: () => admin.finance.overview() })
+}
+
+export function useFinanceEntries() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'finance-entries'], queryFn: () => admin.finance.entries() })
+}
+
+export function useFinanceEntry(id: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'finance-entry', id], queryFn: () => admin.finance.getEntry(id!), enabled: !!id })
+}
+
+export function useLedger() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'ledger'], queryFn: () => admin.finance.ledger() })
+}
+
+/** Pagar conta mexe em saldos, contas, lançamentos, fornecedores e no Início. */
+export function useInvalidateFinance() {
+  const client = useQueryClient()
+  return () =>
+    Promise.all(['finance', 'finance-entries', 'finance-entry', 'ledger', 'dashboard', 'suppliers', 'supplier'].map((k) => client.invalidateQueries({ queryKey: ['admin', k] })))
+}
