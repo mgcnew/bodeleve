@@ -1,6 +1,6 @@
 # SCREEN_MAP — Bodeleve
 
-Status: mapa aprovado (D10) · 75 telas no total · Loja (18), Gestão (36) e PDV (12) desenhadas; Entregas a desenhar
+Status: mapa aprovado (D10) · 75 telas no total · as 75 telas estão desenhadas (Loja 18, Gestão 36, PDV 12, Entregas 9)
 
 Legenda: `[S]` = bottom sheet · sem marca = tela.
 

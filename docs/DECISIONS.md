@@ -21,6 +21,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D12 | 2026-11-14 | Etapa 3 entregue em lotes; lote 1 = Início, Produto, Sacola, Pedido confirmado; lote 2 = checkout; lote 3 = catálogo, marca, pedidos e conta | Usuário |
 | D13 | 2026-11-14 | Etapa 3 (loja) considerada aprovada ("continue"); Etapa 4 (gestão) iniciada em lotes; lote 1 = Entrar, Início, Pedidos, Pedido, Mais; lote 2 = Compras e Fornecedores; lote 3 = Estoque; lote 4 = Produção; lote 5 = Financeiro; lote 6 = Produtos, Clientes, Entregas, Relatórios, Configurações | Usuário |
 | D15 | 2026-11-15 | Etapa 5 (PDV) entregue: 12 telas do mapa em 9 quadros (peso, desconto e sangria como folhas dentro de Vender, Sacola e Caixa) | — |
+| D16 | 2026-11-15 | Etapa 6 (Entregas) entregue: 9 telas; próprio × parceiro mostrado pelo ajuste “perfil” nos quadros | — |
 | D14 | 2026-11-15 | Seguir até concluir todas as etapas sem parar; o que depender do usuário é documentado como pendência | Usuário |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
@@ -113,6 +114,18 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-P6 | Cancelar venda exige senha de gestor; itens voltam ao estoque | H8 |
 | H-P7 | Um caixa por aparelho: abertura com fundo de troco, sangria e suprimento com motivo, fechamento com contado × esperado | H9, Q5 |
 | H-P8 | Comprovante por WhatsApp é opcional; nota fiscal não entra nesta versão | Q12 |
+
+## Hipóteses usadas nas telas da Etapa 6 (Entregas) — a confirmar
+
+| ID | Hipótese | Depende de |
+|---|---|---|
+| H-E1 | Entregador entra com celular e código pelo WhatsApp; só entra quem a casa cadastrou | Q11 |
+| H-E2 | Entregador da casa recebe as entregas atribuídas e pode pegar as livres; parceiro vê só as publicadas e recebe por entrega | H7, Q11 |
+| H-E3 | Coleta tem conferência (volumes, nota, se há algo a cobrar) antes de sair | — |
+| H-E4 | Sem mapa nem rastreio em tempo real nesta versão: “Abrir no mapa” usa o app de mapas do celular | — |
+| H-E5 | Entrega confirmada com o código de 4 números da cliente; sem código, vai para “Problema na entrega” | H6 |
+| H-E6 | Devolução à loja paga metade ao parceiro (exemplo: R$ 4,50) | Q11 |
+| H-E7 | Parceiro recebe por Pix semanal; entregador da casa, mensal | Q11 |
 
 ## Pendências
 

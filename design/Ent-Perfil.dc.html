@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Bodeleve — entregas: perfil</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#A9482C}a:hover{color:#8A3920}
+</style>
+</helmet>
+<div style="width: 390px; height: 760px; box-sizing: border-box; display: flex; flex-direction: column; background: #FBFAF6; color: #292621; font-family: 'Inter', system-ui, sans-serif; font-size: 16px; line-height: 24px">
+<header style="flex: none; padding: 16px 16px 8px"><h1 style="margin: 0; font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 28px; line-height: 34px">Perfil</h1></header><main style="display: flex; flex-direction: column; gap: 16px; padding: 8px 16px 24px"><div style="display: flex; gap: 12px; align-items: center"><span aria-hidden="true" style="flex: none; width: 56px; height: 56px; border-radius: 999px; background: #F7F2E8; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 22px">{{ ini }}</span><div><div style="font-weight: 700; font-size: 20px">{{ nome }}</div><div><sc-if value="{{ parc }}" hint-placeholder-val="{{ false }}"><span style="padding: 4px 10px; border-radius: 8px; background: #F7F2E8; color: #292621; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap">Parceiro</span></sc-if><sc-if value="{{ prop }}" hint-placeholder-val="{{ true }}"><span style="padding: 4px 10px; border-radius: 8px; background: #E3EDE6; color: #315C46; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap">Entregador da casa</span></sc-if></div></div></div><div style="padding: 4px 16px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB; padding-top: 0; padding-bottom: 0"><div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 8px 0; border-bottom: 0"><span id="sd" style="min-width: 0"><span style="display: block; font-weight: 600">Disponível para entregas</span><span style="display: block; font-size: 13px; line-height: 18px; color: #5E584E">Desligue quando parar o turno</span></span><button type="button" role="switch" aria-checked="{{ disp }}" aria-labelledby="sd" onClick="{{ t_disp }}" style="flex: none; width: 52px; height: 32px; border-radius: 999px; border: 0; background: {{ dispBg }}; padding: 4px; display: flex; justify-content: {{ dispJs }}"><span style="width: 24px; height: 24px; border-radius: 999px; background: #FFFFFF"></span></button></div></div><div style="padding: 14px 16px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB; display: flex; flex-direction: column; gap: 8px; "><div style="display: flex; justify-content: space-between; gap: 12px; color: #5E584E; font-variant-numeric: tabular-nums"><span>Veículo</span><span>Moto · [PLACA]</span></div><div style="display: flex; justify-content: space-between; gap: 12px; color: #5E584E; font-variant-numeric: tabular-nums"><span>Celular</span><span>(00) 90000-0300</span></div><div style="display: flex; justify-content: space-between; gap: 12px; color: #5E584E; font-variant-numeric: tabular-nums"><span>Pagamento</span><span>{{ pag }}</span></div></div><sc-if value="{{ parc }}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-direction: column; gap: 6px"><label for="pix" style="font-size: 14px; line-height: 20px; font-weight: 600">Chave Pix para receber</label><input id="pix" type="text" value="" placeholder="[CHAVE PIX]" style="height: 48px; padding: 0 14px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; color: #292621; font: 400 16px 'Inter', system-ui, sans-serif; box-sizing: border-box; width: 100%"></div></sc-if><a href="Ent-Entrar.dc.html" style="align-self: flex-start; min-height: 44px; display: inline-flex; align-items: center; font-weight: 600; text-decoration: none">Sair</a></main><nav aria-label="Navegação do entregador" style="flex: none; margin-top: auto; display: flex; background: #FFFFFF; border-top: 1px solid #E4DCCB"><a href="Ent-Lista.dc.html" style="flex: 1 1 0; min-width: 0; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #5E584E; font-size: 12px; line-height: 16px; font-weight: 500"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M3 7h11v9H3z"></path><path d="M14 10h4l3 3v3h-7"></path><circle cx="7" cy="17" r="2"></circle><circle cx="17" cy="17" r="2"></circle></svg><span>Entregas</span></a><a href="Ent-Historico.dc.html" style="flex: 1 1 0; min-width: 0; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #5E584E; font-size: 12px; line-height: 16px; font-weight: 500"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span>Histórico</span></a><a href="Ent-Perfil.dc.html" aria-current="page" style="flex: 1 1 0; min-width: 0; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #A9482C; font-size: 12px; line-height: 16px; font-weight: 700"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg><span>Perfil</span></a></nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"perfil":{"editor":"enum","options":["Próprio","Parceiro"],"default":"Próprio","section":"Protótipo"},"$preview":{"width":390,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+const parc = (this.props.perfil ?? 'Próprio') === 'Parceiro';
+const st = this.state || {};
+const out = { parc: parc, prop: !parc, nome: parc ? 'Diego' : 'Bruno', ini: parc ? 'D' : 'B',
+  pag: parc ? 'Por entrega, Pix às segundas' : 'Mensal, pela casa' };
+const disp = st.disp === undefined ? true : st.disp;
+out.disp = disp; out.dispBg = disp ? '#315C46' : '#E4DCCB'; out.dispJs = disp ? 'flex-end' : 'flex-start'; out.t_disp = () => this.setState({ disp: !disp });
+return out;
+}
+}
+</script>
+</body>
+</html>

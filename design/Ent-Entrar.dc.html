@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Bodeleve — entregas: entrar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#A9482C}a:hover{color:#8A3920}
+</style>
+</helmet>
+<div style="width: 390px; height: 700px; box-sizing: border-box; display: flex; flex-direction: column; background: #FBFAF6; color: #292621; font-family: 'Inter', system-ui, sans-serif; font-size: 16px; line-height: 24px">
+<main style="flex: 1 1 0; display: flex; flex-direction: column; justify-content: center; gap: 20px; padding: 24px 20px"><div><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 34px; line-height: 40px">Bodeleve</div><div style="font-size: 14px; line-height: 20px; color: #5E584E">Entregas</div></div><sc-if value="{{ p1 }}" hint-placeholder-val="{{ true }}"><div style="display: flex; flex-direction: column; gap: 6px"><label for="ec" style="font-size: 14px; line-height: 20px; font-weight: 600">Celular</label><input id="ec" type="tel" value="(00) 90000-0300" placeholder="" style="height: 48px; padding: 0 14px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; color: #292621; font: 400 16px 'Inter', system-ui, sans-serif; box-sizing: border-box; width: 100%"></div><button type="button" onClick="{{ pedir }}" style="height: 56px; border: 0; border-radius: 12px; background: #A9482C; color: #FFFFFF; font: 600 18px 'Inter', system-ui, sans-serif; width: 100%; font-variant-numeric: tabular-nums; ">Receber código no WhatsApp</button></sc-if><sc-if value="{{ p2 }}" hint-placeholder-val="{{ false }}"><div style="font-size: 14px; line-height: 20px; color: #5E584E">Código enviado para (00) 90000-0300.</div><div role="group" aria-label="Código de 4 dígitos" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px"><input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 1" style="height: 56px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; text-align: center; font: 600 22px 'Inter', system-ui, sans-serif; color: #292621; box-sizing: border-box; width: 100%"><input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 2" style="height: 56px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; text-align: center; font: 600 22px 'Inter', system-ui, sans-serif; color: #292621; box-sizing: border-box; width: 100%"><input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 3" style="height: 56px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; text-align: center; font: 600 22px 'Inter', system-ui, sans-serif; color: #292621; box-sizing: border-box; width: 100%"><input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 4" style="height: 56px; border-radius: 8px; border: 1.5px solid #E4DCCB; background: #FFFFFF; text-align: center; font: 600 22px 'Inter', system-ui, sans-serif; color: #292621; box-sizing: border-box; width: 100%"></div><a href="Ent-Lista.dc.html" style="height: 56px; border-radius: 12px; background: #A9482C; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px; font-variant-numeric: tabular-nums">Entrar</a><button type="button" onClick="{{ voltar }}" style="height: 48px; border: 1.5px solid #292621; border-radius: 12px; background: #FFFFFF; color: #292621; font: 600 16px 'Inter', system-ui, sans-serif; width: 100%">Usar outro número</button></sc-if><div style="font-size: 14px; line-height: 20px; color: #5E584E">Só entra quem a casa cadastrou: entregadores próprios e parceiros.</div></main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":700}}'>
+class Component extends DCLogic {
+renderVals() {
+const p = (this.state && this.state.p) || 1;
+return { p1: p === 1, p2: p === 2, pedir: () => this.setState({ p: 2 }), voltar: () => this.setState({ p: 1 }) };
+}
+}
+</script>
+</body>
+</html>

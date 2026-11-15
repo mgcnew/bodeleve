@@ -48,6 +48,96 @@
       "x": 3040,
       "y": 0
     },
+    "Ent-Coleta.dc.html": {
+      "h": 700,
+      "is_interactive": true,
+      "page": "etapa6",
+      "radius": 24,
+      "title": "3 · Coleta",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "Ent-Confirmacao.dc.html": {
+      "h": 760,
+      "is_interactive": true,
+      "page": "etapa6",
+      "radius": 24,
+      "title": "5 · Confirmar entrega",
+      "w": 390,
+      "x": 2350,
+      "y": 0
+    },
+    "Ent-Detalhe.dc.html": {
+      "h": 960,
+      "is_interactive": true,
+      "page": "etapa6",
+      "radius": 24,
+      "title": "2 · Detalhe e aceite",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "Ent-Entrar.dc.html": {
+      "h": 700,
+      "is_interactive": true,
+      "page": "etapa6",
+      "radius": 24,
+      "title": "Entrar",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "Ent-Historico.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "page": "etapa6",
+      "radius": 24,
+      "title": "7 · Histórico",
+      "w": 390,
+      "x": 3290,
+      "y": 0
+    },
+    "Ent-Lista.dc.html": {
+      "h": 760,
+      "is_interactive": true,
+      "page": "etapa6",
+      "radius": 24,
+      "title": "1 · Entregas",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "Ent-Perfil.dc.html": {
+      "h": 760,
+      "is_interactive": true,
+      "page": "etapa6",
+      "radius": 24,
+      "title": "8 · Perfil",
+      "w": 390,
+      "x": 3760,
+      "y": 0
+    },
+    "Ent-Problema.dc.html": {
+      "h": 980,
+      "is_interactive": true,
+      "page": "etapa6",
+      "radius": 24,
+      "title": "6 · Problema na entrega",
+      "w": 390,
+      "x": 2820,
+      "y": 0
+    },
+    "Ent-Rota.dc.html": {
+      "h": 860,
+      "is_interactive": true,
+      "page": "etapa6",
+      "radius": 24,
+      "title": "4 · Em rota",
+      "w": 390,
+      "x": 1880,
+      "y": 0
+    },
     "Fluxos.dc.html": {
       "h": 1040,
       "title": "Fluxos prioritários",
@@ -699,7 +789,7 @@
   },
   "designSystems": [],
   "launch": {
-    "page": "etapa5",
+    "page": "etapa6",
     "view": "canvas"
   },
   "noteOrder": [
@@ -717,7 +807,9 @@
     "titulo4e",
     "titulo4f",
     "titulo5",
-    "guia5"
+    "guia5",
+    "titulo6",
+    "guia6"
   ],
   "notes": {
     "guia3": {
@@ -740,6 +832,14 @@
       "fill": "orange",
       "page": "etapa5",
       "text": "Como testar: aperte Play em “1 · Abrir caixa” ou em “2 · Vender”.\n\nVender: toque nos produtos (somam na sacola); Carne de sol e Feijão de corda abrem o peso (atalhos 250 g / 500 g / 1 kg e ajuste de 50 em 50 g); aba Categorias filtra; aba Buscar procura pelo nome.\n\nSacola: quantidades, remover item por peso, Dar desconto (5%, 10%, R$ 5, arredondar) com prévia do total.\n\nPagamento: Dinheiro com troco, Pix com QR, cartão na maquininha; “Dividir em duas formas” recebe em partes até zerar.\n\nVendas: filtro por forma; V-0212 → Cancelar pede senha do gestor.\n\nCaixa: sangria ou suprimento muda o esperado; ajuste o contado e veja a diferença; Fechar caixa.\n\nAs 12 telas do mapa estão em 9 quadros: peso, desconto e sangria são folhas (bottom sheets) dentro de Vender, Sacola e Caixa.\n\nDados fictícios. Cada quadro guarda seu próprio estado.",
+      "w": 440,
+      "x": 4230,
+      "y": 0
+    },
+    "guia6": {
+      "fill": "orange",
+      "page": "etapa6",
+      "text": "Como testar: aperte Play em “1 · Entregas” (aba Minhas) e siga: #1041 → Aceitar → Coleta (marque os 3 itens) → Saí da loja → Cheguei → digite o código 7305 → Confirmar.\n\nTeste também: um código errado (mostra o erro); “Problema na entrega” → Devolver à loja; aba Disponíveis → Pegar esta entrega.\n\nPróprio × parceiro: selecione o quadro e, em Tweaks, troque “perfil” para Parceiro (Entregas, Detalhe, Histórico e Perfil). O parceiro vê o valor por entrega e o total a receber; o entregador da casa não.\n\nDados fictícios. O código 7305 é o do pedido #1041 neste protótipo.",
       "w": 440,
       "x": 4230,
       "y": 0
@@ -850,6 +950,15 @@
       "w": 240,
       "x": 0,
       "y": -300
+    },
+    "titulo6": {
+      "kind": "title1",
+      "maxW": 4150,
+      "page": "etapa6",
+      "text": "Etapa 6 — Entregas (app do entregador)",
+      "w": 240,
+      "x": 0,
+      "y": -300
     }
   },
   "order": [
@@ -923,7 +1032,16 @@
     "PDV-Concluida.dc.html",
     "PDV-Vendas.dc.html",
     "PDV-Venda.dc.html",
-    "PDV-Caixa.dc.html"
+    "PDV-Caixa.dc.html",
+    "Ent-Entrar.dc.html",
+    "Ent-Lista.dc.html",
+    "Ent-Detalhe.dc.html",
+    "Ent-Coleta.dc.html",
+    "Ent-Rota.dc.html",
+    "Ent-Confirmacao.dc.html",
+    "Ent-Problema.dc.html",
+    "Ent-Historico.dc.html",
+    "Ent-Perfil.dc.html"
   ],
   "pages": [
     {
@@ -945,6 +1063,10 @@
     {
       "id": "etapa5",
       "name": "Etapa 5 · PDV"
+    },
+    {
+      "id": "etapa6",
+      "name": "Etapa 6 · Entregas"
     }
   ],
   "title": "Bodeleve",
