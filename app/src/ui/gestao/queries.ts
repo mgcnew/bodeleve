@@ -101,3 +101,37 @@ export function useInvalidateStock() {
   return () =>
     Promise.all(['stock', 'stock-item', 'stock-movements', 'count-items', 'suggest', 'dashboard', 'order', 'orders'].map((k) => client.invalidateQueries({ queryKey: ['admin', k] })))
 }
+
+// ───────── Produção ─────────
+
+export function useProductionOrders() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'production'], queryFn: () => admin.production.listOrders() })
+}
+
+export function useProductionOrder(id: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'production-order', id], queryFn: () => admin.production.getOrder(id!), enabled: !!id })
+}
+
+export function useRecipes() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'recipes'], queryFn: () => admin.production.listRecipes() })
+}
+
+export function useRecipe(id: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'recipe', id], queryFn: () => admin.production.getRecipe(id!), enabled: !!id })
+}
+
+export function useFinishDefaults(id: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'finish-defaults', id], queryFn: () => admin.production.finishDefaults(id!), enabled: !!id })
+}
+
+/** Produção mexe em ordens, saldos e lotes do estoque e no Início. */
+export function useInvalidateProduction() {
+  const client = useQueryClient()
+  return () =>
+    Promise.all(['production', 'production-order', 'recipes', 'recipe', 'finish-defaults', 'stock', 'stock-item', 'stock-movements', 'suggest', 'dashboard', 'count-items'].map((k) => client.invalidateQueries({ queryKey: ['admin', k] })))
+}

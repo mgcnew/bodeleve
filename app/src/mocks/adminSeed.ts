@@ -14,12 +14,11 @@ export const adminUsers: Array<{ id: string; name: string; email: string; role: 
 
 /**
  * Parte do Início que ainda não vem de módulo próprio. Estes valores são de EXEMPLO e passam a ser calculados quando
- * Financeiro (lote 5), Produção (lote 4) e PDV (Etapa 5) existirem. Estoque baixo e lotes vencendo já são calculados.
+ * Financeiro (lote 5) e PDV (Etapa 5) existirem. Estoque e Produção já são calculados. Estoque baixo e lotes vencendo já são calculados.
  */
 export const dashboardSeed = {
   counterSales: { count: 26, cents: 89200 },
   yesterdayUntilNowCents: 110200,
-  inProduction: { count: 2, detail: 'Queijo coalho · Doce de leite' },
   payableToday: { cents: 64000, count: 2 },
   receivableWeek: { cents: 115000, detail: 'cartões e fiado' },
   alerts: [

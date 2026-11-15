@@ -31,6 +31,9 @@ import { PurchasePage } from '@/pages/gestao/PurchasePage'
 import { PurchasesPage } from '@/pages/gestao/purchasing'
 import { ReceivingPage } from '@/pages/gestao/ReceivingPage'
 import { SupplierPage, SuppliersPage } from '@/pages/gestao/suppliers'
+import { ProductionOrderPage } from '@/pages/gestao/ProductionOrderPage'
+import { RecipePage } from '@/pages/gestao/RecipePage'
+import { ProductionPage, RecipesPage } from '@/pages/gestao/production'
 import { StockAdjustPage } from '@/pages/gestao/StockAdjustPage'
 import { StockCountPage } from '@/pages/gestao/StockCountPage'
 import { StockMovementsPage } from '@/pages/gestao/StockMovementsPage'
@@ -81,7 +84,10 @@ export const routes: RouteObject[] = [
           { path: 'compras/:id/receber', element: <ReceivingPage />, handle: g('purchasing') },
           { path: 'fornecedores', element: <SuppliersPage />, handle: g('purchasing') },
           { path: 'fornecedores/:id', element: <SupplierPage />, handle: g('purchasing') },
-          { path: 'producao/*', element: <ModulePlaceholder />, handle: g('production') },
+          { path: 'producao', element: <ProductionPage />, handle: g('production') },
+          { path: 'producao/fichas', element: <RecipesPage />, handle: g('production') },
+          { path: 'producao/fichas/:id', element: <RecipePage />, handle: g('production') },
+          { path: 'producao/ordens/:id', element: <ProductionOrderPage />, handle: g('production') },
           { path: 'produtos/*', element: <ModulePlaceholder />, handle: g('stock') },
           { path: 'clientes/*', element: <ModulePlaceholder />, handle: g('orders') },
           { path: 'entregas/*', element: <ModulePlaceholder />, handle: g('deliveries') },

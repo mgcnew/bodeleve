@@ -32,6 +32,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D23 | 2026-11-15 | Etapa 4 (Gestão) iniciada em `app/` pelo lote 1 de D13 — Entrar, Início, Pedidos, Pedido e Mais — sobre o mesmo banco simulado da loja: pedido feito na loja entra como novo na fila da gestão e o status volta para o cliente | Usuário (D18–D21) |
 | D24 | 2026-11-15 | Etapa 4, lote 2 (Compras e Fornecedores) implementado: pedido de compra com sugestão pelo estoque mínimo, recebimento item a item com lote e validade, recebimento parcial, conta a pagar criada no recebimento, e modelo de estoque por movimentações (saldo nunca editável). Envio ao fornecedor só simulado | Usuário (D18–D21) |
 | D25 | 2026-11-15 | Etapa 4, lote 3 (Estoque) implementado: visão geral, item (disponível = físico − reservado, projetado, lotes pelo que vence primeiro), movimentações com saldo, perda/consumo/correção e inventário por área. Início passa a calcular "estoque baixo" e "lotes vencendo" dos dados | Usuário (D18–D21) |
+| D26 | 2026-11-15 | Etapa 4, lote 4 (Produção) implementado: ordens (em produção, planejadas, concluídas; para estoque ou para pedido), fichas técnicas com custo por unidade e margem, conferência de insumos (H-G17) e apontamento com consumo real, unidades boas, lote do acabado e custo real (H-G18) | Usuário (D18–D21) |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -199,6 +200,20 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-I37 | O valor do estoque é a soma de saldo × custo de cada lote ("R$ 2,0 mil" nos dados de exemplo; o quadro mostra R$ 8,4 mil com outros itens) | `stockValueCents` |
 | H-I38 | "Registrar perda" na visão geral, sem item escolhido, abre o ajuste pedindo o item primeiro | `StockAdjustPage.tsx` |
 
+## Hipóteses de implementação da Produção — a confirmar
+
+| ID | O que foi feito | Onde |
+|---|---|---|
+| H-I39 | Ficha técnica por fornada em unidades de estoque, com conversão para a medida que a pessoa conhece (0,4 un de coalho líquido = 20 ml; 40 un de leite = 40 L). Custo da fornada = insumos pelo custo atual + gás e energia (R$ 142,00 no coalho) | `domain/production.ts` |
+| H-I40 | Criar a ordem reserva os insumos que há; o que falta e chega hoje só avisa; o que falta sem compra a caminho deixa a ordem planejada (nunca bloqueia a criação) | `createOrder` |
+| H-I41 | Consumo só baixa do estoque ao concluir (apontamento), pelo lote que vence primeiro; se faltar insumo, nada é lançado e a tela diz qual falta. No exemplo é preciso receber o leite do PC-0057 antes de concluir a OP-0032 | `finishOrder` |
+| H-I42 | Custo real por unidade = (consumo real × custo dos lotes + gás e energia de cada fornada) ÷ unidades boas (19 un → R$ 14,95; previsto R$ 14,20). O lote novo guarda esse custo | `finishOrder` |
+| H-I43 | Rendimento e perda: perda na produção = previsto − boas. Lote sugerido = próximo número do prefixo da ficha (QC-1113); validade sugerida = hoje + validade da ficha | `suggestLotCode` |
+| H-I44 | "Corrigir apontamento" devolve os insumos e tira o lote acabado, enquanto nada saiu dele. Ordens de exemplo já concluídas não têm esse botão (não têm lançamentos) | `undoFinish` |
+| H-I45 | "Em produção" entra no projetado do estoque (queijo coalho 12 + 20 = 32) e no indicador do Início; planejada não entra | `domain/stock.ts` |
+| H-I46 | "Começar em": hoje (agora), amanhã 08h ou depois de amanhã 08h (o quadro tem um campo de texto). "Para um pedido" escolhe entre os pedidos online abertos. A OP-0034 de exemplo aponta para o pedido #1041 (o quadro cita #1045, número que a loja ainda vai gerar) | `RecipePage.tsx` |
+| H-I47 | Ordem planejada tem "Iniciar produção" (não desenhado). As fichas de queijo manteiga, doce de leite e manteiga de garrafa têm insumos de exemplo escolhidos para fechar o custo por unidade do quadro | `mocks/stockSeed.ts` |
+
 ## Pendências
 
 O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
@@ -234,6 +249,10 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P27 | Informar o estoque mínimo de cada item (hoje valores de exemplo) e se Carne de sol e outros por peso serão controlados em kg | Gestão · Estoque | Q1, Q2, H-I34 |
 | P28 | Fazer a primeira contagem real de estoque (lote e validade de cada item) para trocar o inventário de exemplo | Gestão · Estoque | Q1 |
 | P29 | Confirmar a regra de reserva: ao aceitar o pedido, ou só ao pagar o Pix? E quando a reserva expira | Loja · Gestão | H-I31, Q8 |
+| P30 | Passar as fichas técnicas reais (insumos, quantidades, rendimento, validade, modo de preparo) para trocar as de exemplo | Gestão · Produção | Q3, P5 |
+| P31 | Definir o custo de gás e energia por fornada (hoje R$ 3,00 de exemplo) e se entra no custo do produto | Gestão · Produção | H-G19 |
+| P32 | Confirmar se produção deve poder ser concluída com consumo acima do estoque (hoje bloqueia) e se perda tem motivo | Gestão · Produção | H-I41 |
+| P33 | Desenhar o estado "ordem planejada" (iniciar produção) e o cancelamento de ordem | Gestão · Produção | H-I47 |
 
 Marcadores de conteúdo nas telas:
 

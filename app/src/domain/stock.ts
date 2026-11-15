@@ -1,4 +1,4 @@
-import { daysUntil, itemBalance, levelOf, lotBalance, lotsFefo, type Lot, type StockItem, type StockLevel, type StockMovement } from './inventory'
+import { daysUntil, itemBalance, itemLabel, levelOf, lotBalance, lotsFefo, type Lot, type StockItem, type StockLevel, type StockMovement } from './inventory'
 import type { PurchaseOrder } from './purchasing'
 import type { Order } from './types'
 
@@ -75,7 +75,7 @@ export type StockState = {
   orders: Order[]
   reservations: Reservation[]
   purchaseOrders: PurchaseOrder[]
-  /** Quanto está sendo produzido, por item (módulo Produção, lote 4). */
+  /** Quanto está sendo produzido agora, por item (ordens em produção). Entra no saldo projetado. */
   production?: Map<string, number>
 }
 
@@ -92,7 +92,7 @@ export function buildRows(st: StockState, now: Date): StockRow[] {
     const nextExpiry = fefo[0]?.expiresAt ?? null
     return {
       itemId: it.id,
-      name: `${it.name} ${it.unit}`,
+      name: itemLabel(it),
       itemType: it.itemType,
       origin: it.origin,
       categoryId: it.categoryId,

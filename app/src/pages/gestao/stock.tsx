@@ -1,23 +1,17 @@
 import { useSearchParams } from 'react-router-dom'
 import { useParams } from 'react-router-dom'
-import { AppLink, Button, ButtonLink, Chip, EmptyState, Icon, Indicator, IndicatorSkeleton, ListSkeleton, OriginBadge, StatusTag } from '@/components'
-import { compactMoney, type StockRow } from '@/domain/stock'
+import { AppLink, Button, ButtonLink, Chip, EmptyState, Icon, Indicator, IndicatorSkeleton, ListSkeleton, StatusTag } from '@/components'
+import { compactMoney } from '@/domain/stock'
 import { formatBRL, formatDayMonth } from '@/lib/format'
 import { formatBrDate } from '@/domain/purchasing'
 import { useStockItem, useStockOverview } from '@/ui/gestao/queries'
+import { whenText } from './production'
+import { KindBadge } from './KindBadge'
 import { Footer, QueryBoundary, ScreenHeader } from '@/ui/loja/parts'
 import s from '@/ui/gestao/gestao.module.css'
 import l from '@/ui/loja/loja.module.css'
 
 type Filter = 'todos' | 'baixo' | 'vencendo'
-
-/** Selo do tipo/origem: "Feito na casa", "Marca Bodeleve", "Revenda" ou "Matéria-prima". */
-export function KindBadge({ itemType, origin }: Pick<StockRow, 'itemType' | 'origin'>) {
-  if (itemType === 'raw_material' || !origin) {
-    return <span style={{ padding: '2px 10px', borderRadius: 999, border: '1px solid var(--texto-secundario)', color: 'var(--texto-secundario)', font: '600 12px/18px var(--fonte-texto)', whiteSpace: 'nowrap' }}>Matéria-prima</span>
-  }
-  return <OriginBadge origin={origin} />
-}
 
 export function StockPage() {
   const query = useStockOverview()
@@ -127,7 +121,11 @@ export function StockItemPage() {
               </div>
               <div className={l.sub}>
                 Mínimo: {it.min} un.
-                {it.level !== 'ok' && it.projected > it.min ? ` Com o que está a caminho, o saldo projetado fica acima do mínimo.` : ''}
+                {it.level !== 'ok' && it.projected > it.min
+                  ? it.producing.length > 0
+                    ? ` Com a produção em andamento (${it.producing.map((p) => `${p.id}${p.endsAt ? `, termina ${whenText(p.endsAt)}` : ''}`).join('; ')}), o saldo volta acima do mínimo.`
+                    : ' Com o que está a caminho, o saldo projetado fica acima do mínimo.'
+                  : ''}
               </div>
 
               <section className={l.section} aria-labelledby="lotes-t">

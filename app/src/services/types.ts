@@ -2,6 +2,7 @@ import type { IconName } from '@/components'
 import type { AreaCheck, Category, HomeSection, Order, OrderItem, PlaceOrderInput, Product, StoreContent } from '@/domain/types'
 import type { StockLevel } from '@/domain/inventory'
 import type { AdjustKind, StockRow } from '@/domain/stock'
+import type { Destination, ProductionOrder } from '@/domain/production'
 import type { PaymentTermId, PurchaseOrder, ReceiptLine, Supplier } from '@/domain/purchasing'
 import type { ReceiveResult } from '@/domain/receiving'
 import type { Role } from '@/permissions'
@@ -160,6 +161,8 @@ export type StockItemView = StockRow & {
   reservedOrders: number
   reservedManual: number
   lots: StockLotView[]
+  /** Ordens de produção em andamento deste item (entram no projetado). */
+  producing: Array<{ id: string; qty: number; endsAt: string | null }>
 }
 
 export type MovementView = { id: string; description: string; at: string; lotCode: string | null; by: string | null; qty: number; balanceAfter: number; reversed: boolean; reversalOf: string | null }
@@ -184,12 +187,80 @@ export interface StockService {
   undoCount(batchId: string, by: string): Promise<void>
 }
 
+// ───────── Produção ─────────
+
+export type RecipeView = {
+  id: string
+  itemId: string
+  name: string
+  itemType: StockItemView['itemType']
+  origin: StockItemView['origin']
+  yieldPerBatch: number
+  batchLabel: string
+  shelfLifeDays: number
+  unitCostCents: number
+  batchCostCents: number
+  priceCents: number | null
+  marginPercent: number | null
+  overheadCents: number
+  method: string
+  lotPrefix: string
+  lines: Array<{ itemId: string; name: string; qtyText: string; costCents: number }>
+}
+
+export type InputCheckView = {
+  lines: Array<{ itemId: string; name: string; needText: string; haveText: string; missingText: string; missing: number; incomingToday: number }>
+  missingAny: boolean
+  coveredByIncoming: boolean
+}
+
+export type ProductionOrderView = ProductionOrder & { itemName: string; batchLabel: string }
+
+export type FinishDefaults = {
+  plannedQty: number
+  costPlannedCents: number
+  suggestedLot: string
+  suggestedExpiresAt: string
+  /** Em unidades da medida (L, ml, kg, un). `perUnit` converte para unidades de estoque. */
+  consumption: Array<{ itemId: string; name: string; unit: string; planned: number; perUnit: number; step: number; decimals: number; unitCostCents: number }>
+  overheadCents: number
+}
+
+export type FinishResult = {
+  order: ProductionOrderView
+  entered: { itemName: string; lotCode: string; expiresAt: string | null; qty: number }
+  consumed: Array<{ name: string; qtyText: string }>
+  lossQty: number
+  costPerUnitCents: number
+}
+
+export type CreateOrderInput = { recipeId: string; batches: number; destination: Destination; startsAt: string; startNow?: boolean }
+
+export interface ProductionService {
+  listOrders(): Promise<ProductionOrderView[]>
+  getOrder(id: string): Promise<ProductionOrderView | null>
+  listRecipes(): Promise<RecipeView[]>
+  getRecipe(id: string): Promise<RecipeView | null>
+  /** H-G17: confere os insumos para N fornadas. */
+  check(recipeId: string, batches: number): Promise<InputCheckView>
+  /** Cria a ordem e reserva os insumos que há. Pedidos abertos da loja podem ser o destino. */
+  createOrder(input: CreateOrderInput): Promise<{ order: ProductionOrderView; reservedText: string }>
+  /** Desfaz uma ordem que ainda não começou (devolve a reserva). */
+  undoCreate(id: string): Promise<void>
+  start(id: string): Promise<ProductionOrderView>
+  finishDefaults(id: string): Promise<FinishDefaults | null>
+  /** Lança `insufficient` (com o item em `detail`) ou `invalid_input`. */
+  finish(id: string, input: { consumption: Array<{ itemId: string; qty: number }>; goodQty: number; lotCode: string; expiresAt: string | null }): Promise<FinishResult>
+  undoFinish(id: string): Promise<ProductionOrderView>
+}
+
 export type AdminServices = {
   auth: AdminAuthService
   orders: AdminOrderService
   dashboard: DashboardService
   purchasing: PurchasingService
   stock: StockService
+  production: ProductionService
 }
 
 export type Services = {

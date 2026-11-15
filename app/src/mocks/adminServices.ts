@@ -3,8 +3,9 @@ import { stageOf } from '@/domain/orders'
 import type { Order } from '@/domain/types'
 import { adjust, applyCount, buildRows, expiringLots, lowRows, reverse, stockValueCents, undoCount, reservedByItem, type StockState } from '@/domain/stock'
 import { products } from './seed'
-import type { AdminOrder, AdminServices, Dashboard, MovementView, PurchaseSuggestion, PurchaseView, StockItemView, SupplierView } from '@/services/types'
-import { daysUntil, itemBalance, lotsFefo, nextLot } from '@/domain/inventory'
+import { batchCostCents, checkInputs, finishOrder, formatContent, marginPercent, needs, nextOrderId, ProductionError, suggestLotCode, undoFinish, unitCostCents, type ProductionOrder } from '@/domain/production'
+import type { AdminOrder, AdminServices, Dashboard, FinishDefaults, MovementView, ProductionOrderView, PurchaseSuggestion, PurchaseView, RecipeView, StockItemView, SupplierView } from '@/services/types'
+import { daysUntil, itemBalance, itemLabel, lotsFefo, nextLot } from '@/domain/inventory'
 import { orderTotal, paymentTerms, purchaseMessage, receivedTotal, suggestQty, isOpen, type PurchaseOrder } from '@/domain/purchasing'
 import { closeShortOrder, receive, reverseLastReceipt } from '@/domain/receiving'
 import { adminUsers, dashboardSeed, MOCK_ADMIN_PASSWORD } from './adminSeed'
@@ -13,9 +14,17 @@ import { customersSeed, hhmm } from './seedOrders'
 
 const norm = (s: string) => s.trim().toLowerCase()
 
-const stateOf = (st: MockState): StockState => ({
-  stockItems: st.stockItems, lots: st.lots, movements: st.movements, orders: st.orders, reservations: st.reservations, purchaseOrders: st.purchaseOrders,
-})
+const stateOf = (st: MockState): StockState => {
+  const production = new Map<string, number>()
+  for (const o of st.productionOrders) if (o.status === 'in_progress') production.set(o.itemId, (production.get(o.itemId) ?? 0) + o.plannedQty)
+  return { stockItems: st.stockItems, lots: st.lots, movements: st.movements, orders: st.orders, reservations: st.reservations, purchaseOrders: st.purchaseOrders, production }
+}
+
+const costOfItem = (st: MockState) => (itemId: string) => {
+  const it = st.stockItems.find((i) => i.id === itemId)
+  const lot = lotsFefo(st.lots, st.movements, itemId)[0]
+  return lot?.unitCostCents ?? it?.lastCostCents ?? 0
+}
 
 const sameDay = (iso: string, t: Date) => {
   const d = new Date(iso)
@@ -23,6 +32,30 @@ const sameDay = (iso: string, t: Date) => {
 }
 
 export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }): AdminServices {
+  const orderView = (o: ProductionOrder, st: MockState): ProductionOrderView => ({
+    ...o,
+    itemName: itemLabel(st.stockItems.find((i) => i.id === o.itemId)!),
+    batchLabel: st.recipes.find((r) => r.id === o.recipeId)?.batchLabel ?? 'fornada',
+  })
+  const recipeView = (id: string, st: MockState): RecipeView | null => {
+    const r = st.recipes.find((x) => x.id === id)
+    if (!r) return null
+    const item = st.stockItems.find((i) => i.id === r.itemId)!
+    const costOf = costOfItem(st)
+    const unit = unitCostCents(r, costOf)
+    const price = products.find((p) => p.id === r.itemId)?.priceCents ?? null
+    return {
+      id: r.id, itemId: r.itemId, name: itemLabel(item), itemType: item.itemType, origin: item.origin,
+      yieldPerBatch: r.yieldPerBatch, batchLabel: r.batchLabel, shelfLifeDays: r.shelfLifeDays,
+      unitCostCents: unit, batchCostCents: batchCostCents(r, costOf), priceCents: price, marginPercent: price ? marginPercent(price, unit) : null,
+      overheadCents: r.overheadCents, method: r.method, lotPrefix: r.lotPrefix,
+      lines: r.lines.map((l) => {
+        const it = st.stockItems.find((i) => i.id === l.itemId)!
+        return { itemId: l.itemId, name: it.name, qtyText: formatContent(l.qtyPerBatch, it), costCents: Math.round(l.qtyPerBatch * costOf(l.itemId)) }
+      }),
+    }
+  }
+
   const poView = (o: PurchaseOrder, st: MockState): PurchaseView => ({
     ...o,
     items: o.items.map((i) => ({ ...i, tracksExpiry: st.stockItems.find((x) => x.id === i.itemId)?.tracksExpiry ?? false })),
@@ -45,7 +78,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
       lastPurchaseAt: received[0]?.receivedAt ?? null,
       purchasedThisYearCents: sp.previousPurchasesCents + received.filter((o) => new Date(o.receivedAt!).getFullYear() === t.getFullYear()).reduce((a, o) => a + receivedTotal(o), 0),
       openPayablesCents: st.payables.filter((p) => p.supplierId === id && !p.paidAt).reduce((a, p) => a + p.amountCents, 0),
-      products: st.stockItems.filter((i) => i.supplierId === id).map((i) => ({ itemId: i.id, name: `${i.name} ${i.unit}`, lastCostCents: i.lastCostCents })),
+      products: st.stockItems.filter((i) => i.supplierId === id).map((i) => ({ itemId: i.id, name: itemLabel(i), lastCostCents: i.lastCostCents })),
       recentOrders: received.slice(0, 2).map((o) => ({ id: o.id, receivedAt: o.receivedAt!, totalCents: receivedTotal(o) })),
     }
   }
@@ -134,7 +167,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           .map<PurchaseSuggestion>((i) => {
             // A sugestão olha o que pode ser vendido agora (disponível), como o nível de estoque.
             const r = buildRows(stateOf(st), now()).find((x) => x.itemId === i.id)!
-            return { itemId: i.id, name: `${i.name} ${i.unit}`, balance: r.available, min: i.minStock, level: r.level, lastCostCents: i.lastCostCents ?? 0, suggestedQty: suggestQty(r.available, i.minStock) }
+            return { itemId: i.id, name: itemLabel(i), balance: r.available, min: i.minStock, level: r.level, lastCostCents: i.lastCostCents ?? 0, suggestedQty: suggestQty(r.available, i.minStock) }
           })
           // O que mais precisa vem primeiro.
           .sort((a, b) => b.suggestedQty - a.suggestedQty || a.name.localeCompare(b.name))
@@ -163,7 +196,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
             items: lines.map((l) => {
               const it = s.stockItems.find((x) => x.id === l.itemId)
               if (!it) throw new Error('not_found')
-              return { itemId: it.id, name: `${it.name} ${it.unit}`, qty: l.qty, unitCostCents: it.lastCostCents ?? 0, receivedQty: 0 }
+              return { itemId: it.id, name: itemLabel(it), qty: l.qty, unitCostCents: it.lastCostCents ?? 0, receivedQty: 0 }
             }),
           }
           message = purchaseMessage(supplier, order, paymentTerms[order.payment].label)
@@ -228,6 +261,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           reservedOrders: res?.orders ?? 0,
           reservedManual: res?.manual ?? 0,
           lots: fefo.map((l, n) => ({ id: l.id, code: l.code, expiresAt: l.expiresAt, balance: l.balance, daysLeft: l.expiresAt ? daysUntil(l.expiresAt, now()) : null, isNext: n === 0 })),
+          producing: st.productionOrders.filter((o) => o.itemId === id && o.status === 'in_progress').map((o) => ({ id: o.id, qty: o.plannedQty, endsAt: o.endsAt })),
         }
       },
       async movements(itemId) {
@@ -250,7 +284,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
             reversalOf: m.reversalOf ?? null,
           }
         })
-        return { name: `${it.name} ${it.unit}`, physical: saldo, rows: rows.reverse() }
+        return { name: itemLabel(it), physical: saldo, rows: rows.reverse() }
       },
       async adjust(input) {
         let out!: { movementId: string; costCents: number; physicalBefore: number; physicalAfter: number; lotCode: string; itemName: string }
@@ -259,7 +293,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           const m = adjust(s, { ...input, now: now() })
           const lot = s.lots.find((l) => l.id === input.lotId)!
           const it = s.stockItems.find((x) => x.id === input.itemId)!
-          out = { movementId: m.id, costCents: input.qty * lot.unitCostCents, physicalBefore: before, physicalAfter: itemBalance(s.movements, input.itemId), lotCode: lot.code, itemName: `${it.name} ${it.unit}` }
+          out = { movementId: m.id, costCents: input.qty * lot.unitCostCents, physicalBefore: before, physicalAfter: itemBalance(s.movements, input.itemId), lotCode: lot.code, itemName: itemLabel(it) }
         })
         return out
       },
@@ -280,7 +314,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           .filter((i) => areaId === 'all' || i.categoryId === areaId)
           .map((i) => {
             const lot = lotsFefo(st.lots, st.movements, i.id)[0]
-            return { itemId: i.id, name: `${i.name} ${i.unit}`, system: itemBalance(st.movements, i.id), unitCostCents: lot?.unitCostCents ?? i.lastCostCents ?? 0 }
+            return { itemId: i.id, name: itemLabel(i), system: itemBalance(st.movements, i.id), unitCostCents: lot?.unitCostCents ?? i.lastCostCents ?? 0 }
           })
           .sort((a, b) => a.name.localeCompare(b.name))
       },
@@ -296,6 +330,159 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
         db.update((s) => {
           undoCount(s, batchId, by, now())
         })
+      },
+    },
+
+    production: {
+      async listOrders() {
+        const st = db.read()
+        return st.productionOrders.map((o) => orderView(o, st)).sort((a, b) => a.id.localeCompare(b.id))
+      },
+      async getOrder(id) {
+        const st = db.read()
+        const o = st.productionOrders.find((x) => x.id === id)
+        return o ? orderView(o, st) : null
+      },
+      async listRecipes() {
+        const st = db.read()
+        return st.recipes.map((r) => recipeView(r.id, st)!)
+      },
+      async getRecipe(id) {
+        return recipeView(id, db.read())
+      },
+      async check(recipeId, batches) {
+        const st = db.read()
+        const r = st.recipes.find((x) => x.id === recipeId)
+        if (!r) throw new ProductionError('not_found')
+        const rows = buildRows(stateOf(st), now())
+        const row = (id: string) => rows.find((x) => x.itemId === id)
+        const c = checkInputs(r, batches, (id) => row(id)?.available ?? 0, (id) => row(id)?.incomingToday ?? 0)
+        return {
+          missingAny: c.missingAny,
+          coveredByIncoming: c.coveredByIncoming,
+          lines: c.lines.map((l) => {
+            const it = st.stockItems.find((i) => i.id === l.itemId)!
+            return { itemId: l.itemId, name: it.name, needText: formatContent(l.need, it), haveText: formatContent(l.have, it), missingText: formatContent(l.missing, it), missing: l.missing, incomingToday: l.incomingToday }
+          }),
+        }
+      },
+      async createOrder(input) {
+        let created!: ProductionOrder
+        let reservedText = ''
+        const st = db.update((s) => {
+          const r = s.recipes.find((x) => x.id === input.recipeId)
+          if (!r || !(input.batches >= 1)) throw new ProductionError('invalid_input')
+          if (input.destination.kind === 'order') {
+            const oid = input.destination.orderId
+            if (!s.orders.some((o) => o.id === oid)) throw new ProductionError('invalid_input', 'order')
+          }
+          const rows = buildRows(stateOf(s), now())
+          const id = nextOrderId(s.productionOrders.map((o) => o.id))
+          const reservationIds: string[] = []
+          const parts: string[] = []
+          for (const n of needs(r, input.batches)) {
+            const it = s.stockItems.find((i) => i.id === n.itemId)!
+            const have = rows.find((x) => x.itemId === n.itemId)?.available ?? 0
+            const qty = Math.min(n.qty, Math.max(0, have))
+            if (qty > 0) {
+              const rid = `rsv-${s.reservations.reduce((a, x) => Math.max(a, Number(x.id.slice(4)) || 0), 0) + 1 + reservationIds.length}`
+              s.reservations.push({ id: rid, itemId: n.itemId, qty, ref: id })
+              reservationIds.push(rid)
+              parts.push(`${formatContent(qty, it)} de ${it.name.toLowerCase()}`)
+            }
+          }
+          reservedText = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} e ${parts[parts.length - 1]}` : parts[0] ?? ''
+          const t = now().toISOString()
+          created = {
+            id, recipeId: r.id, itemId: r.itemId, batches: input.batches, plannedQty: r.yieldPerBatch * input.batches,
+            status: input.startNow ? 'in_progress' : 'planned', destination: input.destination, startsAt: input.startsAt, endsAt: null,
+            startedAt: input.startNow ? t : null, doneAt: null, goodQty: null, lotCode: null, expiresAt: null, costPerUnitCents: null,
+            lotId: null, movementIds: [], reservationIds,
+          }
+          s.productionOrders.push(created)
+        })
+        return { order: orderView(created, st), reservedText }
+      },
+      async undoCreate(id) {
+        db.update((s) => {
+          const o = s.productionOrders.find((x) => x.id === id)
+          if (!o) throw new ProductionError('not_found')
+          if (o.status === 'done') throw new ProductionError('invalid_state')
+          s.reservations = s.reservations.filter((r) => !o.reservationIds.includes(r.id))
+          s.productionOrders = s.productionOrders.filter((x) => x.id !== id)
+        })
+      },
+      async start(id) {
+        let order!: ProductionOrder
+        const st = db.update((s) => {
+          const o = s.productionOrders.find((x) => x.id === id)
+          if (!o) throw new ProductionError('not_found')
+          if (o.status !== 'planned') throw new ProductionError('invalid_state')
+          o.status = 'in_progress'
+          o.startedAt = now().toISOString()
+          order = o
+        })
+        return orderView(order, st)
+      },
+      async finishDefaults(id): Promise<FinishDefaults | null> {
+        const st = db.read()
+        const o = st.productionOrders.find((x) => x.id === id)
+        const r = o && st.recipes.find((x) => x.id === o.recipeId)
+        if (!o || !r) return null
+        const costOf = costOfItem(st)
+        const finishedLots = st.lots.filter((l) => l.itemId === o.itemId)
+        const expires = new Date(now().getFullYear(), now().getMonth(), now().getDate() + r.shelfLifeDays, 12).toISOString()
+        return {
+          plannedQty: o.plannedQty,
+          costPlannedCents: unitCostCents(r, costOf),
+          suggestedLot: suggestLotCode(r.lotPrefix, finishedLots),
+          suggestedExpiresAt: expires,
+          overheadCents: r.overheadCents * o.batches,
+          consumption: needs(r, o.batches).map((n) => {
+            const it = st.stockItems.find((i) => i.id === n.itemId)!
+            const per = it.content?.qty ?? 1
+            const unit = it.content?.unit ?? 'un'
+            return { itemId: n.itemId, name: it.name, unit, planned: Math.round(n.qty * per * 100) / 100, perUnit: per, step: unit === 'ml' ? 5 : unit === 'kg' ? 0.1 : 1, decimals: unit === 'kg' ? 1 : 0, unitCostCents: costOf(n.itemId) }
+          }),
+        }
+      },
+      async finish(id, input) {
+        let result!: ReturnType<typeof finishOrder>
+        let names: Array<{ name: string; qtyText: string }> = []
+        const st = db.update((s) => {
+          const o = s.productionOrders.find((x) => x.id === id)
+          const r = o && s.recipes.find((x) => x.id === o.recipeId)
+          if (!o || !r) throw new ProductionError('not_found')
+          result = finishOrder(s, o, r, input, now())
+          const i = s.productionOrders.findIndex((x) => x.id === id)
+          s.productionOrders[i] = result.order
+          // A reserva dos insumos termina: o consumo real já saiu do estoque.
+          s.reservations = s.reservations.filter((x) => !o.reservationIds.includes(x.id))
+          names = input.consumption.filter((c) => c.qty > 0).map((c) => {
+            const it = s.stockItems.find((x) => x.id === c.itemId)!
+            return { name: it.name, qtyText: formatContent(c.qty, it) }
+          })
+        })
+        const it = st.stockItems.find((x) => x.id === result.order.itemId)!
+        const order = orderView(result.order, st)
+        return {
+          order,
+          entered: { itemName: itemLabel(it), lotCode: result.order.lotCode!, expiresAt: result.order.expiresAt, qty: result.order.goodQty! },
+          consumed: names,
+          lossQty: result.order.plannedQty - result.order.goodQty!,
+          costPerUnitCents: result.order.costPerUnitCents!,
+        }
+      },
+      async undoFinish(id) {
+        let order!: ProductionOrder
+        const st = db.update((s) => {
+          const i = s.productionOrders.findIndex((x) => x.id === id)
+          if (i < 0) throw new ProductionError('not_found')
+          const back = undoFinish(s, s.productionOrders[i])
+          s.productionOrders[i] = back
+          order = back
+        })
+        return orderView(order, st)
       },
     },
 
@@ -352,7 +539,11 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
               newCount: open.filter((o) => stageOf(o) === 'new').length,
               preparingCount: open.filter((o) => stageOf(o) === 'preparing').length,
             },
-            inProduction: dashboardSeed.inProduction,
+            inProduction: (() => {
+              const going = db.read().productionOrders.filter((o) => o.status === 'in_progress')
+              const names = [...new Set(going.map((o) => db.read().stockItems.find((i) => i.id === o.itemId)?.name ?? ''))]
+              return { count: going.length, detail: names.join(' · ') }
+            })(),
             payableToday: dashboardSeed.payableToday,
             receivableWeek: dashboardSeed.receivableWeek,
           },

@@ -1,5 +1,6 @@
 import type { Lot, StockItem, StockMovement } from '@/domain/inventory'
 import type { PurchaseOrder, Supplier } from '@/domain/purchasing'
+import type { Recipe, ProductionOrder } from '@/domain/production'
 import type { Reservation } from '@/domain/stock'
 
 /** Estoque, fornecedores e compras de EXEMPLO (quadros do lote 2). Datas relativas ao momento em que o banco simulado é criado. */
@@ -11,6 +12,8 @@ const at = (now: Date, plusDays: number, hour = 12) => {
 
 type Opening = { code: string; qty: number; expiresInDays: number | null; costCents: number }
 type Spec = Omit<StockItem, 'lastCostCents'> & { lastCostCents: number | null; lots: Opening[] }
+
+const withContent = (sp: Spec, qty: number, unit: string): Spec => ({ ...sp, content: { qty, unit } })
 
 const item = (
   id: string, name: string, unit: string, itemType: StockItem['itemType'], origin: StockItem['origin'], categoryId: string,
@@ -25,7 +28,7 @@ const specs: Spec[] = [
   // Feitos na casa (o queijo coalho tem histórico próprio, abaixo)
   item('queijo-coalho', 'Queijo coalho', '500 g', 'finished', 'house', 'laticinios', 15, true, null, 1420, []),
   item('queijo-manteiga', 'Queijo manteiga', '500 g', 'finished', 'house', 'laticinios', 5, true, null, 1680, [{ code: 'QM-1031', qty: 9, expiresInDays: 21, costCents: 1680 }]),
-  item('doce-de-leite', 'Doce de leite', '400 g', 'finished', 'house', 'laticinios', 8, true, null, 790, [{ code: 'DL-1101', qty: 10, expiresInDays: 6, costCents: 790 }]),
+  item('doce-de-leite', 'Doce de leite', '400 g', 'finished', 'house', 'laticinios', 8, true, null, 790, [{ code: 'DL-1110', qty: 10, expiresInDays: 6, costCents: 790 }]),
   // Marca Bodeleve
   item('rapadura', 'Rapadura', '400 g', 'resale', 'brand', 'doces', 12, false, 'engenho', 780, [{ code: 'RP-1002', qty: 6, expiresInDays: null, costCents: 780 }]),
   item('manteiga-de-garrafa', 'Manteiga de garrafa', '200 ml', 'finished', 'brand', 'laticinios', 6, true, null, 1500, [{ code: 'MG-1020', qty: 13, expiresInDays: 40, costCents: 1500 }]),
@@ -40,9 +43,11 @@ const specs: Spec[] = [
   item('fuba', 'Fubá', '500 g', 'resale', 'resale', 'farinhas', 10, false, 'moinho', 220, [{ code: 'FB-0916', qty: 15, expiresInDays: null, costCents: 220 }]),
   item('melaco-de-cana', 'Melaço de cana', '500 ml', 'resale', 'resale', 'doces', 6, false, 'engenho', 950, [{ code: 'ME-0910', qty: 6, expiresInDays: null, costCents: 950 }]),
   // Matérias-primas
-  item('leite-integral', 'Leite integral', '1 L', 'raw_material', null, 'laticinios', 40, true, 'serra', 310, [{ code: 'LT-1100', qty: 18, expiresInDays: 10, costCents: 310 }]),
-  item('coalho-liquido', 'Coalho líquido', '50 ml', 'raw_material', null, 'laticinios', 3, false, null, 1800, [{ code: 'CL-0905', qty: 1, expiresInDays: null, costCents: 1800 }]),
-  item('acucar-mascavo', 'Açúcar mascavo', '1 kg', 'raw_material', null, 'doces', 8, false, 'engenho', 820, [{ code: 'AM-0918', qty: 10, expiresInDays: null, costCents: 820 }]),
+  withContent(item('leite-integral', 'Leite integral', '1 L', 'raw_material', null, 'laticinios', 40, true, 'serra', 310, [{ code: 'LT-1100', qty: 18, expiresInDays: 10, costCents: 310 }]), 1, 'L'),
+  withContent(item('coalho-liquido', 'Coalho líquido', '50 ml', 'raw_material', null, 'laticinios', 3, false, null, 1250, [{ code: 'CL-0905', qty: 1, expiresInDays: null, costCents: 1250 }]), 50, 'ml'),
+  withContent(item('acucar-mascavo', 'Açúcar mascavo', '1 kg', 'raw_material', null, 'doces', 8, false, 'engenho', 820, [{ code: 'AM-0918', qty: 10, expiresInDays: null, costCents: 820 }]), 1, 'kg'),
+  withContent(item('sal', 'Sal', '1 kg', 'raw_material', null, 'insumos', 2, false, null, 400, [{ code: 'SL-0801', qty: 3, expiresInDays: null, costCents: 400 }]), 1, 'kg'),
+  item('embalagem-vacuo', 'Embalagem a vácuo', '', 'raw_material', null, 'insumos', 40, false, null, 80, [{ code: 'EV-0901', qty: 120, expiresInDays: null, costCents: 80 }]),
 ]
 
 /** Reserva à mão (encomenda de um cliente, evento): somada às reservas dos pedidos online. */
@@ -113,3 +118,48 @@ export function buildPurchaseSeed(now: Date): PurchaseOrder[] {
   ]
 }
 
+
+
+// ───────── Produção (lote 4) ─────────
+
+const inDays = (now: Date, plus: number, hour: number) => new Date(now.getFullYear(), now.getMonth(), now.getDate() + plus, hour).toISOString()
+
+/** Fichas técnicas de EXEMPLO. O custo por unidade fecha com o quadro: coalho R$ 14,20, manteiga R$ 16,80, doce R$ 7,90, garrafa R$ 15,00. */
+export const recipesSeed: Recipe[] = [
+  {
+    id: 'ficha-queijo-coalho', itemId: 'queijo-coalho', yieldPerBatch: 10, batchLabel: 'fornada', shelfLifeDays: 20, lotPrefix: 'QC', overheadCents: 300,
+    lines: [{ itemId: 'leite-integral', qtyPerBatch: 40 }, { itemId: 'coalho-liquido', qtyPerBatch: 0.4 }, { itemId: 'sal', qtyPerBatch: 0.5 }, { itemId: 'embalagem-vacuo', qtyPerBatch: 10 }],
+    method: '[MODO DE PREPARO DA CASA]',
+  },
+  {
+    id: 'ficha-queijo-manteiga', itemId: 'queijo-manteiga', yieldPerBatch: 6, batchLabel: 'fornada', shelfLifeDays: 25, lotPrefix: 'QM', overheadCents: 180,
+    lines: [{ itemId: 'leite-integral', qtyPerBatch: 30 }, { itemId: 'sal', qtyPerBatch: 0.3 }, { itemId: 'embalagem-vacuo', qtyPerBatch: 6 }],
+    method: '[MODO DE PREPARO DA CASA]',
+  },
+  {
+    id: 'ficha-doce-de-leite', itemId: 'doce-de-leite', yieldPerBatch: 12, batchLabel: 'tacho', shelfLifeDays: 30, lotPrefix: 'DL', overheadCents: 480,
+    lines: [{ itemId: 'leite-integral', qtyPerBatch: 18 }, { itemId: 'acucar-mascavo', qtyPerBatch: 3 }, { itemId: 'embalagem-vacuo', qtyPerBatch: 12 }],
+    method: '[MODO DE PREPARO DA CASA]',
+  },
+  {
+    id: 'ficha-manteiga-de-garrafa', itemId: 'manteiga-de-garrafa', yieldPerBatch: 24, batchLabel: 'lote', shelfLifeDays: 45, lotPrefix: 'MG', overheadCents: 3080,
+    lines: [{ itemId: 'leite-integral', qtyPerBatch: 100 }, { itemId: 'embalagem-vacuo', qtyPerBatch: 24 }],
+    method: '[MODO DE PREPARO DA CASA]',
+  },
+]
+
+const base = (o: Partial<ProductionOrder> & Pick<ProductionOrder, 'id' | 'recipeId' | 'itemId' | 'batches' | 'plannedQty' | 'status' | 'startsAt'>): ProductionOrder => ({
+  destination: { kind: 'stock' }, endsAt: null, startedAt: null, doneAt: null, goodQty: null, lotCode: null, expiresAt: null, costPerUnitCents: null, lotId: null, movementIds: [], reservationIds: [], ...o,
+})
+
+export function buildProductionSeed(now: Date): ProductionOrder[] {
+  return [
+    base({ id: 'OP-0032', recipeId: 'ficha-queijo-coalho', itemId: 'queijo-coalho', batches: 2, plannedQty: 20, status: 'in_progress', startsAt: inDays(now, 0, 9), startedAt: inDays(now, 0, 9), endsAt: inDays(now, 0, 18) }),
+    base({ id: 'OP-0033', recipeId: 'ficha-doce-de-leite', itemId: 'doce-de-leite', batches: 1, plannedQty: 12, status: 'in_progress', startsAt: inDays(now, 0, 13), startedAt: inDays(now, 0, 13), endsAt: inDays(now, 1, 10) }),
+    // Para o pedido #1041, que leva 1 queijo manteiga (o quadro cita #1045, número que a loja ainda vai gerar).
+    base({ id: 'OP-0034', recipeId: 'ficha-queijo-manteiga', itemId: 'queijo-manteiga', batches: 1, plannedQty: 6, status: 'planned', startsAt: inDays(now, 1, 8), destination: { kind: 'order', orderId: '1041' } }),
+    base({ id: 'OP-0035', recipeId: 'ficha-manteiga-de-garrafa', itemId: 'manteiga-de-garrafa', batches: 1, plannedQty: 24, status: 'planned', startsAt: inDays(now, 4, 8) }),
+    base({ id: 'OP-0031', recipeId: 'ficha-queijo-coalho', itemId: 'queijo-coalho', batches: 1, plannedQty: 10, status: 'done', startsAt: inDays(now, -1, 9), startedAt: inDays(now, -1, 9), doneAt: inDays(now, -1, 17), goodQty: 10, lotCode: 'QC-1112', expiresAt: inDays(now, 18, 12), costPerUnitCents: 1420 }),
+    base({ id: 'OP-0030', recipeId: 'ficha-doce-de-leite', itemId: 'doce-de-leite', batches: 1, plannedQty: 12, status: 'done', startsAt: inDays(now, -4, 9), startedAt: inDays(now, -4, 9), doneAt: inDays(now, -4, 17), goodQty: 11, lotCode: 'DL-1110', expiresAt: inDays(now, 6, 12), costPerUnitCents: 790 }),
+  ]
+}

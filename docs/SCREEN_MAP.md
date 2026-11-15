@@ -243,4 +243,8 @@ Rotas em `app/src/app/routes.tsx` (`/gestao/...`); telas em `app/src/pages/gesta
 | 13 · Movimentações | `/gestao/estoque/:id/movimentacoes` | `StockMovementsPage.tsx` | 3 |
 | 14 · Ajuste ou perda | `/gestao/estoque/:id/ajuste` (ou `/gestao/estoque/ajuste`) | `StockAdjustPage.tsx` | 3 |
 | 15 · Inventário | `/gestao/estoque/contagem` | `StockCountPage.tsx` | 3 |
+| 16 · Produção | `/gestao/producao` | `production.tsx` | 4 |
+| 17 · Fichas técnicas | `/gestao/producao/fichas` | `production.tsx` | 4 |
+| 18 · Ficha técnica e nova ordem | `/gestao/producao/fichas/:id` | `RecipePage.tsx` | 4 |
+| 19 · Ordem: apontamento | `/gestao/producao/ordens/:id` | `ProductionOrderPage.tsx` | 4 |
 

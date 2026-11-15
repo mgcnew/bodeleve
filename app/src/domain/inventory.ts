@@ -15,6 +15,8 @@ export type StockItem = {
   itemType: ItemType
   /** Origem/marca, separada do tipo de item (P-E). Matéria-prima não tem origem de venda. */
   origin: ItemOrigin | null
+  /** Quanto cada unidade de estoque contém, para fichas técnicas: "Coalho líquido 50 ml" = 1 un com 50 ml. */
+  content?: { qty: number; unit: string }
   /** Área do inventário ("Queijos e laticínios"): mesma lista de categorias da loja. */
   categoryId: string
   /** Estoque mínimo: abaixo disso o item aparece como "estoque baixo" e entra na sugestão de compra (H-G7). */
@@ -24,6 +26,9 @@ export type StockItem = {
   supplierId: string | null
   lastCostCents: number | null
 }
+
+/** "Queijo coalho 500 g"; sem medida, só o nome. */
+export const itemLabel = (it: Pick<StockItem, 'name' | 'unit'>) => (it.unit ? `${it.name} ${it.unit}` : it.name)
 
 export type Lot = {
   id: string
@@ -59,8 +64,9 @@ export type StockMovement = {
   reversalOf?: string
 }
 
+/** Soma com arredondamento a 3 casas: quantidades decimais (0,4 un de coalho) não acumulam erro de ponto flutuante. */
 export const sumMovements = (movements: StockMovement[], pick: (m: StockMovement) => boolean): number =>
-  movements.reduce((a, m) => (pick(m) ? a + m.qty : a), 0)
+  Math.round(movements.reduce((a, m) => (pick(m) ? a + m.qty : a), 0) * 1000) / 1000
 
 export const lotBalance = (movements: StockMovement[], lotId: string) => sumMovements(movements, (m) => m.lotId === lotId)
 export const itemBalance = (movements: StockMovement[], itemId: string) => sumMovements(movements, (m) => m.itemId === itemId)
