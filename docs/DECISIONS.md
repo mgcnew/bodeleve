@@ -20,6 +20,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D11 | 2026-11-14 | Etapa 2 (design system) aprovada ("pode continuar para próxima fase"): valem P-J a P-P | Usuário |
 | D12 | 2026-11-14 | Etapa 3 entregue em lotes; lote 1 = Início, Produto, Sacola, Pedido confirmado; lote 2 = checkout; lote 3 = catálogo, marca, pedidos e conta | Usuário |
 | D13 | 2026-11-14 | Etapa 3 (loja) considerada aprovada ("continue"); Etapa 4 (gestão) iniciada em lotes; lote 1 = Entrar, Início, Pedidos, Pedido, Mais; lote 2 = Compras e Fornecedores; lote 3 = Estoque; lote 4 = Produção; lote 5 = Financeiro; lote 6 = Produtos, Clientes, Entregas, Relatórios, Configurações | Usuário |
+| D15 | 2026-11-15 | Etapa 5 (PDV) entregue: 12 telas do mapa em 9 quadros (peso, desconto e sangria como folhas dentro de Vender, Sacola e Caixa) | — |
 | D14 | 2026-11-15 | Seguir até concluir todas as etapas sem parar; o que depender do usuário é documentado como pendência | Usuário |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
@@ -99,6 +100,19 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-G28 | Relatórios: vendas por período (hoje, 7 dias, mês), canal, pagamento e mais vendidos; um único gráfico de barras por dia | Princípio do briefing |
 | H-G29 | Configurações de loja online, pagamentos e nota fiscal ficam visíveis mas dependem de respostas pendentes | Q6–Q8, Q12 |
 | H-G6 | "A receber" inclui cartões a liquidar e fiado | Q13 |
+
+## Hipóteses usadas nas telas da Etapa 5 (PDV) — a confirmar
+
+| ID | Hipótese | Depende de |
+|---|---|---|
+| H-P1 | PDV no celular de 390 px, com alvos de 56 px; versão de tablet do balcão desenhada como referência na auditoria | Q4 |
+| H-P2 | Peso digitado com atalhos (250 g, 500 g, 1 kg) e ajuste de 50 g; balança integrada fica para depois | Q2 |
+| H-P3 | Formas no balcão: dinheiro (com troco), Pix por QR com confirmação manual, débito e crédito na maquininha à parte | Q8, Q14 |
+| H-P4 | Pagamento combinado em quantas partes forem precisas, até zerar o total | — |
+| H-P5 | Desconto por atalhos (5%, 10%, R$ 5, arredondar) com motivo obrigatório | — |
+| H-P6 | Cancelar venda exige senha de gestor; itens voltam ao estoque | H8 |
+| H-P7 | Um caixa por aparelho: abertura com fundo de troco, sangria e suprimento com motivo, fechamento com contado × esperado | H9, Q5 |
+| H-P8 | Comprovante por WhatsApp é opcional; nota fiscal não entra nesta versão | Q12 |
 
 ## Pendências
 

@@ -26,7 +26,7 @@ O projeto está na fase **design first**: primeiro o design e os protótipos nav
 | 2 — Design system | Aprovada |
 | 3 — Loja online (18 telas) | Entregue |
 | 4 — Gestão (36 telas) | Entregue |
-| 5 — PDV | A fazer |
+| 5 — PDV | Entregue |
 | 6 — Entregas | A fazer |
 | 7 — Auditoria | A fazer |
 

@@ -601,6 +601,96 @@
       "w": 1440,
       "x": 0,
       "y": 0
+    },
+    "PDV-Abertura.dc.html": {
+      "h": 760,
+      "is_interactive": true,
+      "page": "etapa5",
+      "radius": 24,
+      "title": "1 · Abrir caixa",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "PDV-Caixa.dc.html": {
+      "h": 1160,
+      "is_interactive": true,
+      "page": "etapa5",
+      "radius": 24,
+      "title": "9 · Caixa: sangria e fechamento",
+      "w": 390,
+      "x": 3760,
+      "y": 0
+    },
+    "PDV-Combinado.dc.html": {
+      "h": 940,
+      "is_interactive": true,
+      "page": "etapa5",
+      "radius": 24,
+      "title": "5 · Pagamento combinado",
+      "w": 390,
+      "x": 1880,
+      "y": 0
+    },
+    "PDV-Concluida.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "page": "etapa5",
+      "radius": 24,
+      "title": "6 · Venda concluída",
+      "w": 390,
+      "x": 2350,
+      "y": 0
+    },
+    "PDV-Pagamento.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "page": "etapa5",
+      "radius": 24,
+      "title": "4 · Pagamento",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "PDV-Sacola.dc.html": {
+      "h": 860,
+      "is_interactive": true,
+      "page": "etapa5",
+      "radius": 24,
+      "title": "3 · Sacola (+ desconto)",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "PDV-Venda.dc.html": {
+      "h": 840,
+      "is_interactive": true,
+      "page": "etapa5",
+      "radius": 24,
+      "title": "8 · Detalhe e cancelamento",
+      "w": 390,
+      "x": 3290,
+      "y": 0
+    },
+    "PDV-Vendas.dc.html": {
+      "h": 860,
+      "is_interactive": true,
+      "page": "etapa5",
+      "radius": 24,
+      "title": "7 · Vendas de hoje",
+      "w": 390,
+      "x": 2820,
+      "y": 0
+    },
+    "PDV-Vender.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "page": "etapa5",
+      "radius": 24,
+      "title": "2 · Vender (+ peso)",
+      "w": 390,
+      "x": 470,
+      "y": 0
     }
   },
   "createdOnFiles": {
@@ -609,7 +699,7 @@
   },
   "designSystems": [],
   "launch": {
-    "page": "etapa4",
+    "page": "etapa5",
     "view": "canvas"
   },
   "noteOrder": [
@@ -625,7 +715,9 @@
     "titulo4c",
     "titulo4d",
     "titulo4e",
-    "titulo4f"
+    "titulo4f",
+    "titulo5",
+    "guia5"
   ],
   "notes": {
     "guia3": {
@@ -642,6 +734,14 @@
       "text": "Como testar: aperte Play em “Entrar” ou em “1 · Início”.\n\nLote 1: o cartão de vendas e “2 pedidos novos” abrem Pedidos; filtros por situação; o #1043 abre o detalhe: Aceitar → marcar os 3 itens → Marcar como pronto.\n\nLote 2 (entre por Mais › Compras): filtros Em aberto / Recebidos; Novo pedido com quantidades e total; PC-0057 → Receber mercadoria: mude as quantidades (diminua a Nata para ver o aviso de falta), confirme e veja o que entrou no estoque e a conta a pagar criada com o valor recebido. Mais › Fornecedores → Engenho Boa Vista → Novo pedido.\n\nLote 3 (aba Estoque): filtros Todos / Baixo / Vencendo; Queijo coalho abre saldos (disponível, físico, reservado, projetado) e lotes; Movimentações com filtro; Ajustar registra uma perda com custo; Contar estoque mostra diferenças item a item e o impacto em custo.\n\nLote 4 (Mais › Produção, ou “Em produção” no início): filtros por situação; OP-0032 → aponte o consumo real e as unidades boas, veja o custo real por unidade e conclua (entra o lote no estoque, saem os insumos). Fichas técnicas → Queijo coalho: mude as fornadas e veja o que falta de insumo antes de criar a ordem.\n\nLote 5 (aba Financeiro): saldo agora e saldo previsto dia a dia; Contas com abas A pagar / A receber; Aluguel atrasado → Pagar conta: troque para “Caixa” para ver o aviso de saldo insuficiente; Lançamentos com filtro.\n\nLote 6 (pelo Mais): Produtos com filtro por tipo; Queijo coalho → mude o preço e veja a margem, ligue e desligue loja, PDV, peso e lote; Categorias → adicione uma; Clientes → Maria Lima; Entregas → #1041 → escolha quem leva; Relatórios → Vendas: troque o período e toque nas barras; Configurações → A casa e Equipe (convide alguém, veja o que cada papel acessa).\n\nAs 36 telas da gestão estão ligadas. Nas listas, só o primeiro item de exemplo abre detalhe.\n\nDados fictícios.",
       "w": 440,
       "x": 2350,
+      "y": 0
+    },
+    "guia5": {
+      "fill": "orange",
+      "page": "etapa5",
+      "text": "Como testar: aperte Play em “1 · Abrir caixa” ou em “2 · Vender”.\n\nVender: toque nos produtos (somam na sacola); Carne de sol e Feijão de corda abrem o peso (atalhos 250 g / 500 g / 1 kg e ajuste de 50 em 50 g); aba Categorias filtra; aba Buscar procura pelo nome.\n\nSacola: quantidades, remover item por peso, Dar desconto (5%, 10%, R$ 5, arredondar) com prévia do total.\n\nPagamento: Dinheiro com troco, Pix com QR, cartão na maquininha; “Dividir em duas formas” recebe em partes até zerar.\n\nVendas: filtro por forma; V-0212 → Cancelar pede senha do gestor.\n\nCaixa: sangria ou suprimento muda o esperado; ajuste o contado e veja a diferença; Fechar caixa.\n\nAs 12 telas do mapa estão em 9 quadros: peso, desconto e sangria são folhas (bottom sheets) dentro de Vender, Sacola e Caixa.\n\nDados fictícios. Cada quadro guarda seu próprio estado.",
+      "w": 440,
+      "x": 4230,
       "y": 0
     },
     "titulo": {
@@ -741,6 +841,15 @@
       "w": 240,
       "x": 0,
       "y": 8800
+    },
+    "titulo5": {
+      "kind": "title1",
+      "maxW": 4150,
+      "page": "etapa5",
+      "text": "Etapa 5 — PDV (frente de caixa)",
+      "w": 240,
+      "x": 0,
+      "y": -300
     }
   },
   "order": [
@@ -805,7 +914,16 @@
     "Gestao-Relatorio.dc.html",
     "Gestao-Configuracoes.dc.html",
     "Gestao-Estabelecimento.dc.html",
-    "Gestao-Usuarios.dc.html"
+    "Gestao-Usuarios.dc.html",
+    "PDV-Abertura.dc.html",
+    "PDV-Vender.dc.html",
+    "PDV-Sacola.dc.html",
+    "PDV-Pagamento.dc.html",
+    "PDV-Combinado.dc.html",
+    "PDV-Concluida.dc.html",
+    "PDV-Vendas.dc.html",
+    "PDV-Venda.dc.html",
+    "PDV-Caixa.dc.html"
   ],
   "pages": [
     {
@@ -823,6 +941,10 @@
     {
       "id": "etapa4",
       "name": "Etapa 4 · Gestão"
+    },
+    {
+      "id": "etapa5",
+      "name": "Etapa 5 · PDV"
     }
   ],
   "title": "Bodeleve",

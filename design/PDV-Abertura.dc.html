@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Bodeleve — PDV: abrir caixa</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#A9482C}a:hover{color:#8A3920}
+</style>
+</helmet>
+<div style="width: 390px; height: 760px; box-sizing: border-box; display: flex; flex-direction: column; background: #FBFAF6; color: #292621; font-family: 'Inter', system-ui, sans-serif; font-size: 16px; line-height: 24px">
+<main style="flex: 1 1 0; display: flex; flex-direction: column; gap: 20px; padding: 24px 16px"><div><div style="font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 28px; line-height: 34px">Abrir caixa</div><div style="font-size: 14px; line-height: 20px; color: #5E584E">Balcão · sábado, 14/11 · 08h02</div></div><div style="padding: 14px 16px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E4DCCB; display: flex; flex-direction: column; gap: 8px; "><div style="display: flex; justify-content: space-between; gap: 12px; color: #5E584E; font-variant-numeric: tabular-nums"><span>Quem abre</span><span>Júlia</span></div><div style="display: flex; justify-content: space-between; gap: 12px; color: #5E584E; font-variant-numeric: tabular-nums"><span>Último fechamento</span><span>13/11 · sem diferença</span></div></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="fundo" style="font-size: 14px; line-height: 20px; font-weight: 600">Dinheiro na gaveta para troco</label><input id="fundo" type="text" inputmode="decimal" value="{{ fundo }}" readonly style="height: 56px; padding: 0 16px; border-radius: 8px; border: 2px solid #292621; background: #FFFFFF; color: #292621; font: 600 22px 'Inter', system-ui, sans-serif; font-variant-numeric: tabular-nums; box-sizing: border-box; width: 100%"></div><div role="group" aria-label="Valores comuns" style="display: flex; gap: 8px"><button type="button" aria-pressed="{{ c0 }}" onClick="{{ f0 }}" style="flex: 1 1 0; min-width: 0; height: 48px; border-radius: 12px; border: 1.5px solid #292621; background: {{ c0B }}; color: {{ c0C }}; font: 600 16px 'Inter', system-ui, sans-serif; font-variant-numeric: tabular-nums">R$ 100</button><button type="button" aria-pressed="{{ c1 }}" onClick="{{ f1 }}" style="flex: 1 1 0; min-width: 0; height: 48px; border-radius: 12px; border: 1.5px solid #292621; background: {{ c1B }}; color: {{ c1C }}; font: 600 16px 'Inter', system-ui, sans-serif; font-variant-numeric: tabular-nums">R$ 150</button><button type="button" aria-pressed="{{ c2 }}" onClick="{{ f2 }}" style="flex: 1 1 0; min-width: 0; height: 48px; border-radius: 12px; border: 1.5px solid #292621; background: {{ c2B }}; color: {{ c2C }}; font: 600 16px 'Inter', system-ui, sans-serif; font-variant-numeric: tabular-nums">R$ 200</button></div><div style="font-size: 14px; line-height: 20px; color: #5E584E">Conte o dinheiro antes de abrir. Esse valor é a base para conferir o caixa no fechamento.</div></main><div style="margin-top: auto; flex: none; padding: 12px 16px 16px; background: #FFFFFF; border-top: 1px solid #E4DCCB; display: flex; flex-direction: column; gap: 8px"><a href="PDV-Vender.dc.html" style="height: 56px; border-radius: 12px; background: #A9482C; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px; font-variant-numeric: tabular-nums">Abrir caixa</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+const fmt = (v) => 'R$ ' + v.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const st = this.state || {};
+const v = st.v === undefined ? 150 : st.v;
+const out = { fundo: fmt(v) };
+out.c0 = v === 100; out.c0B = (v === 100) ? '#292621' : '#FFFFFF'; out.c0C = (v === 100) ? '#FFFFFF' : '#292621';
+out.c1 = v === 150; out.c1B = (v === 150) ? '#292621' : '#FFFFFF'; out.c1C = (v === 150) ? '#FFFFFF' : '#292621';
+out.c2 = v === 200; out.c2B = (v === 200) ? '#292621' : '#FFFFFF'; out.c2C = (v === 200) ? '#FFFFFF' : '#292621';
+out.f0 = () => this.setState({ v: 100 }); out.f1 = () => this.setState({ v: 150 }); out.f2 = () => this.setState({ v: 200 });
+return out;
+}
+}
+</script>
+</body>
+</html>
