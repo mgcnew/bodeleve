@@ -25,7 +25,7 @@ O projeto está na fase **design first**: primeiro o design e os protótipos nav
 | 1 — Discovery | Aprovada |
 | 2 — Design system | Aprovada |
 | 3 — Loja online (18 telas) | Entregue |
-| 4 — Gestão (36 telas) | Em andamento — lotes 1 a 4 (20 telas) |
+| 4 — Gestão (36 telas) | Em andamento — lotes 1 a 5 (24 telas) |
 | 5 — PDV | A fazer |
 | 6 — Entregas | A fazer |
 | 7 — Auditoria | A fazer |

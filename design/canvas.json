@@ -65,6 +65,16 @@
       "x": 1410,
       "y": 3400
     },
+    "Gestao-Baixa.dc.html": {
+      "h": 1100,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "22 · Pagar conta",
+      "w": 390,
+      "x": 940,
+      "y": 7400
+    },
     "Gestao-Compra.dc.html": {
       "h": 940,
       "is_interactive": true,
@@ -94,6 +104,16 @@
       "w": 390,
       "x": 0,
       "y": 1700
+    },
+    "Gestao-Contas.dc.html": {
+      "h": 1140,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "21 · Contas a pagar e a receber",
+      "w": 390,
+      "x": 470,
+      "y": 7400
     },
     "Gestao-Entrar.dc.html": {
       "h": 700,
@@ -145,6 +165,16 @@
       "x": 470,
       "y": 5300
     },
+    "Gestao-Financeiro.dc.html": {
+      "h": 1300,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "20 · Financeiro",
+      "w": 390,
+      "x": 0,
+      "y": 7400
+    },
     "Gestao-Fornecedor.dc.html": {
       "h": 1080,
       "is_interactive": true,
@@ -184,6 +214,16 @@
       "w": 390,
       "x": 1880,
       "y": 3400
+    },
+    "Gestao-Lancamentos.dc.html": {
+      "h": 960,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "23 · Lançamentos",
+      "w": 390,
+      "x": 1410,
+      "y": 7400
     },
     "Gestao-Mais.dc.html": {
       "h": 1060,
@@ -463,7 +503,8 @@
     "guia4",
     "titulo4b",
     "titulo4c",
-    "titulo4d"
+    "titulo4d",
+    "titulo4e"
   ],
   "notes": {
     "guia3": {
@@ -477,7 +518,7 @@
     "guia4": {
       "fill": "orange",
       "page": "etapa4",
-      "text": "Como testar: aperte Play em “Entrar” ou em “1 · Início”.\n\nLote 1: o cartão de vendas e “2 pedidos novos” abrem Pedidos; filtros por situação; o #1043 abre o detalhe: Aceitar → marcar os 3 itens → Marcar como pronto.\n\nLote 2 (entre por Mais › Compras): filtros Em aberto / Recebidos; Novo pedido com quantidades e total; PC-0057 → Receber mercadoria: mude as quantidades (diminua a Nata para ver o aviso de falta), confirme e veja o que entrou no estoque e a conta a pagar criada com o valor recebido. Mais › Fornecedores → Engenho Boa Vista → Novo pedido.\n\nLote 3 (aba Estoque): filtros Todos / Baixo / Vencendo; Queijo coalho abre saldos (disponível, físico, reservado, projetado) e lotes; Movimentações com filtro; Ajustar registra uma perda com custo; Contar estoque mostra diferenças item a item e o impacto em custo.\n\nLote 4 (Mais › Produção, ou “Em produção” no início): filtros por situação; OP-0032 → aponte o consumo real e as unidades boas, veja o custo real por unidade e conclua (entra o lote no estoque, saem os insumos). Fichas técnicas → Queijo coalho: mude as fornadas e veja o que falta de insumo antes de criar a ordem.\n\nAinda não: aba Financeiro (esmaecida) e demais módulos do Mais. Só o #1043, o PC-0057, o Engenho Boa Vista, o Queijo coalho e a OP-0032 abrem detalhe.\n\nDados fictícios.",
+      "text": "Como testar: aperte Play em “Entrar” ou em “1 · Início”.\n\nLote 1: o cartão de vendas e “2 pedidos novos” abrem Pedidos; filtros por situação; o #1043 abre o detalhe: Aceitar → marcar os 3 itens → Marcar como pronto.\n\nLote 2 (entre por Mais › Compras): filtros Em aberto / Recebidos; Novo pedido com quantidades e total; PC-0057 → Receber mercadoria: mude as quantidades (diminua a Nata para ver o aviso de falta), confirme e veja o que entrou no estoque e a conta a pagar criada com o valor recebido. Mais › Fornecedores → Engenho Boa Vista → Novo pedido.\n\nLote 3 (aba Estoque): filtros Todos / Baixo / Vencendo; Queijo coalho abre saldos (disponível, físico, reservado, projetado) e lotes; Movimentações com filtro; Ajustar registra uma perda com custo; Contar estoque mostra diferenças item a item e o impacto em custo.\n\nLote 4 (Mais › Produção, ou “Em produção” no início): filtros por situação; OP-0032 → aponte o consumo real e as unidades boas, veja o custo real por unidade e conclua (entra o lote no estoque, saem os insumos). Fichas técnicas → Queijo coalho: mude as fornadas e veja o que falta de insumo antes de criar a ordem.\n\nLote 5 (aba Financeiro): saldo agora e saldo previsto dia a dia; Contas com abas A pagar / A receber; Aluguel atrasado → Pagar conta: troque para “Caixa” para ver o aviso de saldo insuficiente; Lançamentos com filtro.\n\nAinda não: Clientes, Entregas, Relatórios e Configurações. Só o #1043, o PC-0057, o Engenho Boa Vista, o Queijo coalho, a OP-0032 e o Aluguel abrem detalhe.\n\nDados fictícios.",
       "w": 440,
       "x": 2350,
       "y": 0
@@ -561,6 +602,15 @@
       "w": 240,
       "x": 0,
       "y": 5000
+    },
+    "titulo4e": {
+      "kind": "title1",
+      "maxW": 1800,
+      "page": "etapa4",
+      "text": "Lote 5 — Financeiro",
+      "w": 240,
+      "x": 0,
+      "y": 7100
     }
   },
   "order": [
@@ -609,7 +659,11 @@
     "Gestao-Producao.dc.html",
     "Gestao-Fichas.dc.html",
     "Gestao-Ficha.dc.html",
-    "Gestao-Ordem.dc.html"
+    "Gestao-Ordem.dc.html",
+    "Gestao-Financeiro.dc.html",
+    "Gestao-Contas.dc.html",
+    "Gestao-Baixa.dc.html",
+    "Gestao-Lancamentos.dc.html"
   ],
   "pages": [
     {

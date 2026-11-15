@@ -16,7 +16,7 @@ def gphone(fname, title, h, body, logic, bg=OP):
     open(os.path.join(OUT, fname), 'w').write(html)
     print(fname, len(html))
 
-GNAV = [('inicio', 'Início', 'Gestao-Inicio.dc.html'), ('pedidos', 'Pedidos', 'Gestao-Pedidos.dc.html'), ('estoque', 'Estoque', 'Gestao-Estoque.dc.html'), ('financeiro', 'Financeiro', None), ('mais', 'Mais', 'Gestao-Mais.dc.html')]
+GNAV = [('inicio', 'Início', 'Gestao-Inicio.dc.html'), ('pedidos', 'Pedidos', 'Gestao-Pedidos.dc.html'), ('estoque', 'Estoque', 'Gestao-Estoque.dc.html'), ('financeiro', 'Financeiro', 'Gestao-Financeiro.dc.html'), ('mais', 'Mais', 'Gestao-Mais.dc.html')]
 def gnav(active):
     cells = ''
     for i, (ic, t, href) in enumerate(GNAV):
@@ -74,14 +74,14 @@ inicio = (f'<header style="padding: 16px 16px 8px; flex: none; display: flex; ju
     f'<span><span style="display: block; font-size: 12px; line-height: 16px; color: {LN}">Internet · 6</span><span style="font-weight: 600; font-size: 18px">R$ 392,50</span></span></span></a>'
     f'<section style="display: flex; flex-direction: column; gap: 8px">{h2("Pede ação hoje")}'
     + box(acao('pedidos', IN_T, IN_B, '2 pedidos novos', 'Aguardando aceite · o mais antigo há 10 min', 'Gestao-Pedidos.dc.html')
-          + acao('alerta', ER_T, ER_B, 'Aluguel atrasado', 'Venceu em 10/11 · R$ 1.800,00')
-          + acao('financeiro', AT_T, AT_B, '2 contas vencem hoje', 'R$ 640,00 · Laticínios Serra Verde e mais 1')
+          + acao('alerta', ER_T, ER_B, 'Aluguel atrasado', 'Venceu em 10/11 · R$ 1.800,00', 'Gestao-Baixa.dc.html')
+          + acao('financeiro', AT_T, AT_B, '2 contas vencem hoje', 'R$ 640,00 · Laticínios Serra Verde e energia', 'Gestao-Contas.dc.html')
           + acao('validade', AT_T, AT_B, '3 lotes vencem em até 7 dias', 'Queijo coalho, Doce de leite, Nata', 'Gestao-Estoque.dc.html')
           + acao('estoque', AT_T, AT_B, '7 itens com estoque baixo', 'Tapioca granulada, Rapadura e mais 5', 'Gestao-Estoque.dc.html').replace(f'border-bottom: 1px solid {LN}; ', '', 1).replace('min-height: 64px; padding: 8px 0; text', 'min-height: 64px; padding: 8px 0; text'), 'padding-bottom: 0')
     + '</section>'
     f'<section style="display: flex; flex-direction: column; gap: 8px">{h2("Hoje na casa")}<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">'
     + kpi('Pedidos em aberto', '4', '2 novos · 2 em preparo', G, 'Gestao-Pedidos.dc.html') + kpi('Em produção', '2 ordens', 'Queijo coalho · Doce de leite', G, 'Gestao-Producao.dc.html')
-    + kpi('A pagar hoje', 'R$ 640,00', '2 contas', ER_T) + kpi('A receber na semana', 'R$ 1.150,00', 'cartões e fiado', OK_T) + '</div></section>'
+    + kpi('A pagar hoje', 'R$ 640,00', '2 contas', ER_T, 'Gestao-Contas.dc.html') + kpi('A receber na semana', 'R$ 1.150,00', 'cartões e fiado', OK_T, 'Gestao-Contas.dc.html') + '</div></section>'
     f'<div style="{SM}">Faturamento do mês, comparativos e gráficos ficam em Relatórios, para o início mostrar só o que pede ação.</div></main>'
     f'<div style="margin-top: auto; flex: none">{gnav(0)}</div>')
 gphone('Gestao-Inicio.dc.html', 'Bodeleve — gestão: início', 1180, inicio, VAZIO)
