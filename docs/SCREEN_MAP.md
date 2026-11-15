@@ -232,4 +232,10 @@ Rotas em `app/src/app/routes.tsx` (`/gestao/...`); telas em `app/src/pages/gesta
 | 2 · Pedidos | `/gestao/pedidos` | `OrdersPage.tsx` | 1 |
 | 3 · Pedido | `/gestao/pedidos/:id` | `OrderPage.tsx` | 1 |
 | 4 · Mais | `/gestao/mais` | `MorePage.tsx` | 1 |
+| 5 · Compras | `/gestao/compras` | `purchasing.tsx` | 2 |
+| 6 · Novo pedido de compra | `/gestao/compras/novo` (`?fornecedor=`) | `NewPurchasePage.tsx` | 2 |
+| 7 · Pedido de compra | `/gestao/compras/:id` | `PurchasePage.tsx` | 2 |
+| 8 · Recebimento | `/gestao/compras/:id/receber` | `ReceivingPage.tsx` | 2 |
+| 9 · Fornecedores | `/gestao/fornecedores` | `suppliers.tsx` | 2 |
+| 10 · Fornecedor | `/gestao/fornecedores/:id` | `suppliers.tsx` | 2 |
 

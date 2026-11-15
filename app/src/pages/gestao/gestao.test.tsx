@@ -46,7 +46,7 @@ describe('acesso da equipe', () => {
     await user.type(screen.getByLabelText('Senha'), MOCK_ADMIN_PASSWORD)
     await user.click(screen.getByRole('button', { name: 'Entrar' }))
     await waitFor(() => expect(router.state.location.pathname).toBe('/gestao/pedidos'))
-    const nav = screen.getByRole('navigation', { name: 'Navegação da gestão' })
+    const nav = await screen.findByRole('navigation', { name: 'Navegação da gestão' })
     expect(within(nav).queryByRole('link', { name: 'Estoque' })).not.toBeInTheDocument()
     expect(within(nav).getByRole('link', { name: 'Pedidos' })).toBeInTheDocument()
     await router.navigate('/gestao/estoque')

@@ -33,3 +33,37 @@ export function useOrderAction(id: string) {
     undoReady: useMutation({ mutationFn: () => admin.orders.undoReady(id), onSuccess: done }),
   }
 }
+
+// ───────── Compras e fornecedores ─────────
+
+export function usePurchases() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'purchases'], queryFn: () => admin.purchasing.listOrders() })
+}
+
+export function usePurchase(id: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'purchase', id], queryFn: () => admin.purchasing.getOrder(id!), enabled: !!id })
+}
+
+export function useSuppliers() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'suppliers'], queryFn: () => admin.purchasing.listSuppliers() })
+}
+
+export function useSupplier(id: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'supplier', id], queryFn: () => admin.purchasing.getSupplier(id!), enabled: !!id })
+}
+
+export function useSuggestions(supplierId: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'suggest', supplierId], queryFn: () => admin.purchasing.suggest(supplierId!), enabled: !!supplierId })
+}
+
+/** Compras mexem em pedidos, estoque (lotes) e contas: relê o que depende disso. */
+export function useInvalidatePurchasing() {
+  const client = useQueryClient()
+  return () =>
+    Promise.all(['purchases', 'purchase', 'suppliers', 'supplier', 'suggest', 'dashboard'].map((k) => client.invalidateQueries({ queryKey: ['admin', k] })))
+}

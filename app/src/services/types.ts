@@ -1,5 +1,8 @@
 import type { IconName } from '@/components'
 import type { AreaCheck, Category, HomeSection, Order, OrderItem, PlaceOrderInput, Product, StoreContent } from '@/domain/types'
+import type { StockLevel } from '@/domain/inventory'
+import type { PaymentTermId, PurchaseOrder, ReceiptLine, Supplier } from '@/domain/purchasing'
+import type { ReceiveResult } from '@/domain/receiving'
 import type { Role } from '@/permissions'
 
 /**
@@ -92,10 +95,59 @@ export interface DashboardService {
   get(): Promise<Dashboard>
 }
 
+export type PurchaseView = Omit<PurchaseOrder, 'items'> & {
+  /** `tracksExpiry`: o item tem validade, então o recebimento pede a data (H-G8). */
+  items: Array<PurchaseOrder['items'][number] & { tracksExpiry: boolean }>
+  supplierName: string
+  totalCents: number
+  receivedCents: number
+  itemCount: number
+}
+
+export type SupplierView = Supplier & {
+  openOrders: number
+  arrivingToday: number
+  lastPurchaseAt: string | null
+  purchasedThisYearCents: number
+  openPayablesCents: number
+  products: Array<{ itemId: string; name: string; lastCostCents: number | null }>
+  recentOrders: Array<{ id: string; receivedAt: string; totalCents: number }>
+}
+
+export type PurchaseSuggestion = {
+  itemId: string
+  name: string
+  balance: number
+  min: number
+  level: StockLevel
+  lastCostCents: number
+  suggestedQty: number
+}
+
+export type SendPurchaseInput = { supplierId: string; expectedAt: string; payment: PaymentTermId; items: Array<{ itemId: string; qty: number }> }
+
+export interface PurchasingService {
+  listOrders(): Promise<PurchaseView[]>
+  getOrder(id: string): Promise<PurchaseView | null>
+  listSuppliers(): Promise<SupplierView[]>
+  getSupplier(id: string): Promise<SupplierView | null>
+  /** Itens do fornecedor com estoque, mínimo e quantidade sugerida (H-G7). */
+  suggest(supplierId: string): Promise<PurchaseSuggestion[]>
+  /** Salva como "Enviado" e monta a mensagem. Nesta versão a mensagem NÃO é enviada (D21): fica no registro. */
+  send(input: SendPurchaseInput): Promise<{ order: PurchaseView; message: string }>
+  /** Lança `invalid_lines` (com `errors`), `invalid_state` ou `not_found`. */
+  receive(id: string, input: { lines: ReceiptLine[]; closeShort: boolean }): Promise<ReceiveResult & { order: PurchaseView }>
+  /** Encerra o pedido que ficou com falta ("Encerrar o pedido assim"). */
+  closeShort(id: string): Promise<PurchaseView>
+  /** Corrige a conferência do último recebimento. Lança `cannot_reverse` se já houve saída do lote ou pagamento. */
+  reverseReceipt(id: string): Promise<PurchaseView>
+}
+
 export type AdminServices = {
   auth: AdminAuthService
   orders: AdminOrderService
   dashboard: DashboardService
+  purchasing: PurchasingService
 }
 
 export type Services = {

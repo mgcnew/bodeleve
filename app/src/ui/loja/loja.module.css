@@ -104,3 +104,6 @@
 .disc { width: 64px; height: 64px; border-radius: var(--raio-pilula); background: var(--cor-terracota-suave); color: var(--cor-terracota-pressionado); display: flex; align-items: center; justify-content: center; }
 .codeBox { font: 700 36px/40px var(--fonte-titulo); letter-spacing: 0.12em; font-variant-numeric: tabular-nums; }
 .etaTitle { font: 700 28px/34px var(--fonte-titulo); }
+
+/* A primeira linha de uma lista em cartão não tem divisória em cima (vale também para linhas com borda inline). */
+.linkList > :first-child { border-top: 0 !important; }

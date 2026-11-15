@@ -26,6 +26,11 @@ import { ModulePlaceholder } from '@/pages/gestao/ModulePlaceholder'
 import { MorePage } from '@/pages/gestao/MorePage'
 import { AdminOrderPage } from '@/pages/gestao/OrderPage'
 import { AdminOrdersPage } from '@/pages/gestao/OrdersPage'
+import { NewPurchasePage } from '@/pages/gestao/NewPurchasePage'
+import { PurchasePage } from '@/pages/gestao/PurchasePage'
+import { PurchasesPage } from '@/pages/gestao/purchasing'
+import { ReceivingPage } from '@/pages/gestao/ReceivingPage'
+import { SupplierPage, SuppliersPage } from '@/pages/gestao/suppliers'
 import { AppRoot } from './AppRoot'
 import s from '@/ui/loja/loja.module.css'
 
@@ -61,8 +66,12 @@ export const routes: RouteObject[] = [
           { path: 'mais', element: <MorePage />, handle: { tabs: true } satisfies GestaoHandle },
           { path: 'estoque/*', element: <ModulePlaceholder />, handle: g('stock', true) },
           { path: 'financeiro/*', element: <ModulePlaceholder />, handle: g('finance', true) },
-          { path: 'compras/*', element: <ModulePlaceholder />, handle: g('purchasing') },
-          { path: 'fornecedores/*', element: <ModulePlaceholder />, handle: g('purchasing') },
+          { path: 'compras', element: <PurchasesPage />, handle: g('purchasing') },
+          { path: 'compras/novo', element: <NewPurchasePage />, handle: g('purchasing') },
+          { path: 'compras/:id', element: <PurchasePage />, handle: g('purchasing') },
+          { path: 'compras/:id/receber', element: <ReceivingPage />, handle: g('purchasing') },
+          { path: 'fornecedores', element: <SuppliersPage />, handle: g('purchasing') },
+          { path: 'fornecedores/:id', element: <SupplierPage />, handle: g('purchasing') },
           { path: 'producao/*', element: <ModulePlaceholder />, handle: g('production') },
           { path: 'produtos/*', element: <ModulePlaceholder />, handle: g('stock') },
           { path: 'clientes/*', element: <ModulePlaceholder />, handle: g('orders') },

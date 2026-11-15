@@ -30,6 +30,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D21 | 2026-11-15 | Pagamentos reais (Pix, cartão) e envio real de mensagens (WhatsApp) continuam fora até aprovação expressa; entram só como interfaces com versão simulada | Usuário |
 | D22 | 2026-11-15 | Etapa 3 (loja) implementada em `app/`: 18 telas, checkout como convidado em 4 etapas, pedidos do aparelho e login por código de teste, tudo sobre serviços simulados (`app/src/mocks`). Sem pagamento real, sem mensagem real, sem banco | Usuário (D18–D21) |
 | D23 | 2026-11-15 | Etapa 4 (Gestão) iniciada em `app/` pelo lote 1 de D13 — Entrar, Início, Pedidos, Pedido e Mais — sobre o mesmo banco simulado da loja: pedido feito na loja entra como novo na fila da gestão e o status volta para o cliente | Usuário (D18–D21) |
+| D24 | 2026-11-15 | Etapa 4, lote 2 (Compras e Fornecedores) implementado: pedido de compra com sugestão pelo estoque mínimo, recebimento item a item com lote e validade, recebimento parcial, conta a pagar criada no recebimento, e modelo de estoque por movimentações (saldo nunca editável). Envio ao fornecedor só simulado | Usuário (D18–D21) |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -171,6 +172,19 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-I21 | A lista de pedidos mostra só os abertos; concluídos ficam para o histórico/relatórios | `OrdersPage.tsx` |
 | H-I22 | Em desenvolvimento, a entrada mostra as contas de exemplo e a senha `bodeleve`; nada disso aparece em produção | `pages/gestao/LoginPage.tsx` |
 
+## Hipóteses de implementação de Compras e Estoque — a confirmar
+
+| ID | O que foi feito | Onde |
+|---|---|---|
+| H-I23 | Sugestão de compra: item no estoque mínimo ou abaixo repõe até o dobro do mínimo (rapadura 4/12 → 20 un; melaço 6/6 → 6 un; açúcar acima do mínimo → 0). O quadro mostra 24 un para a rapadura; a regra de cálculo não está escrita | `domain/purchasing.ts` |
+| H-I24 | Estoque baixo = no mínimo ou abaixo ("Estoque 6 un · mínimo 6" é baixo no quadro) | `domain/inventory.ts` |
+| H-I25 | Pedido de compra criado no sistema é salvo como "Enviado" e a mensagem ao fornecedor é montada e guardada, mas não enviada (D21). A tela diz isso; pedidos de exemplo dizem "pelo WhatsApp" | `PurchasePage.tsx` · `mocks/adminServices.ts` |
+| H-I26 | Recebimento: lote obrigatório; validade obrigatória só para item que vence; quantidade zero = item não chegou. A decisão "manter em aberto / encerrar" vale ao sair da tela | `domain/receiving.ts` · `ReceivingPage.tsx` |
+| H-I27 | A conta a pagar nasce por recebimento (um recebimento parcial gera uma conta e o complemento, outra), com o valor do que chegou e vencimento pelo prazo do pedido | `domain/receiving.ts` |
+| H-I28 | "Corrigir conferência" desfaz o recebimento (entrada, lotes e conta) enquanto nada saiu do lote e a conta não foi paga; depois disso a correção é por ajuste de estoque | `reverseLastReceipt` |
+| H-I29 | A lista de compras põe em "Recebidos" todos os recebidos (4 nos dados de exemplo: os 2 do quadro Compras e os 2 do histórico do quadro Fornecedor) | `purchasing.tsx` |
+| H-I30 | Itens de exemplo de PC-0053 e PC-0049 foram escolhidos para fechar os totais dos quadros (R$ 420,00 recebido e R$ 236,40) | `mocks/stockSeed.ts` |
+
 ## Pendências
 
 O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
@@ -199,6 +213,10 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P20 | Confirmar o acesso de Produtos e Clientes por papel (H-I14) e se entregador deve ter qualquer tela na Gestão (H-I15) | Gestão | `permissions/` |
 | P21 | Quadro "Pedidos" mostra internet R$ 392,50 e seis pedidos que somam R$ 454,50: dizer qual valor vale, ou corrigir o desenho | Gestão · Início | H-I18 |
 | P22 | Desenhar o estado de pedido "aguardando pagamento do Pix" na fila da gestão e a regra de quando segue sem pagar | Gestão · Pedidos | H-I19, P14 |
+| P23 | Confirmar a regra de sugestão de compra (H-I23): repor até o dobro do mínimo? usar média de vendas? | Gestão · Compras | H-I23 |
+| P24 | Escolher o provedor de WhatsApp para enviar o pedido ao fornecedor (hoje só é guardado) | Gestão · Compras | P8, D21 |
+| P25 | Os quadros Compras (2 recebidos) e Fornecedor (dois pedidos anteriores) não combinam: dizer se a lista de recebidos deve mostrar todo o histórico | Gestão · Compras | H-I29 |
+| P26 | Informar, por fornecedor: contato, e-mail, CNPJ/CPF, prazo de entrega, condição de pagamento (hoje `[marcadores]` e valores de exemplo) | Gestão · Fornecedores | P4 |
 
 Marcadores de conteúdo nas telas:
 
