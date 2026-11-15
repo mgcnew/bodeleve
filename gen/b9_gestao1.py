@@ -80,7 +80,7 @@ inicio = (f'<header style="padding: 16px 16px 8px; flex: none; display: flex; ju
           + acao('estoque', AT_T, AT_B, '7 itens com estoque baixo', 'Tapioca granulada, Rapadura e mais 5', 'Gestao-Estoque.dc.html').replace(f'border-bottom: 1px solid {LN}; ', '', 1).replace('min-height: 64px; padding: 8px 0; text', 'min-height: 64px; padding: 8px 0; text'), 'padding-bottom: 0')
     + '</section>'
     f'<section style="display: flex; flex-direction: column; gap: 8px">{h2("Hoje na casa")}<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">'
-    + kpi('Pedidos em aberto', '4', '2 novos · 2 em preparo', G, 'Gestao-Pedidos.dc.html') + kpi('Em produção', '2 ordens', 'Queijo coalho · Doce de leite')
+    + kpi('Pedidos em aberto', '4', '2 novos · 2 em preparo', G, 'Gestao-Pedidos.dc.html') + kpi('Em produção', '2 ordens', 'Queijo coalho · Doce de leite', G, 'Gestao-Producao.dc.html')
     + kpi('A pagar hoje', 'R$ 640,00', '2 contas', ER_T) + kpi('A receber na semana', 'R$ 1.150,00', 'cartões e fiado', OK_T) + '</div></section>'
     f'<div style="{SM}">Faturamento do mês, comparativos e gráficos ficam em Relatórios, para o início mostrar só o que pede ação.</div></main>'
     f'<div style="margin-top: auto; flex: none">{gnav(0)}</div>')
@@ -180,7 +180,7 @@ def mrow(ic, t, sub, last=False, href=None):
 grupo = lambda t, inner: f'<section style="display: flex; flex-direction: column; gap: 8px"><div style="{LBL}">{t}</div>{box(inner)}</section>'
 mais = (titulo('Mais', 'Todos os módulos da gestão')
     + f'<main style="display: flex; flex-direction: column; gap: 20px; padding: 8px 16px 24px">'
-    + grupo('Abastecer', mrow('compras', 'Compras', 'Pedidos de compra e recebimento', False, 'Gestao-Compras.dc.html') + mrow('entregas', 'Fornecedores', 'Contatos e histórico de compras', False, 'Gestao-Fornecedores.dc.html') + mrow('producao', 'Produção', 'Fichas técnicas e ordens de produção', True))
+    + grupo('Abastecer', mrow('compras', 'Compras', 'Pedidos de compra e recebimento', False, 'Gestao-Compras.dc.html') + mrow('entregas', 'Fornecedores', 'Contatos e histórico de compras', False, 'Gestao-Fornecedores.dc.html') + mrow('producao', 'Produção', 'Fichas técnicas e ordens de produção', True, 'Gestao-Producao.dc.html'))
     + grupo('Catálogo', mrow('vender', 'Produtos e categorias', 'Preço, origem, publicação na loja', True))
     + grupo('Relacionamento', mrow('perfil', 'Clientes', 'Histórico e contato') + mrow('local', 'Entregas', 'Atribuir e acompanhar entregadores', True))
     + grupo('Análise', mrow('historico', 'Relatórios', 'Vendas, estoque, financeiro', True))

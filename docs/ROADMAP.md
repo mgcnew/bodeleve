@@ -7,7 +7,7 @@ Cada etapa termina com revisão e aprovação antes da seguinte. A documentaçã
 | 1 — Discovery e referências | Visão, pesquisa, arquitetura, mapa de telas, navegação, fluxos, direção visual, pendências | — | Aprovada em 2026-11-14 |
 | 2 — Design system | Tokens finais, tipografia, componentes e estados, padrões de navegação dos 4 ambientes | Aprovação de P-A a P-D | Aprovada em 2026-11-14 |
 | 3 — Loja online | Início, catálogo, produto, sacola, checkout, confirmação, acompanhamento, institucional — protótipo navegável do Fluxo 4 | Etapa 2 · Q6–Q10 | Entregue (18 de 18 telas) |
-| 4 — Gestão | Dashboard, compras, estoque, produção, financeiro — Fluxos 1, 2 e 6 | Etapa 2 · Q1, Q3 | **Em andamento — lotes 1 a 3 (16 de 36 telas) entregues** |
+| 4 — Gestão | Dashboard, compras, estoque, produção, financeiro — Fluxos 1, 2 e 6 | Etapa 2 · Q1, Q3 | **Em andamento — lotes 1 a 4 (20 de 36 telas) entregues** |
 | 5 — PDV | Venda, peso, pagamento combinado, caixa — Fluxo 3 | Etapa 2 · Q2, Q5 | A fazer |
 | 6 — Entregas | App do entregador e painel de atribuição — Fluxo 5 | Etapas 3 e 4 · Q11 | A fazer |
 | 7 — Auditoria | Consistência, acessibilidade, responsividade, cobertura dos fluxos | Etapas 2–6 | A fazer |
@@ -17,6 +17,7 @@ Cada etapa termina com revisão e aprovação antes da seguinte. A documentaçã
 Lote 1 (entregue): Entrar · Início · Pedidos · Pedido · Mais.
 Lote 2 (entregue): Compras · Novo pedido de compra · Pedido de compra · Recebimento · Fornecedores · Fornecedor — Fluxo 1.
 Lote 3 (entregue): Estoque · Item (saldos e lotes) · Movimentações · Ajuste ou perda · Inventário.
+Lote 4 (entregue): Produção · Fichas técnicas · Ficha técnica e nova ordem · Ordem (apontamento) — Fluxo 2.
 
 Gestão administrativa, em lotes: (1) Início e Mais; (2) Compras e recebimento — Fluxo 1; (3) Estoque; (4) Produção — Fluxo 2; (5) Financeiro — Fluxo 6; (6) Pedidos, Clientes, Entregas, Relatórios, Configurações.
 Ajudam antes: Q1 (tamanho do catálogo), Q3 (produção antecipada ou sob demanda), Q4 (quem usa e em que aparelho).

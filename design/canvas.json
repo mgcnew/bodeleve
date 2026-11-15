@@ -1,1 +1,634 @@
-{"v":3,"createdOnFiles":{"v":1,"at":"2026-11-14T11:40:00Z"},"title":"Bodeleve","launch":{"view":"canvas","page":"etapa4"},"pages":[{"id":"etapa1","name":"Etapa 1 · Discovery"},{"id":"etapa2","name":"Etapa 2 · Design system"},{"id":"etapa3","name":"Etapa 3 · Loja online"},{"id":"etapa4","name":"Etapa 4 · Gestão"}],"boards":{"Main.dc.html":{"x":0,"y":0,"w":1440,"h":1200,"title":"Direção visual (proposta)"},"Arquitetura.dc.html":{"x":1520,"y":0,"w":1760,"h":1200,"title":"Arquitetura, navegação e mapa de telas"},"Fluxos.dc.html":{"x":3360,"y":0,"w":1600,"h":1040,"title":"Fluxos prioritários"},"DS-Fundamentos.dc.html":{"x":0,"y":0,"w":1440,"h":2240,"title":"Fundamentos","page":"etapa2"},"DS-Componentes.dc.html":{"x":1520,"y":0,"w":1440,"h":1600,"title":"Componentes base","page":"etapa2"},"DS-Navegacao.dc.html":{"x":3040,"y":0,"w":1760,"h":1800,"title":"Navegação e sobreposições","page":"etapa2"},"DS-Dominio.dc.html":{"x":4880,"y":0,"w":1760,"h":1800,"title":"Componentes de domínio","page":"etapa2"},"DS-Estados.dc.html":{"x":6720,"y":0,"w":1440,"h":1560,"title":"Estados","page":"etapa2"},"Loja-Inicio.dc.html":{"x":0,"y":0,"w":390,"h":2360,"title":"1 · Início","page":"etapa3","is_interactive":true,"radius":24},"Loja-Produto.dc.html":{"x":470,"y":0,"w":390,"h":1080,"title":"2 · Produto","page":"etapa3","is_interactive":true,"radius":24},"Loja-Sacola.dc.html":{"x":940,"y":0,"w":390,"h":960,"title":"3 · Sacola","page":"etapa3","is_interactive":true,"radius":24},"Loja-Confirmado.dc.html":{"x":1410,"y":0,"w":390,"h":1000,"title":"4 · Pedido confirmado","page":"etapa3","is_interactive":true,"radius":24},"Loja-Identificacao.dc.html":{"x":0,"y":2700,"w":390,"h":700,"title":"Checkout 1 · Identificação","page":"etapa3","is_interactive":true,"radius":24},"Loja-Entrega.dc.html":{"x":470,"y":2700,"w":390,"h":900,"title":"Checkout 2 · Entrega ou retirada","page":"etapa3","is_interactive":true,"radius":24},"Loja-Endereco.dc.html":{"x":940,"y":2700,"w":390,"h":880,"title":"Checkout 2b · Endereço","page":"etapa3","is_interactive":true,"radius":24},"Loja-Pagamento.dc.html":{"x":1410,"y":2700,"w":390,"h":860,"title":"Checkout 3 · Pagamento","page":"etapa3","is_interactive":true,"radius":24},"Loja-Revisao.dc.html":{"x":1880,"y":2700,"w":390,"h":1060,"title":"Checkout 4 · Revisão","page":"etapa3","is_interactive":true,"radius":24},"Loja-Categoria.dc.html":{"x":0,"y":4300,"w":390,"h":1240,"title":"Categoria","page":"etapa3","is_interactive":true,"radius":24},"Loja-Buscar.dc.html":{"x":470,"y":4300,"w":390,"h":940,"title":"Buscar","page":"etapa3","is_interactive":true,"radius":24},"Loja-Linha.dc.html":{"x":940,"y":4300,"w":390,"h":1240,"title":"Linha Bodeleve","page":"etapa3","is_interactive":true,"radius":24},"Loja-Sobre.dc.html":{"x":1410,"y":4300,"w":390,"h":1120,"title":"Sobre a Bodeleve","page":"etapa3","is_interactive":true,"radius":24},"Loja-Pedidos.dc.html":{"x":1880,"y":4300,"w":390,"h":760,"title":"Pedidos","page":"etapa3","is_interactive":true,"radius":24},"Loja-Acompanhamento.dc.html":{"x":2350,"y":4300,"w":390,"h":1040,"title":"Acompanhamento","page":"etapa3","is_interactive":true,"radius":24},"Loja-Pedido.dc.html":{"x":2820,"y":4300,"w":390,"h":760,"title":"Detalhe e recompra","page":"etapa3","is_interactive":true,"radius":24},"Loja-Perfil.dc.html":{"x":3290,"y":4300,"w":390,"h":800,"title":"Perfil","page":"etapa3","is_interactive":true,"radius":24},"Loja-Entrar.dc.html":{"x":3760,"y":4300,"w":390,"h":620,"title":"Entrar","page":"etapa3","is_interactive":true,"radius":24},"Gestao-Entrar.dc.html":{"x":0,"y":0,"w":390,"h":700,"title":"Entrar","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Inicio.dc.html":{"x":470,"y":0,"w":390,"h":1180,"title":"1 · Início","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Pedidos.dc.html":{"x":940,"y":0,"w":390,"h":860,"title":"2 · Pedidos","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Pedido.dc.html":{"x":1410,"y":0,"w":390,"h":1020,"title":"3 · Pedido","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Mais.dc.html":{"x":1880,"y":0,"w":390,"h":1060,"title":"4 · Mais","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Compras.dc.html":{"x":0,"y":1700,"w":390,"h":820,"title":"5 · Compras","page":"etapa4","is_interactive":true,"radius":24},"Gestao-CompraNova.dc.html":{"x":470,"y":1700,"w":390,"h":1180,"title":"6 · Novo pedido de compra","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Compra.dc.html":{"x":940,"y":1700,"w":390,"h":940,"title":"7 · Pedido de compra","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Recebimento.dc.html":{"x":1410,"y":1700,"w":390,"h":1240,"title":"8 · Recebimento","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Fornecedores.dc.html":{"x":1880,"y":1700,"w":390,"h":700,"title":"9 · Fornecedores","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Fornecedor.dc.html":{"x":2350,"y":1700,"w":390,"h":1080,"title":"10 · Fornecedor","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Estoque.dc.html":{"x":0,"y":3400,"w":390,"h":1500,"title":"11 · Estoque","page":"etapa4","is_interactive":true,"radius":24},"Gestao-EstoqueItem.dc.html":{"x":470,"y":3400,"w":390,"h":1180,"title":"12 · Item: saldos e lotes","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Movimentacoes.dc.html":{"x":940,"y":3400,"w":390,"h":860,"title":"13 · Movimentações","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Ajuste.dc.html":{"x":1410,"y":3400,"w":390,"h":1000,"title":"14 · Ajuste ou perda","page":"etapa4","is_interactive":true,"radius":24},"Gestao-Inventario.dc.html":{"x":1880,"y":3400,"w":390,"h":1240,"title":"15 · Inventário","page":"etapa4","is_interactive":true,"radius":24}},"order":["Main.dc.html","Arquitetura.dc.html","Fluxos.dc.html","DS-Fundamentos.dc.html","DS-Componentes.dc.html","DS-Navegacao.dc.html","DS-Dominio.dc.html","DS-Estados.dc.html","Loja-Inicio.dc.html","Loja-Produto.dc.html","Loja-Sacola.dc.html","Loja-Confirmado.dc.html","Loja-Identificacao.dc.html","Loja-Entrega.dc.html","Loja-Endereco.dc.html","Loja-Pagamento.dc.html","Loja-Revisao.dc.html","Loja-Categoria.dc.html","Loja-Buscar.dc.html","Loja-Linha.dc.html","Loja-Sobre.dc.html","Loja-Pedidos.dc.html","Loja-Acompanhamento.dc.html","Loja-Pedido.dc.html","Loja-Perfil.dc.html","Loja-Entrar.dc.html","Gestao-Entrar.dc.html","Gestao-Inicio.dc.html","Gestao-Pedidos.dc.html","Gestao-Pedido.dc.html","Gestao-Mais.dc.html","Gestao-Compras.dc.html","Gestao-CompraNova.dc.html","Gestao-Compra.dc.html","Gestao-Recebimento.dc.html","Gestao-Fornecedores.dc.html","Gestao-Fornecedor.dc.html","Gestao-Estoque.dc.html","Gestao-EstoqueItem.dc.html","Gestao-Movimentacoes.dc.html","Gestao-Ajuste.dc.html","Gestao-Inventario.dc.html"],"notes":{"titulo":{"x":0,"y":-300,"text":"Bodeleve · Etapa 1 — Discovery","kind":"title1","maxW":4960},"titulo2":{"x":0,"y":-300,"text":"Bodeleve · Etapa 2 — Design system","kind":"title1","maxW":8160,"page":"etapa2"},"titulo3":{"x":0,"y":-300,"text":"Etapa 3 — Loja online · compra","kind":"title1","maxW":1800,"page":"etapa3"},"guia3":{"x":1880,"y":0,"w":440,"page":"etapa3","fill":"orange","text":"Como testar: aperte Play em “1 · Início”. As 18 telas da loja estão ligadas.\n\nFunciona: abas Início, Buscar, Pedidos e Perfil; botão + com barra da sacola; busca de verdade (digite “queijo”); filtro por origem na categoria; quantidades; Entrega / Retirar na loja; checkout completo; acompanhar pedido; pedir de novo; entrar por código.\n\nCada tela guarda seu próprio estado: o que você muda numa tela não aparece na seguinte. A sacola e a revisão mostram sempre os mesmos 3 produtos de exemplo, e todo cartão abre o mesmo produto.\n\nHipóteses a confirmar: taxa fixa de R$ 8,00, horários de entrega, Pix / cartão na entrega / dinheiro, login por código no WhatsApp, categorias.\n\nTextos entre [colchetes] são para você preencher. Dados fictícios."},"titulo3b":{"x":0,"y":2400,"text":"Lote 2 — Checkout sem conta","kind":"title1","maxW":2270,"page":"etapa3"},"titulo3c":{"x":0,"y":4000,"text":"Lote 3 — Catálogo, marca, pedidos e conta","kind":"title1","maxW":4150,"page":"etapa3"},"titulo4":{"x":0,"y":-300,"text":"Etapa 4 — Gestão · lote 1: o dia a dia","kind":"title1","maxW":2270,"page":"etapa4"},"guia4":{"x":2350,"y":0,"w":440,"page":"etapa4","fill":"orange","text":"Como testar: aperte Play em “Entrar” ou em “1 · Início”.\n\nLote 1: o cartão de vendas e “2 pedidos novos” abrem Pedidos; filtros por situação; o #1043 abre o detalhe: Aceitar → marcar os 3 itens → Marcar como pronto.\n\nLote 2 (entre por Mais › Compras): filtros Em aberto / Recebidos; Novo pedido com quantidades e total; PC-0057 → Receber mercadoria: mude as quantidades (diminua a Nata para ver o aviso de falta), confirme e veja o que entrou no estoque e a conta a pagar criada com o valor recebido. Mais › Fornecedores → Engenho Boa Vista → Novo pedido.\n\nLote 3 (aba Estoque): filtros Todos / Baixo / Vencendo; Queijo coalho abre saldos (disponível, físico, reservado, projetado) e lotes; Movimentações com filtro; Ajustar registra uma perda com custo; Contar estoque mostra diferenças item a item e o impacto em custo.\n\nAinda não: aba Financeiro (esmaecida), Produção e demais módulos do Mais. Só o #1043, o PC-0057, o Engenho Boa Vista e o Queijo coalho abrem detalhe.\n\nDados fictícios."},"titulo4b":{"x":0,"y":1400,"text":"Lote 2 — Compras e fornecedores","kind":"title1","maxW":2740,"page":"etapa4"},"titulo4c":{"x":0,"y":3100,"text":"Lote 3 — Estoque","kind":"title1","maxW":2270,"page":"etapa4"}},"designSystems":[]}
+{
+  "attachments": {},
+  "boards": {
+    "Arquitetura.dc.html": {
+      "h": 1200,
+      "title": "Arquitetura, navegação e mapa de telas",
+      "w": 1760,
+      "x": 1520,
+      "y": 0
+    },
+    "DS-Componentes.dc.html": {
+      "h": 1600,
+      "page": "etapa2",
+      "title": "Componentes base",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "DS-Dominio.dc.html": {
+      "h": 1800,
+      "page": "etapa2",
+      "title": "Componentes de domínio",
+      "w": 1760,
+      "x": 4880,
+      "y": 0
+    },
+    "DS-Estados.dc.html": {
+      "h": 1560,
+      "page": "etapa2",
+      "title": "Estados",
+      "w": 1440,
+      "x": 6720,
+      "y": 0
+    },
+    "DS-Fundamentos.dc.html": {
+      "h": 2240,
+      "page": "etapa2",
+      "title": "Fundamentos",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "DS-Navegacao.dc.html": {
+      "h": 1800,
+      "page": "etapa2",
+      "title": "Navegação e sobreposições",
+      "w": 1760,
+      "x": 3040,
+      "y": 0
+    },
+    "Fluxos.dc.html": {
+      "h": 1040,
+      "title": "Fluxos prioritários",
+      "w": 1600,
+      "x": 3360,
+      "y": 0
+    },
+    "Gestao-Ajuste.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "14 · Ajuste ou perda",
+      "w": 390,
+      "x": 1410,
+      "y": 3400
+    },
+    "Gestao-Compra.dc.html": {
+      "h": 940,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "7 · Pedido de compra",
+      "w": 390,
+      "x": 940,
+      "y": 1700
+    },
+    "Gestao-CompraNova.dc.html": {
+      "h": 1180,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "6 · Novo pedido de compra",
+      "w": 390,
+      "x": 470,
+      "y": 1700
+    },
+    "Gestao-Compras.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "5 · Compras",
+      "w": 390,
+      "x": 0,
+      "y": 1700
+    },
+    "Gestao-Entrar.dc.html": {
+      "h": 700,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "Entrar",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "Gestao-Estoque.dc.html": {
+      "h": 1500,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "11 · Estoque",
+      "w": 390,
+      "x": 0,
+      "y": 3400
+    },
+    "Gestao-EstoqueItem.dc.html": {
+      "h": 1180,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "12 · Item: saldos e lotes",
+      "w": 390,
+      "x": 470,
+      "y": 3400
+    },
+    "Gestao-Ficha.dc.html": {
+      "h": 1720,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "18 · Ficha técnica e nova ordem",
+      "w": 390,
+      "x": 940,
+      "y": 5300
+    },
+    "Gestao-Fichas.dc.html": {
+      "h": 760,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "17 · Fichas técnicas",
+      "w": 390,
+      "x": 470,
+      "y": 5300
+    },
+    "Gestao-Fornecedor.dc.html": {
+      "h": 1080,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "10 · Fornecedor",
+      "w": 390,
+      "x": 2350,
+      "y": 1700
+    },
+    "Gestao-Fornecedores.dc.html": {
+      "h": 700,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "9 · Fornecedores",
+      "w": 390,
+      "x": 1880,
+      "y": 1700
+    },
+    "Gestao-Inicio.dc.html": {
+      "h": 1180,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "1 · Início",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "Gestao-Inventario.dc.html": {
+      "h": 1240,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "15 · Inventário",
+      "w": 390,
+      "x": 1880,
+      "y": 3400
+    },
+    "Gestao-Mais.dc.html": {
+      "h": 1060,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "4 · Mais",
+      "w": 390,
+      "x": 1880,
+      "y": 0
+    },
+    "Gestao-Movimentacoes.dc.html": {
+      "h": 860,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "13 · Movimentações",
+      "w": 390,
+      "x": 940,
+      "y": 3400
+    },
+    "Gestao-Ordem.dc.html": {
+      "h": 1460,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "19 · Ordem: apontamento",
+      "w": 390,
+      "x": 1410,
+      "y": 5300
+    },
+    "Gestao-Pedido.dc.html": {
+      "h": 1020,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "3 · Pedido",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "Gestao-Pedidos.dc.html": {
+      "h": 860,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "2 · Pedidos",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "Gestao-Producao.dc.html": {
+      "h": 980,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "16 · Produção",
+      "w": 390,
+      "x": 0,
+      "y": 5300
+    },
+    "Gestao-Recebimento.dc.html": {
+      "h": 1240,
+      "is_interactive": true,
+      "page": "etapa4",
+      "radius": 24,
+      "title": "8 · Recebimento",
+      "w": 390,
+      "x": 1410,
+      "y": 1700
+    },
+    "Loja-Acompanhamento.dc.html": {
+      "h": 1040,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Acompanhamento",
+      "w": 390,
+      "x": 2350,
+      "y": 4300
+    },
+    "Loja-Buscar.dc.html": {
+      "h": 940,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Buscar",
+      "w": 390,
+      "x": 470,
+      "y": 4300
+    },
+    "Loja-Categoria.dc.html": {
+      "h": 1240,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Categoria",
+      "w": 390,
+      "x": 0,
+      "y": 4300
+    },
+    "Loja-Confirmado.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "4 · Pedido confirmado",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "Loja-Endereco.dc.html": {
+      "h": 880,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Checkout 2b · Endereço",
+      "w": 390,
+      "x": 940,
+      "y": 2700
+    },
+    "Loja-Entrar.dc.html": {
+      "h": 620,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Entrar",
+      "w": 390,
+      "x": 3760,
+      "y": 4300
+    },
+    "Loja-Entrega.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Checkout 2 · Entrega ou retirada",
+      "w": 390,
+      "x": 470,
+      "y": 2700
+    },
+    "Loja-Identificacao.dc.html": {
+      "h": 700,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Checkout 1 · Identificação",
+      "w": 390,
+      "x": 0,
+      "y": 2700
+    },
+    "Loja-Inicio.dc.html": {
+      "h": 2360,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "1 · Início",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "Loja-Linha.dc.html": {
+      "h": 1240,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Linha Bodeleve",
+      "w": 390,
+      "x": 940,
+      "y": 4300
+    },
+    "Loja-Pagamento.dc.html": {
+      "h": 860,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Checkout 3 · Pagamento",
+      "w": 390,
+      "x": 1410,
+      "y": 2700
+    },
+    "Loja-Pedido.dc.html": {
+      "h": 760,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Detalhe e recompra",
+      "w": 390,
+      "x": 2820,
+      "y": 4300
+    },
+    "Loja-Pedidos.dc.html": {
+      "h": 760,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Pedidos",
+      "w": 390,
+      "x": 1880,
+      "y": 4300
+    },
+    "Loja-Perfil.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Perfil",
+      "w": 390,
+      "x": 3290,
+      "y": 4300
+    },
+    "Loja-Produto.dc.html": {
+      "h": 1080,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "2 · Produto",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "Loja-Revisao.dc.html": {
+      "h": 1060,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Checkout 4 · Revisão",
+      "w": 390,
+      "x": 1880,
+      "y": 2700
+    },
+    "Loja-Sacola.dc.html": {
+      "h": 960,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "3 · Sacola",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "Loja-Sobre.dc.html": {
+      "h": 1120,
+      "is_interactive": true,
+      "page": "etapa3",
+      "radius": 24,
+      "title": "Sobre a Bodeleve",
+      "w": 390,
+      "x": 1410,
+      "y": 4300
+    },
+    "Main.dc.html": {
+      "h": 1200,
+      "title": "Direção visual (proposta)",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-11-14T11:40:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "page": "etapa4",
+    "view": "canvas"
+  },
+  "noteOrder": [
+    "titulo",
+    "titulo2",
+    "titulo3",
+    "guia3",
+    "titulo3b",
+    "titulo3c",
+    "titulo4",
+    "guia4",
+    "titulo4b",
+    "titulo4c",
+    "titulo4d"
+  ],
+  "notes": {
+    "guia3": {
+      "fill": "orange",
+      "page": "etapa3",
+      "text": "Como testar: aperte Play em “1 · Início”. As 18 telas da loja estão ligadas.\n\nFunciona: abas Início, Buscar, Pedidos e Perfil; botão + com barra da sacola; busca de verdade (digite “queijo”); filtro por origem na categoria; quantidades; Entrega / Retirar na loja; checkout completo; acompanhar pedido; pedir de novo; entrar por código.\n\nCada tela guarda seu próprio estado: o que você muda numa tela não aparece na seguinte. A sacola e a revisão mostram sempre os mesmos 3 produtos de exemplo, e todo cartão abre o mesmo produto.\n\nHipóteses a confirmar: taxa fixa de R$ 8,00, horários de entrega, Pix / cartão na entrega / dinheiro, login por código no WhatsApp, categorias.\n\nTextos entre [colchetes] são para você preencher. Dados fictícios.",
+      "w": 440,
+      "x": 1880,
+      "y": 0
+    },
+    "guia4": {
+      "fill": "orange",
+      "page": "etapa4",
+      "text": "Como testar: aperte Play em “Entrar” ou em “1 · Início”.\n\nLote 1: o cartão de vendas e “2 pedidos novos” abrem Pedidos; filtros por situação; o #1043 abre o detalhe: Aceitar → marcar os 3 itens → Marcar como pronto.\n\nLote 2 (entre por Mais › Compras): filtros Em aberto / Recebidos; Novo pedido com quantidades e total; PC-0057 → Receber mercadoria: mude as quantidades (diminua a Nata para ver o aviso de falta), confirme e veja o que entrou no estoque e a conta a pagar criada com o valor recebido. Mais › Fornecedores → Engenho Boa Vista → Novo pedido.\n\nLote 3 (aba Estoque): filtros Todos / Baixo / Vencendo; Queijo coalho abre saldos (disponível, físico, reservado, projetado) e lotes; Movimentações com filtro; Ajustar registra uma perda com custo; Contar estoque mostra diferenças item a item e o impacto em custo.\n\nLote 4 (Mais › Produção, ou “Em produção” no início): filtros por situação; OP-0032 → aponte o consumo real e as unidades boas, veja o custo real por unidade e conclua (entra o lote no estoque, saem os insumos). Fichas técnicas → Queijo coalho: mude as fornadas e veja o que falta de insumo antes de criar a ordem.\n\nAinda não: aba Financeiro (esmaecida) e demais módulos do Mais. Só o #1043, o PC-0057, o Engenho Boa Vista, o Queijo coalho e a OP-0032 abrem detalhe.\n\nDados fictícios.",
+      "w": 440,
+      "x": 2350,
+      "y": 0
+    },
+    "titulo": {
+      "kind": "title1",
+      "maxW": 4960,
+      "text": "Bodeleve · Etapa 1 — Discovery",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "titulo2": {
+      "kind": "title1",
+      "maxW": 8000,
+      "page": "etapa2",
+      "text": "Bodeleve · Etapa 2 — Design system",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "titulo3": {
+      "kind": "title1",
+      "maxW": 1800,
+      "page": "etapa3",
+      "text": "Etapa 3 — Loja online · compra",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "titulo3b": {
+      "kind": "title1",
+      "maxW": 2270,
+      "page": "etapa3",
+      "text": "Lote 2 — Checkout sem conta",
+      "w": 240,
+      "x": 0,
+      "y": 2400
+    },
+    "titulo3c": {
+      "kind": "title1",
+      "maxW": 4150,
+      "page": "etapa3",
+      "text": "Lote 3 — Catálogo, marca, pedidos e conta",
+      "w": 240,
+      "x": 0,
+      "y": 4000
+    },
+    "titulo4": {
+      "kind": "title1",
+      "maxW": 2270,
+      "page": "etapa4",
+      "text": "Etapa 4 — Gestão · lote 1: o dia a dia",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "titulo4b": {
+      "kind": "title1",
+      "maxW": 2740,
+      "page": "etapa4",
+      "text": "Lote 2 — Compras e fornecedores",
+      "w": 240,
+      "x": 0,
+      "y": 1400
+    },
+    "titulo4c": {
+      "kind": "title1",
+      "maxW": 2270,
+      "page": "etapa4",
+      "text": "Lote 3 — Estoque",
+      "w": 240,
+      "x": 0,
+      "y": 3100
+    },
+    "titulo4d": {
+      "kind": "title1",
+      "maxW": 1800,
+      "page": "etapa4",
+      "text": "Lote 4 — Produção",
+      "w": 240,
+      "x": 0,
+      "y": 5000
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Arquitetura.dc.html",
+    "Fluxos.dc.html",
+    "DS-Fundamentos.dc.html",
+    "DS-Componentes.dc.html",
+    "DS-Navegacao.dc.html",
+    "DS-Dominio.dc.html",
+    "DS-Estados.dc.html",
+    "Loja-Inicio.dc.html",
+    "Loja-Produto.dc.html",
+    "Loja-Sacola.dc.html",
+    "Loja-Confirmado.dc.html",
+    "Loja-Identificacao.dc.html",
+    "Loja-Entrega.dc.html",
+    "Loja-Endereco.dc.html",
+    "Loja-Pagamento.dc.html",
+    "Loja-Revisao.dc.html",
+    "Loja-Categoria.dc.html",
+    "Loja-Buscar.dc.html",
+    "Loja-Linha.dc.html",
+    "Loja-Sobre.dc.html",
+    "Loja-Pedidos.dc.html",
+    "Loja-Acompanhamento.dc.html",
+    "Loja-Pedido.dc.html",
+    "Loja-Perfil.dc.html",
+    "Loja-Entrar.dc.html",
+    "Gestao-Entrar.dc.html",
+    "Gestao-Inicio.dc.html",
+    "Gestao-Pedidos.dc.html",
+    "Gestao-Pedido.dc.html",
+    "Gestao-Mais.dc.html",
+    "Gestao-Compras.dc.html",
+    "Gestao-CompraNova.dc.html",
+    "Gestao-Compra.dc.html",
+    "Gestao-Recebimento.dc.html",
+    "Gestao-Fornecedores.dc.html",
+    "Gestao-Fornecedor.dc.html",
+    "Gestao-Estoque.dc.html",
+    "Gestao-EstoqueItem.dc.html",
+    "Gestao-Movimentacoes.dc.html",
+    "Gestao-Ajuste.dc.html",
+    "Gestao-Inventario.dc.html",
+    "Gestao-Producao.dc.html",
+    "Gestao-Fichas.dc.html",
+    "Gestao-Ficha.dc.html",
+    "Gestao-Ordem.dc.html"
+  ],
+  "pages": [
+    {
+      "id": "etapa1",
+      "name": "Etapa 1 · Discovery"
+    },
+    {
+      "id": "etapa2",
+      "name": "Etapa 2 · Design system"
+    },
+    {
+      "id": "etapa3",
+      "name": "Etapa 3 · Loja online"
+    },
+    {
+      "id": "etapa4",
+      "name": "Etapa 4 · Gestão"
+    }
+  ],
+  "title": "Bodeleve",
+  "v": 3
+}

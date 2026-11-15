@@ -19,7 +19,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D10 | 2026-11-14 | Etapa 1 aprovada em bloco ("pode seguir"): valem as propostas P-A a P-I abaixo | Usuário |
 | D11 | 2026-11-14 | Etapa 2 (design system) aprovada ("pode continuar para próxima fase"): valem P-J a P-P | Usuário |
 | D12 | 2026-11-14 | Etapa 3 entregue em lotes; lote 1 = Início, Produto, Sacola, Pedido confirmado; lote 2 = checkout; lote 3 = catálogo, marca, pedidos e conta | Usuário |
-| D13 | 2026-11-14 | Etapa 3 (loja) considerada aprovada ("continue"); Etapa 4 (gestão) iniciada em lotes; lote 1 = Entrar, Início, Pedidos, Pedido, Mais; lote 2 = Compras e Fornecedores; lote 3 = Estoque | Usuário |
+| D13 | 2026-11-14 | Etapa 3 (loja) considerada aprovada ("continue"); Etapa 4 (gestão) iniciada em lotes; lote 1 = Entrar, Início, Pedidos, Pedido, Mais; lote 2 = Compras e Fornecedores; lote 3 = Estoque; lote 4 = Produção | Usuário |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -82,6 +82,11 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-G12 | Perda e consumo interno registram lote, motivo e custo; correção de contagem também pode somar | — |
 | H-G13 | Inventário por área (ex.: Queijos e laticínios), com diferença em unidades e em custo antes de aplicar | Q1 |
 | H-G14 | Leite e coalho são matérias-primas compradas; queijos e doce de leite são produzidos na casa | Q3 |
+| H-G15 | Produção antecipada e sob demanda convivem: cada ordem diz se vai "para estoque" ou "para um pedido" | Q3 |
+| H-G16 | Ficha técnica por fornada (ex.: 10 un de queijo coalho), com custo por unidade calculado e margem sobre o preço | Q3 |
+| H-G17 | Criar ordem confere insumos; se falta e há compra chegando, avisa; se não, a ordem fica planejada | H1 |
+| H-G18 | Ao concluir a ordem: consumo real e unidades boas são apontados, o lote do acabado entra no estoque e o custo real substitui o previsto | — |
+| H-G19 | Gás e energia entram na ficha como custo indireto estimado por fornada | Q3 |
 | H-G6 | "A receber" inclui cartões a liquidar e fiado | Q13 |
 
 ## Pendências
