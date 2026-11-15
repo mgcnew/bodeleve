@@ -221,3 +221,15 @@ Rotas em `app/src/app/routes.tsx`; telas em `app/src/pages/loja/`; moldura (topo
 | Entrar | `/entrar` (`?next=`) | `LoginPage.tsx` |
 | Catálogo do design system (interno) | `/design-system` | `gallery/Gallery.tsx` |
 
+## Gestão no código (Etapa 4)
+
+Rotas em `app/src/app/routes.tsx` (`/gestao/...`); telas em `app/src/pages/gestao/`; moldura, menu e acesso por papel em `app/src/ui/gestao/`. Os módulos ainda não implementados abrem uma página "chega nos próximos lotes" com o menu definitivo.
+
+| Quadro | Rota | Código | Lote |
+|---|---|---|---|
+| Entrar | `/gestao/entrar` | `LoginPage.tsx` | 1 |
+| 1 · Início | `/gestao` | `DashboardPage.tsx` | 1 |
+| 2 · Pedidos | `/gestao/pedidos` | `OrdersPage.tsx` | 1 |
+| 3 · Pedido | `/gestao/pedidos/:id` | `OrderPage.tsx` | 1 |
+| 4 · Mais | `/gestao/mais` | `MorePage.tsx` | 1 |
+

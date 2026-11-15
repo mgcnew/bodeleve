@@ -2,14 +2,16 @@ import { storefront } from '@/config/storefront'
 import { buildLines, computeTotals } from '@/domain/bag'
 import type { Order, OrderStatus, PlaceOrderInput } from '@/domain/types'
 import type { Services } from '@/services/types'
-import { categories, content, homeSections, products, seedOrders } from './seed'
+import { createAdminServices } from './adminServices'
+import { createDb } from './db'
+import { categories, content, homeSections, products } from './seed'
+import { hhmm } from './seedOrders'
 
 /**
  * Implementação SIMULADA dos serviços (D19: sem banco). Nada sai do navegador: não envia mensagem, não cobra.
  * Pedidos feitos aqui ficam no localStorage deste aparelho (H-L12).
  */
 
-const ORDERS_KEY = 'bodeleve.mock.orders'
 /** Código de teste do login (o envio real por WhatsApp depende de P8). */
 export const MOCK_LOGIN_CODE = '1234'
 
@@ -17,23 +19,10 @@ const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,
 
 type Storage = Pick<globalThis.Storage, 'getItem' | 'setItem'>
 
-function readPlaced(store: Storage | null): Order[] {
-  try {
-    const raw = store?.getItem(ORDERS_KEY)
-    return raw ? (JSON.parse(raw) as Order[]) : []
-  } catch {
-    return []
-  }
-}
-
 function randomCode(length: number): string {
   const bytes = new Uint32Array(length)
   crypto.getRandomValues(bytes)
   return Array.from(bytes, (b) => String(b % 10)).join('')
-}
-
-function hhmm(d: Date): string {
-  return `${String(d.getHours()).padStart(2, '0')}h${String(d.getMinutes()).padStart(2, '0')}`
 }
 
 export type MockOptions = {
@@ -50,7 +39,11 @@ export function createMockServices(opts: MockOptions = {}): Services {
   const now = opts.now ?? (() => new Date())
   const makeCode = opts.code ?? (() => randomCode(storefront.deliveryCodeLength))
 
-  const allOrders = (): Order[] => [...readPlaced(storage), ...(withSeed ? seedOrders : [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  const db = createDb({ storage, withSeed, now })
+  const deviceOrders = (): Order[] => {
+    const { orders, deviceOrderIds } = db.read()
+    return orders.filter((o) => deviceOrderIds.includes(o.id)).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  }
 
   return {
     catalog: {
@@ -83,12 +76,12 @@ export function createMockServices(opts: MockOptions = {}): Services {
         const totals = computeTotals(lines, input.fulfillment, storefront.deliveryFeeCents)
         const windows = input.fulfillment === 'delivery' ? storefront.deliveryWindows : storefront.pickupWindows
         const window = windows.find((w) => w.id === input.windowId) ?? windows[0]
-        const existing = [...readPlaced(storage), ...seedOrders]
-        const nextId = Math.max(1042, ...existing.map((o) => Number(o.id) || 0)) + 1
+        const nextId = Math.max(1044, ...db.read().orders.map((o) => Number(o.id) || 0)) + 1
         const created = now()
         const status: OrderStatus = 'received'
         const order: Order = {
           id: String(nextId).padStart(4, '0'),
+          channel: 'online',
           createdAt: created.toISOString(),
           status,
           fulfillment: input.fulfillment,
@@ -99,20 +92,24 @@ export function createMockServices(opts: MockOptions = {}): Services {
           contact: input.contact,
           address: input.fulfillment === 'delivery' ? input.address : null,
           window,
-          payment: input.payment,
+          // Sem provedor de pagamento (D21) nada é cobrado: o pedido entra como não pago em qualquer forma.
+          payment: { ...input.payment, paid: false },
           deliveryCode: makeCode(),
           etaLabel: null,
           courierName: null,
           stepTimes: { received: hhmm(created) },
         }
-        storage?.setItem(ORDERS_KEY, JSON.stringify([order, ...readPlaced(storage)]))
+        db.update((st) => {
+          st.orders.push(order)
+          st.deviceOrderIds.push(order.id)
+        })
         return order
       },
       async listOrders() {
-        return allOrders()
+        return deviceOrders()
       },
       async getOrder(id) {
-        return allOrders().find((o) => o.id === id) ?? null
+        return deviceOrders().find((o) => o.id === id) ?? null
       },
     },
 
@@ -140,5 +137,7 @@ export function createMockServices(opts: MockOptions = {}): Services {
         return content
       },
     },
+
+    admin: createAdminServices({ db, now }),
   }
 }

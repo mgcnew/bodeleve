@@ -64,7 +64,7 @@ describe('compra como convidado, de ponta a ponta', () => {
 
     await user.click(screen.getByRole('button', { name: /Confirmar pedido/ }))
     await screen.findByRole('heading', { name: 'Pedido confirmado' })
-    expect(router.state.location.pathname).toBe('/pedido-confirmado/1043')
+    expect(router.state.location.pathname).toBe('/pedido-confirmado/1045')
     expect(screen.getByText('4821')).toBeInTheDocument() // código de entrega
     expect(screen.getByText(/Nada foi cobrado/)).toBeInTheDocument() // Pix simulado (D21)
 
@@ -88,7 +88,7 @@ describe('compra como convidado, de ponta a ponta', () => {
     expect(await screen.findByText('Grátis')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /Confirmar pedido/ }))
     await screen.findByRole('heading', { name: 'Pedido confirmado' })
-    expect(router.state.location.pathname).toBe('/pedido-confirmado/1043')
+    expect(router.state.location.pathname).toBe('/pedido-confirmado/1045')
     expect(screen.queryByText('Código de entrega')).not.toBeInTheDocument()
   })
 
@@ -206,7 +206,7 @@ describe('pedidos e conta', () => {
     renderApp('/pedidos/1042', { withSeedOrders: true })
     expect(await screen.findByText('Previsão de entrega')).toBeInTheDocument()
     expect(screen.getByText('4821')).toBeInTheDocument()
-    expect(screen.getByText('15h12 · com Carlos, entregador da casa')).toBeInTheDocument()
+    expect(screen.getByText(/^\d{2}h\d{2} · com Carlos, entregador da casa$/)).toBeInTheDocument()
   })
 
   it('lista separa "em andamento" de "anteriores"', async () => {

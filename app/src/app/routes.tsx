@@ -19,9 +19,17 @@ import { ProductPage } from '@/pages/loja/ProductPage'
 import { ProfilePage } from '@/pages/loja/ProfilePage'
 import { ReviewPage } from '@/pages/loja/ReviewPage'
 import { SearchPage } from '@/pages/loja/SearchPage'
+import { GestaoLayout, type GestaoHandle } from '@/ui/gestao/GestaoLayout'
+import { DashboardPage } from '@/pages/gestao/DashboardPage'
+import { AdminLoginPage } from '@/pages/gestao/LoginPage'
+import { ModulePlaceholder } from '@/pages/gestao/ModulePlaceholder'
+import { MorePage } from '@/pages/gestao/MorePage'
+import { AdminOrderPage } from '@/pages/gestao/OrderPage'
+import { AdminOrdersPage } from '@/pages/gestao/OrdersPage'
 import { AppRoot } from './AppRoot'
 import s from '@/ui/loja/loja.module.css'
 
+const g = (module: GestaoHandle['module'], tabs = false): GestaoHandle => ({ module, tabs })
 const tabs: LojaHandle = { tabs: true }
 const tabsAndBag: LojaHandle = { tabs: true, bagBar: true }
 
@@ -42,6 +50,28 @@ export const routes: RouteObject[] = [
     element: <AppRoot />,
     children: [
       { path: 'design-system', element: <Gallery /> },
+      { path: 'gestao/entrar', element: <AdminLoginPage /> },
+      {
+        path: 'gestao',
+        element: <GestaoLayout />,
+        children: [
+          { index: true, element: <DashboardPage />, handle: g('dashboard', true) },
+          { path: 'pedidos', element: <AdminOrdersPage />, handle: g('orders', true) },
+          { path: 'pedidos/:id', element: <AdminOrderPage />, handle: g('orders') },
+          { path: 'mais', element: <MorePage />, handle: { tabs: true } satisfies GestaoHandle },
+          { path: 'estoque/*', element: <ModulePlaceholder />, handle: g('stock', true) },
+          { path: 'financeiro/*', element: <ModulePlaceholder />, handle: g('finance', true) },
+          { path: 'compras/*', element: <ModulePlaceholder />, handle: g('purchasing') },
+          { path: 'fornecedores/*', element: <ModulePlaceholder />, handle: g('purchasing') },
+          { path: 'producao/*', element: <ModulePlaceholder />, handle: g('production') },
+          { path: 'produtos/*', element: <ModulePlaceholder />, handle: g('stock') },
+          { path: 'clientes/*', element: <ModulePlaceholder />, handle: g('orders') },
+          { path: 'entregas/*', element: <ModulePlaceholder />, handle: g('deliveries') },
+          { path: 'relatorios/*', element: <ModulePlaceholder />, handle: g('dashboard') },
+          { path: 'configuracoes/*', element: <ModulePlaceholder />, handle: g('team') },
+          { path: '*', element: <ModulePlaceholder /> },
+        ],
+      },
       {
         element: <LojaLayout />,
         children: [

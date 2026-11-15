@@ -47,3 +47,26 @@ export function formatFullDate(iso: string): string {
   const d = new Date(iso)
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
 }
+
+/** "15h20" a partir de um ISO, no horário do aparelho. */
+export function formatClock(iso: string | Date): string {
+  const d = typeof iso === 'string' ? new Date(iso) : iso
+  return `${String(d.getHours()).padStart(2, '0')}h${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+/** "dd/MM" a partir de um ISO. */
+export function formatDayMonth(iso: string): string {
+  const d = new Date(iso)
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+/** "Sábado, 14 de novembro" */
+export function formatLongDate(d: Date): string {
+  const text = d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+export function greeting(d: Date): string {
+  const h = d.getHours()
+  return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'
+}

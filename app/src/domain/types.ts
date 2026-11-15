@@ -36,7 +36,15 @@ export type Address = {
 
 export type Contact = { name: string; phone: string }
 
-export type OrderStatus = 'received' | 'preparing' | 'out_for_delivery' | 'delivered' | 'ready_for_pickup' | 'picked_up' | 'cancelled'
+export type OrderStatus =
+  | 'received'
+  | 'preparing'
+  | 'ready_for_delivery'
+  | 'out_for_delivery'
+  | 'delivered'
+  | 'ready_for_pickup'
+  | 'picked_up'
+  | 'cancelled'
 
 export type OrderItem = {
   productId: string
@@ -49,6 +57,8 @@ export type OrderItem = {
 export type Order = {
   /** Número exibido ao cliente: "1042". */
   id: string
+  /** Online (loja) ou balcão (PDV). Venda de balcão entra concluída (H-G5). */
+  channel: 'online' | 'pos'
   createdAt: string
   status: OrderStatus
   fulfillment: Fulfillment
@@ -59,7 +69,7 @@ export type Order = {
   contact: Contact
   address: Address | null
   window: TimeWindow
-  payment: { method: PaymentMethod; changeForCents: number | null }
+  payment: { method: PaymentMethod; changeForCents: number | null; paid: boolean }
   /** Código que o cliente informa ao entregador (H6, H-L4). */
   deliveryCode: string
   /** "Hoje, 15h40" */

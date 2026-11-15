@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { buildTimeline, isInProgress } from './orders'
-import { seedOrders } from '@/mocks/seed'
+import { buildSeedOrders } from '@/mocks/seedOrders'
+
+const seedOrders = buildSeedOrders(new Date('2026-11-15T15:30:00-03:00'))
 
 const byId = (id: string) => seedOrders.find((o) => o.id === id)!
 
@@ -8,7 +10,7 @@ describe('linha do tempo do pedido', () => {
   it('pedido 1042 (saiu para entrega): 2 concluídas, 1 atual, 1 futura — como no quadro', () => {
     const t = buildTimeline(byId('1042'))
     expect(t.map((x) => x.state)).toEqual(['done', 'done', 'current', 'future'])
-    expect(t[2].detail).toBe('15h12 · com Carlos, entregador da casa')
+    expect(t[2].detail).toMatch(/^\d{2}h\d{2} · com Carlos, entregador da casa$/) // horário é relativo ao "agora" do seed
   })
   it('recém-confirmado: "Pedido recebido" já feito e "Em preparo" atual', () => {
     const t = buildTimeline({ ...byId('1042'), status: 'received', courierName: null, stepTimes: { received: '14h52' } })

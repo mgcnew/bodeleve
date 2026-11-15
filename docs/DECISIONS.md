@@ -29,6 +29,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D20 | 2026-11-15 | Implementação segue de fase em fase sem parar; o que depender do dono vai para as pendências abaixo e é revisto no fim | Usuário |
 | D21 | 2026-11-15 | Pagamentos reais (Pix, cartão) e envio real de mensagens (WhatsApp) continuam fora até aprovação expressa; entram só como interfaces com versão simulada | Usuário |
 | D22 | 2026-11-15 | Etapa 3 (loja) implementada em `app/`: 18 telas, checkout como convidado em 4 etapas, pedidos do aparelho e login por código de teste, tudo sobre serviços simulados (`app/src/mocks`). Sem pagamento real, sem mensagem real, sem banco | Usuário (D18–D21) |
+| D23 | 2026-11-15 | Etapa 4 (Gestão) iniciada em `app/` pelo lote 1 de D13 — Entrar, Início, Pedidos, Pedido e Mais — sobre o mesmo banco simulado da loja: pedido feito na loja entra como novo na fila da gestão e o status volta para o cliente | Usuário (D18–D21) |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -156,6 +157,20 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-I12 | Computador (≥ 1024 px): topo com seções, busca e sacola; foto da casa aparece na faixa de abertura; grade de 4 colunas; checkout em coluna de até 560 px. "Produtos" no topo leva a Buscar (não há tela "todos os produtos") | LojaLayout |
 | H-I13 | Pedidos de exemplo (1042, 1017, 0988) aparecem só em desenvolvimento; numeração de novos pedidos segue de 1043 | `main.tsx` · `mocks/services.ts` |
 
+## Hipóteses de implementação da Gestão — a confirmar
+
+| ID | O que foi feito | Onde |
+|---|---|---|
+| H-I14 | O quadro de permissões não cita Produtos nem Clientes: Produtos e categorias seguem o acesso de "Estoque"; Clientes seguem o de "Pedidos" | `permissions/index.ts` |
+| H-I15 | Entregador não usa a Gestão: se entrar, vê "Entregadores usam o app de Entregas" (o app chega na Etapa 6) | `ui/gestao/GestaoLayout.tsx` |
+| H-I16 | Quem entra cai na primeira tela que seu papel acessa (atendente cai em Pedidos) | `ui/gestao/modules.ts` |
+| H-I17 | "Pedidos em aberto" do Início conta só o que pede ação da casa (novos + em preparo), como no quadro; prontos e em rota ficam nos filtros da lista | `mocks/adminServices.ts` |
+| H-I18 | Vendas da internet no Início são a soma dos pedidos do dia (R$ 454,50 nos 6 pedidos de exemplo); o quadro mostra R$ 392,50, que não bate com a lista de pedidos do próprio quadro. Balcão, ontem, contas e alertas de estoque ainda são valores de exemplo até os módulos respectivos existirem | `mocks/adminSeed.ts` |
+| H-I19 | Pedido da loja nasce "não pago" em qualquer forma de pagamento: sem provedor (D21) nada é cobrado nem confirmado | `mocks/services.ts` |
+| H-I20 | Pedido pronto pode ser desfeito (volta para "Separando"); "Em rota" e "Entregue" virão da entrega (Etapa 6) | `domain/orderFlow.ts` |
+| H-I21 | A lista de pedidos mostra só os abertos; concluídos ficam para o histórico/relatórios | `OrdersPage.tsx` |
+| H-I22 | Em desenvolvimento, a entrada mostra as contas de exemplo e a senha `bodeleve`; nada disso aparece em produção | `pages/gestao/LoginPage.tsx` |
+
 ## Pendências
 
 O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
@@ -181,6 +196,9 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P17 | Decidir se "Produtos" no topo do computador deve levar a uma página com todos os produtos (hoje leva a Buscar) | Loja no computador | H-I12 |
 | P18 | Passada visual da loja em celular, tablet e computador, inclusive checkout no tablet e a barra de sacola sobre as abas | Loja | AUDIT.md A1 |
 | P19 | Status do pedido ao vivo para o cliente (e quem o muda na Gestão) | Loja · Acompanhamento | Etapa 7 |
+| P20 | Confirmar o acesso de Produtos e Clientes por papel (H-I14) e se entregador deve ter qualquer tela na Gestão (H-I15) | Gestão | `permissions/` |
+| P21 | Quadro "Pedidos" mostra internet R$ 392,50 e seis pedidos que somam R$ 454,50: dizer qual valor vale, ou corrigir o desenho | Gestão · Início | H-I18 |
+| P22 | Desenhar o estado de pedido "aguardando pagamento do Pix" na fila da gestão e a regra de quando segue sem pagar | Gestão · Pedidos | H-I19, P14 |
 
 Marcadores de conteúdo nas telas:
 
