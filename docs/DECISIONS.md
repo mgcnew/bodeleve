@@ -31,6 +31,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D22 | 2026-11-15 | Etapa 3 (loja) implementada em `app/`: 18 telas, checkout como convidado em 4 etapas, pedidos do aparelho e login por código de teste, tudo sobre serviços simulados (`app/src/mocks`). Sem pagamento real, sem mensagem real, sem banco | Usuário (D18–D21) |
 | D23 | 2026-11-15 | Etapa 4 (Gestão) iniciada em `app/` pelo lote 1 de D13 — Entrar, Início, Pedidos, Pedido e Mais — sobre o mesmo banco simulado da loja: pedido feito na loja entra como novo na fila da gestão e o status volta para o cliente | Usuário (D18–D21) |
 | D24 | 2026-11-15 | Etapa 4, lote 2 (Compras e Fornecedores) implementado: pedido de compra com sugestão pelo estoque mínimo, recebimento item a item com lote e validade, recebimento parcial, conta a pagar criada no recebimento, e modelo de estoque por movimentações (saldo nunca editável). Envio ao fornecedor só simulado | Usuário (D18–D21) |
+| D25 | 2026-11-15 | Etapa 4, lote 3 (Estoque) implementado: visão geral, item (disponível = físico − reservado, projetado, lotes pelo que vence primeiro), movimentações com saldo, perda/consumo/correção e inventário por área. Início passa a calcular "estoque baixo" e "lotes vencendo" dos dados | Usuário (D18–D21) |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -185,6 +186,19 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-I29 | A lista de compras põe em "Recebidos" todos os recebidos (4 nos dados de exemplo: os 2 do quadro Compras e os 2 do histórico do quadro Fornecedor) | `purchasing.tsx` |
 | H-I30 | Itens de exemplo de PC-0053 e PC-0049 foram escolhidos para fechar os totais dos quadros (R$ 420,00 recebido e R$ 236,40) | `mocks/stockSeed.ts` |
 
+## Hipóteses de implementação do Estoque — a confirmar
+
+| ID | O que foi feito | Onde |
+|---|---|---|
+| H-I31 | Reservado = unidades dos pedidos online ainda na casa (novo, em preparo, pronto) + reservas feitas à mão; ao sair para entrega ou ser retirado, o pedido deixa de reservar e vira saída de venda (Etapas 5 e 6) | `domain/stock.ts` |
+| H-I32 | O nível de estoque (baixo/sem) olha o disponível, não o físico: "Estoque baixo" = disponível no mínimo ou abaixo | `domain/stock.ts` |
+| H-I33 | Há uma reserva manual de exemplo (3 un de queijo coalho, "Encomenda de sábado") para o reservado do quadro (6 un) fechar: os pedidos de exemplo reservam só 3 | `mocks/stockSeed.ts` |
+| H-I34 | Os saldos de exemplo seguem o quadro Estoque pelo "disponível"; o físico inclui o reservado pelos pedidos abertos. Por isso o inventário mostra, em alguns itens, um "sistema" 1 un acima do quadro. Carne de sol é controlada por pacote de 500 g, não por kg | `mocks/stockSeed.ts` |
+| H-I35 | Ajuste, perda e contagem nunca apagam histórico: "Desfazer" e "Corrigir contagem" lançam o movimento contrário. Perda/saída não passa do saldo do lote | `domain/stock.ts` |
+| H-I36 | Inventário: a falta sai do lote que vence primeiro (pode atravessar lotes); a sobra entra no lote mais recente | `applyCount` |
+| H-I37 | O valor do estoque é a soma de saldo × custo de cada lote ("R$ 2,0 mil" nos dados de exemplo; o quadro mostra R$ 8,4 mil com outros itens) | `stockValueCents` |
+| H-I38 | "Registrar perda" na visão geral, sem item escolhido, abre o ajuste pedindo o item primeiro | `StockAdjustPage.tsx` |
+
 ## Pendências
 
 O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
@@ -217,6 +231,9 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P24 | Escolher o provedor de WhatsApp para enviar o pedido ao fornecedor (hoje só é guardado) | Gestão · Compras | P8, D21 |
 | P25 | Os quadros Compras (2 recebidos) e Fornecedor (dois pedidos anteriores) não combinam: dizer se a lista de recebidos deve mostrar todo o histórico | Gestão · Compras | H-I29 |
 | P26 | Informar, por fornecedor: contato, e-mail, CNPJ/CPF, prazo de entrega, condição de pagamento (hoje `[marcadores]` e valores de exemplo) | Gestão · Fornecedores | P4 |
+| P27 | Informar o estoque mínimo de cada item (hoje valores de exemplo) e se Carne de sol e outros por peso serão controlados em kg | Gestão · Estoque | Q1, Q2, H-I34 |
+| P28 | Fazer a primeira contagem real de estoque (lote e validade de cada item) para trocar o inventário de exemplo | Gestão · Estoque | Q1 |
+| P29 | Confirmar a regra de reserva: ao aceitar o pedido, ou só ao pagar o Pix? E quando a reserva expira | Loja · Gestão | H-I31, Q8 |
 
 Marcadores de conteúdo nas telas:
 

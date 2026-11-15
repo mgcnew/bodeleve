@@ -31,6 +31,10 @@ import { PurchasePage } from '@/pages/gestao/PurchasePage'
 import { PurchasesPage } from '@/pages/gestao/purchasing'
 import { ReceivingPage } from '@/pages/gestao/ReceivingPage'
 import { SupplierPage, SuppliersPage } from '@/pages/gestao/suppliers'
+import { StockAdjustPage } from '@/pages/gestao/StockAdjustPage'
+import { StockCountPage } from '@/pages/gestao/StockCountPage'
+import { StockMovementsPage } from '@/pages/gestao/StockMovementsPage'
+import { StockItemPage, StockPage } from '@/pages/gestao/stock'
 import { AppRoot } from './AppRoot'
 import s from '@/ui/loja/loja.module.css'
 
@@ -64,7 +68,12 @@ export const routes: RouteObject[] = [
           { path: 'pedidos', element: <AdminOrdersPage />, handle: g('orders', true) },
           { path: 'pedidos/:id', element: <AdminOrderPage />, handle: g('orders') },
           { path: 'mais', element: <MorePage />, handle: { tabs: true } satisfies GestaoHandle },
-          { path: 'estoque/*', element: <ModulePlaceholder />, handle: g('stock', true) },
+          { path: 'estoque', element: <StockPage />, handle: g('stock', true) },
+          { path: 'estoque/contagem', element: <StockCountPage />, handle: g('stock') },
+          { path: 'estoque/ajuste', element: <StockAdjustPage />, handle: g('stock') },
+          { path: 'estoque/:id', element: <StockItemPage />, handle: g('stock') },
+          { path: 'estoque/:id/movimentacoes', element: <StockMovementsPage />, handle: g('stock') },
+          { path: 'estoque/:id/ajuste', element: <StockAdjustPage />, handle: g('stock') },
           { path: 'financeiro/*', element: <ModulePlaceholder />, handle: g('finance', true) },
           { path: 'compras', element: <PurchasesPage />, handle: g('purchasing') },
           { path: 'compras/novo', element: <NewPurchasePage />, handle: g('purchasing') },

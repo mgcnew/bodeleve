@@ -1,5 +1,6 @@
 import type { Lot, StockItem, StockMovement } from '@/domain/inventory'
 import type { PurchaseOrder, Supplier } from '@/domain/purchasing'
+import type { Reservation } from '@/domain/stock'
 
 /** Estoque, fornecedores e compras de EXEMPLO (quadros do lote 2). Datas relativas ao momento em que o banco simulado é criado. */
 
@@ -12,34 +13,40 @@ type Opening = { code: string; qty: number; expiresInDays: number | null; costCe
 type Spec = Omit<StockItem, 'lastCostCents'> & { lastCostCents: number | null; lots: Opening[] }
 
 const item = (
-  id: string, name: string, unit: string, itemType: StockItem['itemType'], minStock: number, tracksExpiry: boolean,
-  supplierId: string | null, lastCostCents: number | null, lots: Opening[],
-): Spec => ({ id, name, unit, itemType, minStock, tracksExpiry, supplierId, lastCostCents, lots })
+  id: string, name: string, unit: string, itemType: StockItem['itemType'], origin: StockItem['origin'], categoryId: string,
+  minStock: number, tracksExpiry: boolean, supplierId: string | null, lastCostCents: number | null, lots: Opening[],
+): Spec => ({ id, name, unit, itemType, origin, categoryId, minStock, tracksExpiry, supplierId, lastCostCents, lots })
 
+/**
+ * Os números seguem o quadro Estoque: "disponível" (físico − reservado) e mínimo de cada item. O físico aqui já inclui o que está
+ * reservado pelos pedidos online abertos da fila de exemplo, para o disponível fechar com o quadro (7 itens baixos, 3 vencendo).
+ */
 const specs: Spec[] = [
-  // Feitos na casa
-  item('queijo-coalho', 'Queijo coalho', '500 g', 'finished', 20, true, null, null, [
-    { code: 'QC-1107', qty: 8, expiresInDays: 5, costCents: 2100 }, { code: 'QC-1112', qty: 10, expiresInDays: 18, costCents: 2100 },
-  ]),
-  item('queijo-manteiga', 'Queijo manteiga', '500 g', 'finished', 10, true, null, null, [{ code: 'QM-1031', qty: 15, expiresInDays: 21, costCents: 2400 }]),
-  item('doce-de-leite', 'Doce de leite', '400 g', 'finished', 10, true, null, null, [{ code: 'DL-1101', qty: 12, expiresInDays: 6, costCents: 1100 }]),
+  // Feitos na casa (o queijo coalho tem histórico próprio, abaixo)
+  item('queijo-coalho', 'Queijo coalho', '500 g', 'finished', 'house', 'laticinios', 15, true, null, 1420, []),
+  item('queijo-manteiga', 'Queijo manteiga', '500 g', 'finished', 'house', 'laticinios', 5, true, null, 1680, [{ code: 'QM-1031', qty: 9, expiresInDays: 21, costCents: 1680 }]),
+  item('doce-de-leite', 'Doce de leite', '400 g', 'finished', 'house', 'laticinios', 8, true, null, 790, [{ code: 'DL-1101', qty: 10, expiresInDays: 6, costCents: 790 }]),
   // Marca Bodeleve
-  item('rapadura', 'Rapadura', '400 g', 'resale', 12, false, 'engenho', 780, [{ code: 'RP-1002', qty: 4, expiresInDays: null, costCents: 780 }]),
-  item('manteiga-de-garrafa', 'Manteiga de garrafa', '200 ml', 'resale', 8, true, null, 1800, [{ code: 'MG-1020', qty: 11, expiresInDays: 40, costCents: 1800 }]),
+  item('rapadura', 'Rapadura', '400 g', 'resale', 'brand', 'doces', 12, false, 'engenho', 780, [{ code: 'RP-1002', qty: 6, expiresInDays: null, costCents: 780 }]),
+  item('manteiga-de-garrafa', 'Manteiga de garrafa', '200 ml', 'finished', 'brand', 'laticinios', 6, true, null, 1500, [{ code: 'MG-1020', qty: 13, expiresInDays: 40, costCents: 1500 }]),
   // Revenda
-  item('carne-de-sol', 'Carne de sol', '500 g', 'resale', 8, true, 'charqueada', 2800, [{ code: 'CS-0811', qty: 10, expiresInDays: 12, costCents: 2800 }]),
-  item('charque', 'Charque', '500 g', 'resale', 5, true, 'charqueada', 3260, [{ code: 'CH-0902', qty: 8, expiresInDays: 30, costCents: 3260 }]),
-  item('requeijao', 'Requeijão', '250 g', 'resale', 10, true, 'serra', 680, [{ code: 'RQ-1109', qty: 14, expiresInDays: 9, costCents: 680 }]),
-  item('nata', 'Nata', '200 g', 'resale', 10, true, 'serra', 520, [{ code: 'NT-1110', qty: 6, expiresInDays: 7, costCents: 520 }]),
-  item('farinha-de-mandioca', 'Farinha de mandioca', '1 kg', 'resale', 20, false, 'moinho', 480, [{ code: 'FM-0921', qty: 30, expiresInDays: null, costCents: 480 }]),
-  item('tapioca-granulada', 'Tapioca granulada', '500 g', 'resale', 12, false, 'moinho', 300, [{ code: 'TG-1030', qty: 3, expiresInDays: null, costCents: 300 }]),
-  item('flocao-de-milho', 'Flocão de milho', '500 g', 'resale', 12, false, 'moinho', 250, [{ code: 'FL-0915', qty: 20, expiresInDays: null, costCents: 250 }]),
-  item('fuba', 'Fubá', '500 g', 'resale', 10, false, 'moinho', 220, [{ code: 'FB-0916', qty: 15, expiresInDays: null, costCents: 220 }]),
+  item('carne-de-sol', 'Carne de sol', '500 g', 'resale', 'resale', 'carnes', 10, true, 'charqueada', 2800, [{ code: 'CS-0811', qty: 14, expiresInDays: 12, costCents: 2800 }]),
+  item('charque', 'Charque', '500 g', 'resale', 'resale', 'carnes', 5, true, 'charqueada', 3260, [{ code: 'CH-0902', qty: 8, expiresInDays: 30, costCents: 3260 }]),
+  item('requeijao', 'Requeijão', '250 g', 'resale', 'resale', 'laticinios', 10, true, 'serra', 680, [{ code: 'RQ-1109', qty: 14, expiresInDays: 9, costCents: 680 }]),
+  item('nata', 'Nata', '200 g', 'resale', 'resale', 'laticinios', 6, true, 'serra', 520, [{ code: 'NT-1110', qty: 6, expiresInDays: 4, costCents: 520 }]),
+  item('farinha-de-mandioca', 'Farinha de mandioca', '1 kg', 'resale', 'resale', 'farinhas', 12, false, 'moinho', 480, [{ code: 'FM-0921', qty: 31, expiresInDays: null, costCents: 480 }]),
+  item('tapioca-granulada', 'Tapioca granulada', '500 g', 'resale', 'resale', 'farinhas', 10, false, 'moinho', 300, [{ code: 'TG-1030', qty: 4, expiresInDays: null, costCents: 300 }]),
+  item('flocao-de-milho', 'Flocão de milho', '500 g', 'resale', 'resale', 'farinhas', 12, false, 'moinho', 250, [{ code: 'FL-0915', qty: 20, expiresInDays: null, costCents: 250 }]),
+  item('fuba', 'Fubá', '500 g', 'resale', 'resale', 'farinhas', 10, false, 'moinho', 220, [{ code: 'FB-0916', qty: 15, expiresInDays: null, costCents: 220 }]),
+  item('melaco-de-cana', 'Melaço de cana', '500 ml', 'resale', 'resale', 'doces', 6, false, 'engenho', 950, [{ code: 'ME-0910', qty: 6, expiresInDays: null, costCents: 950 }]),
   // Matérias-primas
-  item('leite-integral', 'Leite integral', '1 L', 'raw_material', 60, true, 'serra', 310, [{ code: 'LT-1100', qty: 70, expiresInDays: 3, costCents: 310 }]),
-  item('melaco-de-cana', 'Melaço de cana', '500 ml', 'raw_material', 6, false, 'engenho', 950, [{ code: 'ME-0910', qty: 6, expiresInDays: null, costCents: 950 }]),
-  item('acucar-mascavo', 'Açúcar mascavo', '1 kg', 'raw_material', 8, false, 'engenho', 820, [{ code: 'AM-0918', qty: 10, expiresInDays: null, costCents: 820 }]),
+  item('leite-integral', 'Leite integral', '1 L', 'raw_material', null, 'laticinios', 40, true, 'serra', 310, [{ code: 'LT-1100', qty: 18, expiresInDays: 10, costCents: 310 }]),
+  item('coalho-liquido', 'Coalho líquido', '50 ml', 'raw_material', null, 'laticinios', 3, false, null, 1800, [{ code: 'CL-0905', qty: 1, expiresInDays: null, costCents: 1800 }]),
+  item('acucar-mascavo', 'Açúcar mascavo', '1 kg', 'raw_material', null, 'doces', 8, false, 'engenho', 820, [{ code: 'AM-0918', qty: 10, expiresInDays: null, costCents: 820 }]),
 ]
+
+/** Reserva à mão (encomenda de um cliente, evento): somada às reservas dos pedidos online. */
+export const reservationsSeed: Reservation[] = [{ id: 'rsv-1', itemId: 'queijo-coalho', qty: 3, ref: 'Encomenda de sábado' }]
 
 export function buildStockSeed(now: Date): { items: StockItem[]; lots: Lot[]; movements: StockMovement[] } {
   const items: StockItem[] = []
@@ -54,9 +61,28 @@ export function buildStockSeed(now: Date): { items: StockItem[]; lots: Lot[]; mo
         id: lotId, itemId: sp.id, code: o.code, expiresAt: o.expiresInDays == null ? null : at(now, o.expiresInDays),
         unitCostCents: o.costCents, receivedAt: at(now, -10), source: 'Inventário inicial',
       })
-      movements.push({ id: `mv-open-${lotId}`, itemId: sp.id, lotId, type: 'inventory', qty: o.qty, at: at(now, -10), ref: 'Inventário inicial' })
+      movements.push({ id: `mv-open-${lotId}`, itemId: sp.id, lotId, type: 'inventory', qty: o.qty, at: at(now, -10), ref: 'Inventário inicial', description: 'Inventário inicial' })
     })
   }
+
+  // Queijo coalho: histórico completo do quadro Movimentações. Saldo: 15 → 12 → 11 → 21 → 20 → 18.
+  const l1 = 'lot-queijo-coalho-1'
+  const l2 = 'lot-queijo-coalho-2'
+  lots.push(
+    { id: l1, itemId: 'queijo-coalho', code: 'QC-1107', expiresAt: at(now, 5), unitCostCents: 1420, receivedAt: at(now, -12), source: 'OP-0029' },
+    { id: l2, itemId: 'queijo-coalho', code: 'QC-1112', expiresAt: at(now, 18), unitCostCents: 1420, receivedAt: at(now, -1, 17), source: 'OP-0031' },
+  )
+  const ago = (minutes: number) => new Date(now.getTime() - minutes * 60_000).toISOString()
+  const mv = (id: string, lotId: string, type: StockMovement['type'], qty: number, atIso: string, ref: string, description: string, by?: string): StockMovement =>
+    ({ id, itemId: 'queijo-coalho', lotId, type, qty, at: atIso, ref, description, ...(by ? { by } : {}) })
+  movements.push(
+    mv('mv-qc-1', l1, 'production_in', 15, at(now, -12), 'OP-0029', 'Produção · OP-0029 · Entrada do lote QC-1107'),
+    mv('mv-qc-2', l1, 'sale_out', -3, at(now, -3, 16), 'V-0188', 'Venda no balcão'),
+    mv('mv-qc-3', l1, 'loss', -1, at(now, -2, 18), 'Ajuste manual', 'Perda · embalagem danificada', 'Ana'),
+    mv('mv-qc-4', l2, 'production_in', 10, at(now, -1, 17), 'OP-0031', 'Produção · OP-0031 · Entrada do lote QC-1112'),
+    mv('mv-qc-5', l1, 'sale_out', -1, ago(230), 'V-1037', 'Venda online · pedido #1037'),
+    mv('mv-qc-6', l1, 'sale_out', -2, ago(32), 'V-0212', 'Venda no balcão'),
+  )
   return { items, lots, movements }
 }
 

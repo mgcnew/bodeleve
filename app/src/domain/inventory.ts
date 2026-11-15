@@ -5,12 +5,18 @@
 
 export type ItemType = 'resale' | 'raw_material' | 'finished'
 
+export type ItemOrigin = 'house' | 'brand' | 'resale'
+
 export type StockItem = {
   id: string
   name: string
   /** "1 L", "250 g", "400 g" */
   unit: string
   itemType: ItemType
+  /** Origem/marca, separada do tipo de item (P-E). Matéria-prima não tem origem de venda. */
+  origin: ItemOrigin | null
+  /** Área do inventário ("Queijos e laticínios"): mesma lista de categorias da loja. */
+  categoryId: string
   /** Estoque mínimo: abaixo disso o item aparece como "estoque baixo" e entra na sugestão de compra (H-G7). */
   minStock: number
   /** Item com validade: no recebimento, a validade é obrigatória (H-G8). */
@@ -43,6 +49,14 @@ export type StockMovement = {
   at: string
   /** Documento de origem: "PC-0057", "V-0212"… */
   ref: string
+  /** Como a movimentação aparece na lista: "Venda no balcão", "Perda · embalagem danificada". */
+  description?: string
+  /** Quem lançou, quando foi à mão (ajuste, perda, contagem). */
+  by?: string
+  /** Movimentações do mesmo ajuste ou da mesma contagem. */
+  batchId?: string
+  /** Movimentação que desfaz outra (o histórico nunca é apagado). */
+  reversalOf?: string
 }
 
 export const sumMovements = (movements: StockMovement[], pick: (m: StockMovement) => boolean): number =>

@@ -14,7 +14,7 @@ export const adminUsers: Array<{ id: string; name: string; email: string; role: 
 
 /**
  * Parte do Início que ainda não vem de módulo próprio. Estes valores são de EXEMPLO e passam a ser calculados quando
- * Financeiro (lote 5), Estoque (lote 3), Produção (lote 4) e PDV (Etapa 5) existirem.
+ * Financeiro (lote 5), Produção (lote 4) e PDV (Etapa 5) existirem. Estoque baixo e lotes vencendo já são calculados.
  */
 export const dashboardSeed = {
   counterSales: { count: 26, cents: 89200 },
@@ -25,7 +25,5 @@ export const dashboardSeed = {
   alerts: [
     { id: 'rent', icon: 'alerta', title: 'Aluguel atrasado', detail: 'Venceu em 10/11 · R$ 1.800,00', href: '/gestao/financeiro/pagar' },
     { id: 'due', icon: 'financeiro', title: '2 contas vencem hoje', detail: 'R$ 640,00 · Laticínios Serra Verde e energia', href: '/gestao/financeiro/contas' },
-    { id: 'lots', icon: 'validade', title: '3 lotes vencem em até 7 dias', detail: 'Queijo coalho, Doce de leite, Nata', href: '/gestao/estoque' },
-    { id: 'low', icon: 'estoque', title: '7 itens com estoque baixo', detail: 'Tapioca granulada, Rapadura e mais 5', href: '/gestao/estoque' },
   ] satisfies DashboardAlert[],
 }

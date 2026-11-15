@@ -238,4 +238,9 @@ Rotas em `app/src/app/routes.tsx` (`/gestao/...`); telas em `app/src/pages/gesta
 | 8 · Recebimento | `/gestao/compras/:id/receber` | `ReceivingPage.tsx` | 2 |
 | 9 · Fornecedores | `/gestao/fornecedores` | `suppliers.tsx` | 2 |
 | 10 · Fornecedor | `/gestao/fornecedores/:id` | `suppliers.tsx` | 2 |
+| 11 · Estoque | `/gestao/estoque` (`?filtro=baixo\|vencendo`) | `stock.tsx` | 3 |
+| 12 · Item: saldos e lotes | `/gestao/estoque/:id` | `stock.tsx` | 3 |
+| 13 · Movimentações | `/gestao/estoque/:id/movimentacoes` | `StockMovementsPage.tsx` | 3 |
+| 14 · Ajuste ou perda | `/gestao/estoque/:id/ajuste` (ou `/gestao/estoque/ajuste`) | `StockAdjustPage.tsx` | 3 |
+| 15 · Inventário | `/gestao/estoque/contagem` | `StockCountPage.tsx` | 3 |
 

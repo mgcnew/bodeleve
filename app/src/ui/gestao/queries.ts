@@ -67,3 +67,37 @@ export function useInvalidatePurchasing() {
   return () =>
     Promise.all(['purchases', 'purchase', 'suppliers', 'supplier', 'suggest', 'dashboard'].map((k) => client.invalidateQueries({ queryKey: ['admin', k] })))
 }
+
+// ───────── Estoque ─────────
+
+export function useStockOverview() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'stock'], queryFn: () => admin.stock.overview() })
+}
+
+export function useStockItem(id: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'stock-item', id], queryFn: () => admin.stock.getItem(id!), enabled: !!id })
+}
+
+export function useStockMovements(id: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'stock-movements', id], queryFn: () => admin.stock.movements(id!), enabled: !!id })
+}
+
+export function useCountAreas() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'count-areas'], queryFn: () => admin.stock.countAreas() })
+}
+
+export function useCountItems(areaId: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'count-items', areaId], queryFn: () => admin.stock.countItems(areaId!), enabled: !!areaId })
+}
+
+/** Mexer no estoque muda saldos, sugestões de compra, separação de pedidos e o Início. */
+export function useInvalidateStock() {
+  const client = useQueryClient()
+  return () =>
+    Promise.all(['stock', 'stock-item', 'stock-movements', 'count-items', 'suggest', 'dashboard', 'order', 'orders'].map((k) => client.invalidateQueries({ queryKey: ['admin', k] })))
+}

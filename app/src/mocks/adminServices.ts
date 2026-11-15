@@ -1,8 +1,10 @@
 import { transition } from '@/domain/orderFlow'
 import { stageOf } from '@/domain/orders'
 import type { Order } from '@/domain/types'
-import type { AdminOrder, AdminServices, Dashboard, PurchaseSuggestion, PurchaseView, SupplierView } from '@/services/types'
-import { levelOf, itemBalance, nextLot } from '@/domain/inventory'
+import { adjust, applyCount, buildRows, expiringLots, lowRows, reverse, stockValueCents, undoCount, reservedByItem, type StockState } from '@/domain/stock'
+import { products } from './seed'
+import type { AdminOrder, AdminServices, Dashboard, MovementView, PurchaseSuggestion, PurchaseView, StockItemView, SupplierView } from '@/services/types'
+import { daysUntil, itemBalance, lotsFefo, nextLot } from '@/domain/inventory'
 import { orderTotal, paymentTerms, purchaseMessage, receivedTotal, suggestQty, isOpen, type PurchaseOrder } from '@/domain/purchasing'
 import { closeShortOrder, receive, reverseLastReceipt } from '@/domain/receiving'
 import { adminUsers, dashboardSeed, MOCK_ADMIN_PASSWORD } from './adminSeed'
@@ -10,6 +12,10 @@ import type { MockDb, MockState } from './db'
 import { customersSeed, hhmm } from './seedOrders'
 
 const norm = (s: string) => s.trim().toLowerCase()
+
+const stateOf = (st: MockState): StockState => ({
+  stockItems: st.stockItems, lots: st.lots, movements: st.movements, orders: st.orders, reservations: st.reservations, purchaseOrders: st.purchaseOrders,
+})
 
 const sameDay = (iso: string, t: Date) => {
   const d = new Date(iso)
@@ -126,8 +132,9 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
         return st.stockItems
           .filter((i) => i.supplierId === supplierId)
           .map<PurchaseSuggestion>((i) => {
-            const balance = itemBalance(st.movements, i.id)
-            return { itemId: i.id, name: `${i.name} ${i.unit}`, balance, min: i.minStock, level: levelOf(balance, i.minStock), lastCostCents: i.lastCostCents ?? 0, suggestedQty: suggestQty(balance, i.minStock) }
+            // A sugestão olha o que pode ser vendido agora (disponível), como o nível de estoque.
+            const r = buildRows(stateOf(st), now()).find((x) => x.itemId === i.id)!
+            return { itemId: i.id, name: `${i.name} ${i.unit}`, balance: r.available, min: i.minStock, level: r.level, lastCostCents: i.lastCostCents ?? 0, suggestedQty: suggestQty(r.available, i.minStock) }
           })
           // O que mais precisa vem primeiro.
           .sort((a, b) => b.suggestedQty - a.suggestedQty || a.name.localeCompare(b.name))
@@ -192,6 +199,106 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
       },
     },
 
+    stock: {
+      async overview() {
+        const st = db.read()
+        const s0 = stateOf(st)
+        const rows = buildRows(s0, now())
+        return {
+          lowCount: lowRows(rows).length,
+          expiringCount: expiringLots(st.lots, st.movements, st.stockItems, now()).length,
+          valueCents: stockValueCents(st),
+          rows: rows.sort((a, b) => a.name.localeCompare(b.name)),
+        }
+      },
+      async getItem(id): Promise<StockItemView | null> {
+        const st = db.read()
+        const it = st.stockItems.find((x) => x.id === id)
+        if (!it) return null
+        const row = buildRows(stateOf(st), now()).find((r) => r.itemId === id)!
+        const res = reservedByItem(st.orders, st.reservations).get(id)
+        const fefo = lotsFefo(st.lots, st.movements, id)
+        const product = products.find((p) => p.id === id)
+        return {
+          ...row,
+          unit: it.unit,
+          unitCostCents: fefo[0]?.unitCostCents ?? it.lastCostCents,
+          priceCents: product?.priceCents ?? null,
+          published: product ? product.available : null,
+          reservedOrders: res?.orders ?? 0,
+          reservedManual: res?.manual ?? 0,
+          lots: fefo.map((l, n) => ({ id: l.id, code: l.code, expiresAt: l.expiresAt, balance: l.balance, daysLeft: l.expiresAt ? daysUntil(l.expiresAt, now()) : null, isNext: n === 0 })),
+        }
+      },
+      async movements(itemId) {
+        const st = db.read()
+        const it = st.stockItems.find((x) => x.id === itemId)
+        if (!it) return null
+        const list = st.movements.filter((m) => m.itemId === itemId).sort((a, b) => a.at.localeCompare(b.at) || a.id.localeCompare(b.id))
+        let saldo = 0
+        const rows: MovementView[] = list.map((m) => {
+          saldo += m.qty
+          return {
+            id: m.id,
+            description: m.description ?? (m.type === 'purchase_in' ? `Compra · ${m.ref}` : m.ref),
+            at: m.at,
+            lotCode: st.lots.find((l) => l.id === m.lotId)?.code ?? null,
+            by: m.by ?? null,
+            qty: m.qty,
+            balanceAfter: saldo,
+            reversed: st.movements.some((x) => x.reversalOf === m.id),
+            reversalOf: m.reversalOf ?? null,
+          }
+        })
+        return { name: `${it.name} ${it.unit}`, physical: saldo, rows: rows.reverse() }
+      },
+      async adjust(input) {
+        let out!: { movementId: string; costCents: number; physicalBefore: number; physicalAfter: number; lotCode: string; itemName: string }
+        db.update((s) => {
+          const before = itemBalance(s.movements, input.itemId)
+          const m = adjust(s, { ...input, now: now() })
+          const lot = s.lots.find((l) => l.id === input.lotId)!
+          const it = s.stockItems.find((x) => x.id === input.itemId)!
+          out = { movementId: m.id, costCents: input.qty * lot.unitCostCents, physicalBefore: before, physicalAfter: itemBalance(s.movements, input.itemId), lotCode: lot.code, itemName: `${it.name} ${it.unit}` }
+        })
+        return out
+      },
+      async undoMovement(movementId, by) {
+        db.update((s) => {
+          reverse(s, movementId, by, now())
+        })
+      },
+      async countAreas() {
+        const { stockItems } = db.read()
+        const names: Record<string, string> = { laticinios: 'Queijos e laticínios', carnes: 'Carnes e embutidos', farinhas: 'Farinhas e grãos', doces: 'Doces' }
+        const areas = Object.entries(names).map(([id, name]) => ({ id, name, count: stockItems.filter((i) => i.categoryId === id).length })).filter((a) => a.count > 0)
+        return [...areas, { id: 'all', name: 'Tudo', count: stockItems.length }]
+      },
+      async countItems(areaId) {
+        const st = db.read()
+        return st.stockItems
+          .filter((i) => areaId === 'all' || i.categoryId === areaId)
+          .map((i) => {
+            const lot = lotsFefo(st.lots, st.movements, i.id)[0]
+            return { itemId: i.id, name: `${i.name} ${i.unit}`, system: itemBalance(st.movements, i.id), unitCostCents: lot?.unitCostCents ?? i.lastCostCents ?? 0 }
+          })
+          .sort((a, b) => a.name.localeCompare(b.name))
+      },
+      async applyCount(lines, by) {
+        let result = { batchId: null as string | null, adjustments: 0, deltaUnits: 0, deltaCostCents: 0 }
+        db.update((s) => {
+          const r = applyCount(s, lines, by, now())
+          result = { batchId: r.movements.length ? r.batchId : null, adjustments: new Set(r.movements.map((m) => m.itemId)).size, deltaUnits: r.deltaUnits, deltaCostCents: r.deltaCostCents }
+        })
+        return result
+      },
+      async undoCount(batchId, by) {
+        db.update((s) => {
+          undoCount(s, batchId, by, now())
+        })
+      },
+    },
+
     dashboard: {
       async get(): Promise<Dashboard> {
         const { orders } = db.read()
@@ -216,7 +323,19 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
             href: '/gestao/pedidos',
           })
         }
-        attention.push(...dashboardSeed.alerts)
+        attention.push(...dashboardSeed.alerts) // contas: valores de exemplo até o Financeiro (lote 5)
+        const stockState = stateOf(db.read())
+        const expiring = expiringLots(stockState.lots, stockState.movements, stockState.stockItems, t)
+        if (expiring.length > 0) {
+          const names = [...new Set(expiring.map((x) => x.item.name))]
+          attention.push({ id: 'lots', icon: 'validade', title: `${expiring.length} ${expiring.length === 1 ? 'lote vence' : 'lotes vencem'} em até 7 dias`, detail: names.join(', '), href: '/gestao/estoque?filtro=vencendo' })
+        }
+        const low = lowRows(buildRows(stockState, t))
+        if (low.length > 0) {
+          const first = low.slice(0, 2).map((r) => r.name.replace(/ \d+ ?(g|kg|ml|L)$/i, ''))
+          const more = low.length - first.length
+          attention.push({ id: 'low', icon: 'estoque', title: `${low.length} ${low.length === 1 ? 'item com estoque baixo' : 'itens com estoque baixo'}`, detail: more > 0 ? `${first.join(', ')} e mais ${more}` : first.join(', '), href: '/gestao/estoque?filtro=baixo' })
+        }
         return {
           salesToday: {
             totalCents: onlineCents + dashboardSeed.counterSales.cents,

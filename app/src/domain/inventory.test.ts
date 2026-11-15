@@ -57,7 +57,7 @@ describe('sugestão de compra pelo estoque mínimo (H-G7)', () => {
 })
 
 describe('validação do recebimento', () => {
-  const item = (id: string, tracksExpiry: boolean): StockItem => ({ id, name: id, unit: '1 un', itemType: 'resale', minStock: 1, tracksExpiry, supplierId: null, lastCostCents: 100 })
+  const item = (id: string, tracksExpiry: boolean): StockItem => ({ id, name: id, unit: '1 un', itemType: 'resale', origin: 'resale', categoryId: 'c', minStock: 1, tracksExpiry, supplierId: null, lastCostCents: 100 })
   const order: PurchaseOrder = {
     id: 'PC-1', supplierId: 's', status: 'sent', createdAt: '', sentAt: null, expectedAt: '', receivedAt: null, payment: 'boleto14', closedShort: false, sentVia: 'whatsapp',
     items: [{ itemId: 'leite', name: 'Leite', qty: 10, unitCostCents: 300, receivedQty: 0 }],

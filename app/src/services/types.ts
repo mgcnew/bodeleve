@@ -1,6 +1,7 @@
 import type { IconName } from '@/components'
 import type { AreaCheck, Category, HomeSection, Order, OrderItem, PlaceOrderInput, Product, StoreContent } from '@/domain/types'
 import type { StockLevel } from '@/domain/inventory'
+import type { AdjustKind, StockRow } from '@/domain/stock'
 import type { PaymentTermId, PurchaseOrder, ReceiptLine, Supplier } from '@/domain/purchasing'
 import type { ReceiveResult } from '@/domain/receiving'
 import type { Role } from '@/permissions'
@@ -143,11 +144,52 @@ export interface PurchasingService {
   reverseReceipt(id: string): Promise<PurchaseView>
 }
 
+// ───────── Estoque ─────────
+
+export type StockOverview = { lowCount: number; expiringCount: number; valueCents: number; rows: StockRow[] }
+
+export type StockLotView = { id: string; code: string; expiresAt: string | null; balance: number; daysLeft: number | null; isNext: boolean }
+
+export type StockItemView = StockRow & {
+  unit: string
+  /** Custo da última entrada (produção ou compra). */
+  unitCostCents: number | null
+  priceCents: number | null
+  /** Na loja online: publicado ou não; `null` se o item não é vendido (matéria-prima). */
+  published: boolean | null
+  reservedOrders: number
+  reservedManual: number
+  lots: StockLotView[]
+}
+
+export type MovementView = { id: string; description: string; at: string; lotCode: string | null; by: string | null; qty: number; balanceAfter: number; reversed: boolean; reversalOf: string | null }
+
+export type AdjustInput = { itemId: string; lotId: string; qty: number; kind: AdjustKind; reason: string; add?: boolean; by: string }
+
+export type CountArea = { id: string; name: string; count: number }
+export type CountItem = { itemId: string; name: string; system: number; unitCostCents: number }
+
+export interface StockService {
+  overview(): Promise<StockOverview>
+  getItem(id: string): Promise<StockItemView | null>
+  /** Mais recentes primeiro, cada uma com o saldo do item depois dela. */
+  movements(itemId: string): Promise<{ name: string; physical: number; rows: MovementView[] } | null>
+  /** Lança perda, consumo interno ou correção. Lança `insufficient` se o lote não tem o que saiu. */
+  adjust(input: AdjustInput): Promise<{ movementId: string; costCents: number; physicalBefore: number; physicalAfter: number; lotCode: string; itemName: string }>
+  /** Desfaz com um lançamento contrário (o histórico fica). */
+  undoMovement(movementId: string, by: string): Promise<void>
+  countAreas(): Promise<CountArea[]>
+  countItems(areaId: string): Promise<CountItem[]>
+  applyCount(lines: Array<{ itemId: string; counted: number }>, by: string): Promise<{ batchId: string | null; adjustments: number; deltaUnits: number; deltaCostCents: number }>
+  undoCount(batchId: string, by: string): Promise<void>
+}
+
 export type AdminServices = {
   auth: AdminAuthService
   orders: AdminOrderService
   dashboard: DashboardService
   purchasing: PurchasingService
+  stock: StockService
 }
 
 export type Services = {
