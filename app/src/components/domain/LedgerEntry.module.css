@@ -1,0 +1,9 @@
+.list { padding: 4px 16px; border-radius: var(--raio-cartao); background: var(--superficie); border: 1px solid var(--linha); margin: 0; list-style: none; }
+.entry { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--linha); font-variant-numeric: tabular-nums; }
+.entry:first-child { border-top: 0; }
+.body { flex: 1 1 0; min-width: 0; }
+.title { font-weight: 600; }
+.detail { font: var(--apoio-pequeno); color: var(--texto-secundario); }
+.side { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.amount { font-weight: 600; color: var(--texto); }
+.in { color: var(--sucesso); }

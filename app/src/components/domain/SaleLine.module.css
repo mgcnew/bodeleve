@@ -1,0 +1,5 @@
+.line { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: var(--raio-cartao); background: var(--superficie); border: 1px solid var(--linha); font-variant-numeric: tabular-nums; }
+.body { flex: 1 1 0; min-width: 0; }
+.name { font-weight: 600; }
+.detail { font: var(--apoio-pequeno); color: var(--texto-secundario); }
+.total { font-weight: 600; }

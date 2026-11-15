@@ -1,0 +1,6 @@
+.tag { display: inline-block; padding: 4px 10px; border-radius: var(--raio-campo); font: var(--etiqueta); white-space: nowrap; }
+.success { background: var(--sucesso-fundo); color: var(--sucesso); }
+.warning { background: var(--atencao-fundo); color: var(--atencao); }
+.error { background: var(--erro-fundo); color: var(--erro); }
+.info { background: var(--info-fundo); color: var(--info); }
+.neutral { background: var(--cor-creme); color: var(--cor-grafite); }

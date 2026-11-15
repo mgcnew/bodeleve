@@ -1,0 +1,2 @@
+.option { display: flex; align-items: center; gap: 12px; min-height: var(--toque-acao); cursor: pointer; }
+.input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--cor-terracota); }

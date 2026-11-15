@@ -1,0 +1,3 @@
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.method { height: var(--toque-principal); border-radius: var(--raio-cartao); border: var(--borda-campo) solid var(--linha); background: var(--superficie); color: var(--cor-grafite); font: 600 16px/24px var(--fonte-texto); }
+.on { border: 2px solid var(--cor-grafite); }

@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN — Bodeleve
 
-Status: **proposta, aguardando aprovação**. Nenhum código foi escrito, nenhum projeto Supabase foi criado e nada foi enviado ao GitHub. Pagamentos reais (Pix/cartão) e envio de mensagens (WhatsApp) **não serão implementados** até aprovação explícita; até lá ficam atrás de interfaces com implementação simulada.
+Status: **aprovado em 2026-11-15 (D18)**; Etapa 2 entregue em `app/`. Nenhum projeto Supabase foi criado (D19). Pagamentos reais (Pix/cartão) e envio de mensagens (WhatsApp) **não serão implementados** até aprovação explícita; até lá ficam atrás de interfaces com implementação simulada.
 
 **Restrição do dono (2026-11-15): não mexer em banco de dados por enquanto.** Ele ainda vai conectar o Supabase ao Claude. Até lá não se cria projeto, migration, tabela, política, função nem seed, e não se roda SQL em nenhum projeto. As únicas chamadas ao Supabase feitas nesta sessão foram de leitura (listar organizações e projetos).
 

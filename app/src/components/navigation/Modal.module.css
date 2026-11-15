@@ -1,0 +1,9 @@
+.dialog {
+  padding: 0; border: 0; background: transparent; color: var(--texto);
+  width: calc(100% - 48px); max-width: 400px; margin: auto;
+}
+.dialog::backdrop { background: var(--overlay); }
+.panel { background: var(--superficie); border-radius: var(--raio-folha); padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+.title { font: 700 20px/26px var(--fonte-titulo); }
+.description { font: var(--apoio); color: var(--texto-secundario); }
+.actions { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }

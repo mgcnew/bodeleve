@@ -1,0 +1,11 @@
+.box { padding: 16px; border-radius: var(--raio-cartao); background: var(--superficie); border: 1px solid var(--linha); }
+.eta { font: var(--apoio); color: var(--texto-secundario); margin-bottom: 12px; }
+.list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.step { display: flex; gap: 12px; align-items: flex-start; }
+.dot { flex: none; width: 24px; height: 24px; border-radius: var(--raio-pilula); display: flex; align-items: center; justify-content: center; border: 2px solid var(--linha); background: var(--superficie); }
+.done .dot { background: var(--cor-verde); border-color: var(--cor-verde); color: var(--superficie); }
+.current .dot { border-color: var(--cor-terracota); }
+.label { font-weight: 600; color: var(--texto); }
+.current .label { font-weight: 700; }
+.future .label { color: var(--texto-secundario); }
+.detail { font: var(--apoio-pequeno); color: var(--texto-secundario); }

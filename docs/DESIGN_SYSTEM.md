@@ -90,6 +90,36 @@ Todo preço, saldo e valor usa números tabulares.
 
 Folhas (bottom sheets) viram janelas centrais a partir de 768 px.
 
+## Implementação em código (Etapa 2)
+
+Os componentes estão em `app/src/components/` (grupos `base`, `navigation`, `domain`, `states`) e usam só as variáveis de `design/tokens.css`. O catálogo `app/src/gallery/` reproduz os cinco quadros `DS-*`: `cd app && npm install && npm run dev`. Testes: `npm test` (formatação, domínio, contraste dos tokens, comportamento e acessibilidade com axe). Também `npm run lint` e `npm run build`.
+
+Valores que as telas usam e `tokens.css` ainda não nomeia ficam em `app/src/styles/extras.css` (fundo escuro de folha e modal, sombra do segmento, borda de 1,5 px, raio de 10 px, fontes de rótulo, apoio pequeno e etiqueta, anel de foco). Candidatos a entrar em `tokens.css` na próxima revisão do design.
+
+### Desvios em relação aos quadros (a aprovar — P13)
+
+| Onde | O quadro | O código | Motivo |
+|---|---|---|---|
+| Ação do aviso temporário ("Desfazer") | altura mínima de 32 px | 44 px | Regra de alvo mínimo da auditoria (D17) |
+| Peso Inter | 400, 500 e 600 | também 700 | Aba ativa, destino ativo e valores em negrito usam 700; sem o arquivo o navegador fabrica um negrito falso |
+| Botão de adicionar no cartão de produto | nome "Adicionar à sacola" | "Adicionar {produto} à sacola" | Leitor de tela precisa saber qual produto |
+| Linha do tempo do pedido | só marca visual | texto oculto "concluída / etapa atual / próxima etapa" e `aria-current="step"` | Cor e forma não bastam como único sinal |
+| Estoque baixo no bloco de favorito | cor e peso | igual, com "(estoque baixo)" lido por leitor de tela | Mesma razão |
+| Controle de quantidade | caixa única de 48 px | variante `joined` (quadro) e `compact` (dois botões de 44 px, como nas telas da sacola) | As telas da loja usam a forma compacta |
+
+### Estados que o desenho não mostra (decididos no código; a confirmar — P13)
+
+- Liga/desliga desligado: trilho em `texto-secundario` com bolinha branca (contraste de 6,3 : 1 no trilho).
+- Foco por teclado em botões e links: anel de 2 px grafite com 2 px de distância (campos mantêm a borda de 2 px do quadro).
+- Pressionado dos botões secundário, discreto e destrutivo: fundo creme, terracota suave e erro suave.
+- Diferença de caixa positiva: sinal "+" no texto, sem cor de erro.
+
+### Ainda não feito
+
+- Folha e abas: fechar a folha com o botão voltar do aparelho depende do roteador (Etapa 3).
+- Foto de produto real (P3): o marcador `[FOTO DO PRODUTO]` continua.
+- Revisão com leitor de tela (A2) e teste com usuários (A3).
+
 ## Pendências
 
 - Aprovação de P-J a P-P.

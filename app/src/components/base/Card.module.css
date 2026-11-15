@@ -1,0 +1,8 @@
+.card {
+  background: var(--superficie); border: 1px solid var(--linha); border-radius: var(--raio-cartao);
+  min-width: 0;
+}
+.sm { padding: 12px; }
+.md { padding: 16px; }
+.lg { padding: 28px; }
+.flush { padding: 4px 16px; }

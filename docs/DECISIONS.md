@@ -24,6 +24,10 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D16 | 2026-11-15 | Etapa 6 (Entregas) entregue: 9 telas; próprio × parceiro mostrado pelo ajuste “perfil” nos quadros | — |
 | D17 | 2026-11-15 | Etapa 7 (auditoria) concluída: alvo mínimo de toque passa a 44 px; referências de tablet e computador; pacote de passagem (CLAUDE.md, tokens.css, mapa tela → arquivo) | — |
 | D14 | 2026-11-15 | Seguir até concluir todas as etapas sem parar; o que depender do usuário é documentado como pendência | Usuário |
+| D18 | 2026-11-15 | Fase de implementação aprovada em `docs/IMPLEMENTATION_PLAN.md` (Vite + React + TypeScript; Supabase por trás de `services/`). Começa pela Etapa 2 (design system em componentes) | Usuário |
+| D19 | 2026-11-15 | Banco de dados congelado até o dono conectar o Supabase ao Claude: nenhum projeto, migration, tabela, política, função ou seed é criado antes. A Etapa 1 do `CLAUDE.md` (Supabase) fica para depois; as telas leem `mocks/` por trás de `services/` | Usuário |
+| D20 | 2026-11-15 | Implementação segue de fase em fase sem parar; o que depender do dono vai para as pendências abaixo e é revisto no fim | Usuário |
+| D21 | 2026-11-15 | Pagamentos reais (Pix, cartão) e envio real de mensagens (WhatsApp) continuam fora até aprovação expressa; entram só como interfaces com versão simulada | Usuário |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -128,6 +132,14 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-E6 | Devolução à loja paga metade ao parceiro (exemplo: R$ 4,50) | Q11 |
 | H-E7 | Parceiro recebe por Pix semanal; entregador da casa, mensal | Q11 |
 
+## Hipóteses de implementação — a confirmar
+
+| ID | Hipótese | Depende de |
+|---|---|---|
+| H-I1 | App em `app/`, um único SPA com rotas por ambiente (`/`, `/gestao`, `/pdv`, `/entregas`). Vite em vez de Next.js: simples e bom para o PDV offline, mas a loja não tem renderização no servidor (pior para Google e pré-visualização de link no WhatsApp) | P9 |
+| H-I2 | Fontes hospedadas junto do app (`@fontsource`), não carregadas do Google Fonts: funciona sem internet no PDV e não faz pedido a terceiros. Mesmas famílias e pesos do design | — |
+| H-I3 | Trabalho em branches `claude/*`; nenhum PR aberto até o dono pedir | P10 |
+
 ## Pendências
 
 O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
@@ -142,6 +154,11 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P6 | Confirmar ou corrigir as hipóteses H-L*, H-G*, H-P*, H-E* | Todas as telas | Seções de hipóteses acima |
 | P7 | Passada visual no canvas e teste com atendente, cliente e entregador | Ajustes finos | AUDIT.md (A1, A3) |
 | P8 | Escolher provedor de pagamento (Pix/cartão) e de mensagens (WhatsApp) antes da implementação | Implementação | Q8, Q14 |
+| P9 | Decidir Vite × Next.js para a loja (H-I1): importa aparecer no Google e na pré-visualização de links? | Loja (Etapa 3) | IMPLEMENTATION_PLAN.md §1 |
+| P10 | Aprovar o formato de entrega do código: branches `claude/*` e PR quando o dono pedir (H-I3) | Todas | — |
+| P11 | Conectar o Supabase ao Claude e dizer em qual organização/região criar o projeto da Bodeleve (a conta só tem projetos de outro negócio, que não serão usados) | Etapa 1 do CLAUDE.md, tudo que for dado real | D19 |
+| P12 | Passada visual no catálogo de componentes (`cd app && npm run dev`, ou `npm run build` e abrir `dist/`) comparando com os quadros `DS-*`; ver "Desvios" em DESIGN_SYSTEM.md | Etapa 2 | DESIGN_SYSTEM.md |
+| P13 | Aprovar ou recusar os desvios de implementação listados em DESIGN_SYSTEM.md (alvo de 44 px no aviso, Inter 700, estados que o desenho não mostra) | Etapa 2 | DESIGN_SYSTEM.md |
 
 Marcadores de conteúdo nas telas:
 

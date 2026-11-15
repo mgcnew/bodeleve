@@ -1,0 +1,11 @@
+.wrap {
+  display: flex; align-items: center; gap: 10px; height: var(--toque-acao); padding: 0 14px;
+  border-radius: var(--raio-pilula); background: var(--fundo-loja);
+  border: var(--borda-campo) solid var(--linha); color: var(--texto-secundario);
+}
+.wrap:focus-within { border: 2px solid var(--cor-grafite); padding: 0 13.5px; }
+.input {
+  flex: 1 1 0; min-width: 0; border: 0; background: transparent; outline: none;
+  font: var(--corpo); color: var(--texto);
+}
+.input::placeholder { color: var(--texto-secundario); }

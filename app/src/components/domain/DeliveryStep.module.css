@@ -1,0 +1,7 @@
+.box { padding: 16px; border-radius: var(--raio-cartao); background: var(--superficie); border: 1px solid var(--linha); display: flex; flex-direction: column; gap: 12px; }
+.bars { display: flex; gap: 6px; }
+.bar { flex: 1 1 0; height: 6px; border-radius: var(--raio-pilula); background: var(--linha); }
+.done { background: var(--cor-verde); }
+.current { background: var(--cor-terracota); }
+.count { font: var(--apoio); color: var(--texto-secundario); }
+.title { font: 700 20px/26px var(--fonte-titulo); }

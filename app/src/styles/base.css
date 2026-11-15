@@ -1,0 +1,39 @@
+@import '@tokens';
+@import './extras.css';
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo-operacao);
+  color: var(--texto);
+  font: var(--corpo);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, p { margin: 0; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+a { color: var(--cor-terracota); }
+a:hover { color: var(--cor-terracota-pressionado); }
+
+:focus-visible { outline: var(--foco); outline-offset: 2px; }
+
+/* Só para leitores de tela */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Números de preço, saldo e valor sempre tabulares (DESIGN_SYSTEM.md) */
+.tabular { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}

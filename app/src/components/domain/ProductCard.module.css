@@ -1,0 +1,8 @@
+.card { padding: 10px; border-radius: var(--raio-cartao); background: var(--superficie); border: 1px solid var(--linha); display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.photo { height: 120px; border-radius: var(--raio-item); background: var(--fundo-loja); border: 1px dashed var(--texto-secundario); display: flex; align-items: center; justify-content: center; font: var(--legenda); letter-spacing: 0; color: var(--texto-secundario); overflow: hidden; }
+.photo img { width: 100%; height: 100%; object-fit: cover; }
+.badge { min-height: 24px; }
+.name { font-weight: 600; line-height: 22px; }
+.detail { font: var(--apoio-pequeno); color: var(--texto-secundario); }
+.foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.price { font-weight: 600; font-size: 18px; font-variant-numeric: tabular-nums; }

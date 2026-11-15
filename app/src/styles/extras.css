@@ -1,0 +1,15 @@
+/*
+ * Valores que as telas usam mas que design/tokens.css ainda não nomeia.
+ * Todos derivam dos tokens aprovados (grafite, linha) ou de medidas repetidas nos quadros DS-*.
+ * Candidatos a entrar em tokens.css na próxima revisão do design; até lá ficam aqui, num lugar só.
+ */
+:root {
+  --overlay: rgba(41, 38, 33, 0.45);              /* grafite 45% — fundo atrás de folha e modal */
+  --sombra-segmento: 0 1px 2px rgba(41, 38, 33, 0.12);
+  --borda-campo: 1.5px;                           /* campos, botões secundários, chips */
+  --raio-item: 10px;                              /* foto de produto, item de menu lateral */
+  --rotulo: 600 14px/20px var(--fonte-texto);     /* rótulo de campo */
+  --apoio-pequeno: 400 13px/18px var(--fonte-texto);
+  --etiqueta: 600 13px/18px var(--fonte-texto);   /* etiqueta de status */
+  --foco: 2px solid var(--cor-grafite);           /* anel de foco por teclado */
+}

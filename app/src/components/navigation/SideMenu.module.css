@@ -1,0 +1,5 @@
+.nav { width: 260px; padding: 16px 12px; border: 1px solid var(--linha); border-radius: var(--raio-folha); background: var(--superficie); display: flex; flex-direction: column; gap: 2px; }
+.brand { padding: 4px 12px 12px; font: var(--titulo-m); }
+.item { display: flex; align-items: center; gap: 12px; height: var(--toque-min); padding: 0 12px; border-radius: var(--raio-item); text-decoration: none; color: var(--cor-grafite); font: 500 15px/20px var(--fonte-texto); }
+.item:hover { color: var(--cor-grafite); background: var(--fundo-operacao); }
+.active, .active:hover { background: var(--cor-terracota-suave); color: var(--cor-terracota-pressionado); font-weight: 600; }

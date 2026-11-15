@@ -1,0 +1,9 @@
+.group {
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+  padding: 4px; border-radius: var(--raio-cartao); background: var(--fundo-loja); border: 1px solid var(--linha);
+}
+.opt {
+  min-height: var(--toque-min); border: 0; border-radius: var(--raio-campo); background: transparent;
+  color: var(--texto-secundario); font: 600 14px/20px var(--fonte-texto);
+}
+.on { background: var(--superficie); color: var(--cor-grafite); box-shadow: var(--sombra-segmento); }

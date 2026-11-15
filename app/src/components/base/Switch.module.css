@@ -1,0 +1,6 @@
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--toque-acao); }
+/* Área de toque 60 × 44 em volta do trilho de 52 × 32 (AUDIT.md) */
+.hit { flex: none; width: 60px; height: var(--toque-min); border: 0; padding: 0; background: transparent; display: flex; align-items: center; justify-content: center; }
+.track { width: 52px; height: 32px; border-radius: var(--raio-pilula); background: var(--texto-secundario); padding: 4px; display: flex; justify-content: flex-start; transition: background 0.15s; }
+.on .track { background: var(--cor-verde); justify-content: flex-end; }
+.thumb { width: 24px; height: 24px; border-radius: var(--raio-pilula); background: var(--superficie); }

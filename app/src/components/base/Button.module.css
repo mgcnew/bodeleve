@@ -1,0 +1,30 @@
+.button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: var(--toque-acao); padding: 0 20px;
+  border-radius: var(--raio-cartao); border: 0;
+  font: 600 16px/24px var(--fonte-texto);
+  text-decoration: none; white-space: nowrap;
+}
+.lg { height: var(--toque-principal); }          /* ação principal de rodapé, PDV e entregas */
+.full { width: 100%; }
+
+.primary { background: var(--cor-terracota); color: var(--superficie); }
+.primary:active:not(:disabled) { background: var(--cor-terracota-pressionado); }
+.secondary { background: transparent; color: var(--cor-grafite); border: var(--borda-campo) solid var(--cor-grafite); }
+.secondary:active:not(:disabled) { background: var(--cor-creme); }
+.ghost { background: transparent; color: var(--cor-terracota); }
+.ghost:active:not(:disabled) { background: var(--cor-terracota-suave); }
+.destructive { background: var(--superficie); color: var(--erro); border: var(--borda-campo) solid var(--erro); }
+.destructive:active:not(:disabled) { background: var(--erro-fundo); }
+
+.button:disabled { background: var(--linha); color: var(--texto-secundario); border-color: transparent; }
+
+.loading { cursor: progress; }
+.spinner {
+  width: 16px; height: 16px; border-radius: 999px; flex: none;
+  border: 2px solid color-mix(in srgb, currentColor 45%, transparent);
+  border-top-color: currentColor;
+  animation: giro 0.8s linear infinite;
+}
+.lg .spinner { width: 18px; height: 18px; }
+@keyframes giro { to { transform: rotate(360deg); } }

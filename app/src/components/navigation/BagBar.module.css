@@ -1,0 +1,9 @@
+.bar {
+  margin: 0 12px 12px; height: var(--toque-principal); padding: 0 16px; border-radius: var(--raio-cartao);
+  background: var(--cor-terracota); color: var(--superficie); text-decoration: none;
+  display: flex; align-items: center; gap: 12px; font-weight: 600;
+}
+.bar:hover { color: var(--superficie); }
+.bar:active { background: var(--cor-terracota-pressionado); }
+.text { flex: 1 1 0; }
+.total { font-variant-numeric: tabular-nums; }

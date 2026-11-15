@@ -1,0 +1,21 @@
+.group { display: inline-flex; align-items: center; }
+.btn {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; border: 0; padding: 0;
+  background: transparent; color: var(--cor-grafite);
+}
+.btn:disabled { color: var(--texto-secundario); opacity: 0.6; }
+.value { text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* joined: quadro DS-Componentes — caixa única de 48 px */
+.joined { border: var(--borda-campo) solid var(--linha); border-radius: var(--raio-cartao); overflow: hidden; background: var(--superficie); }
+.joined .btn { width: var(--toque-acao); height: var(--toque-acao); }
+.joined .plus { color: var(--cor-terracota); }
+.joined .value { min-width: 40px; }
+
+/* compact: telas da sacola — dois botões de 44 px */
+.compact { gap: 2px; }
+.compact .btn { width: var(--toque-min); height: var(--toque-min); border-radius: var(--raio-cartao); }
+.compact .minus { border: 1px solid var(--linha); background: var(--fundo-loja); }
+.compact .plus { background: var(--cor-terracota); color: var(--superficie); }
+.compact .plus:disabled { background: var(--linha); color: var(--texto-secundario); opacity: 1; }
+.compact .value { min-width: 28px; }

@@ -24,6 +24,8 @@ Plataforma da Bodeleve (Casa do Norte): loja online, gestão, PDV e app de entre
 
 ## Ordem sugerida de implementação
 
+> Banco de dados congelado até o dono conectar o Supabase (D19 em `docs/DECISIONS.md`): não crie projeto, migration, tabela, política ou seed. Pagamento e mensagens reais seguem fora (D21). Plano completo em `docs/IMPLEMENTATION_PLAN.md`.
+
 1. Supabase: projeto, Auth, tabelas do `DATA_MODEL_DRAFT.md` com `establishment_id` e RLS por papel (H-G27).
 2. Design system em componentes (tokens, botões, campos, etiquetas, selos, barras, folha, modal, estados).
 3. Loja online (Fluxo 4) — catálogo público sem login, checkout sem conta.
@@ -38,4 +40,5 @@ Antes de pagamentos reais (Pix, cartão), nota fiscal e área de entrega, confir
 
 - `docs/` — documentação do projeto
 - `design/` — telas do canvas (`*.dc.html`), índice `canvas.json`, `tokens.css`
+- `app/` — o aplicativo (Vite, React, TypeScript). `cd app && npm run dev` (catálogo do design system), `npm test`, `npm run lint`, `npm run build`. Componentes em `src/components`, tokens vêm de `../design/tokens.css`
 - `gen/` — scripts Python que geram as telas (`cd gen && python3 b16_entregas.py` regenera gestão, PDV e entregas; `b8_loja3.py` a loja; `b1`–`b5` o design system; `b17_responsivo.py` as referências de tablet e computador)

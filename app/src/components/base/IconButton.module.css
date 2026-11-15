@@ -1,0 +1,11 @@
+.btn {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: var(--toque-acao); height: var(--toque-acao);
+  border-radius: var(--raio-cartao); border: 0; padding: 0;
+}
+.dense { width: var(--toque-min); height: var(--toque-min); }
+.primary { background: var(--cor-terracota); color: var(--superficie); }
+.primary:active:not(:disabled) { background: var(--cor-terracota-pressionado); }
+.outline { background: var(--superficie); color: var(--cor-grafite); border: var(--borda-campo) solid var(--linha); }
+.plain { background: transparent; color: var(--cor-grafite); }
+.btn:disabled { background: var(--linha); color: var(--texto-secundario); }

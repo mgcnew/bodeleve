@@ -1,0 +1,6 @@
+.item { display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: var(--raio-cartao); background: var(--superficie); border: 1px solid var(--linha); }
+.photo { flex: none; width: 64px; height: 64px; border-radius: var(--raio-item); background: var(--fundo-loja); border: 1px dashed var(--texto-secundario); display: flex; align-items: center; justify-content: center; font: var(--legenda); letter-spacing: 0; color: var(--texto-secundario); text-align: center; overflow: hidden; }
+.body { flex: 1 1 0; min-width: 0; }
+.name { font-weight: 600; }
+.detail { font: var(--apoio-pequeno); color: var(--texto-secundario); font-variant-numeric: tabular-nums; }
+.trailing { font-weight: 600; font-variant-numeric: tabular-nums; }

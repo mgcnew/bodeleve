@@ -1,0 +1,4 @@
+.bar { display: flex; align-items: center; gap: 4px; height: 56px; padding: 0 4px; background: var(--superficie); border-bottom: 1px solid var(--linha); }
+.title { flex: 1 1 0; min-width: 0; font: 700 18px/24px var(--fonte-titulo); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.spacer { width: 12px; flex: none; }
+.actions { display: flex; align-items: center; }

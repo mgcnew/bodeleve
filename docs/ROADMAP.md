@@ -53,6 +53,20 @@ Antes de começar ajudam as respostas a Q6–Q10 (área e taxa de entrega, pedid
 
 Implementação com Supabase (Auth, PostgreSQL com RLS, Storage, Realtime onde fizer sentido), partindo de DATA_MODEL_DRAFT.md.
 
-## Próxima fase: implementação
+## Implementação (em andamento)
+
+Plano e stack em `IMPLEMENTATION_PLAN.md` (aprovado em D18). O banco de dados está congelado até o dono conectar o Supabase (D19).
+
+| Fase | O quê | Situação |
+|---|---|---|
+| I-1 | Supabase: projeto, Auth, tabelas, RLS | Congelada (D19, P11) |
+| I-2 | Design system em componentes | Entregue em `app/`; aguarda a passada visual do dono (P12, P13) |
+| I-3 | Loja online | Próxima |
+| I-4 | Gestão | — |
+| I-5 | PDV | — |
+| I-6 | Entregas e painel de atribuição | — |
+| I-7 | Realtime e acabamento | — |
+
+## Próxima fase: implementação (histórico)
 
 O design está completo. O pacote de passagem para o Claude Code está no repositório: `CLAUDE.md` (regras e ordem de implementação), `design/tokens.css`, `docs/SCREEN_MAP.md` (tela → arquivo) e `docs/AUDIT.md`. Antes de pagamentos reais, área de entrega e nota fiscal, resolver as pendências P2 e P8 de DECISIONS.md.

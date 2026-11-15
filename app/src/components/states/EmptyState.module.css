@@ -1,0 +1,6 @@
+.box { padding: 32px 20px; border-radius: var(--raio-cartao); background: var(--fundo-loja); border: 1px solid var(--linha); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+.error { background: var(--superficie); }
+.disc { width: 56px; height: 56px; border-radius: var(--raio-pilula); background: var(--cor-terracota-suave); color: var(--cor-terracota-pressionado); display: flex; align-items: center; justify-content: center; }
+.error .disc { background: var(--erro-fundo); color: var(--erro); }
+.title { font: 700 20px/26px var(--fonte-titulo); }
+.text { font: var(--apoio); color: var(--texto-secundario); max-width: 280px; }

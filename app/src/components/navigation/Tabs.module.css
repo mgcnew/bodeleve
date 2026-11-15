@@ -1,0 +1,6 @@
+.list { display: flex; background: var(--superficie); border-bottom: 1px solid var(--linha); }
+.tab {
+  flex: 1 1 0; height: var(--toque-acao); border: 0; background: transparent;
+  border-bottom: 3px solid transparent; color: var(--texto-secundario); font: 500 14px/20px var(--fonte-texto);
+}
+.on { border-bottom-color: var(--cor-terracota); color: var(--cor-grafite); font-weight: 700; }

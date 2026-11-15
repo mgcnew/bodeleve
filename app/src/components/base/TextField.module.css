@@ -1,0 +1,14 @@
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.label { font: var(--rotulo); }
+.input {
+  height: var(--toque-acao); width: 100%; padding: 0 14px;
+  border-radius: var(--raio-campo); border: var(--borda-campo) solid var(--linha);
+  background: var(--superficie); color: var(--texto); font: var(--corpo);
+  outline: none;
+}
+.input::placeholder { color: var(--texto-secundario); }
+.input:focus { border: 2px solid var(--cor-grafite); padding: 0 13.5px; }
+.input:disabled { background: var(--fundo-operacao); color: var(--texto-secundario); }
+.invalid, .invalid:focus { border: 2px solid var(--erro); padding: 0 13.5px; }
+.hint { display: flex; gap: 6px; align-items: center; font: var(--apoio-pequeno); color: var(--texto-secundario); }
+.error { display: flex; gap: 6px; align-items: center; font: var(--apoio-pequeno); color: var(--erro); }

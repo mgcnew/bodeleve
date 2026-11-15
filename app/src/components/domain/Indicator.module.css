@@ -1,0 +1,6 @@
+.box { padding: 14px; border-radius: var(--raio-cartao); background: var(--superficie); border: 1px solid var(--linha); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.label { font: var(--apoio-pequeno); color: var(--texto-secundario); }
+.value { font: 600 20px/26px var(--fonte-texto); font-variant-numeric: tabular-nums; color: var(--texto); }
+.warning .value { color: var(--atencao); }
+.error .value { color: var(--erro); }
+.caption { font: 400 12px/16px var(--fonte-texto); color: var(--texto-secundario); }

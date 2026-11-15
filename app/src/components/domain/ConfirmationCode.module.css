@@ -1,0 +1,6 @@
+.box { padding: 16px; border-radius: var(--raio-cartao); background: var(--superficie); border: 1px solid var(--linha); display: flex; flex-direction: column; gap: 10px; }
+.label { font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(var(--digits, 4), minmax(0, 1fr)); gap: 8px; }
+.digit { height: var(--toque-principal); width: 100%; border-radius: var(--raio-campo); border: var(--borda-campo) solid var(--linha); background: var(--superficie); text-align: center; font: var(--valor); color: var(--texto); outline: none; }
+.digit:focus { border: 2px solid var(--cor-grafite); }
+.error { border: 2px solid var(--erro); }

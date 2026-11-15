@@ -1,0 +1,4 @@
+.banner { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--raio-cartao); font: 500 14px/20px var(--fonte-texto); }
+.warning { background: var(--atencao-fundo); color: var(--cor-grafite); }
+.error { background: var(--erro-fundo); color: var(--erro); }
+.success { background: var(--sucesso-fundo); color: var(--sucesso); }

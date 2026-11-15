@@ -1,0 +1,4 @@
+.badge { display: inline-block; padding: 3px 10px; border-radius: var(--raio-pilula); font: 600 12px/18px var(--fonte-texto); white-space: nowrap; }
+.brand { background: var(--cor-terracota); color: var(--superficie); }
+.house { background: var(--cor-verde); color: var(--superficie); }
+.resale { padding: 2px 10px; border: 1px solid var(--texto-secundario); color: var(--texto-secundario); }
