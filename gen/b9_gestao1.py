@@ -181,10 +181,10 @@ grupo = lambda t, inner: f'<section style="display: flex; flex-direction: column
 mais = (titulo('Mais', 'Todos os módulos da gestão')
     + f'<main style="display: flex; flex-direction: column; gap: 20px; padding: 8px 16px 24px">'
     + grupo('Abastecer', mrow('compras', 'Compras', 'Pedidos de compra e recebimento', False, 'Gestao-Compras.dc.html') + mrow('entregas', 'Fornecedores', 'Contatos e histórico de compras', False, 'Gestao-Fornecedores.dc.html') + mrow('producao', 'Produção', 'Fichas técnicas e ordens de produção', True, 'Gestao-Producao.dc.html'))
-    + grupo('Catálogo', mrow('vender', 'Produtos e categorias', 'Preço, origem, publicação na loja', True))
-    + grupo('Relacionamento', mrow('perfil', 'Clientes', 'Histórico e contato') + mrow('local', 'Entregas', 'Atribuir e acompanhar entregadores', True))
-    + grupo('Análise', mrow('historico', 'Relatórios', 'Vendas, estoque, financeiro', True))
-    + grupo('Sistema', mrow('mais', 'Configurações', 'Casa, equipe e permissões', True))
+    + grupo('Catálogo', mrow('vender', 'Produtos e categorias', 'Preço, origem, publicação na loja', True, 'Gestao-Produtos.dc.html'))
+    + grupo('Relacionamento', mrow('perfil', 'Clientes', 'Histórico e contato', False, 'Gestao-Clientes.dc.html') + mrow('local', 'Entregas', 'Atribuir e acompanhar entregadores', True, 'Gestao-Entregas.dc.html'))
+    + grupo('Análise', mrow('historico', 'Relatórios', 'Vendas, estoque, financeiro', True, 'Gestao-Relatorios.dc.html'))
+    + grupo('Sistema', mrow('mais', 'Configurações', 'Casa, equipe e permissões', True, 'Gestao-Configuracoes.dc.html'))
     + f'<a href="Gestao-Entrar.dc.html" style="align-self: flex-start; min-height: 44px; display: inline-flex; align-items: center; font-weight: 600; text-decoration: none">Sair</a></main>'
     + f'<div style="margin-top: auto; flex: none">{gnav(4)}</div>')
 gphone('Gestao-Mais.dc.html', 'Bodeleve — gestão: mais', 1060, mais, VAZIO)

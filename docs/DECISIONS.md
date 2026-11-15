@@ -19,7 +19,8 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D10 | 2026-11-14 | Etapa 1 aprovada em bloco ("pode seguir"): valem as propostas P-A a P-I abaixo | Usuário |
 | D11 | 2026-11-14 | Etapa 2 (design system) aprovada ("pode continuar para próxima fase"): valem P-J a P-P | Usuário |
 | D12 | 2026-11-14 | Etapa 3 entregue em lotes; lote 1 = Início, Produto, Sacola, Pedido confirmado; lote 2 = checkout; lote 3 = catálogo, marca, pedidos e conta | Usuário |
-| D13 | 2026-11-14 | Etapa 3 (loja) considerada aprovada ("continue"); Etapa 4 (gestão) iniciada em lotes; lote 1 = Entrar, Início, Pedidos, Pedido, Mais; lote 2 = Compras e Fornecedores; lote 3 = Estoque; lote 4 = Produção; lote 5 = Financeiro | Usuário |
+| D13 | 2026-11-14 | Etapa 3 (loja) considerada aprovada ("continue"); Etapa 4 (gestão) iniciada em lotes; lote 1 = Entrar, Início, Pedidos, Pedido, Mais; lote 2 = Compras e Fornecedores; lote 3 = Estoque; lote 4 = Produção; lote 5 = Financeiro; lote 6 = Produtos, Clientes, Entregas, Relatórios, Configurações | Usuário |
+| D14 | 2026-11-15 | Seguir até concluir todas as etapas sem parar; o que depender do usuário é documentado como pendência | Usuário |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -92,6 +93,11 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-G22 | Despesas fixas (aluguel, energia, gás) se repetem todo mês; ao pagar, a próxima já fica lançada | — |
 | H-G23 | Pagar conta registra valor, multa e juros, data, de onde saiu e forma; avisa se o saldo da origem não cobre | — |
 | H-G24 | Cartão a liquidar e fiado aparecem como contas a receber | Q13, Q14 |
+| H-G25 | Cadastro do produto separa tipo de item e origem; liga/desliga loja, favorito no PDV, venda por peso e controle de lote | P-E |
+| H-G26 | Entregador próprio recebe por mês; parceiro recebe por entrega (valor de exemplo R$ 9,00); se ninguém aceitar em 10 min, volta para a loja | Q11 |
+| H-G27 | Cinco papéis fixos (dono, gestor, atendente, produção, entregador) com acesso por módulo; sem permissão por pessoa nesta versão | H8 |
+| H-G28 | Relatórios: vendas por período (hoje, 7 dias, mês), canal, pagamento e mais vendidos; um único gráfico de barras por dia | Princípio do briefing |
+| H-G29 | Configurações de loja online, pagamentos e nota fiscal ficam visíveis mas dependem de respostas pendentes | Q6–Q8, Q12 |
 | H-G6 | "A receber" inclui cartões a liquidar e fiado | Q13 |
 
 ## Pendências
