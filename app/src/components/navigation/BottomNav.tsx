@@ -1,4 +1,5 @@
 import { cx } from '@/lib/cx'
+import { AppLink } from '../AppLink'
 import { Icon, type IconName } from '../Icon'
 import s from './BottomNav.module.css'
 
@@ -15,10 +16,10 @@ export function BottomNav({ items, label = 'Navegação principal' }: { items: N
   return (
     <nav aria-label={label} className={s.nav}>
       {items.map((it) => (
-        <a key={it.label} href={it.href} onClick={it.onClick} aria-current={it.active ? 'page' : undefined} className={cx(s.item, it.active && s.active)}>
+        <AppLink key={it.label} href={it.href} onClick={it.onClick} aria-current={it.active ? 'page' : undefined} className={cx(s.item, it.active && s.active)}>
           <Icon name={it.icon} />
           <span>{it.label}</span>
-        </a>
+        </AppLink>
       ))}
     </nav>
   )

@@ -6,3 +6,9 @@
 .detail { font: var(--apoio-pequeno); color: var(--texto-secundario); }
 .foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .price { font-weight: 600; font-size: 18px; font-variant-numeric: tabular-nums; }
+
+.link { display: flex; flex-direction: column; gap: 8px; color: var(--texto); text-decoration: none; }
+.link:hover { color: var(--texto); }
+.store .photo { height: 110px; }
+.store .price { font-size: 17px; }
+.unavailable { font: var(--etiqueta); color: var(--erro); }

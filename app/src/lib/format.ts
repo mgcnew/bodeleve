@@ -29,3 +29,21 @@ export function parseDecimal(text: string): number | null {
   const n = Number(normalized)
   return Number.isFinite(n) && n >= 0 ? n : null
 }
+
+/** Primeira letra minúscula, sem mexer no resto ("Avisamos pelo WhatsApp" -> "avisamos pelo WhatsApp"). */
+export function lowerFirst(text: string): string {
+  return text.charAt(0).toLowerCase() + text.slice(1)
+}
+
+/** "02/11" e "02/11/2026" a partir de um ISO; "Hoje" quando é o mesmo dia de `now`. */
+export function formatShortDate(iso: string, now: Date = new Date()): string {
+  const d = new Date(iso)
+  const same = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
+  if (same) return 'Hoje'
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+export function formatFullDate(iso: string): string {
+  const d = new Date(iso)
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
+}

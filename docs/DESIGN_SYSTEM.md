@@ -114,6 +114,13 @@ Valores que as telas usam e `tokens.css` ainda não nomeia ficam em `app/src/sty
 - Pressionado dos botões secundário, discreto e destrutivo: fundo creme, terracota suave e erro suave.
 - Diferença de caixa positiva: sinal "+" no texto, sem cor de erro.
 
+### Acrescentados na Etapa 3
+
+- `AppLink` / `AppLinkProvider`: os componentes de navegação não conhecem o roteador; a raiz do app entrega o link do roteador.
+- `ButtonLink`: link com a aparência de botão (mesmas variantes e tamanhos).
+- `ProductCard variant="store"`: proporções das telas da loja (foto de 110 px, preço de 17 px), com link para o produto e estado "Indisponível". Selo "Revenda" não aparece na loja.
+- `BagItem`: subtotal e foto de 56 px (tela da sacola).
+
 ### Ainda não feito
 
 - Folha e abas: fechar a folha com o botão voltar do aparelho depende do roteador (Etapa 3).

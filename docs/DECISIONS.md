@@ -28,6 +28,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D19 | 2026-11-15 | Banco de dados congelado até o dono conectar o Supabase ao Claude: nenhum projeto, migration, tabela, política, função ou seed é criado antes. A Etapa 1 do `CLAUDE.md` (Supabase) fica para depois; as telas leem `mocks/` por trás de `services/` | Usuário |
 | D20 | 2026-11-15 | Implementação segue de fase em fase sem parar; o que depender do dono vai para as pendências abaixo e é revisto no fim | Usuário |
 | D21 | 2026-11-15 | Pagamentos reais (Pix, cartão) e envio real de mensagens (WhatsApp) continuam fora até aprovação expressa; entram só como interfaces com versão simulada | Usuário |
+| D22 | 2026-11-15 | Etapa 3 (loja) implementada em `app/`: 18 telas, checkout como convidado em 4 etapas, pedidos do aparelho e login por código de teste, tudo sobre serviços simulados (`app/src/mocks`). Sem pagamento real, sem mensagem real, sem banco | Usuário (D18–D21) |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -140,6 +141,21 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-I2 | Fontes hospedadas junto do app (`@fontsource`), não carregadas do Google Fonts: funciona sem internet no PDV e não faz pedido a terceiros. Mesmas famílias e pesos do design | — |
 | H-I3 | Trabalho em branches `claude/*`; nenhum PR aberto até o dono pedir | P10 |
 
+## Comportamentos que o desenho não mostra — decididos no código (Etapa 3), a confirmar
+
+| ID | O que foi feito | Onde |
+|---|---|---|
+| H-I4 | Pix simulado: depois de confirmar, a tela mostra o marcador `[QR CODE PIX]` e o aviso "ainda não está ligado nesta versão. Nada foi cobrado". Some quando `storefront.pixProviderConnected` for ligado | ConfirmedPage · `config/storefront.ts` |
+| H-I5 | CEP fora da área: aviso "Ainda não entregamos neste CEP. Você pode escolher retirar na loja." e o endereço não é aceito. No exemplo, CEPs começando com 99 ficam fora | AddressPage · `mocks/services.ts` |
+| H-I6 | Login: código errado mostra "Código incorreto…". Em desenvolvimento vale o código de teste `1234` e um aviso diz que nada foi enviado | LoginPage |
+| H-I7 | Campo de troco só liga quando a forma é "Dinheiro" e o valor precisa cobrir o total | PaymentPage |
+| H-I8 | "Pedir de novo" soma os itens disponíveis ao que já está na sacola (não substitui) e deixa de fora os indisponíveis, avisando antes (H-L13) | OrderPage |
+| H-I9 | Logo após confirmar, "Pedido recebido" já aparece concluído e "Em preparo" como etapa atual, como no quadro Pedido confirmado | `domain/orders.ts` |
+| H-I10 | Acrescentar ao carrinho nos cartões mostra aviso temporário com "Desfazer" (componente do design system, ainda sem uso nos quadros da loja) | ProductGrid |
+| H-I11 | Compra sem conta guarda sacola, contato e endereço neste aparelho (localStorage). Depois de confirmar, a sacola esvazia e contato e endereço ficam para a próxima compra | `store/bag.ts` |
+| H-I12 | Computador (≥ 1024 px): topo com seções, busca e sacola; foto da casa aparece na faixa de abertura; grade de 4 colunas; checkout em coluna de até 560 px. "Produtos" no topo leva a Buscar (não há tela "todos os produtos") | LojaLayout |
+| H-I13 | Pedidos de exemplo (1042, 1017, 0988) aparecem só em desenvolvimento; numeração de novos pedidos segue de 1043 | `main.tsx` · `mocks/services.ts` |
+
 ## Pendências
 
 O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
@@ -159,6 +175,12 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P11 | Conectar o Supabase ao Claude e dizer em qual organização/região criar o projeto da Bodeleve (a conta só tem projetos de outro negócio, que não serão usados) | Etapa 1 do CLAUDE.md, tudo que for dado real | D19 |
 | P12 | Passada visual no catálogo de componentes (`cd app && npm run dev`, ou `npm run build` e abrir `dist/`) comparando com os quadros `DS-*`; ver "Desvios" em DESIGN_SYSTEM.md | Etapa 2 | DESIGN_SYSTEM.md |
 | P13 | Aprovar ou recusar os desvios de implementação listados em DESIGN_SYSTEM.md (alvo de 44 px no aviso, Inter 700, estados que o desenho não mostra) | Etapa 2 | DESIGN_SYSTEM.md |
+| P14 | Desenhar e decidir o estado de Pix pendente (QR, copia e cola, validade, pago/expirado) e escolher o provedor | Loja · Pedido confirmado | H-I4, P8, Q8 |
+| P15 | Confirmar a área de entrega e o texto de "CEP fora da área" (e se oferecer retirada na própria tela) | Loja · Endereço | H-I5, Q6 |
+| P16 | Desenhar erros do login: código expirado, reenviar código, limite de tentativas, número inexistente | Loja · Entrar | H-I6, P8 |
+| P17 | Decidir se "Produtos" no topo do computador deve levar a uma página com todos os produtos (hoje leva a Buscar) | Loja no computador | H-I12 |
+| P18 | Passada visual da loja em celular, tablet e computador, inclusive checkout no tablet e a barra de sacola sobre as abas | Loja | AUDIT.md A1 |
+| P19 | Status do pedido ao vivo para o cliente (e quem o muda na Gestão) | Loja · Acompanhamento | Etapa 7 |
 
 Marcadores de conteúdo nas telas:
 

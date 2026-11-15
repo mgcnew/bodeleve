@@ -28,3 +28,9 @@
 }
 .lg .spinner { width: 18px; height: 18px; }
 @keyframes giro { to { transform: rotate(360deg); } }
+
+/* Quando o botão é um link (ButtonLink), o a:hover global não pode mudar a cor do texto */
+.primary:hover { color: var(--superficie); }
+.secondary:hover { color: var(--cor-grafite); }
+.ghost:hover { color: var(--cor-terracota); }
+.destructive:hover { color: var(--erro); }

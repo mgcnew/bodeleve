@@ -195,3 +195,29 @@ Cada tela está em `design/<arquivo>`. A ordem segue o canvas.
 | Gestão no computador | `Resp-Gestao-Desktop.dc.html` |
 | PDV no tablet do balcão | `Resp-PDV-Tablet.dc.html` |
 | Loja no computador | `Resp-Loja-Desktop.dc.html` |
+
+## Loja no código (Etapa 3)
+
+Rotas em `app/src/app/routes.tsx`; telas em `app/src/pages/loja/`; moldura (topo no computador, abas, barra da sacola) em `app/src/ui/loja/LojaLayout.tsx`.
+
+| Quadro | Rota | Código |
+|---|---|---|
+| Início | `/` | `HomePage.tsx` |
+| Buscar | `/buscar` (`?q=`) | `SearchPage.tsx` |
+| Categoria | `/categoria/:id` | `CategoryPage.tsx` |
+| Produto | `/produto/:id` | `ProductPage.tsx` |
+| Linha Bodeleve | `/linha` | `BrandPage.tsx` |
+| Sobre a Bodeleve | `/sobre` | `AboutPage.tsx` |
+| Sacola | `/sacola` | `BagPage.tsx` |
+| Checkout 1 · Identificação | `/finalizar/identificacao` | `IdentificationPage.tsx` |
+| Checkout 2 · Entrega ou retirada | `/finalizar/entrega` | `DeliveryPage.tsx` |
+| Checkout 2b · Endereço | `/finalizar/endereco` | `AddressPage.tsx` |
+| Checkout 3 · Pagamento | `/finalizar/pagamento` | `PaymentPage.tsx` |
+| Checkout 4 · Revisão | `/finalizar/revisao` | `ReviewPage.tsx` |
+| Pedido confirmado | `/pedido-confirmado/:id` | `ConfirmedPage.tsx` |
+| Pedidos | `/pedidos` | `OrdersPage.tsx` |
+| Acompanhamento (pedido em andamento) e Detalhe e recompra (pedido concluído) | `/pedidos/:id` | `OrderPage.tsx` |
+| Perfil | `/perfil` | `ProfilePage.tsx` |
+| Entrar | `/entrar` (`?next=`) | `LoginPage.tsx` |
+| Catálogo do design system (interno) | `/design-system` | `gallery/Gallery.tsx` |
+

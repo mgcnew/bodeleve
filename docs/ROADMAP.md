@@ -61,8 +61,8 @@ Plano e stack em `IMPLEMENTATION_PLAN.md` (aprovado em D18). O banco de dados es
 |---|---|---|
 | I-1 | Supabase: projeto, Auth, tabelas, RLS | Congelada (D19, P11) |
 | I-2 | Design system em componentes | Entregue em `app/`; aguarda a passada visual do dono (P12, P13) |
-| I-3 | Loja online | Próxima |
-| I-4 | Gestão | — |
+| I-3 | Loja online | Entregue em `app/` (18 telas, serviços simulados); aguarda a passada visual (P18) e as pendências P14–P17 |
+| I-4 | Gestão | Próxima |
 | I-5 | PDV | — |
 | I-6 | Entregas e painel de atribuição | — |
 | I-7 | Realtime e acabamento | — |

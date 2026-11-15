@@ -1,6 +1,8 @@
 export { Icon, type IconName } from './Icon'
+export { AppLink, AppLinkProvider, type AppLinkProps, type AppLinkRenderer } from './AppLink'
 
 export { Button, type ButtonProps } from './base/Button'
+export { ButtonLink } from './base/ButtonLink'
 export { IconButton } from './base/IconButton'
 export { Card } from './base/Card'
 export { TextField } from './base/TextField'

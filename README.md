@@ -10,7 +10,7 @@ O **design está completo** (75 telas, 7 etapas). A próxima fase é a implement
 |---|---|
 | `docs/` | Documentos do projeto. São a fonte de verdade: visão, arquitetura, mapa de telas, design system, regras de negócio, modelo de dados, decisões e roadmap. |
 | `design/` | Telas e quadros do canvas de design (arquivos `.dc.html` e `canvas.json`) e `tokens.css`. Os `.dc.html` abrem como telas apenas no canvas de design do Claude; aqui servem de referência versionada. |
-| `app/` | O aplicativo (Vite, React e TypeScript). Hoje contém o design system em componentes e o catálogo para visualizá-los: `cd app && npm install && npm run dev`. |
+| `app/` | O aplicativo (Vite, React e TypeScript). Contém o design system em componentes (`/design-system`) e a loja online (Etapa 3), com serviços simulados: `cd app && npm install && npm run dev`. |
 | `gen/` | Scripts Python que geram os arquivos de `design/`. |
 
 ## Onde começar

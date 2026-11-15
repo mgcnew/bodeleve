@@ -1,4 +1,5 @@
 import { cx } from '@/lib/cx'
+import { AppLink } from '../AppLink'
 import { Icon } from '../Icon'
 import type { NavItem } from './BottomNav'
 import s from './SideMenu.module.css'
@@ -9,10 +10,10 @@ export function SideMenu({ items, brand = 'Bodeleve' }: { items: NavItem[]; bran
     <nav aria-label="Menu lateral" className={s.nav}>
       <div className={s.brand}>{brand}</div>
       {items.map((it) => (
-        <a key={it.label} href={it.href} onClick={it.onClick} aria-current={it.active ? 'page' : undefined} className={cx(s.item, it.active && s.active)}>
+        <AppLink key={it.label} href={it.href} onClick={it.onClick} aria-current={it.active ? 'page' : undefined} className={cx(s.item, it.active && s.active)}>
           <Icon name={it.icon} size={20} />
           <span>{it.label}</span>
-        </a>
+        </AppLink>
       ))}
     </nav>
   )
