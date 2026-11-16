@@ -1,3 +1,5 @@
+import type { Courier, DeliveryStatus } from '@/domain/deliveries'
+import type { History } from '@/domain/courierApp'
 import type { CartLine, DiscountKind, Payment, PosSale } from '@/domain/pos'
 import type { House, TeamMember } from '@/domain/settings'
 import type { Hub, Period, SalesReport } from '@/domain/reports'
@@ -462,6 +464,75 @@ export interface PosService {
   syncPending(): Promise<number>
 }
 
+export type CourierCardView = {
+  orderId: string
+  district: string
+  street: string
+  /** "4,1 km" */
+  km: string | null
+  items: number
+  /** Etiqueta do cartão: "Para você", "Em rota"… */
+  tag: string
+  /** Frase abaixo: "Ainda sem entregador. Você pode pegar." */
+  detail: string
+  valueLabel: string
+  value: string
+  /** `free` = livre para pegar; `published` = publicada para parceiros; o resto é dela ou dele. */
+  state: 'free' | 'published' | DeliveryStatus
+}
+
+export type CourierList = { profile: Courier; available: CourierCardView[]; mine: CourierCardView[] }
+
+export type CourierDetail = {
+  orderId: string
+  customer: string
+  phone: string
+  state: 'free' | 'published' | DeliveryStatus
+  /** Etapa de 1 a 4; 0 = encerrada. */
+  stage: 0 | 1 | 2 | 3 | 4
+  storeAddress: string
+  street: string
+  district: string
+  reference: string
+  km: string | null
+  minutes: number | null
+  items: number
+  /** "Pago no Pix. Nada a cobrar." / "Cobrar R$ 63,70 em dinheiro." */
+  payLine: string
+  cashDueCents: number
+  /** Valor da entrega para parceiro; `null` para entregador da casa. */
+  partnerFeeCents: number | null
+  /** Quando saiu da loja (em rota) ou quando terminou. */
+  at: string | null
+  problemReason: string | null
+  mapsUrl: string
+}
+
+export type CourierHistory = History & { courierName: string }
+
+export interface CourierService {
+  /** O código vai por WhatsApp (D21: não é enviado; em desenvolvimento aparece na tela). Lança `unknown_phone`. */
+  requestCode(phone: string): Promise<void>
+  /** Lança `unknown_phone` ou `invalid_code`. */
+  verify(phone: string, code: string): Promise<Courier>
+  profile(id: string): Promise<Courier | null>
+  setAvailable(id: string, available: boolean): Promise<Courier>
+  savePix(id: string, key: string): Promise<Courier>
+  list(id: string): Promise<CourierList>
+  get(id: string, orderId: string): Promise<CourierDetail | null>
+  /** "Pegar esta entrega" (da casa) ou "Aceitar" a publicada (parceiro): passa a ser dele ou dela. */
+  take(id: string, orderId: string): Promise<CourierDetail>
+  /** Aceite da etapa 1. */
+  accept(id: string, orderId: string): Promise<CourierDetail>
+  /** "Saí da loja". */
+  depart(id: string, orderId: string): Promise<CourierDetail>
+  /** Lança `wrong_code` se o código não confere. */
+  confirm(id: string, orderId: string, code: string): Promise<CourierDetail>
+  problem(id: string, orderId: string, reason: string, note: string): Promise<CourierDetail>
+  undoProblem(id: string, orderId: string): Promise<CourierDetail>
+  history(id: string): Promise<CourierHistory>
+}
+
 export type AdminServices = {
   auth: AdminAuthService
   orders: AdminOrderService
@@ -476,6 +547,7 @@ export type AdminServices = {
   reports: ReportsService
   settings: SettingsService
   pos: PosService
+  courier: CourierService
 }
 
 export type Services = {

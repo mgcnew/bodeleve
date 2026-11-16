@@ -39,7 +39,7 @@ describe('entregas', () => {
     expect(screen.getByText('#1042 · Ana Souza').closest('div')).toHaveTextContent(/Carlos \(próprio\) · saiu \d\dh\d\d · previsão \d\dh\d\d/)
     await user.click(screen.getByRole('button', { name: 'Entregues · 2' }))
     expect(screen.getByText('#1038 · Rafael Dias').closest('div')).toHaveTextContent('Bruno (próprio) · entregue')
-    expect(screen.getByText('#1036 · Paula Reis').closest('div')).toHaveTextContent('Parceiro · entregue')
+    expect(screen.getByText('#1036 · Paula Reis').closest('div')).toHaveTextContent('Diego (parceiro) · entregue')
     const eq = screen.getByRole('region', { name: 'Entregadores' })
     expect(eq).toHaveTextContent(/Carlos\s*Próprio · em rota com #1042, volta \d\dh\d\d/)
     expect(eq).toHaveTextContent('Bruno')

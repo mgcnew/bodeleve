@@ -39,3 +39,6 @@ export const MOCK_MANAGER_PINS: Record<string, { pin: string; name: string; role
   'u-ana': { pin: '2468', name: 'Ana', roleLabel: 'Gestor' },
   'u-dono': { pin: '1357', name: '[NOME DO DONO]', roleLabel: 'Dono' },
 }
+
+/** Código de teste do login do entregador (o envio por WhatsApp depende de P8 e de D21). */
+export const MOCK_COURIER_CODE = '1234'

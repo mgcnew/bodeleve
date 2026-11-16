@@ -7,6 +7,9 @@ import { products } from './seed'
 import { applyProduct, channelLabel, checkNewCategory, defaultSale, kindOf, slugify, validateProduct, type ProductInput } from '@/domain/catalog'
 import { customerDetail, customerId, listCustomers } from '@/domain/customers'
 import { productCost } from './catalogView'
+import { accept as courierAccept, cashDue, confirm as courierConfirm, deliveryItems, depart as courierDepart, historyOf, reportProblem, take as courierTake, undoProblem as courierUndoProblem, visibleTo } from '@/domain/courierApp'
+import { delivery as deliveryCfg } from '@/config/delivery'
+import { DeliveryError, isOpenRecord, kmValue, type Courier, type DeliveryRecord, type DeliveryStatus } from '@/domain/deliveries'
 import { assertPaid, cashDifference, cashNetOf, changeOf, discountCents, expectedCash, nextSaleId, pickLots, PosError, priceLine, sessionTotals, subtotalOf, validateMovement, type CashSession, type PosSale, type PriceInfo, type SaleLine } from '@/domain/pos'
 import { addTransaction } from '@/domain/finance'
 import { formatKgShort, unitKg, unitsToKg } from '@/domain/units'
@@ -15,16 +18,16 @@ import { checkInvite, cleanHouse, rolesInUse, validateHouse } from '@/domain/set
 import { storefront } from '@/config/storefront'
 import { buildHub, monthLosses, monthOutflowCents, monthProduction, periodStart, salesByDay, salesReport } from '@/domain/reports'
 import { todayCounterSeed } from './reportsSeed'
-import { assign as assignDelivery, assignmentOf, assignOptions, courierRows, dispatchRows, kmLabel, unassign } from '@/domain/deliveries'
+import { assign as assignDelivery, assignmentOf, assignOptions, courierRows, dispatchRows, kmLabel, openRecordOf, unassign } from '@/domain/deliveries'
 import { paymentLabel } from '@/config/storefront'
 import { formatBRL } from '@/lib/format'
 import { batchCostCents, checkInputs, finishOrder, formatContent, marginPercent, needs, nextOrderId, ProductionError, suggestLotCode, undoFinish, unitCostCents, type ProductionOrder } from '@/domain/production'
-import type { AccountView, AdminOrder, CashView, CategoryRow, PosSaleRow, PosSessionView, ProductDetail, AdminServices, Dashboard, EntryView, FinanceOverview, FinishDefaults, MovementView, ProductionOrderView, PurchaseSuggestion, PurchaseView, RecipeView, StockItemView, SupplierView } from '@/services/types'
+import type { AccountView, AdminOrder, CashView, CourierCardView, CourierDetail, CategoryRow, PosSaleRow, PosSessionView, ProductDetail, AdminServices, Dashboard, EntryView, FinanceOverview, FinishDefaults, MovementView, ProductionOrderView, PurchaseSuggestion, PurchaseView, RecipeView, StockItemView, SupplierView } from '@/services/types'
 import { daysUntil, itemBalance, itemLabel, lotsFefo, nextLot } from '@/domain/inventory'
 import { orderTotal, paymentTerms, purchaseMessage, receivedTotal, suggestQty, isOpen, type PurchaseOrder } from '@/domain/purchasing'
 import { closeShortOrder, receive, reverseLastReceipt } from '@/domain/receiving'
 import { accountName, balanceOf, daysFromToday, forecast, isOpen as entryOpen, ledger, ledgerTotals, payEntry, remaining, standingOf, totals as financeTotals, undoPayment, type FinancialEntry } from '@/domain/finance'
-import { adminUsers, dashboardSeed, MOCK_ADMIN_PASSWORD } from './adminSeed'
+import { adminUsers, dashboardSeed, MOCK_ADMIN_PASSWORD, MOCK_COURIER_CODE } from './adminSeed'
 import type { MockDb, MockState } from './db'
 import { customersSeed, hhmm } from './seedOrders'
 
@@ -147,6 +150,59 @@ export const todayCounter = (st: MockState, t: Date) => {
   return base
 }
 
+const digitsOf = (s: string) => s.replace(/\D/g, '')
+const courierByPhone = (st: MockState, phone: string) => st.couriers.find((c) => digitsOf(c.phone) === digitsOf(phone))
+
+const stateOf2 = (r: { status: DeliveryStatus } | undefined): CourierDetail['state'] => (r ? r.status : 'free')
+
+const payLineOf = (o: Order): string => {
+  if (o.payment.paid) return `Pago no ${paymentLabel[o.payment.method]}. Nada a cobrar.`
+  return `Cobrar ${formatBRL(o.totalCents)} ${o.payment.method === 'cash' ? 'em dinheiro' : 'no cartão, na maquininha'}${o.payment.method === 'cash' && o.payment.changeForCents ? ` (troco para ${formatBRL(o.payment.changeForCents)})` : ''}.`
+}
+
+/** O que a pessoa vê de uma entrega. Nunca inclui o código de entrega: quem entrega só informa o que ouviu. */
+const courierDetail = (st: MockState, courier: Courier, orderId: string): CourierDetail | null => {
+  const o = st.orders.find((x) => x.id === orderId)
+  if (!o || o.fulfillment !== 'delivery') return null
+  const records = st.deliveries.filter((r) => r.orderId === orderId)
+  const rec = records.find((r) => isOpenRecord(r)) ?? [...records].sort((a, b) => b.at.localeCompare(a.at))[0]
+  const seen = visibleTo(courier, st.orders, st.deliveries)
+  const mine = rec && rec.courierId === courier.id
+  const canSee = mine || seen.available.some((s) => s.order.id === orderId)
+  if (!canSee) return null
+  const status = rec ? rec.status : 'free'
+  const stage = status === 'free' || status === 'published' || status === 'assigned' || status === 'reserved' ? 1 : status === 'accepted' ? 2 : status === 'en_route' ? 3 : 0
+  const district = o.address?.district ?? ''
+  const km = kmValue(district)
+  const addr = o.address
+  const street = addr ? `${addr.street}, ${addr.number}${addr.complement ? ` · ${addr.complement}` : ''}` : ''
+  return {
+    orderId, customer: o.contact.name, phone: o.contact.phone, state: stateOf2(rec && { status: rec.status }), stage: stage as CourierDetail['stage'],
+    storeAddress: st.house.address || '[ENDEREÇO DA LOJA]', street, district, reference: addr?.reference ?? '', km: kmLabel(district),
+    minutes: km == null ? null : Math.round(km * deliveryCfg.minutesPerKm), items: deliveryItems(o), payLine: payLineOf(o), cashDueCents: cashDue(o),
+    partnerFeeCents: courier.kind === 'partner' ? (rec?.feeCents ?? deliveryCfg.partnerFeeCents) : null,
+    at: rec && (rec.status === 'en_route' || rec.status === 'delivered' || rec.status === 'returned') ? rec.at : null,
+    problemReason: rec?.problem?.reason ?? null,
+    mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([street, district].filter(Boolean).join(' '))}`,
+  }
+}
+
+const courierCard = (c: Courier, o: Order, rec: DeliveryRecord | null): CourierCardView => {
+  const district = o.address?.district ?? ''
+  const addr = o.address
+  const base = { orderId: o.id, district, street: addr ? `${addr.street}, ${addr.number}` : '', km: kmLabel(district), items: deliveryItems(o) }
+  const partner = c.kind === 'partner'
+  const value = partner ? { valueLabel: 'Você recebe', value: formatBRL(rec?.feeCents ?? deliveryCfg.partnerFeeCents) } : { valueLabel: 'Cobrar', value: cashDue(o) > 0 ? formatBRL(cashDue(o)) : 'Nada' }
+  if (!rec || rec.courierId !== c.id) {
+    return {
+      ...base, ...value, state: rec ? 'published' : 'free', tag: o.stepTimes.ready_for_delivery ? `Pronto às ${o.stepTimes.ready_for_delivery}` : 'Pronto',
+      detail: partner ? `Publicada para parceiros · você recebe ${formatBRL(rec?.feeCents ?? deliveryCfg.partnerFeeCents)}` : 'Ainda sem entregador. Você pode pegar.',
+    }
+  }
+  const tag = rec.status === 'en_route' ? 'Em rota' : rec.status === 'accepted' ? 'Aceita' : rec.status === 'reserved' ? 'Reservada' : 'Para você'
+  return { ...base, ...value, state: rec.status, tag, detail: '' }
+}
+
 const stageLabel = (o: Order) => (o.status === 'received' ? 'Novo' : o.status === 'preparing' ? 'Em preparo' : 'Pronto')
 
 const productDetail = (st: MockState, id: string): ProductDetail | null => {
@@ -245,6 +301,20 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
       result = toAdmin(st.orders[i], st.orders)
     })
     return result as unknown as AdminOrder
+  }
+
+  /** Muda a entrega e o pedido de uma vez e devolve o que a pessoa vê depois. Erro de regra sobe para a tela. */
+  const courierMutate = (id: string, orderId: string, f: (c: Courier, o: Order, st: MockState) => void): CourierDetail => {
+    let out = null as CourierDetail | null
+    db.update((st) => {
+      const c = st.couriers.find((x) => x.id === id)
+      const o = st.orders.find((x) => x.id === orderId)
+      if (!c || !o) throw new DeliveryError('not_found')
+      f(c, o, st)
+      out = courierDetail(st, c, orderId)
+    })
+    if (!out) throw new DeliveryError('not_found')
+    return out
   }
 
   return {
@@ -811,13 +881,13 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
     deliveries: {
       async overview() {
         const st = db.read()
-        return { rows: dispatchRows(st.orders, st.deliveries), couriers: courierRows(st.deliveries) }
+        return { rows: dispatchRows(st.orders, st.deliveries), couriers: courierRows(st.couriers, st.deliveries) }
       },
       async getAssign(orderId) {
         const st = db.read()
         const o = st.orders.find((x) => x.id === orderId)
         if (!o || o.fulfillment !== 'delivery') return null
-        const rec = st.deliveries.find((r) => r.orderId === orderId)
+        const rec = openRecordOf(st.deliveries, orderId)
         const district = o.address?.district ?? ''
         const addr = o.address ? `${o.address.street}, ${o.address.number}${o.address.complement ? ` · ${o.address.complement}` : ''}` : ''
         const km = kmLabel(district)
@@ -829,14 +899,14 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           address: [addr, district].filter(Boolean).join(' · '),
           summary: [km, `${items} ${items === 1 ? 'item' : 'itens'}`, pay].filter(Boolean).join(' · '),
           ready: o.status === 'ready_for_delivery' || !!rec,
-          options: assignOptions(st.deliveries.filter((r) => r.orderId !== orderId)),
+          options: assignOptions(st.couriers, st.deliveries.filter((r) => r.orderId !== orderId)),
           current: rec ? { ...assignmentOf(rec), optionId } : null,
         }
       },
       async assign(orderId, optionId) {
         let out = null as ReturnType<typeof assignDelivery> | null
         db.update((st) => {
-          out = assignDelivery(st.orders, st.deliveries, orderId, optionId, now())
+          out = assignDelivery(st.orders, st.deliveries, st.couriers, orderId, optionId, now())
           st.deliveries.push(out.record)
         })
         return (out as unknown as ReturnType<typeof assignDelivery>).assignment
@@ -1101,6 +1171,85 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           for (const s of st.posSales) if (s.pending) { s.pending = false; n += 1 }
         })
         return n
+      },
+    },
+
+    courier: {
+      async requestCode(phone) {
+        if (!courierByPhone(db.read(), phone)) throw new DeliveryError('not_found')
+        // D21: o código não é enviado por WhatsApp. Em desenvolvimento, a tela mostra o código de teste.
+      },
+      async verify(phone, code) {
+        const c = courierByPhone(db.read(), phone)
+        if (!c) throw new DeliveryError('not_found')
+        if (code !== MOCK_COURIER_CODE) throw new Error('invalid_code')
+        return c
+      },
+      async profile(id) {
+        return db.read().couriers.find((c) => c.id === id) ?? null
+      },
+      async setAvailable(id, available) {
+        let out = null as Courier | null
+        db.update((st) => {
+          const c = st.couriers.find((x) => x.id === id)
+          if (!c) throw new DeliveryError('not_found')
+          c.available = available
+          out = c
+        })
+        return out as unknown as Courier
+      },
+      async savePix(id, key) {
+        let out = null as Courier | null
+        db.update((st) => {
+          const c = st.couriers.find((x) => x.id === id)
+          if (!c) throw new DeliveryError('not_found')
+          c.pixKey = key.trim()
+          out = c
+        })
+        return out as unknown as Courier
+      },
+      async list(id) {
+        const st = db.read()
+        const c = st.couriers.find((x) => x.id === id)
+        if (!c) throw new DeliveryError('not_found')
+        const seen = visibleTo(c, st.orders, st.deliveries)
+        return {
+          profile: c,
+          available: seen.available.map((s) => courierCard(c, s.order, s.record)),
+          mine: seen.mine.map((m) => courierCard(c, m.order, m.record)),
+        }
+      },
+      async get(id, orderId) {
+        const st = db.read()
+        const c = st.couriers.find((x) => x.id === id)
+        return c ? courierDetail(st, c, orderId) : null
+      },
+      async take(id, orderId) {
+        return courierMutate(id, orderId, (c, o, st) => { courierTake(c, o, st.deliveries, now()) })
+      },
+      async accept(id, orderId) {
+        return courierMutate(id, orderId, (c, _o, st) => { courierAccept(c, openRecordOf(st.deliveries, orderId), now()) })
+      },
+      async depart(id, orderId) {
+        return courierMutate(id, orderId, (c, o, st) => { courierDepart(c, o, openRecordOf(st.deliveries, orderId), now()) })
+      },
+      async confirm(id, orderId, code) {
+        return courierMutate(id, orderId, (c, o, st) => { courierConfirm(c, o, openRecordOf(st.deliveries, orderId), code, now()) })
+      },
+      async problem(id, orderId, reason, note) {
+        return courierMutate(id, orderId, (c, o, st) => { reportProblem(c, o, openRecordOf(st.deliveries, orderId), reason, note, now()) })
+      },
+      async undoProblem(id, orderId) {
+        return courierMutate(id, orderId, (c, o, st) => {
+          const rec = [...st.deliveries].filter((r) => r.orderId === orderId && r.status === 'returned').sort((a, b) => b.at.localeCompare(a.at))[0]
+          courierUndoProblem(c, o, rec, st.deliveries)
+        })
+      },
+      async history(id) {
+        const st = db.read()
+        const c = st.couriers.find((x) => x.id === id)
+        if (!c) throw new DeliveryError('not_found')
+        return { ...historyOf(c, st.deliveries, now()), courierName: c.name }
       },
     },
   }
