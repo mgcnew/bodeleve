@@ -2,21 +2,13 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/Button'
 import { RadioGroup, TextField } from '@/components/Field'
-import { formatCents } from '@/domain/money'
+import { formatCents, parseCents } from '@/domain/money'
 import type { PaymentMethod } from '@/domain/order'
 import { TopBar } from '../../components/LojaShell'
 import { StepProgress } from '../../components/Checkout'
 import { useCart } from '../../state/cart'
 import { useCheckout } from '../../state/checkout'
 import l from '../../loja.module.css'
-
-/** "R$ 100,00" ou "100" → centavos; null se vazio ou inválido */
-export function parseCents(text: string): number | null {
-  const clean = text.replace(/[^\d,.]/g, '').replace(/\./g, '').replace(',', '.')
-  if (!clean) return null
-  const value = Number(clean)
-  return Number.isFinite(value) ? Math.round(value * 100) : null
-}
 
 export function Pagamento() {
   const { draft, update, feeCents } = useCheckout()

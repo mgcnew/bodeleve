@@ -4,6 +4,10 @@ import { Icon } from '@/components/Icon'
 import { greeting, longNow, minutesAgo } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { salesToday } from '@/mocks/gestao/dashboard'
+import { daysUntil } from '@/domain/dates'
+import { entriesStore, productionStore } from '@/services/gestao/backoffice'
+import { openEntries, overdueDays, remaining } from '@/services/gestao/finance'
+import { useStockRows } from './estoque/Estoque'
 import { staffOrdersStore } from '@/services/gestao/orders'
 import { sessionStore } from '@/services/gestao/session'
 import o from '@/styles/ops.module.css'
@@ -16,6 +20,17 @@ export function Inicio() {
   const session = sessionStore.useStore()
   const fresh = orders.filter((x) => x.status === 'new')
   const preparing = orders.filter((x) => x.status === 'separating')
+  const entries = entriesStore.useStore()
+  const rows = useStockRows()
+  const producing = productionStore.useStore().filter((p) => p.status === 'in_progress')
+  const payables = openEntries(entries, 'payable')
+  const overdue = payables.filter((e) => overdueDays(e) > 0)
+  const dueToday = payables.filter((e) => daysUntil(e.dueDate) === 0)
+  const sum = (l: typeof payables) => l.reduce((n, e) => n + remaining(e), 0)
+  const receivableWeek = openEntries(entries, 'receivable').filter((e) => daysUntil(e.dueDate) <= 7)
+  const low = rows.filter((r) => r.low)
+  const expiringRows = rows.filter((r) => r.expiring.length > 0)
+  const names = (l: string[], n: number) => (l.length > n ? `${l.slice(0, n).join(', ')} e mais ${l.length - n}` : l.join(', '))
   const oldest = fresh.reduce<string | null>((acc, x) => (!acc || x.createdAt < acc ? x.createdAt : acc), null)
 
   return (
@@ -63,10 +78,46 @@ export function Inicio() {
                   to="/gestao/pedidos"
                 />
               )}
-              <ListRow icon="alerta" tone="error" title="Aluguel atrasado" sub="Venceu há 4 dias · R$ 1.800,00" to="/gestao/financeiro/contas" />
-              <ListRow icon="financeiro" tone="warning" title="2 contas vencem hoje" sub="R$ 640,00 · Laticínios Serra Verde e energia" to="/gestao/financeiro/contas" />
-              <ListRow icon="validade" tone="warning" title="3 lotes vencem em até 7 dias" sub="Queijo coalho, Doce de leite, Nata" to="/gestao/estoque" />
-              <ListRow icon="estoque" tone="warning" title="7 itens com estoque baixo" sub="Tapioca granulada, Rapadura e mais 5" to="/gestao/estoque" />
+              {overdue.map((e) => (
+                <ListRow
+                  key={e.id}
+                  icon="alerta"
+                  tone="error"
+                  title={`${e.description} atrasado`}
+                  sub={`Venceu há ${overdueDays(e)} ${overdueDays(e) === 1 ? 'dia' : 'dias'} · ${formatCents(remaining(e))}`}
+                  to={`/gestao/financeiro/contas/${e.id}`}
+                />
+              ))}
+              {dueToday.length > 0 && (
+                <ListRow
+                  icon="financeiro"
+                  tone="warning"
+                  title={dueToday.length === 1 ? '1 conta vence hoje' : `${dueToday.length} contas vencem hoje`}
+                  sub={`${formatCents(sum(dueToday))} · ${dueToday.map((e) => e.counterpart).join(' e ')}`}
+                  to="/gestao/financeiro/contas"
+                />
+              )}
+              {expiringRows.length > 0 && (
+                <ListRow
+                  icon="validade"
+                  tone="warning"
+                  title={`${expiringRows.reduce((n, r) => n + r.expiring.length, 0)} lotes vencem em até 7 dias`}
+                  sub={names(expiringRows.map((r) => r.item.name.replace(/ \d+ ?(g|ml)$/, '')), 3)}
+                  to="/gestao/estoque"
+                />
+              )}
+              {low.length > 0 && (
+                <ListRow
+                  icon="estoque"
+                  tone="warning"
+                  title={`${low.length} ${low.length === 1 ? 'item com' : 'itens com'} estoque baixo`}
+                  sub={names(low.map((r) => r.item.name.replace(/ \d+ ?(g|ml)$/, '')), 2)}
+                  to="/gestao/estoque"
+                />
+              )}
+              {overdue.length + dueToday.length + expiringRows.length + low.length + fresh.length === 0 && (
+                <p className={o.muted} style={{ padding: '12px 0' }}>Nada pede ação agora.</p>
+              )}
             </Box>
           </section>
 
@@ -79,9 +130,9 @@ export function Inicio() {
                 sub={`${fresh.length} novos · ${preparing.length} em preparo`}
                 to="/gestao/pedidos"
               />
-              <Kpi label="Em produção" value="2 ordens" sub="Queijo coalho · Doce de leite" to="/gestao/producao" />
-              <Kpi label="A pagar hoje" value="R$ 640,00" sub="2 contas" tone="error" to="/gestao/financeiro/contas" />
-              <Kpi label="A receber na semana" value="R$ 1.150,00" sub="cartões e fiado" tone="success" to="/gestao/financeiro/contas" />
+              <Kpi label="Em produção" value={`${producing.length} ${producing.length === 1 ? 'ordem' : 'ordens'}`} sub={producing.map((p) => p.number).join(' · ') || 'nenhuma agora'} to="/gestao/producao" />
+              <Kpi label="A pagar hoje" value={formatCents(sum(dueToday))} sub={`${dueToday.length} ${dueToday.length === 1 ? 'conta' : 'contas'}`} tone="error" to="/gestao/financeiro/contas" />
+              <Kpi label="A receber na semana" value={formatCents(sum(receivableWeek))} sub="cartões e fiado" tone="success" to="/gestao/financeiro/contas" />
             </div>
           </section>
         </div>

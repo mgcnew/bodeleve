@@ -17,6 +17,10 @@ import { Estoque } from './screens/estoque/Estoque'
 import { Inventario } from './screens/estoque/Inventario'
 import { Item } from './screens/estoque/Item'
 import { Movimentacoes } from './screens/estoque/Movimentacoes'
+import { Baixa } from './screens/financeiro/Baixa'
+import { Contas } from './screens/financeiro/Contas'
+import { Financeiro } from './screens/financeiro/Financeiro'
+import { Lancamentos } from './screens/financeiro/Lancamentos'
 import { Ficha } from './screens/producao/Ficha'
 import { Fichas } from './screens/producao/Fichas'
 import { Ordem } from './screens/producao/Ordem'
@@ -42,7 +46,10 @@ export const gestaoRoutes: RouteObject[] = [
       { path: 'estoque/inventario', element: <Inventario /> },
       { path: 'estoque/:id', element: <Item /> },
       { path: 'estoque/:id/movimentacoes', element: <Movimentacoes /> },
-      { path: 'financeiro/*', element: todo('Financeiro', 'Gestao-Financeiro.dc.html'), handle: tabs },
+      { path: 'financeiro', element: <Financeiro />, handle: tabs },
+      { path: 'financeiro/contas', element: <Contas /> },
+      { path: 'financeiro/contas/:id', element: <Baixa /> },
+      { path: 'financeiro/lancamentos', element: <Lancamentos /> },
       { path: 'compras', element: <Compras /> },
       { path: 'compras/nova', element: <CompraNova /> },
       { path: 'compras/:id', element: <Compra /> },

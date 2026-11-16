@@ -136,3 +136,20 @@ export type ProductionOrder = {
   consumptions: { itemId: string; qty: number }[] | null
   realUnitCostCents: Cents | null
 }
+
+// Financeiro (H-G20 a H-G24): duas contas de dinheiro; transferência entre elas não é entrada nem saída
+export type Account = { id: string; name: string; openingCents: Cents }
+
+export type LedgerKind = 'in' | 'out' | 'transfer'
+
+export type LedgerTx = {
+  id: string
+  at: string
+  title: string
+  sub: string
+  accountId: string
+  /** positivo entra na conta, negativo sai */
+  amountCents: Cents
+  kind: LedgerKind
+  entryId: string | null
+}

@@ -1,5 +1,5 @@
 // Dados fictícios da gestão (design/Gestao-*.dc.html). Datas relativas a hoje.
-import type { FinancialEntry, Item, Lot, Movement, ProductionOrder, Purchase, Recipe, Supplier } from '@/domain/backoffice'
+import type { Account, FinancialEntry, Item, LedgerTx, Lot, Movement, ProductionOrder, Purchase, Recipe, Supplier } from '@/domain/backoffice'
 import { daysFromToday, minutesBefore, todayAt } from '@/domain/dates'
 
 export const suppliers: Supplier[] = [
@@ -163,10 +163,12 @@ export const seedEntries = (): FinancialEntry[] => {
     e({ id: 'fe-aluguel', direction: 'payable', description: 'Aluguel', counterpart: 'Imobiliária Centro', categoryId: 'aluguel', amountCents: 180000, dueDate: daysFromToday(-4), recurring: true, origin: 'recorrente' }),
     e({ id: 'fe-pc0053', direction: 'payable', description: 'Compra PC-0053', counterpart: 'Laticínios Serra Verde', categoryId: 'compras', amountCents: 42000, dueDate: daysFromToday(0), origin: 'compra', ref: 'pc-0053' }),
     e({ id: 'fe-energia', direction: 'payable', description: 'Energia', counterpart: 'Distribuidora de energia', categoryId: 'energia', amountCents: 22000, dueDate: daysFromToday(0), recurring: true, origin: 'recorrente' }),
-    e({ id: 'fe-gas', direction: 'payable', description: 'Gás', counterpart: 'Gás do Norte', categoryId: 'gas', amountCents: 14000, dueDate: daysFromToday(3), recurring: true, origin: 'recorrente' }),
+    e({ id: 'fe-gas', direction: 'payable', description: 'Gás', counterpart: 'Gás do Norte', categoryId: 'gas', amountCents: 14500, dueDate: daysFromToday(11), recurring: true, origin: 'recorrente' }),
+    e({ id: 'fe-pc0054', direction: 'payable', description: 'Compra PC-0054', counterpart: 'Moinho Sertão', categoryId: 'compras', amountCents: 51080, dueDate: daysFromToday(7), origin: 'compra', ref: 'pc-0054' }),
     e({ id: 'fe-pc0049', direction: 'payable', description: 'Compra PC-0049', counterpart: 'Engenho Boa Vista', categoryId: 'compras', amountCents: 23540, dueDate: daysFromToday(-5), paidAt: daysFromToday(-5), paidAmountCents: 23540, accountId: 'banco', origin: 'compra', ref: 'pc-0049' }),
-    e({ id: 'fe-cartao', direction: 'receivable', description: 'Cartões a liquidar', counterpart: 'Maquininha', categoryId: 'vendas', amountCents: 86000, dueDate: daysFromToday(2), origin: 'venda' }),
-    e({ id: 'fe-fiado', direction: 'receivable', description: 'Fiado · Dona Lúcia', counterpart: 'Lúcia Andrade', categoryId: 'vendas', amountCents: 29000, dueDate: daysFromToday(5), origin: 'venda' }),
+    e({ id: 'fe-debito', direction: 'receivable', description: 'Cartão de débito', counterpart: 'Maquininha', categoryId: 'vendas', amountCents: 21000, dueDate: daysFromToday(1), origin: 'venda' }),
+    e({ id: 'fe-credito', direction: 'receivable', description: 'Cartão de crédito', counterpart: 'Maquininha', categoryId: 'vendas', amountCents: 78000, dueDate: daysFromToday(3), origin: 'venda' }),
+    e({ id: 'fe-fiado', direction: 'receivable', description: 'Fiado · Dona Zefa', counterpart: 'Dona Zefa', categoryId: 'vendas', amountCents: 16000, dueDate: daysFromToday(6), origin: 'venda' }),
   ]
 }
 
@@ -204,5 +206,25 @@ export const seedProduction = (): ProductionOrder[] => {
     op({ id: 'op-0035', number: 'OP-0035', recipeId: 'ficha-manteiga-de-garrafa', productId: 'manteiga-de-garrafa', batches: 1, plannedQty: 24, destination: { kind: 'stock' }, status: 'planned', startAt: daysFromToday(2, 8), endAt: daysFromToday(2, 17) }),
     op({ id: 'op-0031', number: 'OP-0031', recipeId: 'ficha-queijo-coalho', productId: 'queijo-coalho', batches: 1, plannedQty: 10, destination: { kind: 'stock' }, status: 'done', startAt: daysFromToday(-3, 9), endAt: daysFromToday(-3, 17), goodQty: 10, lotCode: 'QC-1112', realUnitCostCents: 1420 }),
     op({ id: 'op-0030', number: 'OP-0030', recipeId: 'ficha-doce-de-leite', productId: 'doce-de-leite', batches: 1, plannedQty: 12, destination: { kind: 'stock' }, status: 'done', startAt: daysFromToday(-6, 9), endAt: daysFromToday(-6, 17), goodQty: 11, lotCode: 'DL-1110', realUnitCostCents: 810 }),
+  ]
+}
+
+export const seedAccounts = (): Account[] => [
+  { id: 'banco', name: 'Conta no banco', openingCents: 562790 },
+  { id: 'caixa', name: 'Caixa (gaveta)', openingCents: 70000 },
+]
+
+export const seedLedger = (): LedgerTx[] => {
+  const t = (id: string, days: number, hour: number, title: string, sub: string, accountId: string, amountCents: number, kind: LedgerTx['kind']): LedgerTx => ({
+    id, at: daysFromToday(days, hour), title, sub, accountId, amountCents, kind, entryId: null,
+  })
+  return [
+    t('lx-1', 0, 15, 'Vendas no balcão · dinheiro', 'Caixa · 14 vendas', 'caixa', 31200, 'in'),
+    t('lx-2', 0, 15, 'Vendas no Pix', 'Banco · balcão e loja online', 'banco', 39250, 'in'),
+    t('lx-3', -1, 11, 'Embalagens a vácuo', 'Banco · Pix · categoria Insumos', 'banco', -9600, 'out'),
+    t('lx-4a', -1, 17, 'Sangria do caixa', 'Caixa → banco · transferência entre contas', 'caixa', -60000, 'transfer'),
+    t('lx-4b', -1, 17, 'Sangria do caixa', 'Caixa → banco · transferência entre contas', 'banco', 60000, 'transfer'),
+    t('lx-5', -2, 9, 'Cartão de débito · liquidação', 'Banco · vendas de ontem', 'banco', 54000, 'in'),
+    t('lx-6', -3, 14, 'Charqueada Norte · PC-0050', 'Banco · boleto · categoria Compras', 'banco', -68400, 'out'),
   ]
 }

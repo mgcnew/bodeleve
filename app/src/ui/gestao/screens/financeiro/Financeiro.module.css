@@ -1,0 +1,91 @@
+.balance {
+  padding: 20px;
+  border-radius: var(--raio-folha);
+  background: var(--cor-grafite);
+  color: var(--cor-creme);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.balanceHead {
+  font: var(--apoio);
+}
+
+.balanceValue {
+  font: 700 40px/44px var(--fonte-titulo);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--esp-2);
+  padding-top: 10px;
+  border-top: 1px solid rgb(247 242 232 / 0.25);
+}
+
+.split small {
+  display: block;
+  font: 400 12px/16px var(--fonte-texto);
+  color: var(--linha);
+}
+
+.split b {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  padding: var(--esp-3) 0;
+  border-bottom: 1px solid var(--linha);
+  text-decoration: none;
+  color: var(--texto);
+  font-variant-numeric: tabular-nums;
+}
+
+.item:last-child {
+  border-bottom: 0;
+}
+
+.item > svg {
+  flex: none;
+  color: var(--texto-secundario);
+}
+
+.end {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--esp-1);
+}
+
+.day {
+  display: flex;
+  gap: var(--esp-3);
+  align-items: center;
+  padding: var(--esp-3) 0;
+  border-bottom: 1px solid var(--linha);
+  font-variant-numeric: tabular-nums;
+}
+
+.day:last-child {
+  border-bottom: 0;
+}
+
+.dayLabel {
+  flex: none;
+  width: 48px;
+  font-weight: 700;
+}
+
+.dayText {
+  flex: 1 1 0;
+  min-width: 0;
+  font: var(--apoio);
+  color: var(--texto-secundario);
+}
