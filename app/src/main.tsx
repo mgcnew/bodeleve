@@ -13,12 +13,16 @@ import { router } from './app/routes'
 import { isPreview } from './config/preview'
 import { createMockServices } from './mocks/services'
 import { ServicesProvider } from './services'
+import { useSupabase } from './config/dataSource'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } })
 
 // D19: sem banco por enquanto. Os serviços são simulados; quando o Supabase for conectado, entra outra implementação aqui.
 // Os pedidos de exemplo dos quadros (1042, 1017, 0988) só aparecem em desenvolvimento ou na demonstração (config/preview.ts).
-const services = createMockServices({ withSeedOrders: isPreview })
+// Com VITE_DATA_SOURCE=supabase a loja e a entrada da equipe usam o banco real; o resto segue simulado até ser ligado (services/supabase).
+const services = useSupabase
+  ? (await import('./services/supabase')).createSupabaseServices({ mock: { withSeedOrders: false } })
+  : createMockServices({ withSeedOrders: isPreview })
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
