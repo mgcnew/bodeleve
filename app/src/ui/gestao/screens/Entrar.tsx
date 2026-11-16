@@ -11,8 +11,9 @@ export function Entrar() {
   const session = sessionStore.useStore()
   const navigate = useNavigate()
   const from = (useLocation().state as { from?: string } | null)?.from ?? '/gestao'
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  // só no desenvolvimento: preenche o usuário de teste definido em .env.local (nunca vai ao Git)
+  const [email, setEmail] = useState(import.meta.env.DEV ? (import.meta.env.VITE_DEV_STAFF_EMAIL ?? '') : '')
+  const [password, setPassword] = useState(import.meta.env.DEV ? (import.meta.env.VITE_DEV_STAFF_PASSWORD ?? '') : '')
   const [sending, setSending] = useState(false)
   const [failed, setFailed] = useState(false)
 

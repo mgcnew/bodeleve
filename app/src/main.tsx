@@ -5,7 +5,10 @@ import '@/styles/global.css'
 import { lojaRoutes } from '@/ui/loja/routes'
 import { gestaoRoutes } from '@/ui/gestao/routes'
 import { pdvRoutes } from '@/ui/pdv/routes'
+import { restoreSession } from '@/services/gestao/session'
 import { entregasRoutes } from '@/ui/entregas/routes'
+
+void restoreSession()
 
 const router = createBrowserRouter([lojaRoutes, ...gestaoRoutes, pdvRoutes, ...entregasRoutes])
 

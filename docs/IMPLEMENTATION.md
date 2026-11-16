@@ -13,7 +13,7 @@ Os quatro ambientes estão implementados em `app/` (React + Vite + TypeScript), 
 
 ## Como entrar para testar
 
-- **Gestão e PDV**: `/gestao/entrar` com qualquer e-mail com `@` e senha de 4 ou mais caracteres. Entra como dono.
+- **Gestão e PDV com o Supabase ligado**: `/gestao/entrar` com o usuário de teste de desenvolvimento (papel gestor), cujo e-mail e senha ficam só no seu `app/.env.local` (`VITE_DEV_STAFF_EMAIL` e `VITE_DEV_STAFF_PASSWORD`) e preenchem o formulário no modo dev. Sem o Supabase, qualquer e-mail com `@` e senha de 4+ caracteres entra como dono.
 - **Entregas**: `/entregas/entrar` com um celular cadastrado — Bruno `(00) 90000-0300` (da casa), Carlos `(00) 90000-0310` (da casa), Diego `(00) 90000-0301` (parceiro) — e qualquer código de 4 números.
 - **Cancelar venda no PDV**: qualquer senha numérica de 4 ou mais dígitos.
 
@@ -66,7 +66,10 @@ O app usa o projeto Supabase **já existente** (`afqcwqikkolyoowkozak`), que tem
 |---|---|
 | Loja: catálogo, categorias, dados da casa (taxa, janelas) | **Ligado** (`store_catalog`, `store_categories`, `store_info`) |
 | Loja: fazer pedido e acompanhar | **Ligado e testado**: um pedido de teste (nº 1001, "TESTE Integração") foi criado e aparece no acompanhamento |
-| Gestão, PDV e Entregas | Ainda nos dados de exemplo. Exigem login (Supabase Auth) e as funções `order_*`, `pos_*`, `courier_*`, `receive_purchase` etc. |
+| Gestão: login da equipe | **Ligado** (Supabase Auth + papel em `memberships`) |
+| Gestão: pedidos (fila, aceitar, conferir, pronto, desfazer, retirada) | **Ligado e testado** (`order_accept`, `order_mark_ready`, `order_undo_ready`, `order_complete_pickup`), com Realtime e atualização a cada 15 s |
+| Gestão: entregas (atribuir), estoque, compras, produção, financeiro, produtos, clientes | Ainda nos dados de exemplo |
+| PDV e Entregas (app do entregador) | Ainda nos dados de exemplo (`pos_*`, `courier_*` existem no banco) |
 
 O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de desenvolvimento.
 

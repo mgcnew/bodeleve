@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
 import { Box } from '@/components/Card'
@@ -7,12 +8,18 @@ import { Icon } from '@/components/Icon'
 import { fullDate, hourMinute, shortDate } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { staffStatusLabels, staffSubtotal, staffTotal, type StaffOrder } from '@/domain/staffOrder'
-import { setStatus, staffOrdersStore, toggleChecked } from '@/services/gestao/orders'
+import { staffOrdersStore, toggleChecked } from '@/services/gestao/orders'
+import { acceptOrder, actionErrorMessage, completePickup, markOrderReady, undoOrderReady } from '@/services/gestao/orderActions'
 import o from '@/styles/ops.module.css'
 import { Bar, StepBars, SumRow, SumTotal } from '../../shared/OpsBits'
 
 const hints: Record<StaffOrder['status'], (x: StaffOrder) => string> = {
-  new: (x) => (x.paid ? `Pago no ${x.paymentLabel}. Aceite para começar a separar.` : 'Pagamento na retirada. Aceite para começar a separar.'),
+  new: (x) =>
+    x.paid
+      ? `Pago no ${x.paymentLabel}. Aceite para começar a separar.`
+      : x.paymentLabel === 'Pix'
+        ? 'Pix ainda sem confirmação. Aceite para começar a separar.'
+        : `Pagamento ${x.fulfillment === 'delivery' ? 'na entrega' : 'na retirada'}. Aceite para começar a separar.`,
   separating: () => 'Marque cada item ao colocar na sacola.',
   ready: (x) => (x.fulfillment === 'delivery' ? 'O cliente foi avisado pelo WhatsApp. Aguardando entregador.' : 'O cliente foi avisado pelo WhatsApp. Aguardando retirada.'),
   en_route: (x) => `Saiu para entrega${x.courierName ? ` com ${x.courierName}` : ''}.`,
@@ -24,6 +31,19 @@ const stepIndex = { new: 0, separating: 1, ready: 2, en_route: 3, delivered: 3 }
 export function Pedido() {
   const { id = '' } = useParams()
   const order = staffOrdersStore.useStore().find((x) => x.id === id)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
+  const run = async (action: () => Promise<void>) => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      await action()
+    } catch (e) {
+      setProblem(actionErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
+  }
 
   if (!order) {
     return (
@@ -117,14 +137,15 @@ export function Pedido() {
       </main>
 
       <div className={o.footer}>
+        {problem && <Banner tone="error">{problem}</Banner>}
         {order.status === 'new' && (
-          <Button size="l" block onClick={() => setStatus(order.id, 'separating')}>
+          <Button size="l" block loading={busy} disabled={busy} onClick={() => run(() => acceptOrder(order.id))}>
             Aceitar e começar a separar
           </Button>
         )}
         {order.status === 'separating' &&
           (allChecked ? (
-            <Button size="l" block onClick={() => setStatus(order.id, 'ready')}>
+            <Button size="l" block loading={busy} disabled={busy} onClick={() => run(() => markOrderReady(order.id))}>
               Marcar como pronto
             </Button>
           ) : (
@@ -142,11 +163,11 @@ export function Pedido() {
                 Atribuir entregador
               </ButtonLink>
             ) : (
-              <Button block onClick={() => setStatus(order.id, 'delivered')}>
+              <Button block disabled={busy} onClick={() => run(() => completePickup(order.id))}>
                 Cliente retirou
               </Button>
             )}
-            <Button variant="secondary" block onClick={() => setStatus(order.id, 'separating')}>
+            <Button variant="secondary" block disabled={busy} onClick={() => run(() => undoOrderReady(order.id))}>
               Desfazer
             </Button>
           </>

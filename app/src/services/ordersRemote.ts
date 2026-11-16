@@ -42,7 +42,7 @@ const statusMap: Record<string, OrderStatus> = {
 
 /** "14h52" do banco → data de hoje com essa hora (o design só mostra a hora) */
 function timeToIso(label: string, createdAt: string) {
-  const m = /^(\d{1,2})h(\d{2})$/.exec(label)
+  const m = /^(\d{1,2})[h:](\d{2})$/.exec(label)
   if (!m) return createdAt
   const d = new Date(createdAt)
   d.setHours(Number(m[1]), Number(m[2]), 0, 0)

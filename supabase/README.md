@@ -5,3 +5,6 @@ O banco da Bodeleve é o projeto Supabase `afqcwqikkolyoowkozak` (organização 
 - **A migração que havia aqui foi removida**: criava as mesmas tabelas em outra estrutura e, aplicada no projeto, daria conflito.
 - **`seed_dev.sql`**: catálogo fictício (10 produtos e 4 categorias) para ver a loja funcionando num banco de desenvolvimento. **Aplicado em 2026-11-16** no projeto de desenvolvimento (10 produtos publicados, 4 categorias); é reaplicável sem duplicar.
 - **Pendente**: trazer as 19 migrações para este diretório (`supabase db pull`, que pede a senha do banco) para o esquema ficar versionado junto do código.
+
+- **Usuário de teste**: `teste.gestao@bodeleve.test` (papel gestor), criado só para desenvolvimento. A senha está em `app/.env.local`. Para remover: apagar a linha em `memberships` e o usuário em Authentication.
+- **Pedido de teste**: nº 1001 ("TESTE Integração"), criado pelo teste de integração da loja.

@@ -34,6 +34,8 @@ export type StaffOrder = {
   /** H-E5 — código de 4 números que a cliente informa ao entregador */
   deliveryCode: string
   courierStage?: 'accepted' | 'collected'
+  /** ids dos produtos no banco, na mesma ordem de `items` (só com o Supabase ligado) */
+  itemIds?: string[]
   /** entrega reservada ou publicada, ainda sem entregador em rota */
   deliveryNote?: string
 }

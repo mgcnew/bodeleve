@@ -2,9 +2,13 @@
 // para pedidos novos aparecerem na hora (DATA_MODEL_DRAFT.md).
 import type { StaffOrder, StaffOrderStatus } from '@/domain/staffOrder'
 import { createStore } from '@/lib/store'
+import { supabase } from '@/lib/supabase'
 import { seedStaffOrders } from '@/mocks/gestao/orders'
 
-export const staffOrdersStore = createStore<StaffOrder[]>('bodeleve.gestao.pedidos', seedStaffOrders)
+// com o Supabase ligado é um cache do banco (começa vazio); sem ele, dados de exemplo no aparelho
+export const staffOrdersStore = supabase
+  ? createStore<StaffOrder[]>('bodeleve.gestao.pedidos.remoto', () => [])
+  : createStore<StaffOrder[]>('bodeleve.gestao.pedidos', seedStaffOrders)
 
 function patch(id: string, fn: (o: StaffOrder) => StaffOrder) {
   staffOrdersStore.set((all) => all.map((o) => (o.id === id ? fn(o) : o)))
