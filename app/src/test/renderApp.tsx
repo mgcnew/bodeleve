@@ -7,6 +7,7 @@ import { ServicesProvider } from '@/services'
 import type { Services } from '@/services/types'
 import { useAdminSession } from '@/store/admin'
 import { emptyAddress, useBag, useCheckout, useSession } from '@/store/bag'
+import { usePosCart } from '@/store/pos'
 
 /** Storage em memória para os testes: nada vaza entre um teste e outro. */
 export function memoryStorage() {
@@ -27,6 +28,7 @@ export function resetStores() {
   })
   useSession.setState({ phone: null })
   useAdminSession.setState({ user: null })
+  usePosCart.setState({ lines: [], discount: null })
 }
 
 export function renderApp(path = '/', opts: MockOptions & { services?: (base: Services) => Services } = {}) {

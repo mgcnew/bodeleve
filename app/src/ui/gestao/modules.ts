@@ -9,7 +9,7 @@ export type GestaoEntry = {
   icon: IconName
   to: string
   module: Module
-  group: 'Abastecer' | 'Catálogo' | 'Relacionamento' | 'Análise' | 'Sistema' | 'Principal'
+  group: 'Balcão' | 'Abastecer' | 'Catálogo' | 'Relacionamento' | 'Análise' | 'Sistema' | 'Principal'
 }
 
 export const entries: GestaoEntry[] = [
@@ -17,6 +17,7 @@ export const entries: GestaoEntry[] = [
   { key: 'pedidos', label: 'Vendas e pedidos', detail: 'Loja e balcão, do dia', icon: 'pedidos', to: '/gestao/pedidos', module: 'orders', group: 'Principal' },
   { key: 'estoque', label: 'Estoque', detail: 'Saldos, lotes e validades', icon: 'estoque', to: '/gestao/estoque', module: 'stock', group: 'Principal' },
   { key: 'financeiro', label: 'Financeiro', detail: 'Caixa, contas a pagar e a receber', icon: 'financeiro', to: '/gestao/financeiro', module: 'finance', group: 'Principal' },
+  { key: 'pdv', label: 'PDV (balcão)', detail: 'Vender, vendas do dia e caixa', icon: 'caixa', to: '/pdv', module: 'pos', group: 'Balcão' },
   { key: 'compras', label: 'Compras', detail: 'Pedidos de compra e recebimento', icon: 'compras', to: '/gestao/compras', module: 'purchasing', group: 'Abastecer' },
   { key: 'fornecedores', label: 'Fornecedores', detail: 'Contatos e histórico de compras', icon: 'entregas', to: '/gestao/fornecedores', module: 'purchasing', group: 'Abastecer' },
   { key: 'producao', label: 'Produção', detail: 'Fichas técnicas e ordens de produção', icon: 'producao', to: '/gestao/producao', module: 'production', group: 'Abastecer' },
@@ -27,7 +28,7 @@ export const entries: GestaoEntry[] = [
   { key: 'configuracoes', label: 'Configurações', detail: 'Casa, equipe e permissões', icon: 'mais', to: '/gestao/configuracoes', module: 'team', group: 'Sistema' },
 ]
 
-export const groupsInOrder: GestaoEntry['group'][] = ['Abastecer', 'Catálogo', 'Relacionamento', 'Análise', 'Sistema']
+export const groupsInOrder: GestaoEntry['group'][] = ['Balcão', 'Abastecer', 'Catálogo', 'Relacionamento', 'Análise', 'Sistema']
 
 /** Abas da barra inferior no celular (P-D: 5 abas, a última é "Mais"). */
 export const tabKeys = ['inicio', 'pedidos', 'estoque', 'financeiro'] as const

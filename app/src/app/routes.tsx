@@ -32,6 +32,10 @@ import { CustomerPage, CustomersPage } from '@/pages/gestao/customers'
 import { AssignPage, DeliveriesPage } from '@/pages/gestao/deliveries'
 import { ReportsPage, SalesReportPage } from '@/pages/gestao/reports'
 import { HousePage, SettingsPage, TeamPage } from '@/pages/gestao/settings'
+import { PdvLayout, type PdvHandle } from '@/ui/pdv/PdvLayout'
+import { BagPage as PdvBagPage, OpeningPage, PdvHome, SellPage } from '@/pages/pdv/sell'
+import { DonePage, PaymentPage as PdvPaymentPage, SplitPage } from '@/pages/pdv/checkout'
+import { CashPage, SalePage, SalesPage } from '@/pages/pdv/desk'
 import { PayPage } from '@/pages/gestao/PayPage'
 import { NewPurchasePage } from '@/pages/gestao/NewPurchasePage'
 import { PurchasePage } from '@/pages/gestao/PurchasePage'
@@ -111,6 +115,22 @@ export const routes: RouteObject[] = [
           { path: 'configuracoes/casa', element: <HousePage />, handle: g('team') },
           { path: 'configuracoes/equipe', element: <TeamPage />, handle: g('team') },
           { path: '*', element: <ModulePlaceholder /> },
+        ],
+      },
+      {
+        path: 'pdv',
+        element: <PdvLayout />,
+        children: [
+          { index: true, element: <PdvHome /> },
+          { path: 'abertura', element: <OpeningPage /> },
+          { path: 'vender', element: <SellPage />, handle: { nav: true, header: true } satisfies PdvHandle },
+          { path: 'sacola', element: <PdvBagPage /> },
+          { path: 'pagamento', element: <PdvPaymentPage /> },
+          { path: 'pagamento/dividir', element: <SplitPage /> },
+          { path: 'concluida/:id', element: <DonePage /> },
+          { path: 'vendas', element: <SalesPage />, handle: { nav: true, header: true } satisfies PdvHandle },
+          { path: 'vendas/:id', element: <SalePage /> },
+          { path: 'caixa', element: <CashPage />, handle: { nav: true, header: true } satisfies PdvHandle },
         ],
       },
       {

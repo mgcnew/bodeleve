@@ -36,6 +36,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D27 | 2026-11-15 | Etapa 4, lote 5 (Financeiro) implementado: saldo por conta (banco e caixa), contas que pedem ação hoje, previsão de 7 dias, contas a pagar e a receber, pagamento de conta (total ou em parte, com multa e juros, desfazível) e lançamentos. Contas de compra nascem no recebimento; despesas fixas se repetem todo mês | Usuário (D18–D21) |
 | D28 | 2026-11-16 | Etapa 4, lote 6a implementado: Produtos (lista, filtros, busca), Produto (edição com custo, margem e publicação na loja), Categorias, Clientes e Cliente. O catálogo da loja passa a ser o que a gestão publica | Usuário (D18–D21) |
 | D29 | 2026-11-16 | Etapa 4, lote 6b implementado — a Gestão está completa: Entregas e Atribuir entrega (próprio, reserva, parceiros), Relatórios e Relatório de vendas (hoje, 7 dias, mês), Configurações, A casa e Equipe e permissões. A loja passa a mostrar endereço, WhatsApp e horário preenchidos em A casa | Usuário (D18–D21) |
+| D30 | 2026-11-16 | Etapa 5 (PDV) implementada: abrir caixa, vender (favoritos, categorias, busca, peso), sacola com desconto, pagamento (dinheiro com troco, Pix e cartão simulados), pagamento combinado, venda concluída com comprovante, vendas de hoje, detalhe com cancelamento por senha de gestor, caixa (sangria, suprimento, fechamento e reabertura). A venda baixa o estoque pelo lote que vence primeiro e lança no financeiro. Vendas sem conexão ficam guardadas no aparelho | Usuário (D18–D21) |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -265,6 +266,23 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-I78 | Equipe: 6 pessoas e 5 papéis de exemplo (Bruno entrou como entregador). Os papéis usam os nomes da matriz H-G27 ("Gestor"), sem flexão de gênero. Convidar só registra o convite como pendente: nenhum e-mail sai (D21) e a pessoa ainda não consegue entrar | `settings` |
 | H-I79 | Só o dono acessa Configurações (módulo "Equipe e configurações"). A matriz "O que cada papel vê" é lida da mesma regra de acesso da interface | `permissions/` |
 
+## Hipóteses de implementação do PDV — a confirmar
+
+| ID | O que foi feito | Onde |
+|---|---|---|
+| H-I80 | Preço por kg separado do preço da embalagem: o produto "vendido por peso" tem um preço do kg só para o balcão. Carne de sol: R$ 34,90 a embalagem de 500 g na loja online e R$ 59,90 / kg no balcão (resolve a divergência P39). O peso vira unidades de estoque pela embalagem (0,75 kg de um item de 500 g = 1,5 un). Entrou o feijão de corda (só balcão, por peso) porque aparece nos quadros | `domain/units.ts`, `weightPriceCents` |
+| H-I81 | Estoque da venda: sai do lote que vence primeiro e passa para o próximo se acabar. Não vende acima do disponível (físico menos o reservado a pedidos online): o toque avisa "Só há 12 un…" e o pagamento recusa se o saldo mudou no meio | `pickLots`, `checkout` |
+| H-I82 | Dinheiro: atalhos Exato, a próxima dezena, mais dez e o próximo múltiplo de 50, mais um campo "Outro valor" (não desenhado). Pix mostra só o marcador [QR CODE PIX] e o cartão manda passar na maquininha: nada é cobrado nem conferido (D21); quem opera confirma à mão | `PaymentPage` |
+| H-I83 | Desconto: 5%, 10%, R$ 5,00 ou arredondar (tira os centavos), com motivo da lista do quadro. Não há limite nem aprovação (não desenhado). É recalculado se a sacola mudar | `discountCents` |
+| H-I84 | Cancelar venda: senha de gestor de TESTE (Ana 2468, dono 1357) no lugar da conferência da conta de um gestor; devolve os itens ao lote de onde saíram, tira o dinheiro do caixa e o Pix do banco e diz por onde devolver. O estorno ao cliente é manual. Só cancela a venda inteira | `MOCK_MANAGER_PINS`, `cancelSale` |
+| H-I85 | Caixa: totais = base do dia (20 vendas anteriores ao sistema registrar uma a uma, exemplo) + vendas registradas. Esperado na gaveta = troco de abertura + vendas em dinheiro + suprimentos − sangrias. "Levar ao banco" é transferência caixa → banco; as outras sangrias saem do caixa. Fechar lança a diferença no caixa do financeiro (o saldo passa a ser o contado); reabrir desfaz | `domain/pos.ts` |
+| H-I86 | O Pix de balcão entra na conta do banco na hora da venda (confirmação manual, sem conciliação). Venda em dinheiro entra no caixa pelo valor sem o troco. Cartão ainda não gera conta a receber | `checkout` |
+| H-I87 | O comprovante por WhatsApp é só registrado (D21); a tela diz que o envio não está ligado | `sendReceipt` |
+| H-I88 | O Início e os Relatórios somam as vendas de balcão registradas ao exemplo do dia (26 vendas, R$ 892,00); pagamentos por forma seguem o quadro do Caixa (dinheiro R$ 312,00, Pix R$ 197,60, cartão R$ 382,40) | `todayCounter` |
+| H-I89 | Conexão ruim: a sacola fica no aparelho; as consultas do balcão rodam sem rede; venda feita sem conexão fica marcada "Não enviada" e é enviada quando a conexão volta. Com o Supabase isso vira fila de envio real, com tratamento de conflito de estoque entre aparelhos | `useOnline`, `syncPending` |
+| H-I90 | Abertura: o valor do troco é editável além dos atalhos R$ 100, 150 e 200. Fechar o caixa pede confirmação (modal). Cancelar a venda também | `OpeningPage`, `CashPage` |
+| H-I91 | Favoritos = os 8 do quadro, na ordem do estoque (a do quadro não é ordenável ainda). Produto sem estoque aparece "sem estoque" e avisa ao tocar. Todo usuário com acesso ao PDV (dono, gestor, atendente) abre e fecha o caixa | `SellPage` |
+
 ## Pendências
 
 O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
@@ -319,6 +337,12 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P46 | Passar os dados reais da casa: nome, CNPJ, endereço, WhatsApp, horários e o logotipo aprovado | Configurações · A casa | H-I77, P5 |
 | P47 | Definir o convite de equipe: e-mail de convite, criação de senha, remover ou trocar o papel de alguém, e permissão por pessoa (hoje papéis fixos) | Equipe | H-I78, H-G27 |
 | P48 | Decidir a nota fiscal (se emite, qual sistema) e quando a configuração entra | Configurações | Q12 |
+| P49 | Trocar a senha de teste do gestor pela conferência de uma conta de gestor, e definir limite de desconto e quem pode dar | PDV | H-I83, H-I84 |
+| P50 | Cartão no balcão: maquininha, taxas, prazo de liquidação e como vira conta a receber no financeiro | PDV · Financeiro | Q6, H-I86 |
+| P51 | Pix de balcão: provedor, QR de verdade e conferência automática do recebimento (hoje só marcador e confirmação manual) | PDV | D21, P8 |
+| P52 | Comprovante e nota fiscal: impressão, WhatsApp e nota ao consumidor | PDV | Q12, H-I87 |
+| P53 | Funcionamento sem conexão de verdade (vários aparelhos, conflito de estoque, fila de envio) e leitura de balança | PDV | H-I89 |
+| P54 | Cancelamento parcial, troca e devolução; vários caixas ao mesmo tempo; quem pode abrir e fechar o caixa | PDV | H-I84, H-I91 |
 
 Marcadores de conteúdo nas telas:
 

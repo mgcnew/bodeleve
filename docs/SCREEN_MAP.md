@@ -264,3 +264,17 @@ Rotas em `app/src/app/routes.tsx` (`/gestao/...`); telas em `app/src/pages/gesta
 | 34 · A casa | `/gestao/configuracoes/casa` | `settings.tsx` | 4 |
 | 35 · Equipe e permissões | `/gestao/configuracoes/equipe` | `settings.tsx` | 4 |
 
+### PDV: tela → rota → código
+
+| Quadro | Rota | Arquivo | Etapa |
+|---|---|---|---|
+| 1 · Abrir caixa | `/pdv/abertura` | `pdv/sell.tsx` | 5 |
+| 2 · Vender (+ peso) | `/pdv/vender` | `pdv/sell.tsx` | 5 |
+| 3 · Sacola (+ desconto) | `/pdv/sacola` | `pdv/sell.tsx` | 5 |
+| 4 · Pagamento | `/pdv/pagamento` | `pdv/checkout.tsx` | 5 |
+| 5 · Pagamento combinado | `/pdv/pagamento/dividir` | `pdv/checkout.tsx` | 5 |
+| 6 · Venda concluída | `/pdv/concluida/:id` | `pdv/checkout.tsx` | 5 |
+| 7 · Vendas de hoje | `/pdv/vendas` | `pdv/desk.tsx` | 5 |
+| 8 · Detalhe e cancelamento | `/pdv/vendas/:id` | `pdv/desk.tsx` | 5 |
+| 9 · Caixa: sangria e fechamento | `/pdv/caixa` | `pdv/desk.tsx` | 5 |
+
