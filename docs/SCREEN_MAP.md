@@ -278,3 +278,17 @@ Rotas em `app/src/app/routes.tsx` (`/gestao/...`); telas em `app/src/pages/gesta
 | 8 · Detalhe e cancelamento | `/pdv/vendas/:id` | `pdv/desk.tsx` | 5 |
 | 9 · Caixa: sangria e fechamento | `/pdv/caixa` | `pdv/desk.tsx` | 5 |
 
+### Entregas (app do entregador): tela → rota → código
+
+| Quadro | Rota | Arquivo | Etapa |
+|---|---|---|---|
+| Entrar | `/entregas/entrar` | `entregas/login.tsx` | 6 |
+| 1 · Entregas | `/entregas` | `entregas/list.tsx` | 6 |
+| 2 · Detalhe e aceite | `/entregas/pedido/:id` | `entregas/flow.tsx` | 6 |
+| 3 · Coleta | `/entregas/pedido/:id/coleta` | `entregas/flow.tsx` | 6 |
+| 4 · Em rota | `/entregas/pedido/:id/rota` | `entregas/flow.tsx` | 6 |
+| 5 · Confirmar entrega | `/entregas/pedido/:id/entregar` | `entregas/flow.tsx` | 6 |
+| 6 · Problema na entrega | `/entregas/pedido/:id/problema` | `entregas/flow.tsx` | 6 |
+| 7 · Histórico | `/entregas/historico` | `entregas/me.tsx` | 6 |
+| 8 · Perfil | `/entregas/perfil` | `entregas/me.tsx` | 6 |
+

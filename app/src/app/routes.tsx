@@ -36,6 +36,11 @@ import { PdvLayout, type PdvHandle } from '@/ui/pdv/PdvLayout'
 import { BagPage as PdvBagPage, OpeningPage, PdvHome, SellPage } from '@/pages/pdv/sell'
 import { DonePage, PaymentPage as PdvPaymentPage, SplitPage } from '@/pages/pdv/checkout'
 import { CashPage, SalePage, SalesPage } from '@/pages/pdv/desk'
+import { EntregasLayout, type EntregasHandle } from '@/ui/entregas/EntregasLayout'
+import { CourierLoginPage } from '@/pages/entregas/login'
+import { CourierListPage } from '@/pages/entregas/list'
+import { DetailPage as CourierDetailPage, HandoverPage, PickupPage, ProblemPage, RoutePage } from '@/pages/entregas/flow'
+import { HistoryPage, ProfilePage as CourierProfilePage } from '@/pages/entregas/me'
 import { PayPage } from '@/pages/gestao/PayPage'
 import { NewPurchasePage } from '@/pages/gestao/NewPurchasePage'
 import { PurchasePage } from '@/pages/gestao/PurchasePage'
@@ -131,6 +136,21 @@ export const routes: RouteObject[] = [
           { path: 'vendas', element: <SalesPage />, handle: { nav: true, header: true } satisfies PdvHandle },
           { path: 'vendas/:id', element: <SalePage /> },
           { path: 'caixa', element: <CashPage />, handle: { nav: true, header: true } satisfies PdvHandle },
+        ],
+      },
+      { path: 'entregas/entrar', element: <CourierLoginPage /> },
+      {
+        path: 'entregas',
+        element: <EntregasLayout />,
+        children: [
+          { index: true, element: <CourierListPage />, handle: { nav: true } satisfies EntregasHandle },
+          { path: 'pedido/:id', element: <CourierDetailPage /> },
+          { path: 'pedido/:id/coleta', element: <PickupPage /> },
+          { path: 'pedido/:id/rota', element: <RoutePage /> },
+          { path: 'pedido/:id/entregar', element: <HandoverPage /> },
+          { path: 'pedido/:id/problema', element: <ProblemPage /> },
+          { path: 'historico', element: <HistoryPage />, handle: { nav: true } satisfies EntregasHandle },
+          { path: 'perfil', element: <CourierProfilePage />, handle: { nav: true } satisfies EntregasHandle },
         ],
       },
       {

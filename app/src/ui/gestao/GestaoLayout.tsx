@@ -55,8 +55,8 @@ export function GestaoLayout() {
               <EmptyState
                 icon="entregas"
                 title="Entregadores usam o app de Entregas"
-                description="Esta área é da equipe da casa. O app de Entregas chega na Etapa 6."
-                action={<Button onClick={() => { signOut(); navigate('/gestao/entrar') }}>Sair</Button>}
+                description="Esta área é da equipe da casa. Entre no app de Entregas com o celular cadastrado."
+                action={<Button onClick={() => { signOut(); navigate('/entregas/entrar') }}>Abrir o app de Entregas</Button>}
               />
             </main>
           ) : noAccess ? (

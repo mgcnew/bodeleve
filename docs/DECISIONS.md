@@ -37,6 +37,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D28 | 2026-11-16 | Etapa 4, lote 6a implementado: Produtos (lista, filtros, busca), Produto (edição com custo, margem e publicação na loja), Categorias, Clientes e Cliente. O catálogo da loja passa a ser o que a gestão publica | Usuário (D18–D21) |
 | D29 | 2026-11-16 | Etapa 4, lote 6b implementado — a Gestão está completa: Entregas e Atribuir entrega (próprio, reserva, parceiros), Relatórios e Relatório de vendas (hoje, 7 dias, mês), Configurações, A casa e Equipe e permissões. A loja passa a mostrar endereço, WhatsApp e horário preenchidos em A casa | Usuário (D18–D21) |
 | D30 | 2026-11-16 | Etapa 5 (PDV) implementada: abrir caixa, vender (favoritos, categorias, busca, peso), sacola com desconto, pagamento (dinheiro com troco, Pix e cartão simulados), pagamento combinado, venda concluída com comprovante, vendas de hoje, detalhe com cancelamento por senha de gestor, caixa (sangria, suprimento, fechamento e reabertura). A venda baixa o estoque pelo lote que vence primeiro e lança no financeiro. Vendas sem conexão ficam guardadas no aparelho | Usuário (D18–D21) |
+| D31 | 2026-11-16 | Etapa 6 (app de Entregas) implementada: entrar por celular e código, lista (disponíveis e minhas), detalhe e aceite, coleta, em rota, confirmação pelo código do cliente, problema com devolução, histórico e perfil; entregador da casa e parceiro. O painel da gestão acompanha cada etapa. Nenhuma mensagem é enviada (D21) | Usuário (D18–D21) |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -283,6 +284,20 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-I90 | Abertura: o valor do troco é editável além dos atalhos R$ 100, 150 e 200. Fechar o caixa pede confirmação (modal). Cancelar a venda também | `OpeningPage`, `CashPage` |
 | H-I91 | Favoritos = os 8 do quadro, na ordem do estoque (a do quadro não é ordenável ainda). Produto sem estoque aparece "sem estoque" e avisa ao tocar. Todo usuário com acesso ao PDV (dono, gestor, atendente) abre e fecha o caixa | `SellPage` |
 
+## Hipóteses de implementação do app de Entregas — a confirmar
+
+| ID | O que foi feito | Onde |
+|---|---|---|
+| H-I92 | Só entra quem a casa cadastrou (entregadores próprios e parceiros), pelo celular e um código de 4 números. O código é de teste (1234) e não é enviado por WhatsApp (D21); em desenvolvimento a tela mostra qual usar. Os entregadores e celulares de exemplo estão em `config/delivery.ts` e passam a vir do cadastro de equipe (P47) | `CourierLoginPage`, `config/delivery.ts` |
+| H-I93 | Dois passos para ficar com uma entrega: na lista, "Pegar esta entrega" (da casa) ou "Aceitar por R$ 9,00" (parceiro) torna a entrega dela ou dele; no detalhe, "Aceitar" confirma (a gestão vê "Aceita"). A atribuição feita pelo balcão cai direto no segundo passo. O quadro mostra um botão só em cada lugar | `take`, `accept` |
+| H-I94 | Entregador da casa vê os pedidos prontos sem entregador; parceiro só os publicados pela casa. Quem está em rota e pega outra fica com ela reservada. Fora do turno não vê nem pega e some das opções do balcão | `visibleTo` |
+| H-I95 | "Saí da loja" leva a entrega para Em rota e o pedido para "saiu para entrega" (quem comprou vê no acompanhamento). Previsão = km × 3 min e volta 10 min depois (exemplos). O quadro diz "cliente avisada às 15h44": como nada é enviado, a tela diz que o pedido está a caminho no acompanhamento da loja | `depart` |
+| H-I96 | Entrega: o código de 4 números é o do pedido, e o app nunca o recebe: só informa o que ouviu e o serviço confere. Pedido a pagar na porta (dinheiro ou cartão) passa a pago ao entregar; o repasse desse dinheiro à loja não é registrado | `confirm` |
+| H-I97 | Problema: cinco motivos do quadro; "Devolver à loja" volta o pedido a pronto e a gestão atribui de novo; "Desfazer" vale enquanto ninguém atribuiu outra vez. "Quem comprou não tem o código" abre o problema com esse motivo. A foto do local ainda não é guardada | `reportProblem`, `undoProblem` |
+| H-I98 | Histórico do dia: entregas, devoluções e km rodados (por bairro, tabela de exemplo). Parceiro vê R$ 9,00 por entrega e R$ 4,50 por devolução e o total a receber; entregador da casa vê só a conferência | `historyOf` |
+| H-I99 | Perfil: "Disponível para entregas" liga e desliga; parceiro guarda a chave Pix (só guardada, sem pagamento) | `ProfilePage` |
+| H-I100 | Mapa e rastreio: marcador [MAPA DA ROTA]; "Abrir no mapa" usa o app de mapas do celular e "Ligar" usa o telefone. Sem rastreio em tempo real | `RoutePage` |
+
 ## Pendências
 
 O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
@@ -343,6 +358,11 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P52 | Comprovante e nota fiscal: impressão, WhatsApp e nota ao consumidor | PDV | Q12, H-I87 |
 | P53 | Funcionamento sem conexão de verdade (vários aparelhos, conflito de estoque, fila de envio) e leitura de balança | PDV | H-I89 |
 | P54 | Cancelamento parcial, troca e devolução; vários caixas ao mesmo tempo; quem pode abrir e fechar o caixa | PDV | H-I84, H-I91 |
+| P55 | Login real do entregador (envio do código por WhatsApp) e cadastro de entregadores e parceiros pela gestão, com aprovação e documentos do parceiro | Entregas | H-I92, P8, P47 |
+| P56 | Avisar quem comprou quando o pedido sai e quando é entregue (WhatsApp ou push), e avisar entregadores quando há entrega nova | Entregas · Mensagens | D21, H-I95 |
+| P57 | Mapa da rota, rastreio em tempo real e foto como prova de entrega ou de problema | Entregas | H-I97, H-I100 |
+| P58 | Pagamento do parceiro (Pix toda segunda) e prestação de contas do dinheiro cobrado na porta | Entregas · Financeiro | H-I96, H-I98 |
+| P59 | Publicação para parceiros com prazo de verdade (10 min) e como o parceiro é notificado | Entregas | H-I70, H-I94 |
 
 Marcadores de conteúdo nas telas:
 
