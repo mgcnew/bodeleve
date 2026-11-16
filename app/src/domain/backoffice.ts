@@ -4,7 +4,7 @@ import type { Cents } from './money'
 // Modelo da gestão (docs/DATA_MODEL_DRAFT.md). Saldo de estoque não é coluna: deriva de movimentações.
 
 export type ItemType = 'resale' | 'raw_material' | 'finished'
-export type StockUnit = 'un' | 'kg' | 'L'
+export type StockUnit = 'un' | 'kg' | 'L' | 'ml'
 
 export type Item = {
   id: string
@@ -91,7 +91,7 @@ export type FinancialEntry = {
   recurring: boolean
 }
 
-export const unitLabel: Record<StockUnit, string> = { un: 'un', kg: 'kg', L: 'L' }
+export const unitLabel: Record<StockUnit, string> = { un: 'un', kg: 'kg', L: 'L', ml: 'ml' }
 
 /** 6,4 kg · 12 un */
 export function formatQty(qty: number, unit: StockUnit) {
@@ -101,4 +101,38 @@ export function formatQty(qty: number, unit: StockUnit) {
 
 export function purchaseTotal(p: Purchase, field: 'qty' | 'receivedQty' = 'qty'): Cents {
   return p.items.reduce((n, i) => n + i[field] * i.unitCostCents, 0)
+}
+
+// Produção (H-G15 a H-G19): ficha técnica por fornada e ordens para estoque ou para um pedido
+export type Recipe = {
+  id: string
+  productId: string
+  /** unidades boas esperadas por fornada */
+  yieldQty: number
+  batchLabel: string
+  shelfLifeDays: number
+  lines: { itemId: string; qty: number }[]
+  /** H-G19 — gás e energia como custo indireto estimado por fornada */
+  indirectCostCents: Cents
+  prepNotes: string
+}
+
+export type ProductionStatus = 'planned' | 'in_progress' | 'done' | 'cancelled'
+
+export type ProductionOrder = {
+  id: string
+  number: string
+  recipeId: string
+  productId: string
+  batches: number
+  plannedQty: number
+  destination: { kind: 'stock' } | { kind: 'order'; orderNumber: string }
+  status: ProductionStatus
+  startAt: string
+  endAt: string
+  goodQty: number | null
+  lotCode: string | null
+  /** consumo real por insumo, na conclusão */
+  consumptions: { itemId: string; qty: number }[] | null
+  realUnitCostCents: Cents | null
 }

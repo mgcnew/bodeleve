@@ -9,6 +9,9 @@ export const categories: Category[] = [
   { id: 'doces', name: 'Doces' },
 ]
 
+/** Categorias internas da gestão (não aparecem na loja) */
+export const internalCategories: Category[] = [{ id: 'insumos', name: 'Insumos' }]
+
 const content = {
   description: '[DESCRIÇÃO DO PRODUTO: como é feito, sabor, sugestão de uso]',
   storage: '[COMO CONSERVAR]',

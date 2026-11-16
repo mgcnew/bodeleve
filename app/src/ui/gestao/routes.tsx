@@ -12,6 +12,11 @@ import { Compras } from './screens/compras/Compras'
 import { Fornecedor } from './screens/compras/Fornecedor'
 import { Fornecedores } from './screens/compras/Fornecedores'
 import { Recebimento } from './screens/compras/Recebimento'
+import { Ajuste } from './screens/estoque/Ajuste'
+import { Estoque } from './screens/estoque/Estoque'
+import { Inventario } from './screens/estoque/Inventario'
+import { Item } from './screens/estoque/Item'
+import { Movimentacoes } from './screens/estoque/Movimentacoes'
 
 const env = 'Gestão'
 const tabs: GestaoHandle = { tabs: true }
@@ -28,7 +33,11 @@ export const gestaoRoutes: RouteObject[] = [
       { path: 'pedidos', element: <Pedidos />, handle: tabs },
       { path: 'pedidos/:id', element: <Pedido /> },
       { path: 'mais', element: <Mais />, handle: tabs },
-      { path: 'estoque/*', element: todo('Estoque', 'Gestao-Estoque.dc.html'), handle: tabs },
+      { path: 'estoque', element: <Estoque />, handle: tabs },
+      { path: 'estoque/ajuste', element: <Ajuste /> },
+      { path: 'estoque/inventario', element: <Inventario /> },
+      { path: 'estoque/:id', element: <Item /> },
+      { path: 'estoque/:id/movimentacoes', element: <Movimentacoes /> },
       { path: 'financeiro/*', element: todo('Financeiro', 'Gestao-Financeiro.dc.html'), handle: tabs },
       { path: 'compras', element: <Compras /> },
       { path: 'compras/nova', element: <CompraNova /> },

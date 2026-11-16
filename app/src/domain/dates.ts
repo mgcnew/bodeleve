@@ -54,3 +54,7 @@ export function daysUntil(iso: string) {
 export function minutesAgo(iso: string) {
   return Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000))
 }
+
+export function isTodayIso(iso: string) {
+  return new Date(iso).toDateString() === new Date().toDateString()
+}

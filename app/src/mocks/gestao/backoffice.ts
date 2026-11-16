@@ -1,6 +1,6 @@
 // Dados fictícios da gestão (design/Gestao-*.dc.html). Datas relativas a hoje.
-import type { FinancialEntry, Item, Lot, Movement, Purchase, Supplier } from '@/domain/backoffice'
-import { daysFromToday, minutesBefore } from '@/domain/dates'
+import type { FinancialEntry, Item, Lot, Movement, ProductionOrder, Purchase, Recipe, Supplier } from '@/domain/backoffice'
+import { daysFromToday, minutesBefore, todayAt } from '@/domain/dates'
 
 export const suppliers: Supplier[] = [
   { id: 'engenho-boa-vista', name: 'Engenho Boa Vista', categories: 'Rapadura, melaço, açúcar', contactName: 'Seu Antônio', phone: '(00) 90000-0100', email: '[E-MAIL]', document: '[CNPJ OU CPF]', since: '2024', paymentTerms: 'Boleto, 14 dias', paymentDays: 14, leadTime: '3 a 5 dias' },
@@ -26,8 +26,10 @@ const seedItems: ItemSeed[] = [
   { id: 'carne-de-sol', name: 'Carne de sol', unit: 'kg', itemType: 'resale', origin: 'third_party', categoryId: 'carnes', minStock: 5, costCents: 3600, priceCents: 5990, supplierId: 'charqueada-norte', tracksLots: true, soldByWeight: true, published: true, favoritePos: true },
   { id: 'feijao-de-corda', name: 'Feijão de corda', unit: 'kg', itemType: 'resale', origin: 'third_party', categoryId: 'farinhas', minStock: 5, costCents: 980, priceCents: 1690, supplierId: 'moinho-sertao', soldByWeight: true, favoritePos: true },
   { id: 'leite-integral', name: 'Leite integral 1 L', unit: 'L', itemType: 'raw_material', origin: null, categoryId: 'insumos', minStock: 40, costCents: 310, supplierId: 'serra-verde', tracksLots: true },
-  { id: 'coalho-liquido', name: 'Coalho líquido 50 ml', unit: 'un', itemType: 'raw_material', origin: null, categoryId: 'insumos', minStock: 3, costCents: 1200, supplierId: 'serra-verde' },
-  { id: 'sal', name: 'Sal 1 kg', unit: 'kg', itemType: 'raw_material', origin: null, categoryId: 'insumos', minStock: 2, costCents: 300 },
+  { id: 'coalho-liquido', name: 'Coalho líquido', unit: 'ml', itemType: 'raw_material', origin: null, categoryId: 'insumos', minStock: 150, costCents: 25, supplierId: 'serra-verde' },
+  { id: 'embalagem-vacuo', name: 'Embalagem a vácuo', unit: 'un', itemType: 'raw_material', origin: null, categoryId: 'insumos', minStock: 50, costCents: 80 },
+  { id: 'garrafa-200', name: 'Garrafa 200 ml', unit: 'un', itemType: 'raw_material', origin: null, categoryId: 'insumos', minStock: 24, costCents: 120 },
+  { id: 'sal', name: 'Sal', unit: 'kg', itemType: 'raw_material', origin: null, categoryId: 'insumos', minStock: 2, costCents: 300 },
   { id: 'acucar', name: 'Açúcar cristal', unit: 'kg', itemType: 'raw_material', origin: null, categoryId: 'insumos', minStock: 5, costCents: 450, supplierId: 'engenho-boa-vista' },
 ]
 
@@ -62,7 +64,9 @@ const looseStock: [string, number][] = [
   ['farinha-de-mandioca', 26],
   ['manteiga-de-garrafa', 11],
   ['feijao-de-corda', 9],
-  ['coalho-liquido', 1],
+  ['coalho-liquido', 50],
+  ['embalagem-vacuo', 200],
+  ['garrafa-200', 60],
   ['sal', 4],
   ['acucar', 12],
 ]
@@ -163,5 +167,42 @@ export const seedEntries = (): FinancialEntry[] => {
     e({ id: 'fe-pc0049', direction: 'payable', description: 'Compra PC-0049', counterpart: 'Engenho Boa Vista', categoryId: 'compras', amountCents: 23540, dueDate: daysFromToday(-5), paidAt: daysFromToday(-5), paidAmountCents: 23540, accountId: 'banco', origin: 'compra', ref: 'pc-0049' }),
     e({ id: 'fe-cartao', direction: 'receivable', description: 'Cartões a liquidar', counterpart: 'Maquininha', categoryId: 'vendas', amountCents: 86000, dueDate: daysFromToday(2), origin: 'venda' }),
     e({ id: 'fe-fiado', direction: 'receivable', description: 'Fiado · Dona Lúcia', counterpart: 'Lúcia Andrade', categoryId: 'vendas', amountCents: 29000, dueDate: daysFromToday(5), origin: 'venda' }),
+  ]
+}
+
+export const seedRecipes = (): Recipe[] => [
+  {
+    id: 'ficha-queijo-coalho', productId: 'queijo-coalho', yieldQty: 10, batchLabel: 'fornada', shelfLifeDays: 20, indirectCostCents: 300, prepNotes: '[MODO DE PREPARO DA CASA]',
+    lines: [{ itemId: 'leite-integral', qty: 40 }, { itemId: 'coalho-liquido', qty: 20 }, { itemId: 'sal', qty: 0.5 }, { itemId: 'embalagem-vacuo', qty: 10 }],
+  },
+  {
+    id: 'ficha-queijo-manteiga', productId: 'queijo-manteiga', yieldQty: 6, batchLabel: 'fornada', shelfLifeDays: 30, indirectCostCents: 400, prepNotes: '[MODO DE PREPARO DA CASA]',
+    lines: [{ itemId: 'leite-integral', qty: 30 }, { itemId: 'coalho-liquido', qty: 15 }, { itemId: 'sal', qty: 0.3 }, { itemId: 'embalagem-vacuo', qty: 6 }],
+  },
+  {
+    id: 'ficha-doce-de-leite', productId: 'doce-de-leite', yieldQty: 12, batchLabel: 'tacho', shelfLifeDays: 60, indirectCostCents: 500, prepNotes: '[MODO DE PREPARO DA CASA]',
+    lines: [{ itemId: 'leite-integral', qty: 20 }, { itemId: 'acucar', qty: 4 }],
+  },
+  {
+    id: 'ficha-manteiga-de-garrafa', productId: 'manteiga-de-garrafa', yieldQty: 24, batchLabel: 'lote', shelfLifeDays: 180, indirectCostCents: 600, prepNotes: '[MODO DE PREPARO DA CASA]',
+    lines: [{ itemId: 'leite-integral', qty: 100 }, { itemId: 'garrafa-200', qty: 24 }],
+  },
+]
+
+export const seedProduction = (): ProductionOrder[] => {
+  const op = (x: Omit<ProductionOrder, 'goodQty' | 'lotCode' | 'consumptions' | 'realUnitCostCents'> & Partial<ProductionOrder>): ProductionOrder => ({
+    goodQty: null,
+    lotCode: null,
+    consumptions: null,
+    realUnitCostCents: null,
+    ...x,
+  })
+  return [
+    op({ id: 'op-0032', number: 'OP-0032', recipeId: 'ficha-queijo-coalho', productId: 'queijo-coalho', batches: 2, plannedQty: 20, destination: { kind: 'stock' }, status: 'in_progress', startAt: todayAt(9), endAt: todayAt(18) }),
+    op({ id: 'op-0033', number: 'OP-0033', recipeId: 'ficha-doce-de-leite', productId: 'doce-de-leite', batches: 1, plannedQty: 12, destination: { kind: 'stock' }, status: 'in_progress', startAt: todayAt(13), endAt: daysFromToday(1, 10) }),
+    op({ id: 'op-0034', number: 'OP-0034', recipeId: 'ficha-queijo-manteiga', productId: 'queijo-manteiga', batches: 1, plannedQty: 6, destination: { kind: 'order', orderNumber: '1045' }, status: 'planned', startAt: daysFromToday(1, 8), endAt: daysFromToday(1, 17) }),
+    op({ id: 'op-0035', number: 'OP-0035', recipeId: 'ficha-manteiga-de-garrafa', productId: 'manteiga-de-garrafa', batches: 1, plannedQty: 24, destination: { kind: 'stock' }, status: 'planned', startAt: daysFromToday(2, 8), endAt: daysFromToday(2, 17) }),
+    op({ id: 'op-0031', number: 'OP-0031', recipeId: 'ficha-queijo-coalho', productId: 'queijo-coalho', batches: 1, plannedQty: 10, destination: { kind: 'stock' }, status: 'done', startAt: daysFromToday(-3, 9), endAt: daysFromToday(-3, 17), goodQty: 10, lotCode: 'QC-1112', realUnitCostCents: 1420 }),
+    op({ id: 'op-0030', number: 'OP-0030', recipeId: 'ficha-doce-de-leite', productId: 'doce-de-leite', batches: 1, plannedQty: 12, destination: { kind: 'stock' }, status: 'done', startAt: daysFromToday(-6, 9), endAt: daysFromToday(-6, 17), goodQty: 11, lotCode: 'DL-1110', realUnitCostCents: 810 }),
   ]
 }

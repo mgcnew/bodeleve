@@ -1,14 +1,16 @@
 // Dados da gestão em stores no aparelho. Cada store corresponde a tabelas do
 // DATA_MODEL_DRAFT.md e vira consulta ao Supabase na implementação do banco.
-import type { FinancialEntry, Item, Lot, Movement, Purchase, Supplier } from '@/domain/backoffice'
+import type { FinancialEntry, Item, Lot, Movement, ProductionOrder, Purchase, Recipe, Supplier } from '@/domain/backoffice'
 import { createStore } from '@/lib/store'
-import { seedEntries, seedItemsList, seedPurchases, seedStock, suppliers as seedSuppliers } from '@/mocks/gestao/backoffice'
+import { seedEntries, seedItemsList, seedProduction, seedPurchases, seedRecipes, seedStock, suppliers as seedSuppliers } from '@/mocks/gestao/backoffice'
 
 export const itemsStore = createStore<Item[]>('bodeleve.gestao.itens', seedItemsList)
 export const suppliersStore = createStore<Supplier[]>('bodeleve.gestao.fornecedores', () => seedSuppliers)
 export const stockStore = createStore<{ lots: Lot[]; movements: Movement[] }>('bodeleve.gestao.estoque', () => seedStock(itemsStore.get()))
 export const purchasesStore = createStore<Purchase[]>('bodeleve.gestao.compras', seedPurchases)
 export const entriesStore = createStore<FinancialEntry[]>('bodeleve.gestao.financeiro', seedEntries)
+export const recipesStore = createStore<Recipe[]>('bodeleve.gestao.fichas', seedRecipes)
+export const productionStore = createStore<ProductionOrder[]>('bodeleve.gestao.producao', seedProduction)
 
 export function newId(prefix: string) {
   return `${prefix}-${crypto.randomUUID().slice(0, 8)}`
