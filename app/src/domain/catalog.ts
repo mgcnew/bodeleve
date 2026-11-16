@@ -71,6 +71,8 @@ export type ProductInput = {
   soldByWeight: boolean
   tracksExpiry: boolean
   description: string
+  /** Custo da última compra, para quem compra pronto (revenda) ou usa como insumo: sem ele o custo e a margem ficam em branco até o primeiro recebimento. */
+  lastCostCents?: number | null
 }
 
 /** Primeiro número do texto: "15 un" → 15, "2,5" → 2.5. */
@@ -119,6 +121,7 @@ export function applyProduct(item: StockItem, sale: SaleInfo, input: ProductInpu
       origin: raw ? null : input.origin ?? 'resale',
       minStock: parseMinStock(input.minStock) ?? item.minStock,
       tracksExpiry: input.tracksExpiry,
+      lastCostCents: input.itemType !== 'finished' && input.lastCostCents !== undefined ? input.lastCostCents : item.lastCostCents,
     },
     sale: {
       ...sale,

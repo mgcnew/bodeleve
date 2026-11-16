@@ -1,5 +1,6 @@
 import { createMockServices, type MockOptions } from '@/mocks/services'
 import { useAdminSession } from '@/store/admin'
+import { useCourierSession } from '@/store/courier'
 import type { Services } from '@/services/types'
 import { createSupabaseCatalogAdmin } from './admin/catalog'
 import { createAdminContext } from './admin/context'
@@ -8,7 +9,9 @@ import { createSupabaseCustomers } from './admin/customers'
 import { createSupabaseOrdersAdmin } from './admin/orders'
 import { createSupabaseSettings } from './admin/settings'
 import { createSupabaseAdminAuth } from './adminAuth'
+import { createSupabaseCourier } from './courier'
 import { createDb, storeSlug, type Db } from './client'
+import { createSupabaseRealtime } from './realtime'
 import { createSupabaseStore } from './store'
 
 export { storeSlug } from './client'
@@ -24,6 +27,7 @@ export function createSupabaseServices(opts: { client?: Db; mock?: MockOptions }
   const ctx = createAdminContext(client)
   const base = createMockServices(opts.mock)
   const store = createSupabaseStore({ client, slug: storeSlug })
+  const { invalidate, ...hydrated } = createHydratedAdmin(ctx)
 
   // A sessão da Gestão neste aparelho e a do Supabase andam juntas: sair de uma encerra a outra.
   useAdminSession.subscribe((s, prev) => {
@@ -32,10 +36,14 @@ export function createSupabaseServices(opts: { client?: Db; mock?: MockOptions }
       void client.auth.signOut()
     }
   })
+  useCourierSession.subscribe((s, prev) => {
+    if (prev.courierId && !s.courierId) void client.auth.signOut()
+  })
   client.auth.onAuthStateChange((event) => {
     if (event === 'SIGNED_OUT') {
       ctx.reset()
       if (useAdminSession.getState().user) useAdminSession.getState().signOut()
+      if (useCourierSession.getState().courierId) useCourierSession.getState().signOut()
     }
   })
   void client.auth.getSession().then(({ data }) => {
@@ -45,6 +53,7 @@ export function createSupabaseServices(opts: { client?: Db; mock?: MockOptions }
   return {
     ...base,
     ...store,
+    realtime: createSupabaseRealtime(client, { onEvent: invalidate }),
     admin: {
       ...base.admin,
       auth: createSupabaseAdminAuth(client),
@@ -52,7 +61,8 @@ export function createSupabaseServices(opts: { client?: Db; mock?: MockOptions }
       catalog: createSupabaseCatalogAdmin(ctx),
       customers: createSupabaseCustomers(ctx),
       settings: createSupabaseSettings(ctx),
-      ...createHydratedAdmin(ctx),
+      ...hydrated,
+      courier: createSupabaseCourier(client),
     },
   }
 }

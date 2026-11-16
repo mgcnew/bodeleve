@@ -24,7 +24,7 @@ const addDays = (days: number) => new Date(new Date().getFullYear(), new Date().
  * Leitura: carrega o estado da casa do banco e deixa as mesmas regras e visões do app montarem a tela.
  * Escrita: chama a função do banco (que confere o papel e grava tudo de uma vez) e recarrega.
  */
-export function createHydratedAdmin(ctx: AdminContext): Hydrated {
+export function createHydratedAdmin(ctx: AdminContext): Hydrated & { invalidate(): void } {
   const { client } = ctx
   const memory = createMemoryDb({ storage: null, withSeed: false, now: () => new Date() })
   const view = createAdminServices({ db: memory, now: () => new Date() })
@@ -237,6 +237,10 @@ export function createHydratedAdmin(ctx: AdminContext): Hydrated {
   }
 
   return {
+    /** Esquece o que foi lido: a próxima leitura vai ao banco (chamado quando o Realtime avisa de mudança). */
+    invalidate() {
+      loaded = null
+    },
     deliveries: {
       overview: async () => {
         // Entrega publicada que ninguém aceitou no prazo volta para a casa (H-I71).
@@ -547,6 +551,15 @@ export function createHydratedAdmin(ctx: AdminContext): Hydrated {
         const entry = (await view.finance.getEntry(id))!.entry
         const next = r.next_entry_id ? (await view.finance.getEntry(r.next_entry_id))?.entry ?? null : null
         return { entry, accountName: accountName[input.accountId], balanceAfter: Number(r.balance_after), next, transactionId: r.transaction_id }
+      },
+      async setOpeningBalance(accountId, cents) {
+        try {
+          await rpc('set_opening_balance', { p_establishment: await est(), p_account: accountId, p_cents: cents })
+        } catch (e) {
+          if (e instanceof ServiceError && e.code === 'already_set') throw new Error('already_set')
+          return asFinance(e)
+        }
+        await refresh()
       },
       async undoPay(transactionId) {
         try {

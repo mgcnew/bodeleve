@@ -1,6 +1,6 @@
 import { useId, useState, type FormEvent } from 'react'
 import { AppLink, Banner, Button, Chip, Icon, IndicatorSkeleton, ListSkeleton, StatusTag, TextField } from '@/components'
-import { emptyHouse, invitableRoles, roleLabel, roleMatrix, roleOrder, validateHouse, type House, type HouseErrors } from '@/domain/settings'
+import { checkPin, emptyHouse, invitableRoles, roleLabel, roleMatrix, roleOrder, validateHouse, type House, type HouseErrors } from '@/domain/settings'
 import { formatBRL } from '@/lib/format'
 import type { Role } from '@/permissions'
 import { useServices } from '@/services'
@@ -44,6 +44,13 @@ export function SettingsPage() {
                 <span className={l.grow}>
                   <span className={l.optionTitle}>Equipe e permissões</span>
                   <span className={l.optionDetail}>{o.people} {o.people === 1 ? 'pessoa' : 'pessoas'} · {o.roles} {o.roles === 1 ? 'papel' : 'papéis'}</span>
+                </span>
+                <Icon name="avancar" size={18} />
+              </AppLink>
+              <AppLink href="/gestao/configuracoes/senha" className={l.linkRow} style={{ minHeight: 72 }}>
+                <span className={l.grow}>
+                  <span className={l.optionTitle}>Senha para cancelar venda</span>
+                  <span className={l.optionDetail}>Sua senha de gestor no balcão</span>
                 </span>
                 <Icon name="avancar" size={18} />
               </AppLink>
@@ -218,6 +225,51 @@ export function TeamPage() {
           </div>
         </section>
         <div className={l.sub}>Papéis fixos nesta versão. Permissão por pessoa fica para depois, se precisar.</div>
+      </main>
+    </>
+  )
+}
+
+export function PinPage() {
+  const { admin } = useServices()
+  const [pin, setPin] = useState('')
+  const [again, setAgain] = useState('')
+  const [error, setError] = useState<string | undefined>()
+  const [saved, setSaved] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const submit = async (e: FormEvent) => {
+    e.preventDefault()
+    setSaved(false)
+    setFailed(false)
+    const bad = checkPin(pin, again)
+    setError(bad === 'format' ? 'Use de 4 a 8 números.' : bad === 'mismatch' ? 'As duas senhas não são iguais.' : undefined)
+    if (bad) return
+    setBusy(true)
+    try {
+      await admin.settings.setManagerPin(pin)
+      setPin('')
+      setAgain('')
+      setSaved(true)
+    } catch {
+      setFailed(true)
+    }
+    setBusy(false)
+  }
+  return (
+    <>
+      <ScreenHeader title="Senha para cancelar venda" back="/gestao/configuracoes" />
+      <main className={s.main} style={{ gap: 16, paddingTop: 16 }}>
+        <div className={l.sub}>No balcão, cancelar uma venda pede a senha de um gestor. Escolha a sua. Ela é guardada em código: ninguém consegue ler, só trocar.</div>
+        <form onSubmit={submit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <TextField label="Nova senha" type="password" inputMode="numeric" autoComplete="new-password" value={pin} onChange={(e) => { setPin(e.target.value.replace(/\D/g, '')); setSaved(false) }} error={error} hint="De 4 a 8 números." />
+          <TextField label="Repita a senha" type="password" inputMode="numeric" autoComplete="new-password" value={again} onChange={(e) => { setAgain(e.target.value.replace(/\D/g, '')); setSaved(false) }} />
+          <div role="status" aria-live="polite">
+            {saved && <Banner tone="success">Senha salva. Vale a partir de agora.</Banner>}
+            {failed && <Banner tone="error">Não foi possível salvar. Nada foi alterado. Tente de novo.</Banner>}
+          </div>
+          <Footer><Button type="submit" size="lg" fullWidth loading={busy}>Salvar senha</Button></Footer>
+        </form>
       </main>
     </>
   )

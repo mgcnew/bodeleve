@@ -18,6 +18,9 @@ Aplicadas na ordem do nome. Cada arquivo é o mesmo SQL já aplicado no projeto;
 | `…08_funcoes_pedidos_pdv_financeiro_entregas` | fila do pedido online, balcão (abrir/fechar/reabrir caixa, venda, sangria, cancelamento com senha de gestor), pagar conta e desfazer, atribuição de entrega e todo o fluxo do entregador |
 | `…09_corrige_nome_do_aprovador` | corrige o nome de quem aprova um cancelamento |
 | `…10_protege_escritas_diretas` e `…11_corrige_protecoes` | a equipe não consegue marcar compra como recebida, ordem como concluída ou conta como paga por fora das funções |
+| `…16_nome_de_quem_fechou_o_caixa`, `…17_venda_sem_conexao_aceita` | o caixa guarda quem fechou; venda feita sem conexão é aceita ao chegar (baixa o que houver de estoque) |
+| `…18_cartao_de_entrega_com_endereco` | o cartão do entregador leva o endereço e a hora em que ficou pronto (nunca o código de entrega) |
+| `…19_primeiro_dia_do_dono` | saldo inicial das contas, lote da primeira contagem com o último custo, convite de quem já tem login |
 | `…15_cadastros_fornecedor_e_ficha` | contato do fornecedor e `save_recipe` (ficha técnica gravada de uma vez) |
 | `…12_compras_e_producao_completas` e `…13_corrige_ordem_de_producao`, `…14_mensagem_da_compra_com_numero` | numera pedido de compra e ordem de produção, reserva insumos, encerra compra com falta, apontamento de produção com consumo real |
 
@@ -34,6 +37,7 @@ Aplicadas na ordem do nome. Cada arquivo é o mesmo SQL já aplicado no projeto;
 Toda escrita de estoque, caixa e dinheiro é por função (`security definer`, confere o papel da pessoa na casa). Erros esperados voltam como exceção com o código na mensagem (`insufficient_stock`, `forbidden`, `wrong_code`…).
 Exceção: `pos_cancel_sale` devolve `{ "error": "invalid_pin" | "pin_locked" }` em vez de lançar, para a tentativa errada ficar registrada (5 erros em 10 min travam por 10 min).
 
+- Primeiro dia: `set_opening_balance`, `save_recipe`
 - Compras/produção (novas): `create_purchase_order`, `close_purchase_short`, `create_production_order`, `start_production`, `delete_production_order`
 - Estoque/compras/produção: `stock_adjust`, `stock_reverse`, `stock_count_apply`, `stock_count_undo`, `receive_purchase`, `undo_receipt`, `finish_production`, `undo_finish_production`
 - Pedidos online: `order_accept`, `order_mark_ready`, `order_undo_ready`, `order_complete_pickup`

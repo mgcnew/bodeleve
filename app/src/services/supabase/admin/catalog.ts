@@ -83,6 +83,7 @@ export function createSupabaseCatalogAdmin(ctx: AdminContext): CatalogAdminServi
       origin: raw ? null : (input.origin ?? 'resale'),
       min_stock: parseMinStock(input.minStock) ?? 0,
       tracks_expiry: input.tracksExpiry,
+      ...(input.itemType !== 'finished' && input.lastCostCents !== undefined ? { last_cost_cents: input.lastCostCents } : {}),
       price_cents: raw ? null : input.priceCents,
       weight_price_cents: raw || !input.soldByWeight ? null : input.weightPriceCents,
       is_published: raw ? false : input.published,

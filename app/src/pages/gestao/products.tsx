@@ -82,6 +82,7 @@ export function ProductsPage() {
 const toInput = (d: ProductDetail): ProductInput => ({
   name: d.name, categoryId: d.categoryId, itemType: d.itemType, origin: d.origin, priceCents: d.priceCents, weightPriceCents: d.weightPriceCents, minStock: d.minStock,
   published: d.published, favoritePos: d.favoritePos, soldByWeight: d.soldByWeight, tracksExpiry: d.tracksExpiry, description: d.description,
+  lastCostCents: d.costSource === 'last_purchase' ? d.costCents : null,
 })
 
 function SwitchRow({ label, hint, checked, onChange }: { label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
@@ -99,6 +100,8 @@ function ProductForm({ detail, isNew = false }: { detail: ProductDetail; isNew?:
   const invalidate = useInvalidateCatalog()
   const [form, setForm] = useState<ProductInput>(() => toInput(detail))
   const [priceText, setPriceText] = useState(() => (detail.priceCents == null ? '' : (detail.priceCents / 100).toFixed(2).replace('.', ',')))
+  const [costText, setCostText] = useState(() => (detail.costSource === 'last_purchase' && detail.costCents != null ? (detail.costCents / 100).toFixed(2).replace('.', ',') : ''))
+  const [costError, setCostError] = useState<string | undefined>()
   const [weightText, setWeightText] = useState(() => (detail.weightPriceCents == null ? '' : (detail.weightPriceCents / 100).toFixed(2).replace('.', ',')))
   const [errors, setErrors] = useState<ReturnType<typeof validateProduct>>({})
   const [saved, setSaved] = useState(false)
@@ -115,9 +118,13 @@ function ProductForm({ detail, isNew = false }: { detail: ProductDetail; isNew?:
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    const input = { ...form, priceCents: raw ? null : parseMoney(priceText), weightPriceCents: raw || !form.soldByWeight ? null : parseMoney(weightText) }
+    const withCost = form.itemType !== 'finished'
+    const cost = costText.trim() === '' ? null : parseMoney(costText)
+    const input = { ...form, priceCents: raw ? null : parseMoney(priceText), weightPriceCents: raw || !form.soldByWeight ? null : parseMoney(weightText), ...(withCost ? { lastCostCents: cost } : {}) }
     const errs = validateProduct(input)
+    setCostError(withCost && costText.trim() !== '' && cost == null ? 'Informe o custo, por exemplo 18,50.' : undefined)
     setErrors(errs)
+    if (withCost && costText.trim() !== '' && cost == null) return
     setSaved(false)
     setFailed(false)
     if (Object.keys(errs).length) return
@@ -165,6 +172,7 @@ function ProductForm({ detail, isNew = false }: { detail: ProductDetail; isNew?:
         </fieldset>
       )}
       {!raw && <TextField label="Preço de venda" inputMode="decimal" value={priceText} onChange={(e) => { setPriceText(e.target.value); setSaved(false) }} error={errors.price} hint={form.soldByWeight ? 'Preço da embalagem, na loja online.' : undefined} />}
+      {form.itemType !== 'finished' && <TextField label="Custo da última compra (R$)" inputMode="decimal" value={costText} onChange={(e) => { setCostText(e.target.value); setSaved(false) }} error={costError} hint="Opcional. Vale até o primeiro recebimento de compra, que atualiza o custo sozinho." />}
       <TextField label="Estoque mínimo" inputMode="numeric" value={form.minStock} onChange={(e) => set('minStock', e.target.value)} error={errors.minStock} />
       {!raw && (
         <div className={s.todayGrid}>

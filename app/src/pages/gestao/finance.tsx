@@ -1,5 +1,9 @@
-import { useState } from 'react'
-import { AppLink, ButtonLink, Chip, EmptyState, Icon, IndicatorSkeleton, ListSkeleton, StatusTag } from '@/components'
+import { useState, type FormEvent } from 'react'
+import { AppLink, Banner, Button, ButtonLink, Chip, EmptyState, Icon, IndicatorSkeleton, ListSkeleton, StatusTag, TextField } from '@/components'
+import { parseMoney } from '@/lib/format'
+import { useServices } from '@/services'
+import { useInvalidateFinance } from '@/ui/gestao/queries'
+import type { AccountView } from '@/services/types'
 import { formatBRL, formatLongDate, formatSignedBRL } from '@/lib/format'
 import type { EntryView } from '@/services/types'
 import { useFinanceEntries, useFinanceOverview, useLedger } from '@/ui/gestao/queries'
@@ -8,6 +12,39 @@ import s from '@/ui/gestao/gestao.module.css'
 import l from '@/ui/loja/loja.module.css'
 
 const tagTone = { Atrasado: 'error', 'Vence hoje': 'warning' } as const
+
+/** Ao começar a usar o sistema: quanto há hoje no banco e na gaveta. Só se informa uma vez; depois o saldo muda por lançamentos. */
+function OpeningBalance({ account }: { account: AccountView }) {
+  const { admin } = useServices()
+  const invalidate = useInvalidateFinance()
+  const [text, setText] = useState('')
+  const [error, setError] = useState<string | undefined>()
+  const [failed, setFailed] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const submit = async (e: FormEvent) => {
+    e.preventDefault()
+    const cents = parseMoney(text)
+    setFailed(false)
+    if (cents == null || cents < 0) return setError('Informe o valor, por exemplo 1500,00. Se não há nada, escreva 0.')
+    setError(undefined)
+    setBusy(true)
+    try {
+      await admin.finance.setOpeningBalance(account.id, cents)
+      await invalidate()
+    } catch {
+      setFailed(true)
+      setBusy(false)
+    }
+  }
+  return (
+    <form onSubmit={submit} noValidate className={l.card} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className={l.strong}>{account.name}: quanto há hoje?</div>
+      <TextField label="Saldo inicial (R$)" inputMode="decimal" value={text} onChange={(e) => setText(e.target.value)} error={error} hint="Só se informa uma vez. Depois o saldo muda por vendas, pagamentos e transferências." />
+      {failed && <Banner tone="error">Não foi possível salvar. Nada foi alterado. Tente de novo.</Banner>}
+      <Button type="submit" variant="secondary" loading={busy}>Salvar saldo inicial</Button>
+    </form>
+  )
+}
 
 export function FinancePage() {
   const query = useFinanceOverview()
@@ -36,6 +73,8 @@ export function FinancePage() {
                   ))}
                 </span>
               </div>
+
+              {o.accounts.filter((a) => !a.opened).map((a) => <OpeningBalance key={a.id} account={a} />)}
 
               <section className={l.section} aria-labelledby="acao-t">
                 <h2 id="acao-t" className={l.h2}>Pede ação hoje</h2>

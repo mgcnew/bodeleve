@@ -72,3 +72,11 @@ export const roleMatrix = (role: Role): MatrixRow[] =>
 
 export const roleOrder: Role[] = ['owner', 'manager', 'clerk', 'production', 'courier']
 export { roleLabel }
+
+/** Senha de gestor para cancelar venda no balcão: 4 a 8 números. */
+export const PIN_RULE = /^\d{4,8}$/
+export type PinError = 'format' | 'mismatch'
+export function checkPin(pin: string, again: string): PinError | null {
+  if (!PIN_RULE.test(pin)) return 'format'
+  return pin === again ? null : 'mismatch'
+}

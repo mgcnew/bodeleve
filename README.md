@@ -59,3 +59,7 @@ python3 b16_entregas.py   # regenera gestão, PDV e entregas em ../design (b8_lo
 ```
 
 Requer apenas Python 3. Todos os dados das telas são fictícios.
+
+## Usar com o banco real (Supabase)
+
+O app roda por padrão com dados simulados. Com `VITE_DATA_SOURCE=supabase` (e as variáveis de `app/.env.example`) ele usa o banco do projeto: `cp app/.env.example app/.env.local`, tire o `#` da linha `VITE_DATA_SOURCE` e rode `cd app && npm run dev`. O banco (migrations em `supabase/migrations`, explicado em `supabase/README.md`) não tem dados de exemplo: o dono cadastra produtos, fornecedores e o resto pelo app (`docs/OWNER_CHECKLIST.md`, seção 0).

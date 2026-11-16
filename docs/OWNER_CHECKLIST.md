@@ -2,6 +2,18 @@
 
 Resumo do que está pendente para sair da simulação. Cada item aponta para `DECISIONS.md` (hipóteses H-*, pendências P-*) e `BUSINESS_RULES.md` (perguntas Q*). Nenhum deles impede de ver e testar tudo que existe hoje (veja "Como ver rodando" no `README.md`).
 
+## 0. Para usar o sistema de verdade (banco já pronto e testado)
+
+O banco do Supabase está montado, com as regras de segurança testadas. Falta só você ligar o que depende da sua conta:
+
+| # | O que fazer | Onde |
+|---|---|---|
+| 0.1 | Na Vercel (Settings → Environment Variables, ambiente Production) criar `VITE_DATA_SOURCE=supabase`, `VITE_SUPABASE_URL=https://afqcwqikkolyoowkozak.supabase.co`, `VITE_SUPABASE_PUBLISHABLE_KEY` (a chave pública está em `app/.env.example`) e `VITE_STORE_SLUG=bodeleve`; e **não** criar `VITE_PREVIEW`. Depois, "Redeploy". Sem isso o site continua em modo simulado | Vercel |
+| 0.2 | No Supabase, Authentication → Sign In / Providers → Email: desligar "Allow new users to sign up". A equipe entra por convite: crie a pessoa em Authentication → Users → "Add user" (e-mail e senha) e convide o mesmo e-mail em Gestão → Configurações → Equipe, com o papel dela. A ordem não importa | Supabase |
+| 0.3 | Entrar em `/gestao` com o e-mail do dono e definir a senha de gestor para cancelar venda: Configurações → "Senha para cancelar venda" | App |
+| 0.4 | Primeiros passos na Gestão, nesta ordem: Financeiro (saldo inicial do banco e da gaveta); Produtos → Categorias → Novo produto (com o custo da última compra dos itens de revenda e insumos); Fornecedores; Fichas técnicas; Estoque → Contagem (estoque que já existe); Entregas → Novo entregador | App |
+| 0.5 | Entrada do entregador por código no celular: escolher o provedor de SMS ou WhatsApp no Supabase (Authentication → Sign In / Providers → Phone), aprovar o envio (D21) e criar `VITE_COURIER_SMS=1` na Vercel. O código passa a ter 6 números. Enquanto isso o app de Entregas mostra "o envio do código ainda não está ligado" | Supabase, Vercel |
+
 ## 1. Para começar o banco (Etapa 1)
 
 | O que | Por quê | Onde |
@@ -56,4 +68,4 @@ Estados que o design não mostra e eu decidi no código (precisam do seu olho): 
 
 ## 7. Depois que o Supabase existir
 
-Ligar o Realtime nos pontos já preparados (P60), trocar senhas e códigos de teste por autenticação (P61), revisar políticas RLS e desempenho (P61) e importar o histórico real em vez dos dados de exemplo (`DATA_MODEL_DRAFT.md`, "Ajustes ao modelo").
+Já feito: Realtime ligado (pedidos, entregas, estoque e caixa), entrada por e-mail e senha, políticas RLS revisadas e testadas. Falta importar o histórico real, se houver (`DATA_MODEL_DRAFT.md`, "Ajustes ao modelo"), e limitar as tentativas erradas do código de entrega antes de abrir ao público (D36).

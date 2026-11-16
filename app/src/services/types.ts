@@ -272,7 +272,7 @@ export interface ProductionService {
 
 // ───────── Financeiro ─────────
 
-export type AccountView = { id: AccountId; name: string; balanceCents: number }
+export type AccountView = { id: AccountId; name: string; balanceCents: number; /** Já tem saldo inicial informado (só se informa uma vez). */ opened: boolean }
 
 export type EntryView = {
   id: string
@@ -312,6 +312,8 @@ export interface FinanceService {
   /** Desfaz com um lançamento contrário. */
   undoPay(transactionId: string): Promise<void>
   ledger(): Promise<{ rows: LedgerRow[]; inCents: number; outCents: number }>
+  /** Saldo inicial de uma conta, uma vez só (ao começar a usar o sistema). Lança `already_set` ou `invalid_amount`. */
+  setOpeningBalance(accountId: AccountId, cents: number): Promise<void>
 }
 
 export type ProductRow = {
@@ -397,6 +399,8 @@ export interface SettingsService {
   /** Lança `invalid` se nome, CNPJ ou WhatsApp não passam na validação. */
   saveHouse(house: House): Promise<House>
   team(): Promise<TeamMember[]>
+  /** A senha que esta pessoa (dono ou gestor) usa para liberar o cancelamento de venda no balcão. Lança `invalid`. */
+  setManagerPin(pin: string): Promise<void>
   /** Lança `invalid_email`, `invalid_role` ou `duplicate`. O convite é só registrado: nenhum e-mail sai (D21). */
   invite(email: string, role: Role): Promise<TeamMember>
 }
@@ -523,6 +527,8 @@ export type CourierDetail = {
 export type CourierHistory = History & { courierName: string }
 
 export interface CourierService {
+  /** Quantos números tem o código de entrada (simulado: 4; Supabase: o que o provedor de SMS envia). */
+  codeLength: number
   /** O código vai por WhatsApp (D21: não é enviado; em desenvolvimento aparece na tela). Lança `unknown_phone`. */
   requestCode(phone: string): Promise<void>
   /** Lança `unknown_phone` ou `invalid_code`. */

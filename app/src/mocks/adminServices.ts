@@ -15,7 +15,7 @@ import { assertPaid, cashDifference, cashNetOf, changeOf, discountCents, expecte
 import { addTransaction } from '@/domain/finance'
 import { formatKgShort, unitKg, unitsToKg } from '@/domain/units'
 import { MOCK_MANAGER_PINS } from './adminSeed'
-import { checkInvite, cleanHouse, rolesInUse, validateHouse } from '@/domain/settings'
+import { PIN_RULE, checkInvite, cleanHouse, rolesInUse, validateHouse } from '@/domain/settings'
 import { storefront } from '@/config/storefront'
 import { buildHub, monthLosses, monthOutflowCents, monthProduction, periodStart, salesByDay, salesReport } from '@/domain/reports'
 import { todayCounterSeed } from './reportsSeed'
@@ -27,7 +27,7 @@ import type { AccountView, AdminOrder, CashView, CourierCardView, CourierDetail,
 import { daysUntil, itemBalance, itemLabel, lotsFefo, nextLot, type StockItem } from '@/domain/inventory'
 import { orderTotal, paymentTerms, purchaseMessage, receivedTotal, suggestQty, isOpen, type PurchaseOrder } from '@/domain/purchasing'
 import { closeShortOrder, receive, reverseLastReceipt } from '@/domain/receiving'
-import { accountName, balanceOf, daysFromToday, forecast, isOpen as entryOpen, ledger, ledgerTotals, payEntry, remaining, standingOf, totals as financeTotals, undoPayment, type FinancialEntry } from '@/domain/finance'
+import { FinanceError, accountName, balanceOf, daysFromToday, forecast, isOpen as entryOpen, ledger, ledgerTotals, payEntry, remaining, standingOf, totals as financeTotals, undoPayment, type FinancialEntry } from '@/domain/finance'
 import { adminUsers, dashboardSeed, MOCK_ADMIN_PASSWORD, MOCK_COURIER_CODE } from './adminSeed'
 import type { MockDb, MockState } from './db'
 import { customersSeed, hhmm } from './seedOrders'
@@ -90,7 +90,7 @@ const financeAttention = (st: MockState, t: Date): FinanceOverview['attention'] 
 }
 
 const accountsOf = (st: MockState): AccountView[] =>
-  (['bank', 'cash'] as const).map((id) => ({ id, name: accountName[id], balanceCents: balanceOf(st.transactions, id) }))
+  (['bank', 'cash'] as const).map((id) => ({ id, name: accountName[id], balanceCents: balanceOf(st.transactions, id), opened: st.transactions.some((t) => t.accountId === id && t.kind === 'opening') }))
 
 const costOfItem = (st: MockState) => (itemId: string) => {
   const it = st.stockItems.find((i) => i.id === itemId)
@@ -227,6 +227,8 @@ const categoryRows = (st: MockState): CategoryRow[] =>
   })
 
 export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }): AdminServices {
+  /** Senha definida em Configurações nesta sessão (a de exemplo continua valendo). */
+  let customPin: string | null = null
   const orderView = (o: ProductionOrder, st: MockState): ProductionOrderView => ({
     ...o,
     itemName: itemLabel(st.stockItems.find((i) => i.id === o.itemId)!),
@@ -780,6 +782,13 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           undoPayment(s, transactionId, now())
         })
       },
+      async setOpeningBalance(accountId, cents) {
+        db.update((st) => {
+          if (!(cents >= 0)) throw new FinanceError('invalid_amount')
+          if (st.transactions.some((t) => t.accountId === accountId && t.kind === 'opening')) throw new Error('already_set')
+          if (cents > 0) addTransaction(st, { at: now().toISOString(), accountId, amountCents: cents, kind: 'opening', title: 'Saldo inicial', note: 'Informado ao começar a usar o sistema' })
+        })
+      },
       async ledger() {
         const st = db.read()
         const t = now()
@@ -1054,6 +1063,10 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
       async team() {
         return db.read().team
       },
+      async setManagerPin(pin) {
+        if (!PIN_RULE.test(pin)) throw new Error('invalid')
+        customPin = pin
+      },
       async invite(email, role) {
         let member = null as TeamMember | null
         db.update((st) => {
@@ -1170,7 +1183,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           const s = st.posSales.find((x) => x.id === id)
           if (!s) throw new PosError('not_found')
           if (s.status === 'cancelled') throw new PosError('already_cancelled')
-          const approver = Object.entries(MOCK_MANAGER_PINS).find(([, v]) => v.pin === pin)
+          const approver = Object.entries(MOCK_MANAGER_PINS).find(([, v]) => v.pin === pin) ?? (customPin && pin === customPin ? (['custom', { pin: customPin, name: 'Gestor', roleLabel: 'Gestor' }] as const) : undefined)
           if (!approver) throw new PosError('invalid_pin')
           const t = now()
           // Os itens voltam ao lote de onde saíram.
@@ -1270,6 +1283,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
     },
 
     courier: {
+      codeLength: 4,
       async requestCode(phone) {
         if (!courierByPhone(db.read(), phone)) throw new DeliveryError('not_found')
         // D21: o código não é enviado por WhatsApp. Em desenvolvimento, a tela mostra o código de teste.

@@ -1,5 +1,5 @@
 import { storefront } from '@/config/storefront'
-import { checkInvite, cleanHouse, rolesInUse, validateHouse, type House, type TeamMember } from '@/domain/settings'
+import { PIN_RULE, checkInvite, cleanHouse, rolesInUse, validateHouse, type House, type TeamMember } from '@/domain/settings'
 import type { Role } from '@/permissions'
 import type { SettingsService } from '@/services/types'
 import type { AdminContext } from './context'
@@ -48,6 +48,11 @@ export function createSupabaseSettings(ctx: AdminContext): SettingsService {
       return getHouse()
     },
     team,
+    async setManagerPin(pin) {
+      if (!PIN_RULE.test(pin)) throw new Error('invalid')
+      const { error } = await client.rpc('set_my_pin', { p_establishment: await ctx.establishment(), p_pin: pin })
+      if (error) throw new Error(error.message.includes('forbidden') ? 'forbidden' : 'invalid')
+    },
     async invite(email, role) {
       const est = await ctx.establishment()
       const err = checkInvite(email, role, await team())

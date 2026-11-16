@@ -59,7 +59,7 @@ Plano e stack em `IMPLEMENTATION_PLAN.md` (aprovado em D18). O banco de dados es
 
 | Fase | O quê | Situação |
 |---|---|---|
-| I-1 | Supabase: projeto, Auth, tabelas, RLS | Banco pronto e testado (migrations 1–9, D33). Ligação do app, por fatias, com `VITE_DATA_SOURCE=supabase`: **feitas** loja pública (catálogo, pedido sem conta, acompanhamento, A casa), entrada da equipe e, na Gestão, pedidos, produtos (com cadastro de produto novo) e categorias, clientes, A casa, equipe, estoque, compras, produção, financeiro início, entregas e os cadastros de fornecedor, ficha técnica e entregador; **faltam** relatórios, PDV, app de Entregas e Realtime |
+| I-1 | Supabase: projeto, Auth, tabelas, RLS | **Entregue** (migrations 1–19, D33–D38) e o app inteiro ligado ao banco com `VITE_DATA_SOURCE=supabase`: loja, Gestão, PDV, Entregas e Realtime. Falta só o que depende do dono (`docs/OWNER_CHECKLIST.md`, seção 0): variáveis na Vercel, cadastro público desligado, provedor de SMS, e os dados reais |
 | I-2 | Design system em componentes | Entregue em `app/`; aguarda a passada visual do dono (P12, P13) |
 | I-3 | Loja online | Entregue em `app/` (18 telas, serviços simulados); aguarda a passada visual (P18) e as pendências P14–P17 |
 | I-4 | Gestão | Em andamento: lotes 1 (Entrar, Início, Pedidos, Pedido, Mais), 2 (Compras e Fornecedores), 3 (Estoque), 4 (Produção), 5 (Financeiro) e 6 (Produtos, Clientes, Entregas, Relatórios, Configurações, Equipe) entregues: a Gestão está completa. Próximas: PDV (Etapa 5) e app de entregas (Etapa 6) |

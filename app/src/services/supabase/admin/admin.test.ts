@@ -165,4 +165,23 @@ describe('equipe da Gestão', () => {
     expect(m).toMatchObject({ email: 'julia@x.com', role: 'clerk', pending: true })
     expect(log.find((l) => l.op === 'insert')!.payload).toMatchObject({ establishment_id: 'est-1', status: 'invited', email: 'julia@x.com' })
   })
+
+  it('senha de gestor: só 4 a 8 números e vai para o banco (que guarda só o hash)', async () => {
+    const { client, rpcs } = fake((s) => membership(s) ?? { data: null })
+    const svc = createSupabaseSettings(createAdminContext(client))
+    await expect(svc.setManagerPin('12')).rejects.toThrow('invalid')
+    await svc.setManagerPin('2468')
+    expect(rpcs).toEqual([{ fn: 'set_my_pin', args: { p_establishment: 'est-1', p_pin: '2468' } }])
+  })
+
+  it('custo da última compra: vai para o cadastro de quem compra pronto ou usa como insumo, nunca do produto acabado', async () => {
+    const { client, log } = fake((s) => membership(s) ?? (s.op === 'insert' ? { data: { id: 'p3' } } : { data: null }))
+    const svc = createSupabaseCatalogAdmin(createAdminContext(client))
+    await svc.create({ ...base, name: 'Rapadura 400 g', itemType: 'resale', origin: 'resale', soldByWeight: false, weightPriceCents: null, lastCostCents: 1850 }).catch(() => undefined)
+    await svc.create({ ...base, name: 'Queijo 500 g', itemType: 'finished', lastCostCents: 999 }).catch(() => undefined)
+    const inserts = log.filter((l) => l.op === 'insert').map((l) => l.payload!)
+    expect(inserts[0]).toMatchObject({ last_cost_cents: 1850 })
+    expect(inserts[1]).not.toHaveProperty('last_cost_cents')
+  })
 })
+

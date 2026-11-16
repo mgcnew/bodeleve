@@ -47,3 +47,14 @@ describe('equipe', () => {
     expect(roleMatrix('owner').map((r) => r.label)[0]).toBe('Início e relatórios')
   })
 })
+
+describe('senha de gestor', () => {
+  it('4 a 8 números, iguais nas duas vezes', async () => {
+    const { checkPin } = await import('./settings')
+    expect(checkPin('1234', '1234')).toBeNull()
+    expect(checkPin('123', '123')).toBe('format')
+    expect(checkPin('12a4', '12a4')).toBe('format')
+    expect(checkPin('123456789', '123456789')).toBe('format')
+    expect(checkPin('1234', '4321')).toBe('mismatch')
+  })
+})

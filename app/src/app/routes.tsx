@@ -112,6 +112,7 @@ export const routes: RouteObject[] = [
           { path: 'relatorios/vendas', lazy: lazyOf(() => import('@/pages/gestao/reports'), 'SalesReportPage'), handle: g('dashboard') },
           { path: 'configuracoes', lazy: lazyOf(() => import('@/pages/gestao/settings'), 'SettingsPage'), handle: g('team') },
           { path: 'configuracoes/casa', lazy: lazyOf(() => import('@/pages/gestao/settings'), 'HousePage'), handle: g('team') },
+          { path: 'configuracoes/senha', lazy: lazyOf(() => import('@/pages/gestao/settings'), 'PinPage'), handle: g('team') },
           { path: 'configuracoes/equipe', lazy: lazyOf(() => import('@/pages/gestao/settings'), 'TeamPage'), handle: g('team') },
           { path: '*', lazy: lazyOf(() => import('@/pages/gestao/ModulePlaceholder'), 'ModulePlaceholder') },
         ],

@@ -30,8 +30,8 @@ export function CourierLoginPage() {
       await admin.courier.requestCode(phone)
       setStep(2)
       setPhoneError(undefined)
-    } catch {
-      setPhoneError('Esse número não está cadastrado. Fale com a casa para entrar.')
+    } catch (e) {
+      setPhoneError((e as Error).message === 'sms_disabled' ? 'O envio do código ainda não está ligado. Fale com a casa para entrar.' : 'Esse número não está cadastrado. Fale com a casa para entrar.')
     }
     setBusy(false)
   }
@@ -63,9 +63,9 @@ export function CourierLoginPage() {
           <>
             <div className={l.sub}>Código enviado para {phone}.</div>
             {isPreview && <Banner tone="warning">Só em desenvolvimento: nada foi enviado. Use o código {MOCK_COURIER_CODE}.</Banner>}
-            <ConfirmationCode label="Código de 4 dígitos" value={code} onChange={(v) => { setCode(v); setCodeError(false) }} invalid={codeError} />
+            <ConfirmationCode label={`Código de ${admin.courier.codeLength} dígitos`} length={admin.courier.codeLength} value={code} onChange={(v) => { setCode(v); setCodeError(false) }} invalid={codeError} />
             {codeError && <Banner tone="error">Código incorreto. Confira os números e tente de novo.</Banner>}
-            <Button size="lg" fullWidth loading={busy} disabled={code.length < 4} onClick={verify}>{busy ? 'Entrando…' : 'Entrar'}</Button>
+            <Button size="lg" fullWidth loading={busy} disabled={code.length < admin.courier.codeLength} onClick={verify}>{busy ? 'Entrando…' : 'Entrar'}</Button>
             <Button variant="ghost" fullWidth onClick={() => { setStep(1); setCode(''); setCodeError(false) }}>Usar outro número</Button>
           </>
         )}
