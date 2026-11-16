@@ -6,6 +6,9 @@ import { readJSON, writeJSON } from '@/lib/storage'
 import { sampleOrders } from '@/mocks/orders'
 import { products } from '@/mocks/catalog'
 import { delay } from './delay'
+import { createRemoteOrder, getRemoteOrder, listRemoteOrders } from './ordersRemote'
+import { supabase } from '@/lib/supabase'
+import type { Product } from '@/domain/catalog'
 import { staffOrdersStore } from './gestao/orders'
 import type { StaffOrder, StaffOrderStatus } from '@/domain/staffOrder'
 import type { OrderStatus } from '@/domain/order'
@@ -39,11 +42,13 @@ function withStaffProgress(o: Order): Order {
 }
 
 export async function listDeviceOrders(): Promise<Order[]> {
+  if (supabase) return (await listRemoteOrders()).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
   await delay()
   return [...deviceOrders().map(withStaffProgress), ...sampleOrders].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
 
 export async function getOrder(id: string): Promise<Order | null> {
+  if (supabase) return getRemoteOrder(id)
   await delay()
   const found = [...deviceOrders(), ...sampleOrders].find((o) => o.id === id)
   return found && deviceOrders().some((d) => d.id === id) ? withStaffProgress(found) : (found ?? null)
@@ -64,7 +69,8 @@ function randomCode(length: number) {
   return Array.from({ length }, () => Math.floor(Math.random() * 10)).join('')
 }
 
-export async function createOrder(input: NewOrder): Promise<Order> {
+export async function createOrder(input: NewOrder, windowId = 'asap'): Promise<Order> {
+  if (supabase) return createRemoteOrder(input, windowId)
   await delay(600)
   const existing = deviceOrders()
   // a numeração é única entre a loja e a fila da gestão
@@ -106,10 +112,10 @@ export async function createOrder(input: NewOrder): Promise<Order> {
 }
 
 /** Itens do pedido que ainda estão à venda hoje (H-L13) */
-export function availableForReorder(order: Order) {
+export function availableForReorder(order: Order, catalog: Product[] = products) {
   return order.items.map((item) => ({
     item,
-    product: products.find((p) => p.id === item.productId && p.available) ?? null,
+    product: catalog.find((p) => p.id === item.productId && p.available) ?? null,
   }))
 }
 

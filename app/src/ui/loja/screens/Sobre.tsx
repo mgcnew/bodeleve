@@ -1,6 +1,6 @@
 import { ButtonLink } from '@/components/Button'
 import { Icon } from '@/components/Icon'
-import { establishment } from '@/mocks/establishment'
+import { useEstablishment } from '../state/storeInfo'
 import { TopBar } from '../components/LojaShell'
 import { ProductPhoto } from '../components/ProductCard'
 import l from '../loja.module.css'
@@ -19,6 +19,7 @@ const kinds = [
 ]
 
 export function Sobre() {
+  const establishment = useEstablishment()
   return (
     <div className={`${l.screen} ${l.narrow}`}>
       <TopBar back="history" />

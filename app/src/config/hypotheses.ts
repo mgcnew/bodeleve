@@ -13,12 +13,12 @@ export const hypotheses = {
   /** H-L7 — janelas de entrega e retirada de exemplo (Q7) */
   deliveryWindows: [
     { id: 'asap', title: 'O quanto antes', sub: 'Hoje, em 40 a 60 minutos' },
-    { id: 'today_afternoon', title: 'Hoje à tarde', sub: 'Entre 17h e 18h' },
-    { id: 'tomorrow_morning', title: 'Amanhã cedo', sub: 'Entre 9h e 10h' },
+    { id: 'afternoon', title: 'Hoje à tarde', sub: 'Entre 17h e 18h' },
+    { id: 'tomorrow', title: 'Amanhã cedo', sub: 'Entre 9h e 10h' },
   ],
   pickupWindows: [
-    { id: 'when_ready', title: 'Assim que estiver pronto', sub: 'Avisamos pelo WhatsApp' },
-    { id: 'today_afternoon', title: 'Hoje à tarde', sub: 'Entre 17h e 18h' },
+    { id: 'asap', title: 'Assim que estiver pronto', sub: 'Avisamos pelo WhatsApp' },
+    { id: 'afternoon', title: 'Hoje à tarde', sub: 'Entre 17h e 18h' },
   ],
   /** H-L8 — Pix agora; cartão ou dinheiro ao receber; sem cartão online (Q8) */
   payNow: ['pix'],
@@ -36,3 +36,6 @@ export const hypotheses = {
   weightShortcutsG: [250, 500, 1000],
   weightStepG: 50,
 } as const
+
+/** Identificador da casa no banco (estabelecimento) usado pelas funções públicas da loja */
+export const STORE_SLUG = 'bodeleve'

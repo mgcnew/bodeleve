@@ -1,7 +1,7 @@
 import { Icon, type IconName } from '@/components/Icon'
 import { plural } from '@/domain/catalog'
 import { useAsync } from '@/lib/useAsync'
-import { establishment } from '@/mocks/establishment'
+import { useEstablishment } from '../state/storeInfo'
 import { listProducts } from '@/services/catalog'
 import { CartBar, TopBar } from '../components/LojaShell'
 import { ProductGrid, ProductGridSkeleton } from '../components/ProductCard'
@@ -9,6 +9,7 @@ import l from '../loja.module.css'
 import s from './Institucional.module.css'
 
 export function Linha() {
+  const establishment = useEstablishment()
   const products = useAsync(() => listProducts({ origin: 'bodeleve_brand' }), [])
   const line = establishment.brandLine
   const facts: [IconName, string, string][] = [

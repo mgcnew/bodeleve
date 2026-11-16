@@ -1,12 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ErrorState } from '@/components/Feedback'
+import { EmptyState, ErrorState } from '@/components/Feedback'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/Button'
 import { chipClass } from '@/components/Field'
 import type { Product } from '@/domain/catalog'
 import { useAsync } from '@/lib/useAsync'
-import { establishment } from '@/mocks/establishment'
+import { useEstablishment } from '../state/storeInfo'
 import { listPopular, listProducts } from '@/services/catalog'
 import { CartButton, mobileOnly } from '../components/LojaShell'
 import { ProductGrid, ProductGridSkeleton } from '../components/ProductCard'
@@ -24,6 +24,7 @@ async function loadHome() {
 }
 
 export function Inicio() {
+  const establishment = useEstablishment()
   const home = useAsync(loadHome, [])
   const navigate = useNavigate()
   const [q, setQ] = useState('')
@@ -80,7 +81,9 @@ export function Inicio() {
           </a>
         </nav>
 
-        {home.status === 'error' ? (
+        {home.status === 'ready' && home.data.popular.length + home.data.house.length + home.data.brand.length === 0 ? (
+          <EmptyState icon="sacola" title="O catálogo está sendo preparado" text="Volte em breve: os produtos da casa aparecem aqui assim que forem publicados." />
+        ) : home.status === 'error' ? (
           <ErrorState
             title="Não foi possível carregar os produtos"
             text="Verifique a conexão e tente de novo."

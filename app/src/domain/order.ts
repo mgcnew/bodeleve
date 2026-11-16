@@ -34,6 +34,8 @@ export type Order = {
   address: Address | null
   windowLabel: string
   estimatedAt: string | null
+  /** texto de previsão vindo do banco, quando não há horário exato */
+  etaLabel?: string | null
   courierNote: string | null
   payment: PaymentMethod
   changeForCents: Cents | null

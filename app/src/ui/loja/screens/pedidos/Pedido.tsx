@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
 import { Box, Panel, SummaryRow, SummaryTotal } from '@/components/Card'
@@ -6,8 +7,9 @@ import { Banner, EmptyState, ErrorState, Skeleton } from '@/components/Feedback'
 import { formatCents } from '@/domain/money'
 import { formatAddress, formatTime, isFinished, orderTotal, paymentLabels, type Order } from '@/domain/order'
 import { useAsync } from '@/lib/useAsync'
-import { establishment } from '@/mocks/establishment'
+import { useEstablishment } from '../../state/storeInfo'
 import { availableForReorder, getOrder } from '@/services/orders'
+import { listProducts } from '@/services/catalog'
 import { TopBar } from '../../components/LojaShell'
 import { DeliveryCode, OrderTimeline } from '../../components/Checkout'
 import { useCart } from '../../state/cart'
@@ -19,6 +21,15 @@ import { etaText, statusTag } from './shared'
 export function Pedido() {
   const { id = '' } = useParams()
   const order = useAsync(() => getOrder(id), [id])
+  const { reload } = order
+  const running = order.status === 'ready' && !!order.data && !isFinished(order.data.status)
+
+  // sem Realtime ainda: pedido em andamento se atualiza sozinho a cada 15 s
+  useEffect(() => {
+    if (!running) return
+    const t = setInterval(reload, 15_000)
+    return () => clearInterval(t)
+  }, [running, reload])
 
   const title = order.status === 'ready' && order.data ? `Pedido ${order.data.number}` : 'Pedido'
   return (
@@ -52,6 +63,7 @@ export function Pedido() {
 }
 
 function Acompanhamento({ order }: { order: Order }) {
+  const establishment = useEstablishment()
   const delivery = order.fulfillment === 'delivery'
   const addr = order.address && formatAddress(order.address)
   return (
@@ -59,7 +71,7 @@ function Acompanhamento({ order }: { order: Order }) {
       <div className={s.eta}>
         <div style={{ font: 'var(--apoio)' }}>{delivery ? 'Previsão de entrega' : 'Retirada'}</div>
         <div className={s.etaValue}>
-          {order.estimatedAt ? `Hoje, ${formatTime(order.estimatedAt)}` : order.windowLabel.split(' · ')[0]}
+          {order.estimatedAt ? `Hoje, ${formatTime(order.estimatedAt)}` : (order.etaLabel ?? order.windowLabel.split(' · ')[0])}
         </div>
         <div style={{ font: '400 15px/22px var(--fonte-texto)' }}>{etaText(order)}</div>
       </div>
@@ -91,7 +103,8 @@ function Detalhe({ order }: { order: Order }) {
   const { add } = useCart()
   const navigate = useNavigate()
   const tag = statusTag[order.status]
-  const lines = availableForReorder(order)
+  const catalog = useAsync(() => listProducts(), [])
+  const lines = availableForReorder(order, catalog.status === 'ready' ? catalog.data : [])
   const available = lines.filter((li) => li.product)
   const missing = lines.length - available.length
   const date = new Date(order.createdAt)

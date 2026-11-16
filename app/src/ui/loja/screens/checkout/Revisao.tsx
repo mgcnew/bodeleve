@@ -5,8 +5,9 @@ import { Panel, SummaryRow, SummaryTotal } from '@/components/Card'
 import { Banner } from '@/components/Feedback'
 import { formatCents, parseCents } from '@/domain/money'
 import { formatAddress, paymentLabels } from '@/domain/order'
-import { establishment } from '@/mocks/establishment'
 import { createOrder } from '@/services/orders'
+import { orderErrorMessage } from '@/services/ordersRemote'
+import { useEstablishment } from '../../state/storeInfo'
 import { TopBar } from '../../components/LojaShell'
 import { ReviewBlock, StepProgress } from '../../components/Checkout'
 import { useCart } from '../../state/cart'
@@ -15,7 +16,9 @@ import l from '../../loja.module.css'
 
 export function Revisao() {
   const { lines, subtotalCents } = useCart()
-  const { draft, feeCents, windowLabel } = useCheckout()
+  const { draft, feeCents, windowLabel, windowId } = useCheckout()
+  const establishment = useEstablishment()
+  const [failMessage, setFailMessage] = useState<string>()
   const navigate = useNavigate()
   const [sending, setSending] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -50,10 +53,11 @@ export function Revisao() {
           unitPriceCents: li.unitPriceCents,
         })),
         feeCents,
-      })
+      }, windowId)
       // a sacola é esvaziada na confirmação; esvaziar aqui faria o guarda voltar para a sacola
       navigate(`/pedidos/${order.id}/confirmado`, { replace: true, state: { placed: true } })
-    } catch {
+    } catch (e) {
+      setFailMessage(orderErrorMessage(e))
       setFailed(true)
       setSending(false)
     }
@@ -90,7 +94,7 @@ export function Revisao() {
           <SummaryRow label={delivery ? 'Entrega' : 'Retirada na loja'} value={feeCents ? formatCents(feeCents) : 'Grátis'} />
           <SummaryTotal value={formatCents(total)} />
         </Panel>
-        {failed && <Banner tone="error">Não foi possível enviar o pedido. Nada foi cobrado. Tente de novo.</Banner>}
+        {failed && <Banner tone="error">{failMessage ?? 'Não foi possível enviar o pedido. Nada foi cobrado. Tente de novo.'}</Banner>}
       </main>
       <div className={l.footer}>
         {sending ? (

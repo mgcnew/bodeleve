@@ -7,11 +7,16 @@ import { staffOrdersStore } from './gestao/orders'
 import { categoriesStore } from './gestao/people'
 import { balanceOf } from './gestao/stock'
 import { delay } from './delay'
+import { remoteCategories, remoteEnabled, remoteProducts } from './catalogRemote'
 
 /**
  * O catálogo da loja vem dos textos de exemplo (mocks) e, para cada item que existe na gestão,
  * usa o que a gestão decide: preço, publicado e disponibilidade pelo estoque.
  */
+async function productsNow(): Promise<Product[]> {
+  return remoteEnabled() ? remoteProducts() : liveProducts()
+}
+
 function liveProducts(): Product[] {
   const ctx = { movements: stockStore.get().movements, orders: staffOrdersStore.get(), purchases: purchasesStore.get(), production: productionStore.get() }
   const items = itemsStore.get()
@@ -25,45 +30,47 @@ function liveProducts(): Product[] {
 }
 
 export async function listCategories(): Promise<Category[]> {
+  if (remoteEnabled()) return remoteCategories()
   await delay()
   return categoriesStore.get()
 }
 
 export async function getCategory(id: string): Promise<Category | null> {
+  if (remoteEnabled()) return (await remoteCategories()).find((c) => c.id === id) ?? null
   await delay()
   return categoriesStore.get().find((c) => c.id === id) ?? null
 }
 
 export async function listProducts(filter: { categoryId?: string; origin?: ProductOrigin } = {}): Promise<Product[]> {
-  await delay()
-  return liveProducts().filter(
+  const all = await productsNow()
+  return all.filter(
     (p) =>
       (!filter.categoryId || p.categoryId === filter.categoryId) && (!filter.origin || p.origin === filter.origin),
   )
 }
 
 export async function listPopular(): Promise<Product[]> {
-  await delay()
-  return liveProducts()
+  const all = await productsNow()
+  return all
     .filter((p) => p.popularRank !== null)
     .sort((a, b) => (a.popularRank ?? 0) - (b.popularRank ?? 0))
 }
 
 export async function getProduct(id: string): Promise<Product | null> {
-  await delay()
-  return liveProducts().find((p) => p.id === id) ?? null
+  const all = await productsNow()
+  return all.find((p) => p.id === id) ?? null
 }
 
 export async function searchProducts(query: string): Promise<Product[]> {
-  await delay(120)
   const q = normalize(query.trim())
   if (!q) return []
-  return liveProducts().filter((p) => normalize(p.name).includes(q))
+  const all = await productsNow()
+  return all.filter((p) => normalize(p.name).includes(q))
 }
 
 export async function countByCategory(): Promise<Record<string, number>> {
-  await delay()
-  return liveProducts().reduce<Record<string, number>>((acc, p) => {
+  const all = await productsNow()
+  return all.reduce<Record<string, number>>((acc, p) => {
     acc[p.categoryId] = (acc[p.categoryId] ?? 0) + 1
     return acc
   }, {})

@@ -10,7 +10,7 @@ import type { Fulfillment } from '@/domain/order'
 import { TopBar } from '../components/LojaShell'
 import { ProductPhoto } from '../components/ProductCard'
 import { useCart } from '../state/cart'
-import { useCheckout, windowsFor } from '../state/checkout'
+import { useCheckout } from '../state/checkout'
 import l from '../loja.module.css'
 import s from './Sacola.module.css'
 
@@ -21,7 +21,7 @@ export const fulfillmentOptions: { value: Fulfillment; label: string }[] = [
 
 export function Sacola() {
   const { lines, setQuantity, subtotalCents } = useCart()
-  const { draft, update, feeCents } = useCheckout()
+  const { draft, update, feeCents, windowsFor } = useCheckout()
   const delivery = draft.fulfillment === 'delivery'
 
   if (lines.length === 0) {

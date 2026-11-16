@@ -7,6 +7,7 @@ import { formatCents } from '@/domain/money'
 import { plural } from '@/domain/catalog'
 import { CartProvider, useCart } from '../state/cart'
 import { CheckoutProvider } from '../state/checkout'
+import { StoreInfoProvider } from '../state/storeInfo'
 import l from '../loja.module.css'
 import s from './LojaShell.module.css'
 
@@ -22,11 +23,13 @@ const tabs = [
 
 export function LojaShell() {
   return (
-    <CartProvider>
-      <CheckoutProvider>
-        <ShellFrame />
-      </CheckoutProvider>
-    </CartProvider>
+    <StoreInfoProvider>
+      <CartProvider>
+        <CheckoutProvider>
+          <ShellFrame />
+        </CheckoutProvider>
+      </CartProvider>
+    </StoreInfoProvider>
   )
 }
 

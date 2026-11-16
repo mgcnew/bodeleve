@@ -58,9 +58,21 @@ Pedido feito na loja → aparece em Novos na gestão → aceite, conferência it
 | PDV em conexão ruim | Funciona local; fila de envio ainda não existe | Banco ligado |
 | Realtime (pedido novo, status, entregas livres) | A tela atualiza ao recarregar ou navegar | Supabase Realtime |
 
+## Backend (Supabase)
+
+O app usa o projeto Supabase **já existente** (`afqcwqikkolyoowkozak`), que tem esquema, RLS e funções prontos. A configuração fica em `app/.env.local` (não vai ao Git; modelo em `app/.env.example`). Sem ela, o app roda só com dados de exemplo.
+
+| Área | Situação |
+|---|---|
+| Loja: catálogo, categorias, dados da casa (taxa, janelas) | **Ligado** (`store_catalog`, `store_categories`, `store_info`) |
+| Loja: fazer pedido e acompanhar | **Ligado** no código (`place_order`, `track_order`); falta testar de ponta a ponta, porque o catálogo do banco está vazio |
+| Gestão, PDV e Entregas | Ainda nos dados de exemplo. Exigem login (Supabase Auth) e as funções `order_*`, `pos_*`, `courier_*`, `receive_purchase` etc. |
+
+Para ver a loja com produtos num banco de desenvolvimento, `supabase/seed_dev.sql` traz um catálogo fictício (ainda não aplicado).
+
 ## Próximos passos
 
-1. Criar o projeto Supabase e aplicar `supabase/migrations/`. A primeira migração cobre base, catálogo e RLS; faltam compras, estoque, produção, vendas, entregas e financeiro.
-2. Trocar cada `*Store` por consultas aos serviços de `services/`, uma área por vez, começando por login e catálogo.
+1. Ter um catálogo publicado no banco (o seed de desenvolvimento ou o cadastro real) e testar o pedido da loja de ponta a ponta.
+2. Ligar o login da equipe (Supabase Auth) e trocar cada `*Store` da gestão, do PDV e das entregas pelas funções do banco, uma área por vez.
 3. Ligar Realtime em pedidos, status do pedido e entregas livres.
 4. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.

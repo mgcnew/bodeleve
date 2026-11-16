@@ -5,15 +5,16 @@ import { Banner } from '@/components/Feedback'
 import { RadioGroup, Segmented } from '@/components/Field'
 import { formatCents } from '@/domain/money'
 import { formatAddress, type Fulfillment } from '@/domain/order'
-import { establishment } from '@/mocks/establishment'
 import { TopBar } from '../../components/LojaShell'
 import { FeeLine, Place, StepProgress } from '../../components/Checkout'
-import { useCheckout, windowsFor } from '../../state/checkout'
+import { useCheckout } from '../../state/checkout'
+import { useEstablishment } from '../../state/storeInfo'
 import { fulfillmentOptions } from '../Sacola'
 import l from '../../loja.module.css'
 
 export function Entrega() {
-  const { draft, update, feeCents } = useCheckout()
+  const { draft, update, feeCents, windowsFor } = useCheckout()
+  const establishment = useEstablishment()
   const navigate = useNavigate()
   const [missingAddress, setMissingAddress] = useState(false)
   const delivery = draft.fulfillment === 'delivery'

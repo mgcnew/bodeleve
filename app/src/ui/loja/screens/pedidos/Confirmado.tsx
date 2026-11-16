@@ -56,7 +56,7 @@ export function Confirmado() {
           <h1 className={l.pageTitle}>Pedido confirmado</h1>
           <div className={`${l.secondary} ${l.num}`}>
             Pedido {o.number} ·{' '}
-            {delivery && o.estimatedAt ? `previsão de entrega às ${formatTime(o.estimatedAt)}` : 'avisamos pelo WhatsApp quando estiver pronto'}
+            {delivery && o.estimatedAt ? `previsão de entrega às ${formatTime(o.estimatedAt)}` : delivery && o.etaLabel ? `previsão: ${o.etaLabel}` : 'avisamos pelo WhatsApp quando estiver pronto'}
           </div>
         </div>
 

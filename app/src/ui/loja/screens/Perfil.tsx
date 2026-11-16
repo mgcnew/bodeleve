@@ -1,11 +1,12 @@
 import { ButtonLink } from '@/components/Button'
 import { Box, RowLink } from '@/components/Card'
-import { establishment } from '@/mocks/establishment'
+import { useEstablishment } from '../state/storeInfo'
 import { PageHeader } from '../components/LojaShell'
 import { useCheckout } from '../state/checkout'
 import l from '../loja.module.css'
 
 export function Perfil() {
+  const establishment = useEstablishment()
   const { draft } = useCheckout()
   const addr = draft.address ? `${draft.address.street}, ${draft.address.number}` : 'Nenhum endereço salvo'
 
