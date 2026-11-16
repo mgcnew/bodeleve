@@ -3,9 +3,12 @@ import { stageOf } from '@/domain/orders'
 import type { Order } from '@/domain/types'
 import { adjust, applyCount, buildRows, expiringLots, lowRows, reverse, stockValueCents, undoCount, reservedByItem, type StockState } from '@/domain/stock'
 import { products } from './seed'
+import { applyProduct, channelLabel, checkNewCategory, defaultSale, kindOf, slugify, validateProduct, type ProductInput } from '@/domain/catalog'
+import { customerDetail, customerId, listCustomers } from '@/domain/customers'
+import { productCost } from './catalogView'
 import { formatBRL } from '@/lib/format'
 import { batchCostCents, checkInputs, finishOrder, formatContent, marginPercent, needs, nextOrderId, ProductionError, suggestLotCode, undoFinish, unitCostCents, type ProductionOrder } from '@/domain/production'
-import type { AccountView, AdminOrder, AdminServices, Dashboard, EntryView, FinanceOverview, FinishDefaults, MovementView, ProductionOrderView, PurchaseSuggestion, PurchaseView, RecipeView, StockItemView, SupplierView } from '@/services/types'
+import type { AccountView, AdminOrder, CategoryRow, ProductDetail, AdminServices, Dashboard, EntryView, FinanceOverview, FinishDefaults, MovementView, ProductionOrderView, PurchaseSuggestion, PurchaseView, RecipeView, StockItemView, SupplierView } from '@/services/types'
 import { daysUntil, itemBalance, itemLabel, lotsFefo, nextLot } from '@/domain/inventory'
 import { orderTotal, paymentTerms, purchaseMessage, receivedTotal, suggestQty, isOpen, type PurchaseOrder } from '@/domain/purchasing'
 import { closeShortOrder, receive, reverseLastReceipt } from '@/domain/receiving'
@@ -84,6 +87,25 @@ const sameDay = (iso: string, t: Date) => {
   const d = new Date(iso)
   return d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate()
 }
+
+const productDetail = (st: MockState, id: string): ProductDetail | null => {
+  const i = st.stockItems.find((x) => x.id === id)
+  if (!i) return null
+  const sale = st.sales.find((s) => s.itemId === id) ?? defaultSale(id)
+  const cost = productCost(st, i)
+  return {
+    id, label: itemLabel(i), unit: i.unit, name: itemLabel(i), categoryId: i.categoryId, itemType: i.itemType, origin: i.origin,
+    priceCents: sale.priceCents, minStock: `${i.minStock} un`, published: sale.published, favoritePos: sale.favoritePos,
+    soldByWeight: sale.soldByWeight, tracksExpiry: i.tracksExpiry, description: sale.description,
+    costCents: cost.cents, costSource: cost.source, categories: st.categories.map((c) => ({ id: c.id, name: c.name })),
+  }
+}
+
+const categoryRows = (st: MockState): CategoryRow[] =>
+  st.categories.filter((c) => !c.internal).map((c) => {
+    const n = st.stockItems.filter((i) => i.categoryId === c.id && i.itemType !== 'raw_material').length
+    return { id: c.id, name: c.name, products: n, tag: n === 0 ? 'Nova' : 'Na loja' }
+  })
 
 export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }): AdminServices {
   const orderView = (o: ProductionOrder, st: MockState): ProductionOrderView => ({
@@ -656,6 +678,70 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
             })(),
           },
         }
+      },
+    },
+
+    catalog: {
+      async list() {
+        const st = db.read()
+        return st.stockItems.map((i) => {
+          const sale = st.sales.find((s) => s.itemId === i.id) ?? defaultSale(i.id)
+          return { id: i.id, label: itemLabel(i), kind: kindOf(i), channel: channelLabel(i, sale), priceCents: sale.priceCents, soldByWeight: sale.soldByWeight }
+        })
+      },
+      async get(id) {
+        const st = db.read()
+        return productDetail(st, id)
+      },
+      async save(id, input: ProductInput) {
+        if (Object.keys(validateProduct(input)).length) throw new Error('invalid')
+        let out: ProductDetail | null = null
+        db.update((st) => {
+          const i = st.stockItems.findIndex((x) => x.id === id)
+          if (i < 0) throw new Error('not_found')
+          let si = st.sales.findIndex((s) => s.itemId === id)
+          if (si < 0) { st.sales.push(defaultSale(id)); si = st.sales.length - 1 }
+          const r = applyProduct(st.stockItems[i], st.sales[si], input)
+          st.stockItems[i] = r.item
+          st.sales[si] = r.sale
+          out = productDetail(st, id)
+        })
+        return out as unknown as ProductDetail
+      },
+      async categories() {
+        return categoryRows(db.read())
+      },
+      async addCategory(name) {
+        const st0 = db.read()
+        const err = checkNewCategory(name, st0.categories)
+        if (err) throw new Error(err)
+        let row: CategoryRow | null = null
+        db.update((st) => {
+          st.categories.push({ id: slugify(name), name: name.trim() })
+          row = categoryRows(st).find((c) => c.id === slugify(name)) ?? null
+        })
+        return row as unknown as CategoryRow
+      },
+    },
+
+    customers: {
+      async list(query = '') {
+        const st = db.read()
+        return listCustomers(st.customers, st.orders, st.entries, now(), query)
+      },
+      async get(id) {
+        const st = db.read()
+        const nameOf = (pid: string) => { const it = st.stockItems.find((i) => i.id === pid); return it?.name ?? products.find((p) => p.id === pid)?.name ?? pid }
+        return customerDetail(id, st.customers, st.orders, st.entries, now(), nameOf)
+      },
+      async saveNotes(id, notes) {
+        db.update((st) => {
+          const known = st.customers.find((c) => customerId(c.phone) === id)
+          if (known) { known.notes = notes; return }
+          const o = st.orders.find((x) => customerId(x.contact.phone) === id)
+          if (!o) throw new Error('not_found')
+          st.customers.push({ phone: o.contact.phone, name: o.contact.name, since: null, notes, channelNote: null, baseline: { orders: 0, spentCents: 0, products: {} } })
+        })
       },
     },
   }

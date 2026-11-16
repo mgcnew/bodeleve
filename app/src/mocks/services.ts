@@ -4,7 +4,10 @@ import type { Order, OrderStatus, PlaceOrderInput } from '@/domain/types'
 import type { Services } from '@/services/types'
 import { createAdminServices } from './adminServices'
 import { createDb } from './db'
-import { categories, content, homeSections, products } from './seed'
+import { categories as staticCategories, content, homeSections as staticSections, noDetails, products as staticProducts } from './seed'
+import { DESCRIPTION_PLACEHOLDER } from '@/domain/catalog'
+import type { MockState } from './db'
+import type { Product } from '@/domain/types'
 import { hhmm } from './seedOrders'
 
 /**
@@ -33,6 +36,32 @@ export type MockOptions = {
   code?: () => string
 }
 
+/**
+ * O catálogo da loja é o que a gestão publica (H-I58). Sem o cadastro de venda no banco simulado (testes sem dados de exemplo),
+ * vale o catálogo estático. A ordem é a do quadro; o que a gestão publicou depois vem no fim.
+ */
+function storeCatalog(st: MockState): { products: Product[]; categories: typeof staticCategories; sections: typeof staticSections } {
+  if (st.sales.length === 0) return { products: staticProducts, categories: staticCategories, sections: staticSections }
+  const order = (id: string) => { const i = staticProducts.findIndex((p) => p.id === id); return i < 0 ? 999 : i }
+  const list: Product[] = st.stockItems
+    .filter((i) => i.itemType !== 'raw_material')
+    .flatMap((i) => {
+      const sale = st.sales.find((s) => s.itemId === i.id)
+      if (!sale || !sale.published || sale.priceCents == null) return []
+      const base = staticProducts.find((p) => p.id === i.id)?.details ?? noDetails
+      const description = sale.description === DESCRIPTION_PLACEHOLDER ? base.description : sale.description
+      return [{ id: i.id, name: i.name, unit: i.unit, priceCents: sale.priceCents, origin: i.origin ?? 'resale', categoryId: i.categoryId, available: true, details: { ...base, description } }]
+    })
+    .sort((a, b) => order(a.id) - order(b.id))
+  const used = new Set(list.map((p) => p.categoryId))
+  const ids = new Set(list.map((p) => p.id))
+  return {
+    products: list,
+    categories: st.categories.filter((c) => !c.internal && used.has(c.id)).map((c) => ({ id: c.id, name: c.name })),
+    sections: staticSections.map((s) => ({ ...s, productIds: s.productIds.filter((id) => ids.has(id)) })),
+  }
+}
+
 export function createMockServices(opts: MockOptions = {}): Services {
   const storage = opts.storage === undefined ? (typeof localStorage === 'undefined' ? null : localStorage) : opts.storage
   const withSeed = opts.withSeedOrders ?? false
@@ -48,11 +77,11 @@ export function createMockServices(opts: MockOptions = {}): Services {
   return {
     catalog: {
       async listCategories() {
-        return categories
+        return storeCatalog(db.read()).categories
       },
       async listProducts(filter = {}) {
         const q = filter.query ? norm(filter.query.trim()) : ''
-        return products.filter(
+        return storeCatalog(db.read()).products.filter(
           (p) =>
             (!filter.categoryId || p.categoryId === filter.categoryId) &&
             (!filter.origin || p.origin === filter.origin) &&
@@ -60,16 +89,16 @@ export function createMockServices(opts: MockOptions = {}): Services {
         )
       },
       async getProduct(id) {
-        return products.find((p) => p.id === id) ?? null
+        return storeCatalog(db.read()).products.find((p) => p.id === id) ?? null
       },
       async getHomeSections() {
-        return homeSections
+        return storeCatalog(db.read()).sections
       },
     },
 
     orders: {
       async placeOrder(input: PlaceOrderInput) {
-        const lines = buildLines(Object.fromEntries(input.items.map((i) => [i.productId, i.qty])), products)
+        const lines = buildLines(Object.fromEntries(input.items.map((i) => [i.productId, i.qty])), storeCatalog(db.read()).products)
         if (lines.length === 0) throw new Error('empty_order')
         if (lines.some((l) => !l.product.available)) throw new Error('unavailable_item')
         // O "servidor" refaz preços e total; o que o cliente mandou de valor é ignorado.

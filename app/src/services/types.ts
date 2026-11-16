@@ -1,3 +1,5 @@
+import type { ProductInput, ProductKind } from '@/domain/catalog'
+import type { CustomerDetail, CustomerSummary } from '@/domain/customers'
 import type { IconName } from '@/components'
 import type { AreaCheck, Category, HomeSection, Order, OrderItem, PlaceOrderInput, Product, StoreContent } from '@/domain/types'
 import type { StockLevel } from '@/domain/inventory'
@@ -299,6 +301,44 @@ export interface FinanceService {
   ledger(): Promise<{ rows: LedgerRow[]; inCents: number; outCents: number }>
 }
 
+export type ProductRow = {
+  id: string
+  /** "Queijo coalho 500 g" */
+  label: string
+  kind: ProductKind
+  channel: string
+  priceCents: number | null
+  soldByWeight: boolean
+}
+
+export type ProductDetail = ProductInput & {
+  id: string
+  label: string
+  unit: string
+  costCents: number | null
+  /** De onde vem o custo: a ficha técnica (feito na casa) ou o último recebimento. */
+  costSource: 'recipe' | 'last_purchase' | null
+  categories: Array<{ id: string; name: string }>
+}
+
+export type CategoryRow = { id: string; name: string; products: number; tag: 'Na loja' | 'Nova' }
+
+export interface CatalogAdminService {
+  list(): Promise<ProductRow[]>
+  get(id: string): Promise<ProductDetail | null>
+  /** Lança `invalid` se o formulário não passa na validação. */
+  save(id: string, input: ProductInput): Promise<ProductDetail>
+  categories(): Promise<CategoryRow[]>
+  /** Lança `empty` ou `duplicate`. */
+  addCategory(name: string): Promise<CategoryRow>
+}
+
+export interface CustomerAdminService {
+  list(query?: string): Promise<CustomerSummary[]>
+  get(id: string): Promise<CustomerDetail | null>
+  saveNotes(id: string, notes: string): Promise<void>
+}
+
 export type AdminServices = {
   auth: AdminAuthService
   orders: AdminOrderService
@@ -307,6 +347,8 @@ export type AdminServices = {
   stock: StockService
   production: ProductionService
   finance: FinanceService
+  catalog: CatalogAdminService
+  customers: CustomerAdminService
 }
 
 export type Services = {

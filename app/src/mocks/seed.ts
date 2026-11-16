@@ -2,7 +2,7 @@ import type { Category, HomeSection, Product, StoreContent } from '@/domain/type
 
 /** Dados FICTÍCIOS dos quadros de design (CLAUDE.md): só para desenvolvimento. */
 
-const noDetails = {
+export const noDetails = {
   description: '[DESCRIÇÃO DO PRODUTO: como é feito, sabor, sugestão de uso]',
   conservation: '[COMO CONSERVAR]',
   validity: '[PRAZO DE VALIDADE]',

@@ -67,6 +67,8 @@ function make(now: Date, sp: Spec): Order {
 }
 
 const ana: Contact = { name: 'Ana Souza', phone: '(00) 90000-0000' }
+const maria: Contact = { name: 'Maria Lima', phone: '(00) 90000-0001' }
+const mariaAddress = { street: 'Av. das Palmeiras', number: '455', complement: 'casa 2', district: 'Centro' }
 const camelias = { street: 'Rua das Camélias', number: '120', complement: 'apto 34', district: 'Jardim das Flores' }
 
 /** Os pedidos feitos "neste aparelho" nos quadros da loja: 1042 em andamento, 1017 e 0988 concluídos. */
@@ -88,10 +90,21 @@ export function buildSeedOrders(now: Date): Order[] {
       id: '0988', at: '2026-10-21T16:10:00-03:00', status: 'picked_up', delivery: false, contact: ana, method: 'cash', paid: true, code: '0988',
       items: [item('queijo-coalho', 1), item('farinha-de-mandioca', 1)], stepTimes: { picked_up: '17h05' },
     }),
+    // — Histórico da Maria Lima (quadro Cliente): um pedido entregue e um retirado —
+    make(now, {
+      // Tapioca a R$ 11,70: preço de quando o pedido foi feito (o total do quadro, R$ 98,40, não fecha com o preço de hoje).
+      id: '1021', at: '2026-11-06T14:20:00-03:00', status: 'delivered', delivery: true, contact: maria,
+      address: mariaAddress, method: 'pix', paid: true, code: '1021',
+      items: [item('queijo-coalho', 2), item('farinha-de-mandioca', 1), item('tapioca-granulada', 1, 1170)], stepTimes: { delivered: '15h05' },
+    }),
+    make(now, {
+      id: '0997', at: '2026-10-24T11:05:00-03:00', status: 'picked_up', delivery: false, contact: maria, method: 'cash', paid: true, code: '0997',
+      items: [item('queijo-coalho', 2), item('farinha-de-mandioca', 1), item('doce-de-leite', 1), item('rapadura', 1), item('nata', 1)], stepTimes: { picked_up: '11h40' },
+    }),
     // — Gestão: fila do dia (nomes e totais dos quadros) —
     make(now, {
-      id: '1043', minutesAgo: 10, status: 'received', delivery: true, contact: { name: 'Maria Lima', phone: '(00) 90000-0001' },
-      address: { street: 'Av. das Palmeiras', number: '455', complement: 'casa 2', district: 'Centro' }, method: 'pix', paid: true, code: '3055',
+      id: '1043', minutesAgo: 10, status: 'received', delivery: true, contact: maria,
+      address: mariaAddress, method: 'pix', paid: true, code: '3055',
       items: [item('queijo-coalho', 1), item('farinha-de-mandioca', 1), item('tapioca-granulada', 1)],
     }),
     make(now, {
@@ -119,7 +132,7 @@ export function buildSeedOrders(now: Date): Order[] {
 
 /** Clientes conhecidos: desde quando e quantos pedidos tinham antes dos de hoje ("cliente desde 03/2026 · 5 pedidos"). */
 export const customersSeed: Record<string, { since: string; previousOrders: number }> = {
-  '(00) 90000-0001': { since: '03/2026', previousOrders: 4 },
+  '(00) 90000-0001': { since: '03/2026', previousOrders: 2 }, // + 1043, 1021 e 0997 = 5 pedidos
   '(00) 90000-0000': { since: '01/2026', previousOrders: 2 },
   '(00) 90000-0002': { since: '08/2026', previousOrders: 1 },
 }
