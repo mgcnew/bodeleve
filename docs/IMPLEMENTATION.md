@@ -65,14 +65,13 @@ O app usa o projeto Supabase **já existente** (`afqcwqikkolyoowkozak`), que tem
 | Área | Situação |
 |---|---|
 | Loja: catálogo, categorias, dados da casa (taxa, janelas) | **Ligado** (`store_catalog`, `store_categories`, `store_info`) |
-| Loja: fazer pedido e acompanhar | **Ligado** no código (`place_order`, `track_order`); falta testar de ponta a ponta, porque o catálogo do banco está vazio |
+| Loja: fazer pedido e acompanhar | **Ligado e testado**: um pedido de teste (nº 1001, "TESTE Integração") foi criado e aparece no acompanhamento |
 | Gestão, PDV e Entregas | Ainda nos dados de exemplo. Exigem login (Supabase Auth) e as funções `order_*`, `pos_*`, `courier_*`, `receive_purchase` etc. |
 
-Para ver a loja com produtos num banco de desenvolvimento, `supabase/seed_dev.sql` traz um catálogo fictício (ainda não aplicado).
+O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de desenvolvimento.
 
 ## Próximos passos
 
-1. Ter um catálogo publicado no banco (o seed de desenvolvimento ou o cadastro real) e testar o pedido da loja de ponta a ponta.
-2. Ligar o login da equipe (Supabase Auth) e trocar cada `*Store` da gestão, do PDV e das entregas pelas funções do banco, uma área por vez.
-3. Ligar Realtime em pedidos, status do pedido e entregas livres.
-4. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.
+1. Ligar o login da equipe (Supabase Auth) e trocar cada `*Store` da gestão, do PDV e das entregas pelas funções do banco, uma área por vez.
+2. Ligar Realtime em pedidos, status do pedido e entregas livres.
+3. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.

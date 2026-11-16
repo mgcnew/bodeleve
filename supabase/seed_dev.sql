@@ -16,7 +16,8 @@ insert into public.products (establishment_id, slug, name, unit, item_type, orig
 select e.id, p.slug, p.name, 'un', p.item_type::public.item_type, p.origin::public.item_origin, c.id, p.price, true, true,
        '[DESCRIÇÃO DO PRODUTO: como é feito, sabor, sugestão de uso]',
        jsonb_build_object('size', p.size, 'storage', '[COMO CONSERVAR]', 'shelf_life', '[PRAZO DE VALIDADE]', 'ingredients', '[INGREDIENTES]', 'popular_rank', p.rank)
-from public.establishments e,
+from public.establishments e
+cross join
   (values
     ('queijo-coalho',       'Queijo coalho',       '500 g', 3290, 'finished', 'house',  'queijos',  1),
     ('carne-de-sol',        'Carne de sol',        '500 g', 3490, 'resale',   'resale', 'carnes',   2),
