@@ -119,3 +119,19 @@ export function applyInventory(counts: { itemId: string; counted: number }[]) {
   stockStore.set((s) => ({ ...s, movements: [...s.movements, ...created] }))
   return created.map((m) => m.id)
 }
+
+/** Saída de estoque pelo lote que vence primeiro (H-G11). Devolve os movimentos a lançar. */
+export function fefoOut(input: { itemId: string; qty: number; type: Movement['type']; note: string; ref: string | null; by: string; at: string }): Movement[] {
+  const { lots, movements } = stockStore.get()
+  const item = itemsStore.get().find((i) => i.id === input.itemId)
+  const out: Movement[] = []
+  let left = input.qty
+  for (const lot of item?.tracksLots ? lotsOf(input.itemId, lots, movements) : []) {
+    if (left <= 0) break
+    const take = Math.min(lot.qty, left)
+    out.push({ id: newId('mv'), itemId: input.itemId, lotId: lot.id, type: input.type, qty: -take, at: input.at, note: input.note, by: input.by, ref: input.ref })
+    left = round(left - take)
+  }
+  if (left > 0) out.push({ id: newId('mv'), itemId: input.itemId, lotId: null, type: input.type, qty: -left, at: input.at, note: input.note, by: input.by, ref: input.ref })
+  return out
+}
