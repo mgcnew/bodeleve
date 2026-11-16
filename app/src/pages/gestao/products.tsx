@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { AppLink, Banner, Button, ButtonLink, Chip, EmptyState, Icon, IndicatorSkeleton, ListSkeleton, OriginBadge, SearchField, StatusTag, Switch, TextField, ChoiceOption } from '@/components'
 import { kindFilters, kindLabel, marginLabel, validateProduct, type ProductInput, type ProductKind } from '@/domain/catalog'
 import type { ItemType } from '@/domain/inventory'
+import { unitKg } from '@/domain/units'
 import { formatBRL, parseMoney } from '@/lib/format'
 import { useServices } from '@/services'
 import type { ProductDetail, ProductRow } from '@/services/types'
@@ -77,7 +78,7 @@ export function ProductsPage() {
 }
 
 const toInput = (d: ProductDetail): ProductInput => ({
-  name: d.name, categoryId: d.categoryId, itemType: d.itemType, origin: d.origin, priceCents: d.priceCents, minStock: d.minStock,
+  name: d.name, categoryId: d.categoryId, itemType: d.itemType, origin: d.origin, priceCents: d.priceCents, weightPriceCents: d.weightPriceCents, minStock: d.minStock,
   published: d.published, favoritePos: d.favoritePos, soldByWeight: d.soldByWeight, tracksExpiry: d.tracksExpiry, description: d.description,
 })
 
@@ -95,6 +96,8 @@ function ProductForm({ detail }: { detail: ProductDetail }) {
   const invalidate = useInvalidateCatalog()
   const [form, setForm] = useState<ProductInput>(() => toInput(detail))
   const [priceText, setPriceText] = useState(() => (detail.priceCents == null ? '' : (detail.priceCents / 100).toFixed(2).replace('.', ',')))
+  const [weightText, setWeightText] = useState(() => (detail.weightPriceCents == null ? '' : (detail.weightPriceCents / 100).toFixed(2).replace('.', ',')))
+  const canWeigh = unitKg(detail.unit) != null
   const [errors, setErrors] = useState<ReturnType<typeof validateProduct>>({})
   const [saved, setSaved] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -108,7 +111,7 @@ function ProductForm({ detail }: { detail: ProductDetail }) {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    const input = { ...form, priceCents: raw ? null : parseMoney(priceText) }
+    const input = { ...form, priceCents: raw ? null : parseMoney(priceText), weightPriceCents: raw || !form.soldByWeight ? null : parseMoney(weightText) }
     const errs = validateProduct(input)
     setErrors(errs)
     setSaved(false)
@@ -150,7 +153,7 @@ function ProductForm({ detail }: { detail: ProductDetail }) {
           <ChoiceOption type="radio" name="origem" checked={form.origin === 'resale' || form.origin === null} onChange={() => set('origin', 'resale')}><b>Terceiros</b><br /><span className={l.sub}>Sem selo na loja</span></ChoiceOption>
         </fieldset>
       )}
-      {!raw && <TextField label="Preço de venda" inputMode="decimal" value={priceText} onChange={(e) => { setPriceText(e.target.value); setSaved(false) }} error={errors.price} hint={form.soldByWeight ? 'Preço por kg.' : undefined} />}
+      {!raw && <TextField label="Preço de venda" inputMode="decimal" value={priceText} onChange={(e) => { setPriceText(e.target.value); setSaved(false) }} error={errors.price} hint={form.soldByWeight ? 'Preço da embalagem, na loja online.' : undefined} />}
       <TextField label="Estoque mínimo" inputMode="numeric" value={form.minStock} onChange={(e) => set('minStock', e.target.value)} error={errors.minStock} />
       {!raw && (
         <div className={s.todayGrid}>
@@ -160,7 +163,8 @@ function ProductForm({ detail }: { detail: ProductDetail }) {
       )}
       {!raw && <SwitchRow label="Publicar na loja online" hint="Aparece no catálogo para clientes" checked={form.published} onChange={(v) => set('published', v)} />}
       {!raw && <SwitchRow label="Favorito no PDV" hint="Fica na primeira tela do balcão" checked={form.favoritePos} onChange={(v) => set('favoritePos', v)} />}
-      {!raw && <SwitchRow label="Vendido por peso" hint="Pede o peso na hora da venda" checked={form.soldByWeight} onChange={(v) => set('soldByWeight', v)} />}
+      {!raw && <SwitchRow label="Vendido por peso" hint={canWeigh ? 'Pede o peso na hora da venda' : 'Disponível só para produtos com medida em g ou kg'} checked={form.soldByWeight && canWeigh} onChange={(v) => canWeigh && set('soldByWeight', v)} />}
+      {!raw && form.soldByWeight && canWeigh && <TextField label="Preço por kg (balcão)" inputMode="decimal" value={weightText} onChange={(e) => { setWeightText(e.target.value); setSaved(false) }} error={errors.weightPrice} hint="A loja online segue vendendo a embalagem pelo preço de venda." />}
       <SwitchRow label="Controlar lote e validade" hint="Obrigatório para alimentos perecíveis" checked={form.tracksExpiry} onChange={(v) => set('tracksExpiry', v)} />
       {!raw && (
         <div className={l.stack} style={{ gap: 6 }}>

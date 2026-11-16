@@ -7,8 +7,10 @@ import type { ItemOrigin, ItemType, StockItem } from './inventory'
 
 export type SaleInfo = {
   itemId: string
-  /** Preço de venda em centavos (por kg quando vendido por peso). Matéria-prima não tem preço. */
+  /** Preço de venda da embalagem, em centavos. Matéria-prima não tem preço. */
   priceCents: number | null
+  /** Preço do quilo no balcão, para o que é vendido por peso (H-I80). A loja online segue vendendo a embalagem pelo preço acima. */
+  weightPriceCents: number | null
   /** Aparece no catálogo da loja online. */
   published: boolean
   /** Fica na primeira tela do balcão (PDV). */
@@ -53,7 +55,7 @@ export function channelLabel(item: Pick<StockItem, 'itemType'>, sale: Pick<SaleI
   return sale.soldByWeight ? `${base} (por peso)` : base
 }
 
-export const defaultSale = (itemId: string): SaleInfo => ({ itemId, priceCents: null, published: false, favoritePos: false, soldByWeight: false, description: DESCRIPTION_PLACEHOLDER })
+export const defaultSale = (itemId: string): SaleInfo => ({ itemId, priceCents: null, weightPriceCents: null, published: false, favoritePos: false, soldByWeight: false, description: DESCRIPTION_PLACEHOLDER })
 
 export type ProductInput = {
   name: string
@@ -61,6 +63,7 @@ export type ProductInput = {
   itemType: ItemType
   origin: ItemOrigin | null
   priceCents: number | null
+  weightPriceCents: number | null
   /** Texto digitado ("15 un"): só o número vale. */
   minStock: string
   published: boolean
@@ -77,12 +80,13 @@ export function parseMinStock(text: string): number | null {
   return Number(m[1].replace(',', '.'))
 }
 
-export type ProductErrors = Partial<Record<'name' | 'price' | 'minStock', string>>
+export type ProductErrors = Partial<Record<'name' | 'price' | 'weightPrice' | 'minStock', string>>
 
 export function validateProduct(input: ProductInput): ProductErrors {
   const e: ProductErrors = {}
   if (!input.name.trim()) e.name = 'Informe o nome do produto.'
   if (input.itemType !== 'raw_material' && (input.priceCents == null || input.priceCents <= 0)) e.price = 'Informe o preço de venda, por exemplo 32,90.'
+  if (input.itemType !== 'raw_material' && input.soldByWeight && (input.weightPriceCents == null || input.weightPriceCents <= 0)) e.weightPrice = 'Informe o preço por kg, por exemplo 59,90.'
   if (parseMinStock(input.minStock) == null) e.minStock = 'Informe o estoque mínimo, por exemplo 15.'
   return e
 }
@@ -110,6 +114,7 @@ export function applyProduct(item: StockItem, sale: SaleInfo, input: ProductInpu
     sale: {
       ...sale,
       priceCents: raw ? null : input.priceCents,
+      weightPriceCents: raw || !input.soldByWeight ? null : input.weightPriceCents,
       published: raw ? false : input.published,
       favoritePos: raw ? false : input.favoritePos,
       soldByWeight: raw ? false : input.soldByWeight,

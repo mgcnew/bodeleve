@@ -36,8 +36,9 @@ export function buildSalesHistory(now: Date, days = 31): SalesDay[] {
 export const todayCounterSeed = {
   count: dashboardSeed.counterSales.count,
   cents: dashboardSeed.counterSales.cents,
-  pixCents: 28000,
-  cardCents: 30000,
-  cashCents: dashboardSeed.counterSales.cents - 58000,
+  // Quadro Caixa: dinheiro R$ 312,00, Pix R$ 197,60, cartão R$ 382,40.
+  pixCents: 19760,
+  cardCents: 38240,
+  cashCents: 31200,
   products: { 'queijo-coalho': 7, 'farinha-de-mandioca': 5, 'carne-de-sol': 2 } as Record<string, number>,
 }

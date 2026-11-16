@@ -3,7 +3,7 @@ import type { StockItem } from './inventory'
 import { applyProduct, splitLabel, channelLabel, checkNewCategory, defaultSale, kindOf, marginLabel, parseMinStock, slugify, validateProduct, type ProductInput } from './catalog'
 
 const item: StockItem = { id: 'queijo-coalho', name: 'Queijo coalho', unit: '500 g', itemType: 'finished', origin: 'house', categoryId: 'laticinios', minStock: 15, tracksExpiry: true, supplierId: null, lastCostCents: 1420 }
-const input: ProductInput = { name: ' Queijo coalho 500 g ', categoryId: 'laticinios', itemType: 'finished', origin: 'house', priceCents: 3290, minStock: '15 un', published: true, favoritePos: true, soldByWeight: false, tracksExpiry: true, description: '' }
+const input: ProductInput = { name: ' Queijo coalho 500 g ', categoryId: 'laticinios', itemType: 'finished', origin: 'house', priceCents: 3290, weightPriceCents: null, minStock: '15 un', published: true, favoritePos: true, soldByWeight: false, tracksExpiry: true, description: '' }
 
 describe('catálogo', () => {
   it('classifica o item como no quadro: feito na casa, marca, revenda, matéria-prima', () => {
@@ -41,6 +41,13 @@ describe('catálogo', () => {
       minStock: 'Informe o estoque mínimo, por exemplo 15.',
     })
     expect(validateProduct({ ...input, itemType: 'raw_material', priceCents: null })).toEqual({})
+  })
+
+  it('vendido por peso exige o preço por kg e só guarda esse preço quando o peso está ligado', () => {
+    expect(validateProduct({ ...input, soldByWeight: true }).weightPrice).toBe('Informe o preço por kg, por exemplo 59,90.')
+    expect(validateProduct({ ...input, soldByWeight: true, weightPriceCents: 5990 })).toEqual({})
+    expect(applyProduct(item, defaultSale(item.id), { ...input, soldByWeight: true, weightPriceCents: 5990 }).sale.weightPriceCents).toBe(5990)
+    expect(applyProduct(item, defaultSale(item.id), { ...input, soldByWeight: false, weightPriceCents: 5990 }).sale.weightPriceCents).toBeNull()
   })
 
   it('aplicar o formulário atualiza o item e a venda; matéria-prima perde preço, loja e favorito', () => {

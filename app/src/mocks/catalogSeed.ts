@@ -17,19 +17,22 @@ export const categoriesSeed: CategoryRecord[] = [
  * Venda dos itens da loja: o preço e a publicação vêm do catálogo da loja (mesmos números dos quadros).
  * Charque, flocão, fubá e melaço são vendidos só no balcão; o restante do estoque é matéria-prima e não vende.
  */
-const counterOnly: Array<[id: string, priceCents: number]> = [['charque', 3990], ['flocao-de-milho', 590], ['fuba', 520], ['melaco-de-cana', 1890]]
-const favorites = new Set(['queijo-coalho', 'queijo-manteiga', 'carne-de-sol', 'farinha-de-mandioca', 'rapadura'])
+const counterOnly: Array<[id: string, priceCents: number]> = [['charque', 3990], ['flocao-de-milho', 590], ['fuba', 520], ['melaco-de-cana', 1890], ['feijao-de-corda', 1690]]
+/** Vendidos por peso no balcão (preço do quilo). Carne de sol: R$ 59,90 / kg no balcão e R$ 34,90 a embalagem de 500 g na loja (H-I80). */
+const weightPrices: Record<string, number> = { 'carne-de-sol': 5990, charque: 7980, 'feijao-de-corda': 1690 }
+const favorites = new Set(['queijo-coalho', 'carne-de-sol', 'farinha-de-mandioca', 'tapioca-granulada', 'rapadura', 'manteiga-de-garrafa', 'feijao-de-corda', 'doce-de-leite'])
 
 export function buildSalesSeed(): SaleInfo[] {
   const store: SaleInfo[] = storeProducts.map((p) => ({
     itemId: p.id,
     priceCents: p.priceCents,
+    weightPriceCents: weightPrices[p.id] ?? null,
     published: true,
     favoritePos: favorites.has(p.id),
-    soldByWeight: false,
+    soldByWeight: p.id in weightPrices,
     description: p.details.description,
   }))
-  const counter: SaleInfo[] = counterOnly.map(([itemId, priceCents]) => ({ itemId, priceCents, published: false, favoritePos: false, soldByWeight: itemId === 'charque', description: DESCRIPTION_PLACEHOLDER }))
+  const counter: SaleInfo[] = counterOnly.map(([itemId, priceCents]) => ({ itemId, priceCents, weightPriceCents: weightPrices[itemId] ?? null, published: false, favoritePos: itemId === 'feijao-de-corda', soldByWeight: itemId in weightPrices, description: DESCRIPTION_PLACEHOLDER }))
   return [...store, ...counter]
 }
 

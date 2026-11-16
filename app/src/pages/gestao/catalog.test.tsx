@@ -28,12 +28,13 @@ describe('produtos', () => {
     expect(row).toHaveTextContent(money('32,90'))
     const charque = screen.getByText('Charque 500 g').closest('a')!
     expect(charque).toHaveTextContent('Só balcão (por peso)')
-    expect(charque).toHaveTextContent(/R\$.39,90 \/ kg/)
+    expect(charque).toHaveTextContent(/R\$.79,80 \/ kg/)
     const leite = screen.getByText('Leite integral 1 L').closest('a')!
     expect(leite).toHaveTextContent('Matéria-prima')
     expect(leite).toHaveTextContent('Não vende')
     expect(leite).toHaveTextContent('—')
-    expect(screen.getByText(/19 itens cadastrados/)).toBeInTheDocument()
+    expect(screen.getByText(/20 itens cadastrados/)).toBeInTheDocument()
+    expect(screen.getByText('Carne de sol 500 g').closest('a')).toHaveTextContent(/Loja e balcão \(por peso\).*R\$.59,90 \/ kg/)
 
     await user.click(screen.getByRole('button', { name: 'Marca Bodeleve' }))
     expect(screen.getAllByRole('link', { name: /Rapadura|Manteiga de garrafa/ })).toHaveLength(2)

@@ -40,6 +40,7 @@ const specs: Spec[] = [
   item('nata', 'Nata', '200 g', 'resale', 'resale', 'laticinios', 6, true, 'serra', 520, [{ code: 'NT-1110', qty: 6, expiresInDays: 4, costCents: 520 }]),
   item('farinha-de-mandioca', 'Farinha de mandioca', '1 kg', 'resale', 'resale', 'farinhas', 12, false, 'moinho', 480, [{ code: 'FM-0921', qty: 31, expiresInDays: null, costCents: 480 }]),
   item('tapioca-granulada', 'Tapioca granulada', '500 g', 'resale', 'resale', 'farinhas', 10, false, 'moinho', 300, [{ code: 'TG-1030', qty: 4, expiresInDays: null, costCents: 300 }]),
+  item('feijao-de-corda', 'Feijão de corda', '1 kg', 'resale', 'resale', 'farinhas', 5, false, 'moinho', 1090, [{ code: 'FJ-0925', qty: 9, expiresInDays: null, costCents: 1090 }]),
   item('flocao-de-milho', 'Flocão de milho', '500 g', 'resale', 'resale', 'farinhas', 12, false, 'moinho', 250, [{ code: 'FL-0915', qty: 20, expiresInDays: null, costCents: 250 }]),
   item('fuba', 'Fubá', '500 g', 'resale', 'resale', 'farinhas', 10, false, 'moinho', 220, [{ code: 'FB-0916', qty: 15, expiresInDays: null, costCents: 220 }]),
   item('melaco-de-cana', 'Melaço de cana', '500 ml', 'resale', 'resale', 'doces', 6, false, 'engenho', 950, [{ code: 'ME-0910', qty: 6, expiresInDays: null, costCents: 950 }]),
@@ -87,7 +88,7 @@ export function buildStockSeed(now: Date): { items: StockItem[]; lots: Lot[]; mo
     mv('mv-qc-3', l1, 'loss', -1, at(now, -2, 18), 'Ajuste manual', 'Perda · embalagem danificada', 'Ana'),
     mv('mv-qc-4', l2, 'production_in', 10, at(now, -1, 17), 'OP-0031', 'Produção · OP-0031 · Entrada do lote QC-1112'),
     mv('mv-qc-5', l1, 'sale_out', -1, ago(230), 'V-1037', 'Venda online · pedido #1037'),
-    mv('mv-qc-6', l1, 'sale_out', -2, ago(32), 'V-0212', 'Venda no balcão'),
+    mv('mv-qc-6', l1, 'sale_out', -2, ago(32), 'V-0210', 'Venda no balcão'),
   )
   return { items, lots, movements }
 }

@@ -7,6 +7,10 @@ import { products } from './seed'
 import { applyProduct, channelLabel, checkNewCategory, defaultSale, kindOf, slugify, validateProduct, type ProductInput } from '@/domain/catalog'
 import { customerDetail, customerId, listCustomers } from '@/domain/customers'
 import { productCost } from './catalogView'
+import { assertPaid, cashDifference, cashNetOf, changeOf, discountCents, expectedCash, nextSaleId, pickLots, PosError, priceLine, sessionTotals, subtotalOf, validateMovement, type CashSession, type PosSale, type PriceInfo, type SaleLine } from '@/domain/pos'
+import { addTransaction } from '@/domain/finance'
+import { formatKgShort, unitKg, unitsToKg } from '@/domain/units'
+import { MOCK_MANAGER_PINS } from './adminSeed'
 import { checkInvite, cleanHouse, rolesInUse, validateHouse } from '@/domain/settings'
 import { storefront } from '@/config/storefront'
 import { buildHub, monthLosses, monthOutflowCents, monthProduction, periodStart, salesByDay, salesReport } from '@/domain/reports'
@@ -15,7 +19,7 @@ import { assign as assignDelivery, assignmentOf, assignOptions, courierRows, dis
 import { paymentLabel } from '@/config/storefront'
 import { formatBRL } from '@/lib/format'
 import { batchCostCents, checkInputs, finishOrder, formatContent, marginPercent, needs, nextOrderId, ProductionError, suggestLotCode, undoFinish, unitCostCents, type ProductionOrder } from '@/domain/production'
-import type { AccountView, AdminOrder, CategoryRow, ProductDetail, AdminServices, Dashboard, EntryView, FinanceOverview, FinishDefaults, MovementView, ProductionOrderView, PurchaseSuggestion, PurchaseView, RecipeView, StockItemView, SupplierView } from '@/services/types'
+import type { AccountView, AdminOrder, CashView, CategoryRow, PosSaleRow, PosSessionView, ProductDetail, AdminServices, Dashboard, EntryView, FinanceOverview, FinishDefaults, MovementView, ProductionOrderView, PurchaseSuggestion, PurchaseView, RecipeView, StockItemView, SupplierView } from '@/services/types'
 import { daysUntil, itemBalance, itemLabel, lotsFefo, nextLot } from '@/domain/inventory'
 import { orderTotal, paymentTerms, purchaseMessage, receivedTotal, suggestQty, isOpen, type PurchaseOrder } from '@/domain/purchasing'
 import { closeShortOrder, receive, reverseLastReceipt } from '@/domain/receiving'
@@ -97,6 +101,52 @@ const sameDay = (iso: string, t: Date) => {
 
 const productName = (st: MockState, id: string) => { const it = st.stockItems.find((i) => i.id === id); return it ? itemLabel(it) : id }
 
+const nextMovementId = (st: MockState) => `mv-${st.stockItems.length * 0 + st.movements.reduce((a, m) => Math.max(a, Number(m.id.split('-').pop()) || 0), 0) + 1}`
+
+const sessionView = (s: CashSession): PosSessionView => ({ id: s.id, openedBy: s.openedBy, openedAt: s.openedAt, status: s.status, openingCents: s.openingCents, closedAt: s.closedAt })
+
+const currentSession = (st: MockState): CashSession | null => st.cashSessions.find((s) => s.status === 'open') ?? null
+const lastClosed = (st: MockState): CashSession | null => [...st.cashSessions].filter((s) => s.status === 'closed').sort((a, b) => (b.closedAt ?? '').localeCompare(a.closedAt ?? ''))[0] ?? null
+
+const cashView = (st: MockState, s: CashSession): CashView => {
+  const totals = sessionTotals(s, st.posSales)
+  const mine = st.posSales.filter((x) => x.sessionId === s.id && x.status === 'completed')
+  const salesCash = mine.reduce((a, x) => a + cashNetOf(x.payments), 0) + s.baseline.cashCents
+  const expected = expectedCash(s, st.posSales)
+  return {
+    session: sessionView(s), count: totals.count, cashCents: totals.cashCents, pixCents: totals.pixCents, cardCents: totals.cardCents, totalCents: totals.totalCents,
+    salesCashCents: salesCash,
+    movements: s.movements.map((m) => ({ id: m.id, label: `${m.kind === 'sangria' ? 'Sangria' : 'Suprimento'} · ${m.reason}`, signedCents: m.kind === 'sangria' ? -m.cents : m.cents })),
+    expectedCents: s.status === 'closed' && s.expectedCents != null ? s.expectedCents : expected,
+    countedCents: s.countedCents,
+    differenceCents: s.countedCents != null ? s.countedCents - (s.expectedCents ?? expected) : null,
+  }
+}
+
+const saleRow = (s: PosSale): PosSaleRow => {
+  const filters = [...new Set(s.payments.map((p) => (p.method === 'cash' ? 'cash' : p.method === 'pix' ? 'pix' : 'card')))] as PosSaleRow['filters']
+  const label = (f: string) => (f === 'cash' ? 'Dinheiro' : f === 'pix' ? 'Pix' : 'Cartão')
+  return { id: s.id, at: s.at, items: s.lines.reduce((a, l) => a + (l.kind === 'unit' ? l.qty : 1), 0), methods: filters.map(label).join(' e '), totalCents: s.totalCents, cancelled: s.status === 'cancelled', pending: !!s.pending, filters }
+}
+
+/** Vendas de balcão de hoje que o sistema registrou (as de exemplo já estão na base do caixa). Alimenta Início e Relatórios. */
+export const todayCounter = (st: MockState, t: Date) => {
+  const same = (iso: string) => { const d = new Date(iso); return d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate() }
+  const base = { ...todayCounterSeed, products: { ...todayCounterSeed.products } }
+  for (const s of st.posSales) {
+    if (s.seed || s.status !== 'completed' || !same(s.at)) continue
+    base.count += 1
+    base.cents += s.totalCents
+    for (const p of s.payments) {
+      if (p.method === 'cash') base.cashCents += p.cents
+      else if (p.method === 'pix') base.pixCents += p.cents
+      else base.cardCents += p.cents
+    }
+    for (const l of s.lines) base.products[l.itemId] = (base.products[l.itemId] ?? 0) + (l.kind === 'unit' ? l.qty : 1)
+  }
+  return base
+}
+
 const stageLabel = (o: Order) => (o.status === 'received' ? 'Novo' : o.status === 'preparing' ? 'Em preparo' : 'Pronto')
 
 const productDetail = (st: MockState, id: string): ProductDetail | null => {
@@ -106,7 +156,7 @@ const productDetail = (st: MockState, id: string): ProductDetail | null => {
   const cost = productCost(st, i)
   return {
     id, label: itemLabel(i), unit: i.unit, name: itemLabel(i), categoryId: i.categoryId, itemType: i.itemType, origin: i.origin,
-    priceCents: sale.priceCents, minStock: `${i.minStock} un`, published: sale.published, favoritePos: sale.favoritePos,
+    priceCents: sale.priceCents, weightPriceCents: sale.weightPriceCents, minStock: `${i.minStock} un`, published: sale.published, favoritePos: sale.favoritePos,
     soldByWeight: sale.soldByWeight, tracksExpiry: i.tracksExpiry, description: sale.description,
     costCents: cost.cents, costSource: cost.source, categories: st.categories.map((c) => ({ id: c.id, name: c.name })),
   }
@@ -660,10 +710,10 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
         }
         return {
           salesToday: {
-            totalCents: onlineCents + dashboardSeed.counterSales.cents,
-            count: online.length + dashboardSeed.counterSales.count,
+            totalCents: onlineCents + todayCounter(db.read(), t).cents,
+            count: online.length + todayCounter(db.read(), t).count,
             yesterdayUntilNowCents: dashboardSeed.yesterdayUntilNowCents,
-            counter: dashboardSeed.counterSales,
+            counter: { count: todayCounter(db.read(), t).count, cents: todayCounter(db.read(), t).cents },
             online: { count: online.length, cents: onlineCents },
           },
           attention,
@@ -697,7 +747,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
         const st = db.read()
         return st.stockItems.map((i) => {
           const sale = st.sales.find((s) => s.itemId === i.id) ?? defaultSale(i.id)
-          return { id: i.id, label: itemLabel(i), kind: kindOf(i), channel: channelLabel(i, sale), priceCents: sale.priceCents, soldByWeight: sale.soldByWeight }
+          return { id: i.id, label: itemLabel(i), kind: kindOf(i), channel: channelLabel(i, sale), priceCents: sale.soldByWeight && sale.weightPriceCents ? sale.weightPriceCents : sale.priceCents, soldByWeight: sale.soldByWeight }
         })
       },
       async get(id) {
@@ -706,6 +756,8 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
       },
       async save(id, input: ProductInput) {
         if (Object.keys(validateProduct(input)).length) throw new Error('invalid')
+        const unit = db.read().stockItems.find((x) => x.id === id)?.unit ?? ''
+        if (input.soldByWeight && input.itemType !== 'raw_material' && unitKg(unit) == null) throw new Error('invalid')
         let out: ProductDetail | null = null
         db.update((st) => {
           const i = st.stockItems.findIndex((x) => x.id === id)
@@ -800,7 +852,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
       async hub() {
         const st = db.read()
         const t = now()
-        const days = salesByDay(st.salesHistory, st.orders, todayCounterSeed, periodStart('month', t), t)
+        const days = salesByDay(st.salesHistory, st.orders, todayCounter(st, t), periodStart('month', t), t)
         const lotCost = (m: { lotId: string | null; itemId: string }) => st.lots.find((l) => l.id === m.lotId)?.unitCostCents ?? st.stockItems.find((i) => i.id === m.itemId)?.lastCostCents ?? 0
         const hub = buildHub(days, monthLosses(st.movements, lotCost, t), monthProduction(st.productionOrders, t), monthOutflowCents(st.transactions, t))
         return { ...hub, bestSeller: hub.bestSeller ? { name: productName(st, hub.bestSeller.productId), qty: hub.bestSeller.qty } : null }
@@ -808,7 +860,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
       async sales(period) {
         const st = db.read()
         const t = now()
-        const r = salesReport(salesByDay(st.salesHistory, st.orders, todayCounterSeed, periodStart(period, t), t), period)
+        const r = salesReport(salesByDay(st.salesHistory, st.orders, todayCounter(st, t), periodStart(period, t), t), period)
         return { ...r, top: r.top.map((x) => ({ ...x, name: productName(st, x.productId) })) }
       },
     },
@@ -849,6 +901,206 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           st.outbox.push({ id: `msg-${st.outbox.length + 1}`, to: e, text: `Convite para a equipe da casa como ${role}`, at: now().toISOString(), kind: 'invite' })
         })
         return member as unknown as TeamMember
+      },
+    },
+
+    pos: {
+      async overview() {
+        const st = db.read()
+        const s = currentSession(st)
+        const last = lastClosed(st)
+        return {
+          session: s ? sessionView(s) : null,
+          lastClose: last ? { at: last.closedAt!, differenceCents: (last.countedCents ?? 0) - (last.expectedCents ?? 0) } : null,
+          pendingSales: st.posSales.filter((x) => x.pending).length,
+        }
+      },
+      async openSession(openingCents, by) {
+        let out = null as CashSession | null
+        db.update((st) => {
+          if (currentSession(st)) throw new Error('session_open')
+          if (!(openingCents >= 0)) throw new PosError('invalid_amount')
+          const id = `cx-${st.cashSessions.length + 1}`
+          out = { id, openedAt: now().toISOString(), openedBy: by, openingCents, baseline: { count: 0, cashCents: 0, pixCents: 0, cardCents: 0 }, movements: [], status: 'open', closedAt: null, closedBy: null, countedCents: null, expectedCents: null }
+          st.cashSessions.push(out)
+        })
+        return sessionView(out as unknown as CashSession)
+      },
+      async catalog() {
+        const st = db.read()
+        const rows = buildRows(stateOf(st), now())
+        const products = st.stockItems.flatMap((i) => {
+          const sale = st.sales.find((x) => x.itemId === i.id)
+          if (i.itemType === 'raw_material' || !sale || sale.priceCents == null) return []
+          const row = rows.find((r) => r.itemId === i.id)
+          const avail = Math.max(0, row?.available ?? 0)
+          const perKg = sale.soldByWeight && sale.weightPriceCents != null && unitKg(i.unit) != null
+          return [{
+            id: i.id, name: i.name, unit: i.unit,
+            priceCents: perKg ? sale.weightPriceCents! : sale.priceCents,
+            perKg,
+            stockText: perKg ? formatKgShort(unitsToKg(avail, i.unit)) : `${Math.round(avail * 100) / 100} un`,
+            low: row?.level === 'low', out: avail <= 0, categoryId: i.categoryId, favorite: sale.favoritePos, availableUnits: avail,
+          }]
+        })
+        const used = new Set(products.map((p) => p.categoryId))
+        return { products, categories: st.categories.filter((c) => !c.internal && used.has(c.id)).map((c) => ({ id: c.id, name: c.name })) }
+      },
+      async checkout(input, by) {
+        let out = null as PosSale | null
+        db.update((st) => {
+          const session = currentSession(st)
+          if (!session) throw new PosError('no_session')
+          if (input.lines.length === 0) throw new PosError('empty_cart')
+          const t = now()
+          const rows = buildRows(stateOf(st), t)
+          const lines: SaleLine[] = input.lines.map((cl) => {
+            const it = st.stockItems.find((x) => x.id === cl.itemId)
+            const sale = st.sales.find((x) => x.itemId === cl.itemId)
+            const info: PriceInfo | undefined = it && sale && sale.priceCents != null && it.itemType !== 'raw_material' ? { name: it.name, unit: it.unit, priceCents: sale.priceCents, weightPriceCents: sale.soldByWeight ? sale.weightPriceCents : null } : undefined
+            return priceLine(cl, info)
+          })
+          // Estoque disponível por item (o mesmo item pode estar em mais de uma linha, por exemplo pesagens).
+          const need = new Map<string, number>()
+          for (const l of lines) need.set(l.itemId, (need.get(l.itemId) ?? 0) + l.stockUnits)
+          for (const [itemId, units] of need) if (units > (rows.find((r) => r.itemId === itemId)?.available ?? 0) + 1e-9) throw new PosError('insufficient_stock', itemId)
+          const subtotal = subtotalOf(lines)
+          const cents = input.discount ? discountCents(input.discount.kind, subtotal) : 0
+          const discount = input.discount && cents > 0 ? { kind: input.discount.kind, cents, reason: input.discount.reason } : null
+          const total = subtotal - (discount?.cents ?? 0)
+          assertPaid(total, input.payments)
+          const id = nextSaleId(st.posSales.map((s) => s.id))
+          const movementIds: string[] = []
+          for (const l of lines) {
+            for (const take of pickLots(st.lots, st.movements, l.itemId, l.stockUnits)) {
+              const mid = nextMovementId(st)
+              st.movements.push({ id: mid, itemId: l.itemId, lotId: take.lot.id, type: 'sale_out', qty: -take.qty, at: t.toISOString(), ref: id, description: 'Venda no balcão', by })
+              movementIds.push(mid)
+              l.lots.push({ lotCode: take.lot.code, qty: take.qty })
+            }
+          }
+          const cash = cashNetOf(input.payments)
+          const pix = input.payments.filter((p) => p.method === 'pix').reduce((a, p) => a + p.cents, 0)
+          if (cash > 0) addTransaction(st, { at: t.toISOString(), accountId: 'cash', amountCents: cash, kind: 'sale', title: `Venda ${id} · dinheiro`, note: 'Balcão' })
+          if (pix > 0) addTransaction(st, { at: t.toISOString(), accountId: 'bank', amountCents: pix, kind: 'sale', title: `Venda ${id} · Pix`, note: 'Balcão' })
+          out = { id, sessionId: session.id, at: t.toISOString(), by, lines, subtotalCents: subtotal, discount, totalCents: total, payments: input.payments, changeCents: changeOf(input.payments), status: 'completed', cancel: null, movementIds, ...(input.offline ? { pending: true } : {}) }
+          st.posSales.push(out)
+        })
+        return out as unknown as PosSale
+      },
+      async sales(filter = 'all') {
+        const st = db.read()
+        const session = currentSession(st) ?? lastClosed(st)
+        const mine = session ? st.posSales.filter((s) => s.sessionId === session.id) : []
+        const totals = session ? sessionTotals(session, st.posSales) : { count: 0, totalCents: 0 }
+        const rows = mine.sort((a, b) => b.at.localeCompare(a.at)).map(saleRow).filter((r) => filter === 'all' || r.filters.includes(filter)).slice(0, 6)
+        return { rows, count: totals.count, totalCents: totals.totalCents, session: session ? sessionView(session) : null }
+      },
+      async getSale(id) {
+        return db.read().posSales.find((s) => s.id === id) ?? null
+      },
+      async cancelSale(id, pin) {
+        let out = null as PosSale | null
+        db.update((st) => {
+          const s = st.posSales.find((x) => x.id === id)
+          if (!s) throw new PosError('not_found')
+          if (s.status === 'cancelled') throw new PosError('already_cancelled')
+          const approver = Object.entries(MOCK_MANAGER_PINS).find(([, v]) => v.pin === pin)
+          if (!approver) throw new PosError('invalid_pin')
+          const t = now()
+          // Os itens voltam ao lote de onde saíram.
+          for (const l of s.lines) {
+            for (const back of l.lots) {
+              const lot = st.lots.find((x) => x.itemId === l.itemId && x.code === back.lotCode)
+              if (!lot) continue
+              st.movements.push({ id: nextMovementId(st), itemId: l.itemId, lotId: lot.id, type: 'adjustment', qty: back.qty, at: t.toISOString(), ref: s.id, description: `Venda ${s.id} cancelada · volta ao estoque`, by: approver[1].name })
+            }
+          }
+          const cash = cashNetOf(s.payments)
+          const pix = s.payments.filter((p) => p.method === 'pix').reduce((a, p) => a + p.cents, 0)
+          if (cash > 0) addTransaction(st, { at: t.toISOString(), accountId: 'cash', amountCents: -cash, kind: 'sale', title: `Venda ${s.id} cancelada · dinheiro`, note: 'Balcão' })
+          if (pix > 0) addTransaction(st, { at: t.toISOString(), accountId: 'bank', amountCents: -pix, kind: 'sale', title: `Venda ${s.id} cancelada · Pix`, note: 'Balcão' })
+          s.status = 'cancelled'
+          s.cancel = { at: t.toISOString(), by: s.by, approvedBy: `${approver[1].name} (${approver[1].roleLabel})` }
+          out = s
+        })
+        return out as unknown as PosSale
+      },
+      async cash() {
+        const st = db.read()
+        const s = currentSession(st) ?? lastClosed(st)
+        return s ? cashView(st, s) : null
+      },
+      async addMovement(kind, cents, reason, by) {
+        let out = null as CashView | null
+        db.update((st) => {
+          const s = currentSession(st)
+          if (!s) throw new PosError('no_session')
+          validateMovement(kind, cents, expectedCash(s, st.posSales))
+          const t = now().toISOString()
+          s.movements.push({ id: `cm-${s.movements.length + 1}`, at: t, kind, cents, reason, by })
+          if (kind === 'sangria' && reason === 'Levar ao banco') {
+            const transferId = `tr-${st.transactions.length + 1}`
+            addTransaction(st, { at: t, accountId: 'cash', amountCents: -cents, kind: 'transfer', title: 'Sangria do caixa', note: 'Caixa → banco · transferência entre contas', transferId })
+            addTransaction(st, { at: t, accountId: 'bank', amountCents: cents, kind: 'transfer', title: 'Sangria do caixa', note: 'Caixa → banco · transferência entre contas', transferId })
+          } else {
+            addTransaction(st, { at: t, accountId: 'cash', amountCents: kind === 'sangria' ? -cents : cents, kind: 'manual', title: `${kind === 'sangria' ? 'Sangria' : 'Suprimento'} · ${reason}`, note: 'Caixa do balcão' })
+          }
+          out = cashView(st, s)
+        })
+        return out as unknown as CashView
+      },
+      async closeSession(countedCents, by) {
+        let out = null as CashView | null
+        db.update((st) => {
+          const s = currentSession(st)
+          if (!s) throw new PosError('no_session')
+          if (!(countedCents >= 0)) throw new PosError('invalid_amount')
+          const expected = expectedCash(s, st.posSales)
+          const diff = cashDifference(countedCents, expected)
+          const t = now().toISOString()
+          s.status = 'closed'
+          s.closedAt = t
+          s.closedBy = by
+          s.countedCents = countedCents
+          s.expectedCents = expected
+          // A diferença acerta o saldo do caixa no financeiro: o que está na gaveta é o que foi contado.
+          s.differenceTxId = diff !== 0 ? addTransaction(st, { at: t, accountId: 'cash', amountCents: diff, kind: 'manual', title: `Diferença do caixa · ${diff > 0 ? 'sobra' : 'falta'}`, note: 'Fechamento do caixa' }) : null
+          out = cashView(st, s)
+        })
+        return out as unknown as CashView
+      },
+      async reopenSession() {
+        let out = null as CashView | null
+        db.update((st) => {
+          if (currentSession(st)) throw new Error('session_open')
+          const s = lastClosed(st)
+          if (!s) throw new PosError('no_session')
+          const diff = (s.countedCents ?? 0) - (s.expectedCents ?? 0)
+          if (diff !== 0) addTransaction(st, { at: now().toISOString(), accountId: 'cash', amountCents: -diff, kind: 'manual', title: 'Diferença do caixa desfeita', note: 'Caixa reaberto para corrigir' })
+          s.status = 'open'
+          s.closedAt = null
+          s.closedBy = null
+          s.countedCents = null
+          s.expectedCents = null
+          s.differenceTxId = null
+          out = cashView(st, s)
+        })
+        return out as unknown as CashView
+      },
+      async sendReceipt(saleId, phone) {
+        db.update((st) => {
+          if (!st.posSales.some((s) => s.id === saleId)) throw new PosError('not_found')
+          // D21: o comprovante é só registrado; nenhuma mensagem sai.
+          st.outbox.push({ id: `msg-${st.outbox.length + 1}`, to: phone, text: `Comprovante da venda ${saleId}`, at: now().toISOString(), kind: 'receipt' })
+        })
+      },
+      async syncPending() {
+        let n = 0
+        db.update((st) => {
+          for (const s of st.posSales) if (s.pending) { s.pending = false; n += 1 }
+        })
+        return n
       },
     },
   }

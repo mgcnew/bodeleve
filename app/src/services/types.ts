@@ -1,3 +1,4 @@
+import type { CartLine, DiscountKind, Payment, PosSale } from '@/domain/pos'
 import type { House, TeamMember } from '@/domain/settings'
 import type { Hub, Period, SalesReport } from '@/domain/reports'
 import type { Assignment, AssignOption, CourierRow, DispatchRow } from '@/domain/deliveries'
@@ -386,6 +387,81 @@ export interface SettingsService {
   invite(email: string, role: Role): Promise<TeamMember>
 }
 
+export type PosSessionView = { id: string; openedBy: string; openedAt: string; status: 'open' | 'closed'; openingCents: number; closedAt: string | null }
+
+export type PosOverview = {
+  session: PosSessionView | null
+  /** Último caixa fechado: "13/11 · sem diferença". */
+  lastClose: { at: string; differenceCents: number } | null
+  /** Vendas feitas sem conexão que ainda não foram enviadas. */
+  pendingSales: number
+}
+
+export type PosProduct = {
+  id: string
+  name: string
+  unit: string
+  /** Preço mostrado: do kg nos produtos por peso, da embalagem nos demais. */
+  priceCents: number
+  perKg: boolean
+  /** "12 un", "6,4 kg". */
+  stockText: string
+  low: boolean
+  out: boolean
+  categoryId: string
+  favorite: boolean
+  availableUnits: number
+}
+
+export type PosCatalog = { products: PosProduct[]; categories: Array<{ id: string; name: string }> }
+
+export type CheckoutInput = {
+  lines: CartLine[]
+  discount: { kind: DiscountKind; reason: string } | null
+  payments: Payment[]
+  /** A venda foi feita sem conexão: fica marcada como não enviada até a conexão voltar. */
+  offline?: boolean
+}
+
+export type PosSaleRow = { id: string; at: string; items: number; methods: string; totalCents: number; cancelled: boolean; pending: boolean; filters: Array<'cash' | 'pix' | 'card'> }
+export type PosSalesView = { rows: PosSaleRow[]; count: number; totalCents: number; session: PosSessionView | null }
+
+export type CashView = {
+  session: PosSessionView
+  count: number
+  cashCents: number
+  pixCents: number
+  cardCents: number
+  totalCents: number
+  salesCashCents: number
+  movements: Array<{ id: string; label: string; signedCents: number }>
+  expectedCents: number
+  countedCents: number | null
+  differenceCents: number | null
+}
+
+export interface PosService {
+  overview(): Promise<PosOverview>
+  /** Lança `session_open` se já há caixa aberto. */
+  openSession(openingCents: number, by: string): Promise<PosSessionView>
+  catalog(): Promise<PosCatalog>
+  /** Lança PosError: `no_session`, `empty_cart`, `insufficient_stock`, `invalid_payment`, `unknown_product`. */
+  checkout(input: CheckoutInput, by: string): Promise<PosSale>
+  sales(filter?: 'all' | 'cash' | 'pix' | 'card'): Promise<PosSalesView>
+  getSale(id: string): Promise<PosSale | null>
+  /** Cancelamento precisa da senha de um gestor. Lança `invalid_pin` ou `already_cancelled`. */
+  cancelSale(id: string, pin: string): Promise<PosSale>
+  cash(): Promise<CashView | null>
+  addMovement(kind: 'sangria' | 'suprimento', cents: number, reason: string, by: string): Promise<CashView>
+  closeSession(countedCents: number, by: string): Promise<CashView>
+  /** Reabre o último caixa fechado para corrigir. */
+  reopenSession(): Promise<CashView>
+  /** O comprovante é só registrado: nenhuma mensagem sai (D21). */
+  sendReceipt(saleId: string, phone: string): Promise<void>
+  /** Marca como enviadas as vendas feitas sem conexão. */
+  syncPending(): Promise<number>
+}
+
 export type AdminServices = {
   auth: AdminAuthService
   orders: AdminOrderService
@@ -399,6 +475,7 @@ export type AdminServices = {
   deliveries: DeliveryAdminService
   reports: ReportsService
   settings: SettingsService
+  pos: PosService
 }
 
 export type Services = {

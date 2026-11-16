@@ -30,3 +30,12 @@ export const teamNotes: Record<string, string> = {
   'u-carlos': 'Próprio',
   'u-bruno': 'Próprio',
 }
+
+/**
+ * Senha de gestor para cancelar venda (quadro Venda): valores de TESTE. Quando o Supabase entrar, a senha vira a conferência
+ * da conta de um gestor (Auth), nunca um código fixo.
+ */
+export const MOCK_MANAGER_PINS: Record<string, { pin: string; name: string; roleLabel: string }> = {
+  'u-ana': { pin: '2468', name: 'Ana', roleLabel: 'Gestor' },
+  'u-dono': { pin: '1357', name: '[NOME DO DONO]', roleLabel: 'Dono' },
+}

@@ -211,3 +211,10 @@ export function ledgerTotals(rows: LedgerRow[]) {
     outCents: rows.filter((r) => r.kind === 'out').reduce((a, r) => a + Math.abs(r.amountCents), 0),
   }
 }
+
+/** Lança uma movimentação de dinheiro e devolve o código dela. */
+export function addTransaction(st: Pick<FinanceState, 'transactions'>, tx: Omit<CashTransaction, 'id'>): string {
+  const id = nextId('tx-', st.transactions.map((t) => t.id))
+  st.transactions.push({ id, ...tx })
+  return id
+}
