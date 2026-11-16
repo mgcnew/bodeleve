@@ -522,6 +522,7 @@ export type Database = {
           id: string
           kind: Database["public"]["Enums"]["tx_kind"]
           note: string
+          order_id: string | null
           principal_cents: number | null
           receipt_path: string | null
           reversal_of: string | null
@@ -537,6 +538,7 @@ export type Database = {
           id?: string
           kind: Database["public"]["Enums"]["tx_kind"]
           note?: string
+          order_id?: string | null
           principal_cents?: number | null
           receipt_path?: string | null
           reversal_of?: string | null
@@ -552,6 +554,7 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["tx_kind"]
           note?: string
+          order_id?: string | null
           principal_cents?: number | null
           receipt_path?: string | null
           reversal_of?: string | null
@@ -585,6 +588,13 @@ export type Database = {
             columns: ["establishment_id"]
             isOneToOne: false
             referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
           {
@@ -788,6 +798,32 @@ export type Database = {
             columns: ["establishment_id"]
             isOneToOne: false
             referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manager_pins: {
+        Row: {
+          membership_id: string
+          pin_hash: string
+          updated_at: string
+        }
+        Insert: {
+          membership_id: string
+          pin_hash: string
+          updated_at?: string
+        }
+        Update: {
+          membership_id?: string
+          pin_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manager_pins_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: true
+            referencedRelation: "memberships"
             referencedColumns: ["id"]
           },
         ]
@@ -1106,6 +1142,35 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pin_failures: {
+        Row: {
+          at: string
+          establishment_id: string
+          id: number
+          user_id: string
+        }
+        Insert: {
+          at?: string
+          establishment_id: string
+          id?: never
+          user_id: string
+        }
+        Update: {
+          at?: string
+          establishment_id?: string
+          id?: never
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pin_failures_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
             referencedColumns: ["id"]
           },
         ]
@@ -1973,7 +2038,126 @@ export type Database = {
       }
     }
     Functions: {
+      courier_accept: { Args: { p_order: string }; Returns: undefined }
+      courier_confirm: {
+        Args: { p_code: string; p_order: string }
+        Returns: undefined
+      }
+      courier_depart: { Args: { p_order: string }; Returns: undefined }
+      courier_detail: { Args: { p_order: string }; Returns: Json }
+      courier_history: { Args: never; Returns: Json }
+      courier_link: { Args: never; Returns: Json }
+      courier_list: { Args: never; Returns: Json }
+      courier_problem: {
+        Args: { p_note?: string; p_order: string; p_reason: string }
+        Returns: undefined
+      }
+      courier_save_pix: { Args: { p_key: string }; Returns: undefined }
+      courier_set_available: {
+        Args: { p_available: boolean }
+        Returns: undefined
+      }
+      courier_take: { Args: { p_order: string }; Returns: undefined }
+      courier_undo_problem: { Args: { p_order: string }; Returns: undefined }
+      delivery_assign: {
+        Args: { p_courier?: string; p_order: string }
+        Returns: Json
+      }
+      delivery_expire_published: {
+        Args: { p_establishment: string }
+        Returns: number
+      }
+      delivery_unassign: { Args: { p_order: string }; Returns: undefined }
+      finish_production: {
+        Args: {
+          p_expires_at?: string
+          p_good_qty: number
+          p_lot_code?: string
+          p_order: string
+        }
+        Returns: Json
+      }
+      order_accept: { Args: { p_order: string }; Returns: Json }
+      order_complete_pickup: { Args: { p_order: string }; Returns: Json }
+      order_mark_ready: {
+        Args: { p_checked: string[]; p_order: string }
+        Returns: Json
+      }
+      order_undo_ready: { Args: { p_order: string }; Returns: Json }
+      pay_entry: {
+        Args: {
+          p_account: string
+          p_amount_cents: number
+          p_entry: string
+          p_fine_cents: number
+          p_method: string
+          p_paid_at?: string
+        }
+        Returns: Json
+      }
       place_order: { Args: { p_order: Json; p_slug: string }; Returns: Json }
+      pos_cancel_sale: {
+        Args: { p_order: string; p_pin: string }
+        Returns: Json
+      }
+      pos_cash_movement: {
+        Args: {
+          p_cents: number
+          p_establishment: string
+          p_kind: string
+          p_reason: string
+        }
+        Returns: Json
+      }
+      pos_checkout: {
+        Args: { p_establishment: string; p_sale: Json }
+        Returns: Json
+      }
+      pos_close_session: {
+        Args: { p_counted_cents: number; p_establishment: string }
+        Returns: Json
+      }
+      pos_open_session: {
+        Args: { p_establishment: string; p_opening_cents: number }
+        Returns: string
+      }
+      pos_reopen_session: { Args: { p_establishment: string }; Returns: string }
+      pos_send_receipt: {
+        Args: { p_order: string; p_phone: string }
+        Returns: string
+      }
+      pos_sync_pending: { Args: { p_establishment: string }; Returns: number }
+      receive_purchase: {
+        Args: {
+          p_close_short?: boolean
+          p_due_at?: string
+          p_lines: Json
+          p_payment_label?: string
+          p_po: string
+        }
+        Returns: Json
+      }
+      set_my_pin: {
+        Args: { p_establishment: string; p_pin: string }
+        Returns: undefined
+      }
+      stock_adjust: {
+        Args: {
+          p_add?: boolean
+          p_kind: string
+          p_lot: string
+          p_product: string
+          p_qty: number
+          p_reason?: string
+        }
+        Returns: string
+      }
+      stock_count_apply: {
+        Args: { p_establishment: string; p_lines: Json }
+        Returns: Json
+      }
+      stock_count_undo: { Args: { p_count: string }; Returns: number }
+      stock_reverse: { Args: { p_movement: string }; Returns: string }
       store_catalog: {
         Args: { p_slug: string }
         Returns: {
@@ -2004,6 +2188,9 @@ export type Database = {
         Args: { p_numbers: string[]; p_phone: string; p_slug: string }
         Returns: Json
       }
+      undo_finish_production: { Args: { p_order: string }; Returns: undefined }
+      undo_payment: { Args: { p_transaction: string }; Returns: undefined }
+      undo_receipt: { Args: { p_receipt: string }; Returns: undefined }
     }
     Enums: {
       account_kind: "bank" | "cash"
