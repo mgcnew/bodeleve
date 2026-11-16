@@ -70,6 +70,7 @@ export type Database = {
           baseline: Json
           closed_at: string | null
           closed_by: string | null
+          closed_by_name: string | null
           counted_cents: number | null
           difference_tx_id: string | null
           establishment_id: string
@@ -85,6 +86,7 @@ export type Database = {
           baseline?: Json
           closed_at?: string | null
           closed_by?: string | null
+          closed_by_name?: string | null
           counted_cents?: number | null
           difference_tx_id?: string | null
           establishment_id: string
@@ -100,6 +102,7 @@ export type Database = {
           baseline?: Json
           closed_at?: string | null
           closed_by?: string | null
+          closed_by_name?: string | null
           counted_cents?: number | null
           difference_tx_id?: string | null
           establishment_id?: string

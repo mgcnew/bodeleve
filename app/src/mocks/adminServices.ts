@@ -136,7 +136,8 @@ const saleRow = (s: PosSale): PosSaleRow => {
 /** Vendas de balcão de hoje que o sistema registrou (as de exemplo já estão na base do caixa). Alimenta Início e Relatórios. */
 export const todayCounter = (st: MockState, t: Date) => {
   const same = (iso: string) => { const d = new Date(iso); return d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate() }
-  const base = { ...todayCounterSeed, products: { ...todayCounterSeed.products } }
+  const seed = st.counterBase ?? todayCounterSeed
+  const base = { ...seed, products: { ...seed.products } }
   for (const s of st.posSales) {
     if (s.seed || s.status !== 'completed' || !same(s.at)) continue
     base.count += 1
@@ -237,7 +238,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
     const item = st.stockItems.find((i) => i.id === r.itemId)!
     const costOf = costOfItem(st)
     const unit = unitCostCents(r, costOf)
-    const price = products.find((p) => p.id === r.itemId)?.priceCents ?? null
+    const price = st.sales.find((x) => x.itemId === r.itemId)?.priceCents ?? products.find((p) => p.id === r.itemId)?.priceCents ?? null
     return {
       id: r.id, itemId: r.itemId, name: itemLabel(item), itemType: item.itemType, origin: item.origin,
       yieldPerBatch: r.yieldPerBatch, batchLabel: r.batchLabel, shelfLifeDays: r.shelfLifeDays,
@@ -482,12 +483,13 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
         const res = reservedByItem(st.orders, st.reservations).get(id)
         const fefo = lotsFefo(st.lots, st.movements, id)
         const product = products.find((p) => p.id === id)
+        const sale = st.sales.find((x) => x.itemId === id)
         return {
           ...row,
           unit: it.unit,
           unitCostCents: fefo[0]?.unitCostCents ?? it.lastCostCents,
-          priceCents: product?.priceCents ?? null,
-          published: product ? product.available : null,
+          priceCents: sale ? sale.priceCents : product?.priceCents ?? null,
+          published: sale ? (it.itemType === 'raw_material' ? null : sale.published) : product ? product.available : null,
           reservedOrders: res?.orders ?? 0,
           reservedManual: res?.manual ?? 0,
           lots: fefo.map((l, n) => ({ id: l.id, code: l.code, expiresAt: l.expiresAt, balance: l.balance, daysLeft: l.expiresAt ? daysUntil(l.expiresAt, now()) : null, isNext: n === 0 })),
@@ -834,7 +836,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           salesToday: {
             totalCents: onlineCents + todayCounter(db.read(), t).cents,
             count: online.length + todayCounter(db.read(), t).count,
-            yesterdayUntilNowCents: dashboardSeed.yesterdayUntilNowCents,
+            yesterdayUntilNowCents: db.read().yesterdayUntilNowCents ?? dashboardSeed.yesterdayUntilNowCents,
             counter: { count: todayCounter(db.read(), t).count, cents: todayCounter(db.read(), t).cents },
             online: { count: online.length, cents: onlineCents },
           },

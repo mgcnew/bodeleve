@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { FinanceError } from '@/domain/finance'
+import { PosError } from '@/domain/pos'
 import { ProductionError } from '@/domain/production'
 import type { Db } from '../client'
 import { createAdminContext } from './context'
@@ -17,7 +18,7 @@ function fake(rows: Rows, rpc: Rpc = () => ({ data: null }), afterWrite: Rows = 
   const client = {
     from: (table: string) => {
       const q: Record<string, unknown> = {}
-      for (const m of ['select', 'eq', 'neq', 'is', 'in', 'order', 'limit', 'range', 'gt']) q[m] = () => q
+      for (const m of ['select', 'eq', 'neq', 'is', 'in', 'order', 'limit', 'range', 'gt', 'gte']) q[m] = () => q
       q.maybeSingle = () => Promise.resolve({ data: table === 'memberships' ? { establishment_id: EST } : null, error: null })
       q.then = (res: (v: unknown) => unknown) => {
         if (table === 'products') loads++
@@ -125,6 +126,75 @@ describe('Estoque, Compras, Produção e Financeiro sobre o banco', () => {
     const bad = fake({ ...base, orders: [order] }, () => ({ error: { message: 'already_assigned' } }))
     await expect(createHydratedAdmin(createAdminContext(bad.client)).deliveries.assign('1001', 'partners')).rejects.toMatchObject({ code: 'already_assigned' })
     await expect(createHydratedAdmin(createAdminContext(bad.client)).deliveries.assign('9999', 'partners')).rejects.toMatchObject({ code: 'not_found' })
+  })
+
+  describe('balcão', () => {
+    const queijo = product('p-queijo', 'Queijo coalho', '500 g', { item_type: 'finished', origin: 'house', price_cents: 3000, is_published: true, tracks_expiry: false })
+    const pos: Rows = {
+      ...base,
+      products: [product('p-leite', 'Leite', '1 L'), queijo],
+      product_lots: [{ id: 'lot-q', establishment_id: EST, product_id: 'p-queijo', code: 'Q1', expires_at: null, unit_cost_cents: 1500, received_at: at, source: '' }],
+      stock_movements: [{ id: 'mq', product_id: 'p-queijo', lot_id: 'lot-q', type: 'purchase_in', qty: 10, at, ref: '', description: null, created_by_name: null, batch_id: null, reversal_of: null }],
+      cash_sessions: [{ id: 'cx1', opened_at: at, opened_by_name: 'Julia', opening_cents: 10000, baseline: {}, status: 'open', closed_at: null, closed_by_name: null, counted_cents: null, expected_cents: null, difference_tx_id: null }],
+    }
+    const sold = [{ id: 'o-v1', number: 'V-0001', channel: 'pos', status: 'completed', cash_session_id: 'cx1', created_at: at, created_by_name: 'Julia', subtotal_cents: 3000, discount_kind: null, discount_cents: 0, discount_reason: null, total_cents: 3000, pending_sync: false, cancelled_at: null, approved_by_name: null,
+      order_items: [{ product_id: 'p-queijo', name: 'Queijo coalho', unit: '500 g', kind: 'unit', qty: 1, unit_price_cents: 3000, total_cents: 3000, lots: [{ lotCode: 'Q1', qty: 1 }] }], payments: [{ method: 'pix', cents: 3000, received_cents: null }] }]
+    const input = { lines: [{ key: 'a', itemId: 'p-queijo', kind: 'unit' as const, qty: 1 }], discount: null, payments: [{ method: 'pix' as const, cents: 3000 }] }
+
+    it('venda: manda só produto, quantidade e forma de pagamento; o preço vem do banco', async () => {
+      const f = fake(pos, (fn) => (fn === 'pos_checkout' ? { data: { number: 'V-0001' } } : { data: null }), { orders: sold })
+      const svc = createHydratedAdmin(createAdminContext(f.client))
+      const sale = await svc.pos.checkout(input, 'Julia')
+      const sent = f.rpcs.find((r) => r.fn === 'pos_checkout')!.args.p_sale as Record<string, unknown>
+      expect(sent).toEqual({ lines: [{ product_id: 'p-queijo', kind: 'unit', qty: 1 }], discount: null, payments: [{ method: 'pix', cents: 3000, received_cents: null }], offline: false })
+      expect(JSON.stringify(sent)).not.toMatch(/price|total/i)
+      expect(sale).toMatchObject({ id: 'V-0001', totalCents: 3000, status: 'completed', by: 'Julia' })
+    })
+
+    it('erro do banco vira o erro do balcão; senha errada volta como senha incorreta', async () => {
+      const f = fake(pos, (fn) => (fn === 'pos_checkout' ? { error: { message: 'insufficient_stock:p-queijo' } } : { data: { error: 'invalid_pin' } }), { orders: sold })
+      const svc = createHydratedAdmin(createAdminContext(f.client))
+      const e1 = await svc.pos.checkout(input, 'Julia').catch((e) => e)
+      expect(e1).toBeInstanceOf(PosError)
+      expect(e1).toMatchObject({ code: 'insufficient_stock', detail: 'p-queijo' })
+      const e2 = await createHydratedAdmin(createAdminContext(fake({ ...pos, orders: sold }, () => ({ data: { error: 'invalid_pin' } })).client)).pos.cancelSale('V-0001', '0000').catch((e) => e)
+      expect(e2).toMatchObject({ code: 'invalid_pin' })
+    })
+
+    it('sem conexão: a venda sai pelas regras do app, fica na fila e sobe quando a conexão volta', async () => {
+      localStorage.clear()
+      const f = fake(pos, (fn) => (fn === 'pos_checkout' ? { data: { number: 'V-0001' } } : { data: null }))
+      const svc = createHydratedAdmin(createAdminContext(f.client))
+      await svc.pos.catalog()
+      const sale = await svc.pos.checkout({ ...input, offline: true }, 'Julia')
+      expect(sale).toMatchObject({ pending: true, totalCents: 3000 })
+      expect(sale.id).toMatch(/^OFF-/)
+      expect(f.rpcs.filter((r) => r.fn === 'pos_checkout')).toHaveLength(0)
+      expect((await svc.pos.overview()).pendingSales).toBe(1)
+      expect((await svc.pos.getSale(sale.id))?.id).toBe(sale.id)
+      expect(await svc.pos.syncPending()).toBe(1)
+      expect(f.rpcs.find((r) => r.fn === 'pos_checkout')!.args.p_sale).toMatchObject({ offline: true })
+      expect((await svc.pos.overview()).pendingSales).toBe(0)
+    })
+
+    it('caixa aberto uma vez só: o erro do banco segue como na simulação', async () => {
+      const f = fake(pos, () => ({ error: { message: 'session_open' } }))
+      await expect(createHydratedAdmin(createAdminContext(f.client)).pos.openSession(5000, 'Julia')).rejects.toThrow('session_open')
+    })
+  })
+
+  it('início e relatórios: nada de números de exemplo; contam só o que o banco tem', async () => {
+    const svc = createHydratedAdmin(createAdminContext(fake(base).client))
+    const d = await svc.dashboard.get()
+    expect(d.salesToday).toMatchObject({ totalCents: 0, count: 0, yesterdayUntilNowCents: 0 })
+    const week = await svc.reports.sales('7d' as never).catch(() => null)
+    const hub = await svc.reports.hub()
+    expect(hub.bestSeller).toBeNull()
+    expect(week === null || week.totalCents === 0).toBe(true)
+    const now = new Date().toISOString()
+    const sold = fake({ ...base, orders: [{ id: 'o-v', number: 'V-0001', channel: 'pos', status: 'completed', cash_session_id: null, created_at: now, created_by_name: 'J', subtotal_cents: 5000, discount_kind: null, discount_cents: 0, discount_reason: null, total_cents: 5000, pending_sync: false, cancelled_at: null, approved_by_name: null, order_items: [{ product_id: 'p-queijo', name: 'Queijo', unit: '500 g', kind: 'unit', qty: 2, unit_price_cents: 2500, total_cents: 5000, lots: [] }], payments: [{ method: 'cash', cents: 5000, received_cents: null }] }] })
+    const d2 = await createHydratedAdmin(createAdminContext(sold.client)).dashboard.get()
+    expect(d2.salesToday.counter).toEqual({ count: 1, cents: 5000 })
   })
 })
 

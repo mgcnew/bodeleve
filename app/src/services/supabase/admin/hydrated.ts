@@ -1,18 +1,19 @@
 import { DeliveryError } from '@/domain/deliveries'
 import { FinanceError, accountName, type PayInput } from '@/domain/finance'
 import { itemBalance, itemLabel } from '@/domain/inventory'
+import { PosError, type PosSale } from '@/domain/pos'
 import { ProductionError, formatContent } from '@/domain/production'
 import { paymentTerms, purchaseMessage, validateReceipt, type PaymentTermId, type ReceiptErrors } from '@/domain/purchasing'
 import { ReceivingError } from '@/domain/receiving'
 import { validateCourier, validateRecipe, validateSupplier } from '@/domain/registry'
 import { createAdminServices } from '@/mocks/adminServices'
 import { createDb as createMemoryDb } from '@/mocks/db'
-import type { AdminServices, Dashboard } from '@/services/types'
+import type { AdminServices, CheckoutInput, Dashboard } from '@/services/types'
 import { ServiceError, unwrap } from '../client'
 import type { AdminContext } from './context'
 import { hydrate, type Registry } from './hydrate'
 
-type Hydrated = Pick<AdminServices, 'stock' | 'purchasing' | 'production' | 'finance' | 'dashboard' | 'deliveries'>
+type Hydrated = Pick<AdminServices, 'stock' | 'purchasing' | 'production' | 'finance' | 'dashboard' | 'deliveries' | 'pos' | 'reports'>
 
 const FRESH_MS = 1500
 const payLabel: Record<PaymentTermId, string> = { boleto14: 'Boleto', pix_on_delivery: 'Pix', cash_on_delivery: 'Dinheiro' }
@@ -29,12 +30,20 @@ export function createHydratedAdmin(ctx: AdminContext): Hydrated {
   const view = createAdminServices({ db: memory, now: () => new Date() })
 
   let loaded: { at: number; reg: Promise<Registry> } | null = null
+  // Último estado que chegou do banco: sem conexão (balcão, entregas) as telas seguem com ele em vez de falhar.
+  let last: Registry | null = null
   const fresh = (): Promise<Registry> => {
     if (!loaded || Date.now() - loaded.at > FRESH_MS) {
-      const reg = hydrate(ctx).then((r) => {
-        memory.update((s) => Object.assign(s, r.state))
-        return r
-      })
+      const reg = hydrate(ctx)
+        .then((r) => {
+          last = r
+          memory.update((s) => Object.assign(s, r.state))
+          return r
+        })
+        .catch((e) => {
+          if (last) return last
+          throw e
+        })
       loaded = { at: Date.now(), reg }
       reg.catch(() => {
         if (loaded?.reg === reg) loaded = null
@@ -76,6 +85,155 @@ export function createHydratedAdmin(ctx: AdminContext): Hydrated {
     if (e.code === 'not_receivable' || e.code === 'invalid_state') throw new ReceivingError('invalid_state')
     if (['not_last_receipt', 'lot_already_used', 'entry_already_paid', 'already_undone'].includes(e.code)) throw new ReceivingError('cannot_reverse')
     throw new ReceivingError('invalid_lines')
+  }
+
+
+  // ───────── Balcão ─────────
+  const QUEUE = 'bodeleve.pos.queue.v1'
+  type Queued = { input: CheckoutInput; by: string }
+  const readQueue = (): Queued[] => {
+    try {
+      return JSON.parse(localStorage.getItem(QUEUE) ?? '[]') as Queued[]
+    } catch {
+      return []
+    }
+  }
+  const writeQueue = (q: Queued[]) => {
+    try {
+      localStorage.setItem(QUEUE, JSON.stringify(q))
+    } catch {
+      /* sem armazenamento: a venda da fila se perde ao recarregar */
+    }
+  }
+  /** Vendas feitas sem conexão, ainda só neste aparelho. */
+  const localSales = new Map<string, PosSale>()
+  let offlineSeq = 0
+
+  const asPos = (e: unknown): never => {
+    if (!(e instanceof ServiceError)) throw e
+    const known = ['empty_cart', 'insufficient_stock', 'invalid_payment', 'unknown_product', 'session_closed', 'not_found', 'already_cancelled', 'invalid_pin', 'invalid_amount', 'invalid_qty', 'no_session'] as const
+    if (e.code === 'invalid_discount') throw new PosError('invalid_payment')
+    throw new PosError((known as readonly string[]).includes(e.code) ? (e.code as (typeof known)[number]) : 'invalid_payment', e.detail)
+  }
+  const payload = (input: CheckoutInput) => ({
+    lines: input.lines.map((l) => ({ product_id: l.itemId, kind: l.kind, qty: l.qty })),
+    discount: input.discount,
+    payments: input.payments.map((p) => ({ method: p.method, cents: p.cents, received_cents: p.receivedCents ?? null })),
+    offline: input.offline ?? false,
+  })
+
+  function createPos(): AdminServices['pos'] {
+    return {
+      overview: async () => {
+        await fresh()
+        const o = await view.pos.overview()
+        return { ...o, pendingSales: readQueue().length }
+      },
+      catalog: read(() => view.pos.catalog()),
+      sales: read((f?: 'all' | 'cash' | 'pix' | 'card') => view.pos.sales(f)),
+      cash: read(() => view.pos.cash()),
+      async getSale(id) {
+        const local = localSales.get(id)
+        if (local) return local
+        await fresh()
+        return view.pos.getSale(id)
+      },
+      async openSession(openingCents) {
+        try {
+          await rpc('pos_open_session', { p_establishment: await est(), p_opening_cents: openingCents })
+        } catch (e) {
+          if (e instanceof ServiceError && e.code === 'session_open') throw new Error('session_open')
+          return asPos(e)
+        }
+        await refresh()
+        return (await view.pos.overview()).session!
+      },
+      async checkout(input, by) {
+        const offline = input.offline || (typeof navigator !== 'undefined' && navigator.onLine === false)
+        if (offline) {
+          // Sem conexão: a venda sai pelas regras do app com o último estado conhecido e fica na fila deste aparelho até a conexão voltar (H-I89).
+          if (!last) throw new PosError('no_session')
+          const sale = await view.pos.checkout({ ...input, offline: true }, by)
+          const local: PosSale = { ...sale, id: `OFF-${(offlineSeq += 1)}`, pending: true }
+          localSales.set(local.id, local)
+          writeQueue([...readQueue(), { input: { ...input, offline: true }, by }])
+          return local
+        }
+        let r: { number: string }
+        try {
+          r = await rpc('pos_checkout', { p_establishment: await est(), p_sale: payload({ ...input, offline: false }) })
+        } catch (e) {
+          return asPos(e)
+        }
+        await refresh()
+        return (await view.pos.getSale(r.number))!
+      },
+      async cancelSale(id, pin) {
+        const reg = await fresh()
+        let r: { ok?: boolean; error?: string }
+        try {
+          r = await rpc('pos_cancel_sale', { p_order: reg.posOrderId.get(id), p_pin: pin })
+        } catch (e) {
+          return asPos(e)
+        }
+        if (r.error) throw new PosError('invalid_pin', r.error)
+        await refresh()
+        return (await view.pos.getSale(id))!
+      },
+      async addMovement(kind, cents, reason) {
+        try {
+          await rpc('pos_cash_movement', { p_establishment: await est(), p_kind: kind, p_cents: cents, p_reason: reason })
+        } catch (e) {
+          return asPos(e)
+        }
+        await refresh()
+        return (await view.pos.cash())!
+      },
+      async closeSession(countedCents) {
+        try {
+          await rpc('pos_close_session', { p_establishment: await est(), p_counted_cents: countedCents })
+        } catch (e) {
+          return asPos(e)
+        }
+        await refresh()
+        return (await view.pos.cash())!
+      },
+      async reopenSession() {
+        try {
+          await rpc('pos_reopen_session', { p_establishment: await est() })
+        } catch (e) {
+          if (e instanceof ServiceError && e.code === 'session_open') throw new Error('session_open')
+          return asPos(e)
+        }
+        await refresh()
+        return (await view.pos.cash())!
+      },
+      async sendReceipt(saleId, phone) {
+        const reg = await fresh()
+        // D21: o comprovante fica guardado na caixa de saída; nenhuma mensagem sai.
+        await rpc('pos_send_receipt', { p_order: reg.posOrderId.get(saleId), p_phone: phone })
+      },
+      /** Envia as vendas feitas sem conexão. O que o banco recusar de vez (produto que deixou de existir) fica na fila. */
+      async syncPending() {
+        const queue = readQueue()
+        const kept: Queued[] = []
+        let sent = 0
+        for (const q of queue) {
+          try {
+            await rpc('pos_checkout', { p_establishment: await est(), p_sale: payload({ ...q.input, offline: true }) })
+            sent += 1
+          } catch {
+            kept.push(q)
+          }
+        }
+        writeQueue(kept)
+        if (sent > 0) {
+          localSales.clear()
+          await refresh()
+        }
+        return sent
+      },
+    }
   }
 
   return {
@@ -127,6 +285,9 @@ export function createHydratedAdmin(ctx: AdminContext): Hydrated {
       },
     },
 
+
+    pos: createPos(),
+    reports: { hub: read(() => view.reports.hub()), sales: read((p: Parameters<AdminServices['reports']['sales']>[0]) => view.reports.sales(p)) },
     dashboard: { get: read((): Promise<Dashboard> => view.dashboard.get()) },
 
     stock: {

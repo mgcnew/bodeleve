@@ -58,6 +58,10 @@ export type MockState = {
   /** Sessões de caixa do balcão e vendas feitas nele (PDV). */
   cashSessions: CashSession[]
   posSales: PosSale[]
+  /** Vendas de balcão de hoje que não estão em `posSales` (exemplo). Com o banco real começa zerado. */
+  counterBase?: { count: number; cents: number; cashCents: number; pixCents: number; cardCents: number; products: Record<string, number> }
+  /** Vendas de ontem até esta hora; no modo simulado vale o exemplo. */
+  yesterdayUntilNowCents?: number
   house: House
   team: TeamMember[]
   /** Mensagens que o sistema montou mas NÃO enviou (D21): pedido de compra ao fornecedor, comprovantes… */

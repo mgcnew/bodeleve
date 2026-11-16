@@ -7,8 +7,11 @@ import type { PaymentTermId, PurchaseOrder, Supplier } from '@/domain/purchasing
 import type { Receipt } from '@/domain/receiving'
 import type { Reservation } from '@/domain/stock'
 import type { Courier, DeliveryRecord } from '@/domain/deliveries'
+import type { CashSession, PosSale, SaleLine } from '@/domain/pos'
+import { kgToUnits } from '@/domain/units'
 import { emptyHouse } from '@/domain/settings'
 import type { MockState } from '@/mocks/db'
+import type { SalesDay } from '@/domain/reports'
 import type { AdminContext } from './context'
 import { toOrder } from './orders'
 
@@ -25,6 +28,8 @@ export type Registry = {
   poItemId: Map<string, string>
   opId: Map<string, string>
   orderId: Map<string, string>
+  /** Vendas do balcão: número ("V-0213") → id. */
+  posOrderId: Map<string, string>
   /** Recebimentos que ainda valem, do mais novo para o mais antigo, por pedido de compra. */
   receiptsByPo: Map<string, string[]>
 }
@@ -50,7 +55,7 @@ export async function hydrate(ctx: AdminContext): Promise<Registry> {
   const { client } = ctx
   const est = await ctx.establishment()
 
-  const [products, categories, lots, movements, reservations, suppliers, pos, receipts, entries, txs, accounts, recipes, prodOrders, orders, courierRows, deliveryRows] = await Promise.all([
+  const [products, categories, lots, movements, reservations, suppliers, pos, receipts, entries, txs, accounts, recipes, prodOrders, orders, courierRows, deliveryRows, sessionRows, movementRows, posRows] = await Promise.all([
     all((a, b) => client.from('products').select('*').eq('establishment_id', est).eq('is_active', true).order('name').range(a, b)),
     all((a, b) => client.from('categories').select('*').eq('establishment_id', est).order('position').range(a, b)),
     all((a, b) => client.from('product_lots').select('*').eq('establishment_id', est).order('received_at').range(a, b)),
@@ -67,6 +72,9 @@ export async function hydrate(ctx: AdminContext): Promise<Registry> {
     all((a, b) => client.from('orders').select('*, order_items(product_id, name, unit, qty, unit_price_cents)').eq('establishment_id', est).eq('channel', 'online').order('created_at', { ascending: false }).range(a, b)),
     all((a, b) => client.from('couriers').select('*').eq('establishment_id', est).order('created_at').range(a, b)),
     all((a, b) => client.from('deliveries').select('*').eq('establishment_id', est).order('created_at').range(a, b)),
+    client.from('cash_sessions').select('*').eq('establishment_id', est).order('opened_at', { ascending: false }).limit(60).then((r) => r.data ?? []),
+    client.from('cash_movements').select('*').eq('establishment_id', est).order('at', { ascending: false }).limit(500).then((r) => r.data ?? []),
+    all((a, b) => client.from('orders').select('*, order_items(*), payments(*)').eq('establishment_id', est).eq('channel', 'pos').gte('created_at', new Date(Date.now() - 70 * 86_400_000).toISOString()).order('created_at', { ascending: false }).range(a, b)),
   ])
 
   const lotById = new Map(lots.map((l) => [l.id, l]))
@@ -184,10 +192,72 @@ export async function hydrate(ctx: AdminContext): Promise<Registry> {
     }]
   })
 
+  const cashSessions: CashSession[] = sessionRows.map((c) => ({
+    id: c.id, openedAt: c.opened_at, openedBy: c.opened_by_name ?? 'Balcão', openingCents: n(c.opening_cents),
+    baseline: { count: 0, cashCents: 0, pixCents: 0, cardCents: 0, ...((c.baseline as object) ?? {}) },
+    movements: movementRows.filter((m) => m.session_id === c.id).map((m) => ({ id: m.id, at: m.at, kind: m.kind as 'sangria' | 'suprimento', cents: n(m.cents), reason: m.reason, by: m.created_by_name ?? '' })).sort((a, b) => a.at.localeCompare(b.at)),
+    status: c.status as CashSession['status'], closedAt: c.closed_at, closedBy: c.closed_by_name ?? (c.closed_at ? 'Balcão' : null),
+    countedCents: c.counted_cents == null ? null : n(c.counted_cents), expectedCents: c.expected_cents == null ? null : n(c.expected_cents), differenceTxId: c.difference_tx_id,
+  }))
+  const posOrderId = new Map<string, string>()
+  const posSales: PosSale[] = posRows.map((o) => {
+    posOrderId.set(o.number, o.id)
+    const lines: SaleLine[] = [...(o.order_items ?? [])].map((i) => {
+      const unit = i.product_id ? productById.get(i.product_id)?.unit ?? '' : ''
+      const weight = i.kind === 'weight'
+      return {
+        itemId: i.product_id ?? '', name: i.name, kind: (weight ? 'weight' : 'unit') as 'unit' | 'weight', qty: n(i.qty), unitPriceCents: n(i.unit_price_cents), totalCents: n(i.total_cents),
+        stockUnits: weight ? kgToUnits(n(i.qty), unit) : n(i.qty), lots: ((i.lots ?? []) as Array<{ lotCode: string; qty: number }>).map((x) => ({ lotCode: x.lotCode, qty: n(x.qty) })),
+      }
+    })
+    const payments = (o.payments ?? []).map((p) => ({ method: p.method as 'cash' | 'pix' | 'debit' | 'credit', cents: n(p.cents), ...(p.received_cents != null ? { receivedCents: n(p.received_cents) } : {}) }))
+    const change = payments.reduce((a, p) => a + (p.method === 'cash' && p.receivedCents != null ? Math.max(0, p.receivedCents - p.cents) : 0), 0)
+    const kind = o.discount_kind as 'p5' | 'p10' | 'f500' | 'round' | null
+    return {
+      id: o.number, sessionId: o.cash_session_id ?? '', at: o.created_at, by: o.created_by_name ?? 'Balcão', lines, subtotalCents: n(o.subtotal_cents),
+      discount: kind && n(o.discount_cents) > 0 ? { kind, cents: n(o.discount_cents), reason: o.discount_reason ?? '' } : null, totalCents: n(o.total_cents), payments, changeCents: change,
+      status: o.status === 'cancelled' ? 'cancelled' : 'completed',
+      cancel: o.status === 'cancelled' ? { at: o.cancelled_at ?? o.created_at, by: o.created_by_name ?? 'Balcão', approvedBy: o.approved_by_name ?? '' } : null,
+      movementIds: [], ...(o.pending_sync ? { pending: true } : {}),
+    }
+  })
+
+  // Vendas de balcão por dia (menos hoje, que o contador do dia cobre) e o que ontem vendeu até esta hora: alimentam Início e Relatórios.
+  const dayKey = (iso: string) => {
+    const d = new Date(iso)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+  const nowDate = new Date()
+  const todayKey = dayKey(nowDate.toISOString())
+  const history = new Map<string, SalesDay>()
+  for (const sale of posSales) {
+    const key = dayKey(sale.at)
+    if (sale.status !== 'completed' || key === todayKey) continue
+    const d = history.get(key) ?? { date: key, counterCents: 0, onlineCents: 0, count: 0, pixCents: 0, cardCents: 0, cashCents: 0, products: {} }
+    d.counterCents += sale.totalCents
+    d.count += 1
+    for (const p of sale.payments) {
+      if (p.method === 'cash') d.cashCents += p.cents
+      else if (p.method === 'pix') d.pixCents += p.cents
+      else d.cardCents += p.cents
+    }
+    for (const l of sale.lines) d.products[l.itemId] = (d.products[l.itemId] ?? 0) + (l.kind === 'unit' ? l.qty : 1)
+    history.set(key, d)
+  }
+  const yesterday = new Date(nowDate.getTime() - 86_400_000)
+  const yKey = dayKey(yesterday.toISOString())
+  const untilNow = (iso: string) => {
+    const t = new Date(iso)
+    return dayKey(iso) === yKey && (t.getHours() < nowDate.getHours() || (t.getHours() === nowDate.getHours() && t.getMinutes() <= nowDate.getMinutes()))
+  }
+  const yesterdayUntilNowCents =
+    posSales.filter((x) => x.status === 'completed' && untilNow(x.at)).reduce((a, x) => a + x.totalCents, 0) +
+    orderList.filter((o) => o.status !== 'cancelled' && untilNow(o.createdAt)).reduce((a, o) => a + o.totalCents, 0)
+
   const state: MockState = {
     orders: orderList, deviceOrderIds: [], suppliers: supplierList, purchaseOrders, stockItems, lots: lotList, movements: moves, entries: entryList, transactions: txList,
-    receipts: receiptList, reservations: reservationList, recipes: recipeList, productionOrders, sales, categories: cats, customers: [], couriers: courierList, deliveries, salesHistory: [],
-    cashSessions: [], posSales: [], house: { ...emptyHouse }, team: [], outbox: [],
+    receipts: receiptList, reservations: reservationList, recipes: recipeList, productionOrders, sales, categories: cats, customers: [], couriers: courierList, deliveries, salesHistory: [...history.values()].sort((a, b) => a.date.localeCompare(b.date)),
+    cashSessions, posSales, counterBase: { count: 0, cents: 0, cashCents: 0, pixCents: 0, cardCents: 0, products: {} }, yesterdayUntilNowCents, house: { ...emptyHouse }, team: [], outbox: [],
   }
-  return { state, poId, poItemId, opId, orderId, receiptsByPo }
+  return { state, poId, poItemId, opId, orderId, posOrderId, receiptsByPo }
 }
