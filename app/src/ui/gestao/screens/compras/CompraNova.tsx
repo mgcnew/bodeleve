@@ -1,0 +1,134 @@
+import { useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Tag } from '@/components/Badges'
+import { Box } from '@/components/Card'
+import { Button } from '@/components/Button'
+import { Banner } from '@/components/Feedback'
+import { SelectField, TextField } from '@/components/Field'
+import { QuantityStepper } from '@/components/QuantityStepper'
+import { formatQty } from '@/domain/backoffice'
+import { daysFromToday } from '@/domain/dates'
+import { formatCents } from '@/domain/money'
+import { itemsStore, purchasesStore, stockStore, suppliersStore } from '@/services/gestao/backoffice'
+import { staffOrdersStore } from '@/services/gestao/orders'
+import { createPurchase, whatsappLink } from '@/services/gestao/purchases'
+import { balanceOf } from '@/services/gestao/stock'
+import o from '@/styles/ops.module.css'
+import { Bar, SumRow, SumTotal } from '../../../shared/OpsBits'
+
+const paymentOptions = ['Boleto, 14 dias após receber', 'Boleto, 21 dias após receber', 'Pix na entrega', 'Dinheiro na entrega']
+
+export function CompraNova() {
+  const [params] = useSearchParams()
+  const suppliers = suppliersStore.useStore()
+  const items = itemsStore.useStore()
+  const { movements } = stockStore.useStore()
+  const orders = staffOrdersStore.useStore()
+  const purchases = purchasesStore.useStore()
+  const navigate = useNavigate()
+
+  const [supplierId, setSupplierId] = useState(params.get('fornecedor') ?? suppliers[0].id)
+  const supplier = suppliers.find((s) => s.id === supplierId)!
+  const supplied = useMemo(() => items.filter((i) => i.supplierId === supplierId), [items, supplierId])
+
+  // H-G7 — sugere quantidades pelo estoque mínimo
+  const suggestion = useMemo(() => {
+    const out: Record<string, number> = {}
+    for (const it of supplied) {
+      const b = balanceOf(it.id, { movements, orders, purchases })
+      out[it.id] = b.projected < it.minStock ? Math.ceil(it.minStock * 2 - b.projected) : 0
+    }
+    return out
+  }, [supplied, movements, orders, purchases])
+
+  const [qty, setQty] = useState<Record<string, Record<string, number>>>({})
+  const current = qty[supplierId] ?? suggestion
+  const setItemQty = (id: string, q: number) => setQty((all) => ({ ...all, [supplierId]: { ...current, [id]: q } }))
+
+  const [expected, setExpected] = useState(daysFromToday(4).slice(0, 10))
+  const [payment, setPayment] = useState(supplier.paymentDays ? `Boleto, ${supplier.paymentDays} dias após receber` : 'Pix na entrega')
+  const [error, setError] = useState(false)
+
+  const lines = supplied.filter((i) => (current[i.id] ?? 0) > 0)
+  const totalQty = lines.reduce((n, i) => n + current[i.id], 0)
+  const total = lines.reduce((n, i) => n + current[i.id] * i.costCents, 0)
+
+  const send = () => {
+    if (lines.length === 0) {
+      setError(true)
+      return
+    }
+    const p = createPurchase({
+      supplierId,
+      expectedAt: new Date(`${expected}T12:00:00`).toISOString(),
+      paymentTerms: payment,
+      items: lines.map((i) => ({ itemId: i.id, name: i.name, qty: current[i.id], unitCostCents: i.costCents, receivedQty: 0 })),
+    })
+    const text = [`Olá, ${supplier.contactName}! Pedido ${p.number} da Bodeleve:`, ...lines.map((i) => `• ${current[i.id]} × ${i.name}`), `Previsão: ${new Date(`${expected}T12:00:00`).toLocaleDateString('pt-BR')}`, `Pagamento: ${payment}`].join('\n')
+    window.open(whatsappLink(supplier.phone, text), '_blank', 'noopener')
+    navigate(`/gestao/compras/${p.id}`, { replace: true })
+  }
+
+  return (
+    <div className={o.screen}>
+      <Bar title="Novo pedido de compra" back="/gestao/compras" />
+      <main className={`${o.main} ${o.mainTop} ${o.narrow}`}>
+        <SelectField
+          label="Fornecedor"
+          value={supplierId}
+          onChange={(e) => {
+            setSupplierId(e.target.value)
+            setError(false)
+          }}
+          options={suppliers.map((s) => ({ value: s.id, label: s.name }))}
+        />
+        <section className={o.section} style={{ gap: 4 }}>
+          <div className={o.cardHead} style={{ alignItems: 'baseline' }}>
+            <h2 className={o.h2}>Itens</h2>
+            <span className={o.muted}>Sugestão pelo estoque mínimo</span>
+          </div>
+          <Box>
+            {supplied.length === 0 && <p className={o.muted} style={{ padding: '12px 0' }}>Nenhum item cadastrado para este fornecedor.</p>}
+            {supplied.map((it) => {
+              const b = balanceOf(it.id, { movements, orders, purchases })
+              const low = b.available < it.minStock
+              const q = current[it.id] ?? 0
+              return (
+                <div key={it.id} style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '14px 0', borderBottom: '1px solid var(--linha)' }}>
+                  <div className={o.cardHead} style={{ alignItems: 'flex-start' }}>
+                    <div>
+                      <div className={o.bold}>{it.name}</div>
+                      <div className={`${o.small} ${o.num}`}>
+                        Estoque {formatQty(b.available, it.unit)} · {low ? `mínimo ${it.minStock}` : 'ok'} · último custo {formatCents(it.costCents)}
+                      </div>
+                    </div>
+                    {low && <Tag tone="warning">Estoque baixo</Tag>}
+                  </div>
+                  <div className={o.cardHead}>
+                    <QuantityStepper label={`Quantidade de ${it.name}`} value={q} onChange={(v) => setItemQty(it.id, v)} />
+                    <span className={`${o.bold} ${o.num}`}>{formatCents(q * it.costCents)}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </Box>
+        </section>
+        <TextField label="Previsão de chegada" type="date" value={expected} onChange={(e) => setExpected(e.target.value)} />
+        <SelectField label="Pagamento" value={payment} onChange={(e) => setPayment(e.target.value)} options={paymentOptions.map((p) => ({ value: p, label: p }))} />
+        <div className={o.card}>
+          <SumRow label="Itens" value={`${totalQty} un`} />
+          <SumTotal label="Total previsto" value={formatCents(total)} />
+        </div>
+        {error && <Banner tone="error">Escolha a quantidade de pelo menos um item.</Banner>}
+      </main>
+      <div className={o.footer}>
+        <Button size="l" block onClick={send}>
+          Enviar ao fornecedor
+        </Button>
+        <p className={o.muted} style={{ textAlign: 'center' }}>
+          Envia o pedido pelo WhatsApp do fornecedor e salva como “Enviado”.
+        </p>
+      </div>
+    </div>
+  )
+}

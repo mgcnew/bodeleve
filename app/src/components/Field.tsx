@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes, type ReactNode } from 'react'
+import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
 import { Icon } from './Icon'
 import styles from './Field.module.css'
 
@@ -132,6 +132,30 @@ export function FilterChips<T extends string>({
           {o.label}
         </button>
       ))}
+    </div>
+  )
+}
+
+export function SelectField({
+  label,
+  options,
+  id,
+  ...rest
+}: SelectHTMLAttributes<HTMLSelectElement> & { label: string; options: { value: string; label: string }[] }) {
+  const auto = useId()
+  const fid = id ?? auto
+  return (
+    <div className={styles.field}>
+      <label htmlFor={fid} className={styles.label}>
+        {label}
+      </label>
+      <select id={fid} className={`${styles.input} ${styles.select}`} {...rest}>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
     </div>
   )
 }

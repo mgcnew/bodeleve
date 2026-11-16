@@ -20,6 +20,15 @@
   font: var(--corpo);
 }
 
+.select {
+  padding: 0 12px;
+}
+
+.input:disabled {
+  background: var(--fundo-operacao);
+  color: var(--texto-secundario);
+}
+
 .input:focus-visible {
   outline: none;
   border-color: var(--cor-grafite);

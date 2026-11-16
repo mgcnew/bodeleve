@@ -6,6 +6,12 @@ import { Inicio } from './screens/Inicio'
 import { Mais } from './screens/Mais'
 import { Pedido } from './screens/Pedido'
 import { Pedidos } from './screens/Pedidos'
+import { Compra } from './screens/compras/Compra'
+import { CompraNova } from './screens/compras/CompraNova'
+import { Compras } from './screens/compras/Compras'
+import { Fornecedor } from './screens/compras/Fornecedor'
+import { Fornecedores } from './screens/compras/Fornecedores'
+import { Recebimento } from './screens/compras/Recebimento'
 
 const env = 'Gestão'
 const tabs: GestaoHandle = { tabs: true }
@@ -24,8 +30,12 @@ export const gestaoRoutes: RouteObject[] = [
       { path: 'mais', element: <Mais />, handle: tabs },
       { path: 'estoque/*', element: todo('Estoque', 'Gestao-Estoque.dc.html'), handle: tabs },
       { path: 'financeiro/*', element: todo('Financeiro', 'Gestao-Financeiro.dc.html'), handle: tabs },
-      { path: 'compras/*', element: todo('Compras', 'Gestao-Compras.dc.html') },
-      { path: 'fornecedores/*', element: todo('Fornecedores', 'Gestao-Fornecedores.dc.html') },
+      { path: 'compras', element: <Compras /> },
+      { path: 'compras/nova', element: <CompraNova /> },
+      { path: 'compras/:id', element: <Compra /> },
+      { path: 'compras/:id/receber', element: <Recebimento /> },
+      { path: 'fornecedores', element: <Fornecedores /> },
+      { path: 'fornecedores/:id', element: <Fornecedor /> },
       { path: 'producao/*', element: todo('Produção', 'Gestao-Producao.dc.html') },
       { path: 'produtos/*', element: todo('Produtos', 'Gestao-Produtos.dc.html') },
       { path: 'clientes/*', element: todo('Clientes', 'Gestao-Clientes.dc.html') },
