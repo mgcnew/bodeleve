@@ -1,3 +1,5 @@
+import type { House, TeamMember } from '@/domain/settings'
+import type { Hub, Period, SalesReport } from '@/domain/reports'
 import type { Assignment, AssignOption, CourierRow, DispatchRow } from '@/domain/deliveries'
 import type { ProductInput, ProductKind } from '@/domain/catalog'
 import type { CustomerDetail, CustomerSummary } from '@/domain/customers'
@@ -363,6 +365,27 @@ export interface DeliveryAdminService {
   undoAssign(orderId: string): Promise<void>
 }
 
+export type SalesReportView = Omit<SalesReport, 'top'> & { top: Array<{ productId: string; name: string; qty: number }> }
+
+export type ReportsHub = Omit<Hub, 'bestSeller'> & { bestSeller: { name: string; qty: number } | null }
+
+export interface ReportsService {
+  hub(): Promise<ReportsHub>
+  sales(period: Period): Promise<SalesReportView>
+}
+
+export type SettingsOverview = { people: number; roles: number; deliveryFeeCents: number; paymentLabels: string[] }
+
+export interface SettingsService {
+  overview(): Promise<SettingsOverview>
+  getHouse(): Promise<House>
+  /** Lança `invalid` se nome, CNPJ ou WhatsApp não passam na validação. */
+  saveHouse(house: House): Promise<House>
+  team(): Promise<TeamMember[]>
+  /** Lança `invalid_email`, `invalid_role` ou `duplicate`. O convite é só registrado: nenhum e-mail sai (D21). */
+  invite(email: string, role: Role): Promise<TeamMember>
+}
+
 export type AdminServices = {
   auth: AdminAuthService
   orders: AdminOrderService
@@ -374,6 +397,8 @@ export type AdminServices = {
   catalog: CatalogAdminService
   customers: CustomerAdminService
   deliveries: DeliveryAdminService
+  reports: ReportsService
+  settings: SettingsService
 }
 
 export type Services = {

@@ -1,3 +1,4 @@
+import type { Period } from '@/domain/reports'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useServices } from '@/services'
 
@@ -209,4 +210,29 @@ export function useAssignView(orderId: string | undefined) {
 export function useInvalidateDeliveries() {
   const client = useQueryClient()
   return () => Promise.all(['deliveries', 'assign', 'dashboard', 'orders'].map((k) => client.invalidateQueries({ queryKey: ['admin', k] })))
+}
+
+export function useReportsHub() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'reports-hub'], queryFn: () => admin.reports.hub() })
+}
+
+export function useSalesReport(period: Period) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'sales-report', period], queryFn: () => admin.reports.sales(period) })
+}
+
+export function useSettingsOverview() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'settings'], queryFn: () => admin.settings.overview() })
+}
+
+export function useHouse() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'house'], queryFn: () => admin.settings.getHouse() })
+}
+
+export function useTeam() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'team'], queryFn: () => admin.settings.team() })
 }

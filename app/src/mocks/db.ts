@@ -1,3 +1,5 @@
+import { cleanHouse, emptyHouse, type House, type TeamMember } from '@/domain/settings'
+import type { SalesDay } from '@/domain/reports'
 import type { DeliveryRecord } from '@/domain/deliveries'
 import type { CategoryRecord, SaleInfo } from '@/domain/catalog'
 import type { CustomerRecord } from '@/domain/customers'
@@ -9,6 +11,8 @@ import type { Order } from '@/domain/types'
 import { buildSeedOrders, DEVICE_SEED_IDS } from './seedOrders'
 import type { ProductionOrder, Recipe } from '@/domain/production'
 import type { Reservation } from '@/domain/stock'
+import { adminUsers, teamNotes } from './adminSeed'
+import { buildSalesHistory } from './reportsSeed'
 import { buildDeliverySeed } from './deliverySeed'
 import { buildCustomersSeed, buildSalesSeed, categoriesSeed } from './catalogSeed'
 import { buildFinanceSeed, buildProductionSeed, buildPurchaseSeed, buildStockSeed, recipesSeed, reservationsSeed, suppliersSeed } from './stockSeed'
@@ -17,7 +21,7 @@ import { buildFinanceSeed, buildProductionSeed, buildPurchaseSeed, buildStockSee
  * Banco simulado, único para a loja e a gestão: um pedido feito na loja aparece na fila da gestão.
  * Fica no localStorage (D19: sem banco). Lido de novo a cada operação, então duas abas enxergam a mesma coisa.
  */
-const KEY = 'bodeleve.mock.db.v6'
+const KEY = 'bodeleve.mock.db.v7'
 
 type Storage = Pick<globalThis.Storage, 'getItem' | 'setItem'>
 
@@ -45,8 +49,12 @@ export type MockState = {
   customers: CustomerRecord[]
   /** Entregas atribuídas (a fila 'para sair' vem dos pedidos). */
   deliveries: DeliveryRecord[]
+  /** Vendas diárias anteriores à base (exemplo, até o PDV existir). */
+  salesHistory: SalesDay[]
+  house: House
+  team: TeamMember[]
   /** Mensagens que o sistema montou mas NÃO enviou (D21): pedido de compra ao fornecedor, comprovantes… */
-  outbox: Array<{ id: string; to: string; text: string; at: string; kind: 'purchase_order' }>
+  outbox: Array<{ id: string; to: string; text: string; at: string; kind: 'purchase_order' | 'invite' }>
 }
 
 export type MockDb = {
@@ -58,7 +66,7 @@ export function createDb(opts: { storage: Storage | null; withSeed: boolean; now
   let memory: MockState | null = null
 
   const initial = (): MockState => {
-    const empty: MockState = { orders: [], deviceOrderIds: [], suppliers: [], purchaseOrders: [], stockItems: [], lots: [], movements: [], entries: [], transactions: [], receipts: [], reservations: [], recipes: [], productionOrders: [], sales: [], categories: [], customers: [], deliveries: [], outbox: [] }
+    const empty: MockState = { orders: [], deviceOrderIds: [], suppliers: [], purchaseOrders: [], stockItems: [], lots: [], movements: [], entries: [], transactions: [], receipts: [], reservations: [], recipes: [], productionOrders: [], sales: [], categories: [], customers: [], deliveries: [], salesHistory: [], house: emptyHouse, team: [], outbox: [] }
     if (!opts.withSeed) return empty
     const now = opts.now()
     const stock = buildStockSeed(now)
@@ -78,6 +86,9 @@ export function createDb(opts: { storage: Storage | null; withSeed: boolean; now
       categories: categoriesSeed,
       customers: buildCustomersSeed(now),
       deliveries: buildDeliverySeed(now),
+      salesHistory: buildSalesHistory(now),
+      house: cleanHouse(emptyHouse),
+      team: adminUsers.map((u) => ({ id: u.id, name: u.name, email: u.email, role: u.role, note: teamNotes[u.id] ?? '' })),
       ...buildFinanceSeed(now),
     }
   }

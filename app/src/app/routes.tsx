@@ -30,6 +30,8 @@ import { AccountsPage, FinancePage, LedgerPage } from '@/pages/gestao/finance'
 import { CategoriesPage, ProductPage as AdminProductPage, ProductsPage } from '@/pages/gestao/products'
 import { CustomerPage, CustomersPage } from '@/pages/gestao/customers'
 import { AssignPage, DeliveriesPage } from '@/pages/gestao/deliveries'
+import { ReportsPage, SalesReportPage } from '@/pages/gestao/reports'
+import { HousePage, SettingsPage, TeamPage } from '@/pages/gestao/settings'
 import { PayPage } from '@/pages/gestao/PayPage'
 import { NewPurchasePage } from '@/pages/gestao/NewPurchasePage'
 import { PurchasePage } from '@/pages/gestao/PurchasePage'
@@ -103,8 +105,11 @@ export const routes: RouteObject[] = [
           { path: 'clientes/:id', element: <CustomerPage />, handle: g('orders') },
           { path: 'entregas', element: <DeliveriesPage />, handle: g('deliveries') },
           { path: 'entregas/atribuir/:id', element: <AssignPage />, handle: g('deliveries') },
-          { path: 'relatorios/*', element: <ModulePlaceholder />, handle: g('dashboard') },
-          { path: 'configuracoes/*', element: <ModulePlaceholder />, handle: g('team') },
+          { path: 'relatorios', element: <ReportsPage />, handle: g('dashboard') },
+          { path: 'relatorios/vendas', element: <SalesReportPage />, handle: g('dashboard') },
+          { path: 'configuracoes', element: <SettingsPage />, handle: g('team') },
+          { path: 'configuracoes/casa', element: <HousePage />, handle: g('team') },
+          { path: 'configuracoes/equipe', element: <TeamPage />, handle: g('team') },
           { path: '*', element: <ModulePlaceholder /> },
         ],
       },

@@ -9,6 +9,7 @@ export const adminUsers: Array<{ id: string; name: string; email: string; role: 
   { id: 'u-julia', name: 'Júlia', email: 'julia@exemplo.com', role: 'clerk' },
   { id: 'u-raimundo', name: 'Seu Raimundo', email: 'raimundo@exemplo.com', role: 'production' },
   { id: 'u-carlos', name: 'Carlos', email: 'carlos@exemplo.com', role: 'courier' },
+  { id: 'u-bruno', name: 'Bruno', email: 'bruno@exemplo.com', role: 'courier' },
 ]
 
 /**
@@ -18,4 +19,14 @@ export const adminUsers: Array<{ id: string; name: string; email: string; role: 
 export const dashboardSeed = {
   counterSales: { count: 26, cents: 89200 },
   yesterdayUntilNowCents: 110200,
+}
+
+/** Detalhe de cada pessoa na lista da equipe (o e-mail aparece para quem gerencia). */
+export const teamNotes: Record<string, string> = {
+  'u-dono': '',
+  'u-ana': 'ana@exemplo.com',
+  'u-julia': 'Balcão',
+  'u-raimundo': 'Cozinha',
+  'u-carlos': 'Próprio',
+  'u-bruno': 'Próprio',
 }

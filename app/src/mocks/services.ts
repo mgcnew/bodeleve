@@ -6,6 +6,7 @@ import { createAdminServices } from './adminServices'
 import { createDb } from './db'
 import { categories as staticCategories, content, homeSections as staticSections, noDetails, products as staticProducts } from './seed'
 import { DESCRIPTION_PLACEHOLDER } from '@/domain/catalog'
+import { hoursText } from '@/domain/settings'
 import type { MockState } from './db'
 import type { Product } from '@/domain/types'
 import { hhmm } from './seedOrders'
@@ -163,7 +164,9 @@ export function createMockServices(opts: MockOptions = {}): Services {
 
     content: {
       async getStoreContent() {
-        return content
+        // O que a gestão preencher em "A casa" vale; o que estiver vazio continua como marcador entre colchetes.
+        const { house } = db.read()
+        return { ...content, address: house.address || content.address, whatsapp: house.whatsapp || content.whatsapp, hours: hoursText(house.hours) || content.hours }
       },
     },
 

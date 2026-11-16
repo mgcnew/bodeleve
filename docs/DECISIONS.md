@@ -35,6 +35,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D26 | 2026-11-15 | Etapa 4, lote 4 (Produção) implementado: ordens (em produção, planejadas, concluídas; para estoque ou para pedido), fichas técnicas com custo por unidade e margem, conferência de insumos (H-G17) e apontamento com consumo real, unidades boas, lote do acabado e custo real (H-G18) | Usuário (D18–D21) |
 | D27 | 2026-11-15 | Etapa 4, lote 5 (Financeiro) implementado: saldo por conta (banco e caixa), contas que pedem ação hoje, previsão de 7 dias, contas a pagar e a receber, pagamento de conta (total ou em parte, com multa e juros, desfazível) e lançamentos. Contas de compra nascem no recebimento; despesas fixas se repetem todo mês | Usuário (D18–D21) |
 | D28 | 2026-11-16 | Etapa 4, lote 6a implementado: Produtos (lista, filtros, busca), Produto (edição com custo, margem e publicação na loja), Categorias, Clientes e Cliente. O catálogo da loja passa a ser o que a gestão publica | Usuário (D18–D21) |
+| D29 | 2026-11-16 | Etapa 4, lote 6b implementado — a Gestão está completa: Entregas e Atribuir entrega (próprio, reserva, parceiros), Relatórios e Relatório de vendas (hoje, 7 dias, mês), Configurações, A casa e Equipe e permissões. A loja passa a mostrar endereço, WhatsApp e horário preenchidos em A casa | Usuário (D18–D21) |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -248,6 +249,22 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-I67 | A observação interna é salva ao sair do campo. O texto de privacidade do quadro foi escrito sem flexão de gênero ("Quem comprou pode pedir para apagar a conta") | `customers.tsx` |
 | H-I68 | O histórico da Maria Lima ganhou dois pedidos de exemplo (#1021 e #0997) para a lista do quadro; o contador do pedido na fila continua 5 | `mocks/seedOrders.ts` |
 
+## Hipóteses de implementação de Entregas, Relatórios e Configurações — a confirmar
+
+| ID | O que foi feito | Onde |
+|---|---|---|
+| H-I69 | Entregas: "Para sair" = pedidos de entrega ainda na casa (novo, em preparo, pronto) mais os já atribuídos que não saíram; "Em rota" e "Entregues" vêm das entregas registradas. Só o pedido pronto abre o Atribuir; retirada não entra | `domain/deliveries.ts` |
+| H-I70 | Atribuir: entregador próprio livre recebe na hora; o que está em rota fica com a entrega reservada, para a próxima saída; parceiros avulsos recebem uma publicação por R$ 9,00 que volta para a casa se ninguém aceitar em 10 min. Desfazer vale até a entrega sair. O aviso a quem comprou e o aceite do parceiro dependem do app de entregas (Etapa 6) e não são enviados (D21) | `assign`, `config/delivery.ts` |
+| H-I71 | Distância por bairro (Centro 1,8 km, Bairro Alto 4,1 km, Jardim das Flores 3,2 km) e "2 parceiros online" são exemplos; vêm da área de entrega (Q6) e do app de entregas | `config/delivery.ts` |
+| H-I72 | Os pedidos 1038 e 1036 do quadro (entregues hoje) são registros de exemplo de entrega, sem pedido correspondente na base, para não mexer nas vendas do dia | `mocks/deliverySeed.ts` |
+| H-I73 | Entregador não usa a Gestão (já era H-G27): tem o app próprio, na Etapa 6 | `GestaoLayout` |
+| H-I74 | Relatórios: dias anteriores à base vêm de um histórico de exemplo por dia (valor por dia da semana, canal, pagamento, produtos); os dias seguintes vêm dos pedidos online e, no balcão de hoje, do exemplo do Início até o PDV existir. Pedido de dia coberto pelo histórico não é contado em dobro. Os números do quadro (R$ 14.326,80 etc.) são fictícios e não são reproduzidos | `domain/reports.ts`, `mocks/reportsSeed.ts` |
+| H-I75 | Resumo do mês: perdas = movimentações de perda ainda valendo (desfeitas não contam) × custo do lote; produção = ordens concluídas no mês, rendimento = unidades boas ÷ planejadas; resultado = vendas do mês − todas as saídas de banco e caixa no mês (transferência é neutra) | `buildHub` |
+| H-I76 | Exportar em planilha ou PDF não existe: as telas dizem isso em vez de prometer. A frase "Sexta e sábado vendem mais" do quadro foi retirada por ser um achado que depende dos dados | `reports.tsx` |
+| H-I77 | A casa: nome, CNPJ, endereço, WhatsApp e três horários. Só o nome é obrigatório; CNPJ (14 números) e WhatsApp (DDD + número) são conferidos se preenchidos. O que está vazio continua como marcador entre colchetes na loja | `domain/settings.ts` |
+| H-I78 | Equipe: 6 pessoas e 5 papéis de exemplo (Bruno entrou como entregador). Os papéis usam os nomes da matriz H-G27 ("Gestor"), sem flexão de gênero. Convidar só registra o convite como pendente: nenhum e-mail sai (D21) e a pessoa ainda não consegue entrar | `settings` |
+| H-I79 | Só o dono acessa Configurações (módulo "Equipe e configurações"). A matriz "O que cada papel vê" é lida da mesma regra de acesso da interface | `permissions/` |
+
 ## Pendências
 
 O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
@@ -296,6 +313,12 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P40 | Desenhar criação de produto novo, renomear, ocultar e reordenar categorias, e a edição do cadastro do cliente | Gestão · Produtos · Clientes | H-I64 |
 | P41 | Definir o apagamento de dados do cliente (pedido do titular) e o que fica nos pedidos antigos | Gestão · Clientes | H-I67 |
 | P42 | Confirmar quem acessa Produtos e Clientes (hoje Produtos = Estoque e Clientes = Pedidos) | Gestão · Permissões | H-I14 |
+| P43 | Confirmar a área de entrega por bairro (distância e taxa) e o valor e as regras do parceiro avulso (R$ 9,00, prazo de 10 min, como aceita e como é pago) | Entregas | Q6, H-I70, H-I71 |
+| P44 | Decidir como o entregador próprio é avisado e como a pessoa que comprou é avisada quando o pedido sai (WhatsApp ou app), já que nada é enviado ainda | Entregas · Mensagens | D21, H-I70 |
+| P45 | Definir quais relatórios o dono quer de verdade (vendas, produtos, estoque e perdas, produção, resultado) com as perguntas que cada um responde, e o formato de exportação (planilha e PDF) | Relatórios | H-I74, H-I76 |
+| P46 | Passar os dados reais da casa: nome, CNPJ, endereço, WhatsApp, horários e o logotipo aprovado | Configurações · A casa | H-I77, P5 |
+| P47 | Definir o convite de equipe: e-mail de convite, criação de senha, remover ou trocar o papel de alguém, e permissão por pessoa (hoje papéis fixos) | Equipe | H-I78, H-G27 |
+| P48 | Decidir a nota fiscal (se emite, qual sistema) e quando a configuração entra | Configurações | Q12 |
 
 Marcadores de conteúdo nas telas:
 

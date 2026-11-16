@@ -62,7 +62,7 @@ Plano e stack em `IMPLEMENTATION_PLAN.md` (aprovado em D18). O banco de dados es
 | I-1 | Supabase: projeto, Auth, tabelas, RLS | Congelada (D19, P11) |
 | I-2 | Design system em componentes | Entregue em `app/`; aguarda a passada visual do dono (P12, P13) |
 | I-3 | Loja online | Entregue em `app/` (18 telas, serviços simulados); aguarda a passada visual (P18) e as pendências P14–P17 |
-| I-4 | Gestão | Em andamento: lotes 1 (Entrar, Início, Pedidos, Pedido, Mais), 2 (Compras e Fornecedores), 3 (Estoque), 4 (Produção), 5 (Financeiro) e 6a (Produtos, Categorias, Clientes) entregues; lote 6b (Entregas, Relatórios, Configurações, Equipe) na sequência de D13 |
+| I-4 | Gestão | Em andamento: lotes 1 (Entrar, Início, Pedidos, Pedido, Mais), 2 (Compras e Fornecedores), 3 (Estoque), 4 (Produção), 5 (Financeiro) e 6 (Produtos, Clientes, Entregas, Relatórios, Configurações, Equipe) entregues: a Gestão está completa. Próximas: PDV (Etapa 5) e app de entregas (Etapa 6) |
 | I-5 | PDV | — |
 | I-6 | Entregas e painel de atribuição | — |
 | I-7 | Realtime e acabamento | — |

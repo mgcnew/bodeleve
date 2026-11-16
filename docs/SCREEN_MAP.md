@@ -256,4 +256,11 @@ Rotas em `app/src/app/routes.tsx` (`/gestao/...`); telas em `app/src/pages/gesta
 | 26 · Categorias | `/gestao/produtos/categorias` | `products.tsx` | 4 |
 | 27 · Clientes | `/gestao/clientes` | `customers.tsx` | 4 |
 | 28 · Cliente | `/gestao/clientes/:id` | `customers.tsx` | 4 |
+| 29 · Entregas | `/gestao/entregas` | `deliveries.tsx` | 4 |
+| 30 · Atribuir entrega | `/gestao/entregas/atribuir/:id` | `deliveries.tsx` | 4 |
+| 31 · Relatórios | `/gestao/relatorios` | `reports.tsx` | 4 |
+| 32 · Relatório de vendas | `/gestao/relatorios/vendas` | `reports.tsx` | 4 |
+| 33 · Configurações | `/gestao/configuracoes` | `settings.tsx` | 4 |
+| 34 · A casa | `/gestao/configuracoes/casa` | `settings.tsx` | 4 |
+| 35 · Equipe e permissões | `/gestao/configuracoes/equipe` | `settings.tsx` | 4 |
 

@@ -1,11 +1,16 @@
 import { transition } from '@/domain/orderFlow'
 import { stageOf } from '@/domain/orders'
 import type { Order } from '@/domain/types'
+import type { TeamMember } from '@/domain/settings'
 import { adjust, applyCount, buildRows, expiringLots, lowRows, reverse, stockValueCents, undoCount, reservedByItem, type StockState } from '@/domain/stock'
 import { products } from './seed'
 import { applyProduct, channelLabel, checkNewCategory, defaultSale, kindOf, slugify, validateProduct, type ProductInput } from '@/domain/catalog'
 import { customerDetail, customerId, listCustomers } from '@/domain/customers'
 import { productCost } from './catalogView'
+import { checkInvite, cleanHouse, rolesInUse, validateHouse } from '@/domain/settings'
+import { storefront } from '@/config/storefront'
+import { buildHub, monthLosses, monthOutflowCents, monthProduction, periodStart, salesByDay, salesReport } from '@/domain/reports'
+import { todayCounterSeed } from './reportsSeed'
 import { assign as assignDelivery, assignmentOf, assignOptions, courierRows, dispatchRows, kmLabel, unassign } from '@/domain/deliveries'
 import { paymentLabel } from '@/config/storefront'
 import { formatBRL } from '@/lib/format'
@@ -89,6 +94,8 @@ const sameDay = (iso: string, t: Date) => {
   const d = new Date(iso)
   return d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate()
 }
+
+const productName = (st: MockState, id: string) => { const it = st.stockItems.find((i) => i.id === id); return it ? itemLabel(it) : id }
 
 const stageLabel = (o: Order) => (o.status === 'received' ? 'Novo' : o.status === 'preparing' ? 'Em preparo' : 'Pronto')
 
@@ -786,6 +793,62 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
         db.update((st) => {
           st.deliveries = unassign(st.deliveries, orderId)
         })
+      },
+    },
+
+    reports: {
+      async hub() {
+        const st = db.read()
+        const t = now()
+        const days = salesByDay(st.salesHistory, st.orders, todayCounterSeed, periodStart('month', t), t)
+        const lotCost = (m: { lotId: string | null; itemId: string }) => st.lots.find((l) => l.id === m.lotId)?.unitCostCents ?? st.stockItems.find((i) => i.id === m.itemId)?.lastCostCents ?? 0
+        const hub = buildHub(days, monthLosses(st.movements, lotCost, t), monthProduction(st.productionOrders, t), monthOutflowCents(st.transactions, t))
+        return { ...hub, bestSeller: hub.bestSeller ? { name: productName(st, hub.bestSeller.productId), qty: hub.bestSeller.qty } : null }
+      },
+      async sales(period) {
+        const st = db.read()
+        const t = now()
+        const r = salesReport(salesByDay(st.salesHistory, st.orders, todayCounterSeed, periodStart(period, t), t), period)
+        return { ...r, top: r.top.map((x) => ({ ...x, name: productName(st, x.productId) })) }
+      },
+    },
+
+    settings: {
+      async overview() {
+        const { team } = db.read()
+        return {
+          people: team.length,
+          roles: rolesInUse(team),
+          deliveryFeeCents: storefront.deliveryFeeCents,
+          paymentLabels: [...storefront.payments.payNow, ...storefront.payments.payOnReceipt].map((p) => p.label),
+        }
+      },
+      async getHouse() {
+        return db.read().house
+      },
+      async saveHouse(house) {
+        const clean = cleanHouse(house)
+        if (Object.keys(validateHouse(clean)).length) throw new Error('invalid')
+        db.update((st) => {
+          st.house = clean
+        })
+        return clean
+      },
+      async team() {
+        return db.read().team
+      },
+      async invite(email, role) {
+        let member = null as TeamMember | null
+        db.update((st) => {
+          const err = checkInvite(email, role, st.team)
+          if (err) throw new Error(err)
+          const e = email.trim().toLowerCase()
+          member = { id: `u-${e}`, name: e.split('@')[0], email: e, role, note: 'Convite pendente', pending: true }
+          st.team.push(member)
+          // D21: o convite é só registrado; nenhuma mensagem é enviada.
+          st.outbox.push({ id: `msg-${st.outbox.length + 1}`, to: e, text: `Convite para a equipe da casa como ${role}`, at: now().toISOString(), kind: 'invite' })
+        })
+        return member as unknown as TeamMember
       },
     },
   }
