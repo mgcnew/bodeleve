@@ -4,6 +4,7 @@ import type { Order, OrderStatus, PlaceOrderInput } from '@/domain/types'
 import type { Services } from '@/services/types'
 import { createAdminServices } from './adminServices'
 import { createDb } from './db'
+import { createMockRealtime } from './realtime'
 import { categories as staticCategories, content, homeSections as staticSections, noDetails, products as staticProducts } from './seed'
 import { DESCRIPTION_PLACEHOLDER } from '@/domain/catalog'
 import { hoursText } from '@/domain/settings'
@@ -171,5 +172,6 @@ export function createMockServices(opts: MockOptions = {}): Services {
     },
 
     admin: createAdminServices({ db, now }),
+    realtime: createMockRealtime(db),
   }
 }

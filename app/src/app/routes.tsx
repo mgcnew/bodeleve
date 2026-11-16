@@ -1,6 +1,6 @@
+import type { ComponentType } from 'react'
 import { createBrowserRouter, type RouteObject } from 'react-router-dom'
 import { ButtonLink, EmptyState } from '@/components'
-import { Gallery } from '@/gallery/Gallery'
 import { LojaLayout, type LojaHandle } from '@/ui/loja/LojaLayout'
 import { AboutPage } from '@/pages/loja/AboutPage'
 import { AddressPage } from '@/pages/loja/AddressPage'
@@ -19,47 +19,31 @@ import { ProductPage } from '@/pages/loja/ProductPage'
 import { ProfilePage } from '@/pages/loja/ProfilePage'
 import { ReviewPage } from '@/pages/loja/ReviewPage'
 import { SearchPage } from '@/pages/loja/SearchPage'
-import { GestaoLayout, type GestaoHandle } from '@/ui/gestao/GestaoLayout'
-import { DashboardPage } from '@/pages/gestao/DashboardPage'
-import { AdminLoginPage } from '@/pages/gestao/LoginPage'
-import { ModulePlaceholder } from '@/pages/gestao/ModulePlaceholder'
-import { MorePage } from '@/pages/gestao/MorePage'
-import { AdminOrderPage } from '@/pages/gestao/OrderPage'
-import { AdminOrdersPage } from '@/pages/gestao/OrdersPage'
-import { AccountsPage, FinancePage, LedgerPage } from '@/pages/gestao/finance'
-import { CategoriesPage, ProductPage as AdminProductPage, ProductsPage } from '@/pages/gestao/products'
-import { CustomerPage, CustomersPage } from '@/pages/gestao/customers'
-import { AssignPage, DeliveriesPage } from '@/pages/gestao/deliveries'
-import { ReportsPage, SalesReportPage } from '@/pages/gestao/reports'
-import { HousePage, SettingsPage, TeamPage } from '@/pages/gestao/settings'
-import { PdvLayout, type PdvHandle } from '@/ui/pdv/PdvLayout'
-import { BagPage as PdvBagPage, OpeningPage, PdvHome, SellPage } from '@/pages/pdv/sell'
-import { DonePage, PaymentPage as PdvPaymentPage, SplitPage } from '@/pages/pdv/checkout'
-import { CashPage, SalePage, SalesPage } from '@/pages/pdv/desk'
-import { EntregasLayout, type EntregasHandle } from '@/ui/entregas/EntregasLayout'
-import { CourierLoginPage } from '@/pages/entregas/login'
-import { CourierListPage } from '@/pages/entregas/list'
-import { DetailPage as CourierDetailPage, HandoverPage, PickupPage, ProblemPage, RoutePage } from '@/pages/entregas/flow'
-import { HistoryPage, ProfilePage as CourierProfilePage } from '@/pages/entregas/me'
-import { PayPage } from '@/pages/gestao/PayPage'
-import { NewPurchasePage } from '@/pages/gestao/NewPurchasePage'
-import { PurchasePage } from '@/pages/gestao/PurchasePage'
-import { PurchasesPage } from '@/pages/gestao/purchasing'
-import { ReceivingPage } from '@/pages/gestao/ReceivingPage'
-import { SupplierPage, SuppliersPage } from '@/pages/gestao/suppliers'
-import { ProductionOrderPage } from '@/pages/gestao/ProductionOrderPage'
-import { RecipePage } from '@/pages/gestao/RecipePage'
-import { ProductionPage, RecipesPage } from '@/pages/gestao/production'
-import { StockAdjustPage } from '@/pages/gestao/StockAdjustPage'
-import { StockCountPage } from '@/pages/gestao/StockCountPage'
-import { StockMovementsPage } from '@/pages/gestao/StockMovementsPage'
-import { StockItemPage, StockPage } from '@/pages/gestao/stock'
 import { AppRoot } from './AppRoot'
+import type { GestaoHandle } from '@/ui/gestao/GestaoLayout'
+import type { PdvHandle } from '@/ui/pdv/PdvLayout'
+import type { EntregasHandle } from '@/ui/entregas/EntregasLayout'
 import s from '@/ui/loja/loja.module.css'
+
+/**
+ * Gestão, PDV, Entregas e o catálogo do design system carregam sob demanda: quem entra na loja não baixa o código deles.
+ * (A loja pública fica no pacote principal.)
+ */
+const lazyOf =
+  <M extends Record<string, unknown>>(load: () => Promise<M>, name: keyof M & string): NonNullable<RouteObject['lazy']> =>
+  async () => ({ Component: (await load())[name] as ComponentType })
 
 const g = (module: GestaoHandle['module'], tabs = false): GestaoHandle => ({ module, tabs })
 const tabs: LojaHandle = { tabs: true }
 const tabsAndBag: LojaHandle = { tabs: true, bagBar: true }
+
+function LoadingScreen() {
+  return (
+    <main className={s.centerBox}>
+      <div role="status" className={s.sub}>Carregando…</div>
+    </main>
+  )
+}
 
 function NotFound() {
   return (
@@ -76,81 +60,82 @@ function NotFound() {
 export const routes: RouteObject[] = [
   {
     element: <AppRoot />,
+    HydrateFallback: LoadingScreen,
     children: [
-      { path: 'design-system', element: <Gallery /> },
-      { path: 'gestao/entrar', element: <AdminLoginPage /> },
+      { path: 'design-system', lazy: lazyOf(() => import('@/gallery/Gallery'), 'Gallery') },
+      { path: 'gestao/entrar', lazy: lazyOf(() => import('@/pages/gestao/LoginPage'), 'AdminLoginPage') },
       {
         path: 'gestao',
-        element: <GestaoLayout />,
+        lazy: lazyOf(() => import('@/ui/gestao/GestaoLayout'), 'GestaoLayout'),
         children: [
-          { index: true, element: <DashboardPage />, handle: g('dashboard', true) },
-          { path: 'pedidos', element: <AdminOrdersPage />, handle: g('orders', true) },
-          { path: 'pedidos/:id', element: <AdminOrderPage />, handle: g('orders') },
-          { path: 'mais', element: <MorePage />, handle: { tabs: true } satisfies GestaoHandle },
-          { path: 'estoque', element: <StockPage />, handle: g('stock', true) },
-          { path: 'estoque/contagem', element: <StockCountPage />, handle: g('stock') },
-          { path: 'estoque/ajuste', element: <StockAdjustPage />, handle: g('stock') },
-          { path: 'estoque/:id', element: <StockItemPage />, handle: g('stock') },
-          { path: 'estoque/:id/movimentacoes', element: <StockMovementsPage />, handle: g('stock') },
-          { path: 'estoque/:id/ajuste', element: <StockAdjustPage />, handle: g('stock') },
-          { path: 'financeiro', element: <FinancePage />, handle: g('finance', true) },
-          { path: 'financeiro/contas', element: <AccountsPage />, handle: g('finance') },
-          { path: 'financeiro/pagar/:id', element: <PayPage />, handle: g('finance') },
-          { path: 'financeiro/lancamentos', element: <LedgerPage />, handle: g('finance') },
-          { path: 'compras', element: <PurchasesPage />, handle: g('purchasing') },
-          { path: 'compras/novo', element: <NewPurchasePage />, handle: g('purchasing') },
-          { path: 'compras/:id', element: <PurchasePage />, handle: g('purchasing') },
-          { path: 'compras/:id/receber', element: <ReceivingPage />, handle: g('purchasing') },
-          { path: 'fornecedores', element: <SuppliersPage />, handle: g('purchasing') },
-          { path: 'fornecedores/:id', element: <SupplierPage />, handle: g('purchasing') },
-          { path: 'producao', element: <ProductionPage />, handle: g('production') },
-          { path: 'producao/fichas', element: <RecipesPage />, handle: g('production') },
-          { path: 'producao/fichas/:id', element: <RecipePage />, handle: g('production') },
-          { path: 'producao/ordens/:id', element: <ProductionOrderPage />, handle: g('production') },
-          { path: 'produtos', element: <ProductsPage />, handle: g('stock') },
-          { path: 'produtos/categorias', element: <CategoriesPage />, handle: g('stock') },
-          { path: 'produtos/:id', element: <AdminProductPage />, handle: g('stock') },
-          { path: 'clientes', element: <CustomersPage />, handle: g('orders') },
-          { path: 'clientes/:id', element: <CustomerPage />, handle: g('orders') },
-          { path: 'entregas', element: <DeliveriesPage />, handle: g('deliveries') },
-          { path: 'entregas/atribuir/:id', element: <AssignPage />, handle: g('deliveries') },
-          { path: 'relatorios', element: <ReportsPage />, handle: g('dashboard') },
-          { path: 'relatorios/vendas', element: <SalesReportPage />, handle: g('dashboard') },
-          { path: 'configuracoes', element: <SettingsPage />, handle: g('team') },
-          { path: 'configuracoes/casa', element: <HousePage />, handle: g('team') },
-          { path: 'configuracoes/equipe', element: <TeamPage />, handle: g('team') },
-          { path: '*', element: <ModulePlaceholder /> },
+          { index: true, lazy: lazyOf(() => import('@/pages/gestao/DashboardPage'), 'DashboardPage'), handle: g('dashboard', true) },
+          { path: 'pedidos', lazy: lazyOf(() => import('@/pages/gestao/OrdersPage'), 'AdminOrdersPage'), handle: g('orders', true) },
+          { path: 'pedidos/:id', lazy: lazyOf(() => import('@/pages/gestao/OrderPage'), 'AdminOrderPage'), handle: g('orders') },
+          { path: 'mais', lazy: lazyOf(() => import('@/pages/gestao/MorePage'), 'MorePage'), handle: { tabs: true } satisfies GestaoHandle },
+          { path: 'estoque', lazy: lazyOf(() => import('@/pages/gestao/stock'), 'StockPage'), handle: g('stock', true) },
+          { path: 'estoque/contagem', lazy: lazyOf(() => import('@/pages/gestao/StockCountPage'), 'StockCountPage'), handle: g('stock') },
+          { path: 'estoque/ajuste', lazy: lazyOf(() => import('@/pages/gestao/StockAdjustPage'), 'StockAdjustPage'), handle: g('stock') },
+          { path: 'estoque/:id', lazy: lazyOf(() => import('@/pages/gestao/stock'), 'StockItemPage'), handle: g('stock') },
+          { path: 'estoque/:id/movimentacoes', lazy: lazyOf(() => import('@/pages/gestao/StockMovementsPage'), 'StockMovementsPage'), handle: g('stock') },
+          { path: 'estoque/:id/ajuste', lazy: lazyOf(() => import('@/pages/gestao/StockAdjustPage'), 'StockAdjustPage'), handle: g('stock') },
+          { path: 'financeiro', lazy: lazyOf(() => import('@/pages/gestao/finance'), 'FinancePage'), handle: g('finance', true) },
+          { path: 'financeiro/contas', lazy: lazyOf(() => import('@/pages/gestao/finance'), 'AccountsPage'), handle: g('finance') },
+          { path: 'financeiro/pagar/:id', lazy: lazyOf(() => import('@/pages/gestao/PayPage'), 'PayPage'), handle: g('finance') },
+          { path: 'financeiro/lancamentos', lazy: lazyOf(() => import('@/pages/gestao/finance'), 'LedgerPage'), handle: g('finance') },
+          { path: 'compras', lazy: lazyOf(() => import('@/pages/gestao/purchasing'), 'PurchasesPage'), handle: g('purchasing') },
+          { path: 'compras/novo', lazy: lazyOf(() => import('@/pages/gestao/NewPurchasePage'), 'NewPurchasePage'), handle: g('purchasing') },
+          { path: 'compras/:id', lazy: lazyOf(() => import('@/pages/gestao/PurchasePage'), 'PurchasePage'), handle: g('purchasing') },
+          { path: 'compras/:id/receber', lazy: lazyOf(() => import('@/pages/gestao/ReceivingPage'), 'ReceivingPage'), handle: g('purchasing') },
+          { path: 'fornecedores', lazy: lazyOf(() => import('@/pages/gestao/suppliers'), 'SuppliersPage'), handle: g('purchasing') },
+          { path: 'fornecedores/:id', lazy: lazyOf(() => import('@/pages/gestao/suppliers'), 'SupplierPage'), handle: g('purchasing') },
+          { path: 'producao', lazy: lazyOf(() => import('@/pages/gestao/production'), 'ProductionPage'), handle: g('production') },
+          { path: 'producao/fichas', lazy: lazyOf(() => import('@/pages/gestao/production'), 'RecipesPage'), handle: g('production') },
+          { path: 'producao/fichas/:id', lazy: lazyOf(() => import('@/pages/gestao/RecipePage'), 'RecipePage'), handle: g('production') },
+          { path: 'producao/ordens/:id', lazy: lazyOf(() => import('@/pages/gestao/ProductionOrderPage'), 'ProductionOrderPage'), handle: g('production') },
+          { path: 'produtos', lazy: lazyOf(() => import('@/pages/gestao/products'), 'ProductsPage'), handle: g('stock') },
+          { path: 'produtos/categorias', lazy: lazyOf(() => import('@/pages/gestao/products'), 'CategoriesPage'), handle: g('stock') },
+          { path: 'produtos/:id', lazy: lazyOf(() => import('@/pages/gestao/products'), 'ProductPage'), handle: g('stock') },
+          { path: 'clientes', lazy: lazyOf(() => import('@/pages/gestao/customers'), 'CustomersPage'), handle: g('orders') },
+          { path: 'clientes/:id', lazy: lazyOf(() => import('@/pages/gestao/customers'), 'CustomerPage'), handle: g('orders') },
+          { path: 'entregas', lazy: lazyOf(() => import('@/pages/gestao/deliveries'), 'DeliveriesPage'), handle: g('deliveries') },
+          { path: 'entregas/atribuir/:id', lazy: lazyOf(() => import('@/pages/gestao/deliveries'), 'AssignPage'), handle: g('deliveries') },
+          { path: 'relatorios', lazy: lazyOf(() => import('@/pages/gestao/reports'), 'ReportsPage'), handle: g('dashboard') },
+          { path: 'relatorios/vendas', lazy: lazyOf(() => import('@/pages/gestao/reports'), 'SalesReportPage'), handle: g('dashboard') },
+          { path: 'configuracoes', lazy: lazyOf(() => import('@/pages/gestao/settings'), 'SettingsPage'), handle: g('team') },
+          { path: 'configuracoes/casa', lazy: lazyOf(() => import('@/pages/gestao/settings'), 'HousePage'), handle: g('team') },
+          { path: 'configuracoes/equipe', lazy: lazyOf(() => import('@/pages/gestao/settings'), 'TeamPage'), handle: g('team') },
+          { path: '*', lazy: lazyOf(() => import('@/pages/gestao/ModulePlaceholder'), 'ModulePlaceholder') },
         ],
       },
       {
         path: 'pdv',
-        element: <PdvLayout />,
+        lazy: lazyOf(() => import('@/ui/pdv/PdvLayout'), 'PdvLayout'),
         children: [
-          { index: true, element: <PdvHome /> },
-          { path: 'abertura', element: <OpeningPage /> },
-          { path: 'vender', element: <SellPage />, handle: { nav: true, header: true } satisfies PdvHandle },
-          { path: 'sacola', element: <PdvBagPage /> },
-          { path: 'pagamento', element: <PdvPaymentPage /> },
-          { path: 'pagamento/dividir', element: <SplitPage /> },
-          { path: 'concluida/:id', element: <DonePage /> },
-          { path: 'vendas', element: <SalesPage />, handle: { nav: true, header: true } satisfies PdvHandle },
-          { path: 'vendas/:id', element: <SalePage /> },
-          { path: 'caixa', element: <CashPage />, handle: { nav: true, header: true } satisfies PdvHandle },
+          { index: true, lazy: lazyOf(() => import('@/pages/pdv/sell'), 'PdvHome') },
+          { path: 'abertura', lazy: lazyOf(() => import('@/pages/pdv/sell'), 'OpeningPage') },
+          { path: 'vender', lazy: lazyOf(() => import('@/pages/pdv/sell'), 'SellPage'), handle: { nav: true, header: true } satisfies PdvHandle },
+          { path: 'sacola', lazy: lazyOf(() => import('@/pages/pdv/sell'), 'BagPage') },
+          { path: 'pagamento', lazy: lazyOf(() => import('@/pages/pdv/checkout'), 'PaymentPage') },
+          { path: 'pagamento/dividir', lazy: lazyOf(() => import('@/pages/pdv/checkout'), 'SplitPage') },
+          { path: 'concluida/:id', lazy: lazyOf(() => import('@/pages/pdv/checkout'), 'DonePage') },
+          { path: 'vendas', lazy: lazyOf(() => import('@/pages/pdv/desk'), 'SalesPage'), handle: { nav: true, header: true } satisfies PdvHandle },
+          { path: 'vendas/:id', lazy: lazyOf(() => import('@/pages/pdv/desk'), 'SalePage') },
+          { path: 'caixa', lazy: lazyOf(() => import('@/pages/pdv/desk'), 'CashPage'), handle: { nav: true, header: true } satisfies PdvHandle },
         ],
       },
-      { path: 'entregas/entrar', element: <CourierLoginPage /> },
+      { path: 'entregas/entrar', lazy: lazyOf(() => import('@/pages/entregas/login'), 'CourierLoginPage') },
       {
         path: 'entregas',
-        element: <EntregasLayout />,
+        lazy: lazyOf(() => import('@/ui/entregas/EntregasLayout'), 'EntregasLayout'),
         children: [
-          { index: true, element: <CourierListPage />, handle: { nav: true } satisfies EntregasHandle },
-          { path: 'pedido/:id', element: <CourierDetailPage /> },
-          { path: 'pedido/:id/coleta', element: <PickupPage /> },
-          { path: 'pedido/:id/rota', element: <RoutePage /> },
-          { path: 'pedido/:id/entregar', element: <HandoverPage /> },
-          { path: 'pedido/:id/problema', element: <ProblemPage /> },
-          { path: 'historico', element: <HistoryPage />, handle: { nav: true } satisfies EntregasHandle },
-          { path: 'perfil', element: <CourierProfilePage />, handle: { nav: true } satisfies EntregasHandle },
+          { index: true, lazy: lazyOf(() => import('@/pages/entregas/list'), 'CourierListPage'), handle: { nav: true } satisfies EntregasHandle },
+          { path: 'pedido/:id', lazy: lazyOf(() => import('@/pages/entregas/flow'), 'DetailPage') },
+          { path: 'pedido/:id/coleta', lazy: lazyOf(() => import('@/pages/entregas/flow'), 'PickupPage') },
+          { path: 'pedido/:id/rota', lazy: lazyOf(() => import('@/pages/entregas/flow'), 'RoutePage') },
+          { path: 'pedido/:id/entregar', lazy: lazyOf(() => import('@/pages/entregas/flow'), 'HandoverPage') },
+          { path: 'pedido/:id/problema', lazy: lazyOf(() => import('@/pages/entregas/flow'), 'ProblemPage') },
+          { path: 'historico', lazy: lazyOf(() => import('@/pages/entregas/me'), 'HistoryPage'), handle: { nav: true } satisfies EntregasHandle },
+          { path: 'perfil', lazy: lazyOf(() => import('@/pages/entregas/me'), 'ProfilePage'), handle: { nav: true } satisfies EntregasHandle },
         ],
       },
       {

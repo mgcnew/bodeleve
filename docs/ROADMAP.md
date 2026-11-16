@@ -65,7 +65,7 @@ Plano e stack em `IMPLEMENTATION_PLAN.md` (aprovado em D18). O banco de dados es
 | I-4 | Gestão | Em andamento: lotes 1 (Entrar, Início, Pedidos, Pedido, Mais), 2 (Compras e Fornecedores), 3 (Estoque), 4 (Produção), 5 (Financeiro) e 6 (Produtos, Clientes, Entregas, Relatórios, Configurações, Equipe) entregues: a Gestão está completa. Próximas: PDV (Etapa 5) e app de entregas (Etapa 6) |
 | I-5 | PDV | Entregue (9 quadros): abertura, venda com peso, sacola e desconto, pagamento e combinado, vendas, cancelamento e caixa. Pix, cartão e comprovante simulados (D21) |
 | I-6 | Entregas | Entregue (9 quadros): entrar, lista, aceite, coleta, em rota, confirmação por código, problema, histórico e perfil, ligados ao painel da gestão. Mensagens, mapa e pagamento do parceiro seguem fora (D21) |
-| I-7 | Realtime e acabamento | — |
+| I-7 | Realtime e acabamento | Entregue na simulação: atualização ao vivo entre abas, PDV em tablet, código por ambiente. O Realtime real, as políticas RLS e a revisão de desempenho dependem do Supabase (D19) |
 
 ## Próxima fase: implementação (histórico)
 

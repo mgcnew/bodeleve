@@ -38,6 +38,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D29 | 2026-11-16 | Etapa 4, lote 6b implementado — a Gestão está completa: Entregas e Atribuir entrega (próprio, reserva, parceiros), Relatórios e Relatório de vendas (hoje, 7 dias, mês), Configurações, A casa e Equipe e permissões. A loja passa a mostrar endereço, WhatsApp e horário preenchidos em A casa | Usuário (D18–D21) |
 | D30 | 2026-11-16 | Etapa 5 (PDV) implementada: abrir caixa, vender (favoritos, categorias, busca, peso), sacola com desconto, pagamento (dinheiro com troco, Pix e cartão simulados), pagamento combinado, venda concluída com comprovante, vendas de hoje, detalhe com cancelamento por senha de gestor, caixa (sangria, suprimento, fechamento e reabertura). A venda baixa o estoque pelo lote que vence primeiro e lança no financeiro. Vendas sem conexão ficam guardadas no aparelho | Usuário (D18–D21) |
 | D31 | 2026-11-16 | Etapa 6 (app de Entregas) implementada: entrar por celular e código, lista (disponíveis e minhas), detalhe e aceite, coleta, em rota, confirmação pelo código do cliente, problema com devolução, histórico e perfil; entregador da casa e parceiro. O painel da gestão acompanha cada etapa. Nenhuma mensagem é enviada (D21) | Usuário (D18–D21) |
+| D32 | 2026-11-16 | Etapa 7 (acabamento): atualização ao vivo simulada entre abas (pedidos novos, status do pedido, entregas, caixa), PDV em tablet com sacola fixa, código da Gestão, do PDV e das Entregas carregado sob demanda. Frente de telas concluída; falta o Supabase (D19) | Usuário (D18–D21) |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -298,6 +299,15 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-I99 | Perfil: "Disponível para entregas" liga e desliga; parceiro guarda a chave Pix (só guardada, sem pagamento) | `ProfilePage` |
 | H-I100 | Mapa e rastreio: marcador [MAPA DA ROTA]; "Abrir no mapa" usa o app de mapas do celular e "Ligar" usa o telefone. Sem rastreio em tempo real | `RoutePage` |
 
+## Hipóteses de implementação do acabamento — a confirmar
+
+| ID | O que foi feito | Onde |
+|---|---|---|
+| H-I101 | Atualização ao vivo simulada: o banco simulado fica no navegador e o evento `storage` avisa as outras abas; as telas abertas se atualizam sozinhas (pedido novo na fila da gestão, status do pedido para quem comprou, entrega publicada para o parceiro). Cada aviso diz o assunto (pedidos, entregas, estoque, caixa), mas hoje a raiz atualiza tudo. Com o Supabase vira canal Realtime por tabela, sem mudar as telas | `RealtimeService`, `mocks/realtime.ts`, `AppRoot` |
+| H-I102 | PDV em tablet (a partir de 768 px): grade de 4 colunas e sacola fixa à direita, com "Cobrar" e "Limpar sacola"; no celular a sacola é a barra de baixo. O peso abre em janela central (já era o comportamento da folha) | `ui/pdv/pdv.module.css` |
+| H-I103 | Gestão, PDV, Entregas e o catálogo do design system carregam sob demanda, então quem entra na loja baixa só o pacote principal (de 786 kB para 520 kB; 159 kB comprimido). A loja ainda não é dividida por página | `app/routes.tsx` |
+| H-I104 | Telas e consultas do balcão e das entregas rodam sem esperar a rede (o armazenamento é local); a revisão de políticas RLS e a de desempenho com `get_advisors` ficam para quando o Supabase existir | `networkMode: 'always'` |
+
 ## Pendências
 
 O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
@@ -322,7 +332,7 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P16 | Desenhar erros do login: código expirado, reenviar código, limite de tentativas, número inexistente | Loja · Entrar | H-I6, P8 |
 | P17 | Decidir se "Produtos" no topo do computador deve levar a uma página com todos os produtos (hoje leva a Buscar) | Loja no computador | H-I12 |
 | P18 | Passada visual da loja em celular, tablet e computador, inclusive checkout no tablet e a barra de sacola sobre as abas | Loja | AUDIT.md A1 |
-| P19 | Status do pedido ao vivo para o cliente (e quem o muda na Gestão) | Loja · Acompanhamento | Etapa 7 |
+| P19 | Status do pedido ao vivo para o cliente (e quem o muda na Gestão). Na simulação já atualiza entre abas (H-I101); falta o Realtime real | Loja · Acompanhamento | H-I101, P60 |
 | P20 | Confirmar o acesso de Produtos e Clientes por papel (H-I14) e se entregador deve ter qualquer tela na Gestão (H-I15) | Gestão | `permissions/` |
 | P21 | Quadro "Pedidos" mostra internet R$ 392,50 e seis pedidos que somam R$ 454,50: dizer qual valor vale, ou corrigir o desenho | Gestão · Início | H-I18 |
 | P22 | Desenhar o estado de pedido "aguardando pagamento do Pix" na fila da gestão e a regra de quando segue sem pagar | Gestão · Pedidos | H-I19, P14 |
@@ -363,6 +373,9 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P57 | Mapa da rota, rastreio em tempo real e foto como prova de entrega ou de problema | Entregas | H-I97, H-I100 |
 | P58 | Pagamento do parceiro (Pix toda segunda) e prestação de contas do dinheiro cobrado na porta | Entregas · Financeiro | H-I96, H-I98 |
 | P59 | Publicação para parceiros com prazo de verdade (10 min) e como o parceiro é notificado | Entregas | H-I70, H-I94 |
+| P60 | Ligar o Realtime de verdade (Supabase) nos pontos H-I101 e decidir o que deve avisar com som ou vibração no balcão e no app de Entregas | Etapa 1 · Todas | H-I101 |
+| P61 | Revisar as políticas RLS por papel e o desempenho (`get_advisors`) depois de criar as tabelas; trocar as senhas e códigos de teste por autenticação real | Etapa 1 | D19, H-G27 |
+| P62 | Passada com leitor de tela (A2) e teste de uso real com atendente, entregador e cliente em aparelho de verdade | Todas | AUDIT.md, P7 |
 
 Marcadores de conteúdo nas telas:
 

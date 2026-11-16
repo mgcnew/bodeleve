@@ -33,7 +33,7 @@ describe('entrar', () => {
   it('número não cadastrado, código errado e código certo', async () => {
     const user = userEvent.setup()
     const { router } = renderApp('/entregas/entrar', { withSeedOrders: true })
-    expect(screen.getByText('Só entra quem a casa cadastrou: entregadores próprios e parceiros.')).toBeInTheDocument()
+    expect(await screen.findByText('Só entra quem a casa cadastrou: entregadores próprios e parceiros.')).toBeInTheDocument()
     await user.type(screen.getByLabelText('Celular'), '98')
     await user.click(screen.getByRole('button', { name: 'Receber código no WhatsApp' }))
     expect(await screen.findByText('Use o DDD e o número, por exemplo (00) 90000-0000.')).toBeInTheDocument()

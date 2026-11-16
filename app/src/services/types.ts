@@ -550,6 +550,17 @@ export type AdminServices = {
   courier: CourierService
 }
 
+/** O que mudou. Quem escuta atualiza só as telas desse assunto (hoje a raiz do app atualiza tudo). */
+export type RealtimeTopic = 'orders' | 'deliveries' | 'stock' | 'cash'
+
+/**
+ * Atualização ao vivo (pedidos novos na gestão, status do pedido, entregas disponíveis, saldo no balcão).
+ * Aqui é simulada (outro aba ou aparelho gravando no mesmo armazenamento); com o Supabase vira canais Realtime por tabela.
+ */
+export interface RealtimeService {
+  onChange(listener: (topics: RealtimeTopic[]) => void): () => void
+}
+
 export type Services = {
   catalog: CatalogService
   orders: OrderService
@@ -557,4 +568,5 @@ export type Services = {
   area: AreaService
   content: ContentService
   admin: AdminServices
+  realtime: RealtimeService
 }

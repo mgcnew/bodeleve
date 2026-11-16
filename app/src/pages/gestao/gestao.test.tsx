@@ -27,7 +27,7 @@ describe('acesso da equipe', () => {
   it('senha errada é recusada; senha certa entra no início', async () => {
     const user = userEvent.setup()
     const { router } = renderApp('/gestao/entrar', { withSeedOrders: true })
-    await user.type(screen.getByLabelText('E-mail'), 'ana@exemplo.com')
+    await user.type(await screen.findByLabelText('E-mail'), 'ana@exemplo.com')
     await user.type(screen.getByLabelText('Senha'), 'errada')
     await user.click(screen.getByRole('button', { name: 'Entrar' }))
     expect(await screen.findByText(/E-mail ou senha incorretos/)).toBeInTheDocument()
@@ -42,7 +42,7 @@ describe('acesso da equipe', () => {
   it('atendente só vê Pedidos e cai direto neles; estoque é bloqueado', async () => {
     const user = userEvent.setup()
     const { router } = renderApp('/gestao/entrar')
-    await user.type(screen.getByLabelText('E-mail'), 'julia@exemplo.com')
+    await user.type(await screen.findByLabelText('E-mail'), 'julia@exemplo.com')
     await user.type(screen.getByLabelText('Senha'), MOCK_ADMIN_PASSWORD)
     await user.click(screen.getByRole('button', { name: 'Entrar' }))
     await waitFor(() => expect(router.state.location.pathname).toBe('/gestao/pedidos'))

@@ -26,7 +26,7 @@ Plataforma da Bodeleve (Casa do Norte): loja online, gestão, PDV e app de entre
 
 > Banco de dados congelado até o dono conectar o Supabase (D19 em `docs/DECISIONS.md`): não crie projeto, migration, tabela, política ou seed. Pagamento e mensagens reais seguem fora (D21). Plano completo em `docs/IMPLEMENTATION_PLAN.md`.
 
-1. Supabase: projeto, Auth, tabelas do `DATA_MODEL_DRAFT.md` com `establishment_id` e RLS por papel (H-G27).
+1. Supabase: projeto, Auth, tabelas do `DATA_MODEL_DRAFT.md` com `establishment_id` e RLS por papel (H-G27). **Pendente**: depende do dono (D19). A seção "Ajustes ao modelo" do `DATA_MODEL_DRAFT.md` lista o que a implementação simulada precisou além do rascunho.
 2. Design system em componentes (tokens, botões, campos, etiquetas, selos, barras, folha, modal, estados).
 3. Loja online (Fluxo 4) — catálogo público sem login, checkout sem conta.
 4. Gestão: pedidos → estoque → compras/recebimento → produção → financeiro → demais módulos.
@@ -40,5 +40,5 @@ Antes de pagamentos reais (Pix, cartão), nota fiscal e área de entrega, confir
 
 - `docs/` — documentação do projeto
 - `design/` — telas do canvas (`*.dc.html`), índice `canvas.json`, `tokens.css`
-- `app/` — o aplicativo (Vite, React, TypeScript). `cd app && npm run dev` (catálogo do design system), `npm test`, `npm run lint`, `npm run build`. Componentes em `src/components`, tokens vêm de `../design/tokens.css`
+- `app/` — o aplicativo (Vite, React, TypeScript): loja (`/`), gestão (`/gestao`), PDV (`/pdv`) e Entregas (`/entregas`), tudo com serviços simulados em `src/mocks`. `cd app && npm run dev` (catálogo do design system), `npm test`, `npm run lint`, `npm run build`. Componentes em `src/components`, tokens vêm de `../design/tokens.css`
 - `gen/` — scripts Python que geram as telas (`cd gen && python3 b16_entregas.py` regenera gestão, PDV e entregas; `b8_loja3.py` a loja; `b1`–`b5` o design system; `b17_responsivo.py` as referências de tablet e computador)

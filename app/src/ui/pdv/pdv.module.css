@@ -1,0 +1,15 @@
+/* Balcão em tablet (≥ 768 px): grade de 4 colunas e a sacola fixa à direita (Resp-PDV-Tablet). No celular a sacola é a barra de baixo. */
+.sell { display: block; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.aside { display: none; }
+.mobileOnly { display: block; }
+
+@media (min-width: 768px) {
+  .sell { display: grid; grid-template-columns: minmax(0, 1fr) 320px; align-items: stretch; }
+  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .aside { display: flex; flex-direction: column; gap: 12px; padding: 16px; border-left: 1px solid var(--linha); background: var(--superficie); }
+  .mobileOnly { display: none; }
+}
+
+.asideLines { display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto; }
+.asideLine { display: flex; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }

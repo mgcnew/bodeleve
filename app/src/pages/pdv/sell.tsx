@@ -11,6 +11,7 @@ import { useAdminSession } from '@/store/admin'
 import { usePosCart } from '@/store/pos'
 import { priceCart } from '@/ui/pdv/cart'
 import { useInvalidatePos, usePosCatalog, usePosOverview } from '@/ui/pdv/queries'
+import p from '@/ui/pdv/pdv.module.css'
 import { Footer, QueryBoundary, ScreenHeader } from '@/ui/loja/parts'
 import s from '@/ui/gestao/gestao.module.css'
 import l from '@/ui/loja/loja.module.css'
@@ -84,7 +85,7 @@ type Mode = 'fav' | 'cat' | 'search'
 export function SellPage() {
   const catalog = usePosCatalog()
   const overview = usePosOverview()
-  const { lines, discount, addUnit, addWeight } = usePosCart()
+  const { lines, discount, addUnit, addWeight, clear } = usePosCart()
   const [mode, setMode] = useState<Mode>('fav')
   const [cat, setCat] = useState<string | null>(null)
   const [q, setQ] = useState('')
@@ -119,6 +120,8 @@ export function SellPage() {
 
   return (
     <>
+      <div className={p.sell}>
+      <div>
       <div style={{ padding: '0 16px' }}>
         <Tabs<Mode> label="Como achar o produto" value={mode} onChange={setMode} tabs={[{ value: 'fav', label: 'Favoritos' }, { value: 'cat', label: 'Categorias' }, { value: 'search', label: 'Buscar' }]} />
       </div>
@@ -134,7 +137,7 @@ export function SellPage() {
             shown.length === 0 ? (
               <EmptyState icon="buscar" title={mode === 'search' ? 'Nenhum produto com esse nome.' : 'Nenhum produto aqui'} description={mode === 'fav' ? 'Marque favoritos em Produtos, na gestão.' : undefined} />
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+              <div className={p.grid}>
                 {shown.map((p) => (
                   <FavoriteTile key={p.id} name={p.name} price={priceText(p)} stock={p.out ? 'sem estoque' : p.stockText} lowStock={p.low && !p.out} onClick={() => tap(p)} />
                 ))}
@@ -145,7 +148,25 @@ export function SellPage() {
         <div role="status" aria-live="polite" className={l.sub} style={{ minHeight: 20 }}>{notice}</div>
         <div className={l.sub}>Toque para somar 1. Produtos por peso pedem o peso antes.</div>
       </main>
-      {priced.count > 0 && <BagBar itemCount={priced.count} totalCents={priced.totalCents} href="/pdv/sacola" />}
+      </div>
+      <aside aria-label="Sacola" className={p.aside}>
+        <h2 style={{ font: '700 17px/24px var(--fonte-titulo)', margin: 0 }}>Sacola</h2>
+        <div className={p.asideLines}>
+          {priced.lines.length === 0 ? <div className={l.sub}>Toque nos produtos para somar.</div> : priced.lines.map((ln) => (
+            <div key={ln.key} className={p.asideLine}>
+              <div>{ln.name}{ln.kind === 'weight' ? ` · ${formatKg(ln.qty)}` : ln.qty > 1 ? ` × ${ln.qty}` : ''}</div>
+              <b>{formatBRL(ln.totalCents)}</b>
+            </div>
+          ))}
+        </div>
+        <div className={p.asideLine} style={{ fontWeight: 700 }}><span>Total</span><span>{formatBRL(priced.totalCents)}</span></div>
+        <ButtonLink href="/pdv/sacola" size="lg" fullWidth>Cobrar</ButtonLink>
+        <Button variant="ghost" fullWidth disabled={priced.lines.length === 0} onClick={() => clear()}>Limpar sacola</Button>
+        <div className={l.sub}>Produtos por peso abrem o peso numa janela central.</div>
+      </aside>
+      </div>
+      {priced.count > 0 && <div className={p.mobileOnly}><BagBar itemCount={priced.count} totalCents={priced.totalCents} href="/pdv/sacola" /></div>}
+
 
       <BottomSheet open={sheet != null} onClose={() => setSheet(null)} title={sheet?.name ?? 'Peso'} description={sheet ? `${formatBRL(sheet.priceCents)} o quilo` : undefined}>
         {sheet && (
