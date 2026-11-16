@@ -45,7 +45,7 @@ export function Atribuir() {
 
   const send = () => {
     setDone(order)
-    if (choice === 'bruno') update({ status: 'en_route', courierName: 'Bruno', deliveryNote: undefined })
+    if (choice === 'bruno') update({ courierName: 'Bruno', deliveryNote: 'atribuído ao Bruno' })
     if (choice === 'carlos') update({ courierName: 'Carlos', deliveryNote: 'reservado para o Carlos' })
     if (choice === 'partners') update({ courierName: null, deliveryNote: 'publicado para parceiros' })
   }
@@ -77,7 +77,7 @@ export function Atribuir() {
             variant="secondary"
             block
             onClick={() => {
-              update({ status: done.status, courierName: done.courierName, deliveryNote: done.deliveryNote })
+              update({ status: done.status, courierName: done.courierName, deliveryNote: done.deliveryNote, courierStage: done.courierStage })
               setDone(null)
             }}
           >

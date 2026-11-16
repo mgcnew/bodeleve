@@ -6,6 +6,7 @@ import { TextField } from '@/components/Field'
 import { Icon } from '@/components/Icon'
 import { hypotheses } from '@/config/hypotheses'
 import { formatPhone } from '@/domain/order'
+import { applyCodeInput } from '@/lib/otp'
 import { TopBar } from '../components/LojaShell'
 import { useCheckout } from '../state/checkout'
 import l from '../loja.module.css'
@@ -37,10 +38,10 @@ export function Entrar() {
   }
 
   const setDigit = (i: number, value: string) => {
-    const d = value.replace(/\D/g, '').slice(-1)
-    setCode((c) => c.map((x, j) => (j === i ? d : x)))
+    const r = applyCodeInput(code, i, value)
+    setCode(r.digits)
     setCodeError(false)
-    if (d && i < code.length - 1) inputs.current[i + 1]?.focus()
+    inputs.current[r.focus]?.focus()
   }
 
   const enter = (e: FormEvent) => {
@@ -90,7 +91,6 @@ export function Entrar() {
                   type="text"
                   inputMode="numeric"
                   autoComplete={i === 0 ? 'one-time-code' : 'off'}
-                  maxLength={1}
                   aria-label={`Dígito ${i + 1}`}
                   className={s.digit}
                   value={d}

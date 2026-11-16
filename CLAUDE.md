@@ -1,6 +1,6 @@
 # Bodeleve — instruções para o Claude Code
 
-Plataforma da Bodeleve (Casa do Norte): loja online, gestão, PDV e app de entregas. O design está pronto; a próxima fase é implementar com Supabase.
+Plataforma da Bodeleve (Casa do Norte): loja online, gestão, PDV e app de entregas. O design está pronto e os quatro ambientes estão implementados com dados de exemplo no aparelho; a próxima etapa é ligar o Supabase. Veja `docs/IMPLEMENTATION.md`.
 
 ## Fonte de verdade
 
@@ -24,6 +24,8 @@ Plataforma da Bodeleve (Casa do Norte): loja online, gestão, PDV e app de entre
 
 ## Ordem sugerida de implementação
 
+Os passos 2 a 7 estão feitos com dados locais; o passo 1 e a troca dos dados locais pelo banco são o que falta.
+
 1. Supabase: projeto, Auth, tabelas do `DATA_MODEL_DRAFT.md` com `establishment_id` e RLS por papel (H-G27).
 2. Design system em componentes (tokens, botões, campos, etiquetas, selos, barras, folha, modal, estados).
 3. Loja online (Fluxo 4) — catálogo público sem login, checkout sem conta.
@@ -35,6 +37,8 @@ Plataforma da Bodeleve (Casa do Norte): loja online, gestão, PDV e app de entre
 Antes de pagamentos reais (Pix, cartão), nota fiscal e área de entrega, confirme com o dono as pendências Q6–Q8, Q12 e Q14.
 
 ## Implementação
+
+- **Estado**: as 75 telas existem e funcionam com dados de exemplo; nada fala com o banco ainda. O que é simulado, como entrar para testar e como cada store vira tabela está em `docs/IMPLEMENTATION.md`.
 
 - **Stack**: React + Vite + TypeScript em `app/`, React Router, `@supabase/supabase-js`. Um único app com os 4 ambientes por rota: Loja em `/`, Gestão em `/gestao`, PDV em `/pdv`, Entregas em `/entregas`.
 - **Rodar**: `cd app && npm install && npm run dev`. Supabase: copie `app/.env.example` para `app/.env.local`; sem ele, `supabase` é `null` e os serviços usam `src/mocks`.

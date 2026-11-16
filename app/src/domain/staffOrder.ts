@@ -31,6 +31,9 @@ export type StaffOrder = {
   paid: boolean
   courierName: string | null
   distanceKm?: number
+  /** H-E5 — código de 4 números que a cliente informa ao entregador */
+  deliveryCode: string
+  courierStage?: 'accepted' | 'collected'
   /** entrega reservada ou publicada, ainda sem entregador em rota */
   deliveryNote?: string
 }

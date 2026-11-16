@@ -19,8 +19,10 @@ const rapadura = (q = 1) => item('rapadura', 'Rapadura', `${q} un · 400 g`, q, 
 const doce = (q = 1) => item('doce-de-leite', 'Doce de leite', `${q} un · 400 g`, q, 1890, 'DL-1102', 6)
 const carne = (q = 1) => item('carne-de-sol', 'Carne de sol', `${q} un · 500 g`, q, 3490, 'CS-1110', 9)
 
-function order(o: Omit<StaffOrder, 'checked'>): StaffOrder {
-  return { ...o, checked: o.items.map(() => o.status !== 'new' && o.status !== 'separating') }
+const codes: Record<string, string> = { '1043': '2468', '1044': '1357', '1041': '7305', '1040': '4410', '1039': '8821', '1042': '4821', '1038': '1190', '1036': '3302' }
+
+function order(o: Omit<StaffOrder, 'checked' | 'deliveryCode'>): StaffOrder {
+  return { ...o, deliveryCode: codes[o.number] ?? '0000', checked: o.items.map(() => o.status !== 'new' && o.status !== 'separating') }
 }
 
 export const seedStaffOrders = (): StaffOrder[] => [

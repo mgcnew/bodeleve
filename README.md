@@ -2,7 +2,7 @@
 
 Plataforma da Bodeleve, uma Casa do Norte: gestão administrativa, PDV (frente de caixa), loja online e app de entregas.
 
-O **design está completo** (75 telas, 7 etapas). A próxima fase é a implementação com Supabase; comece por `CLAUDE.md`. Nada aqui é funcional ainda — sem banco, pagamentos ou estoque reais.
+O **design está completo** (75 telas, 7 etapas) e os quatro ambientes estão **implementados** em `app/`, com dados de exemplo no aparelho. Falta ligar o Supabase; comece por `CLAUDE.md` e `docs/IMPLEMENTATION.md`. Ainda sem banco, pagamentos ou estoque reais.
 
 ## Estrutura
 
@@ -10,6 +10,8 @@ O **design está completo** (75 telas, 7 etapas). A próxima fase é a implement
 |---|---|
 | `docs/` | Documentos do projeto. São a fonte de verdade: visão, arquitetura, mapa de telas, design system, regras de negócio, modelo de dados, decisões e roadmap. |
 | `design/` | Telas e quadros do canvas de design (arquivos `.dc.html` e `canvas.json`) e `tokens.css`. Os `.dc.html` abrem como telas apenas no canvas de design do Claude; aqui servem de referência versionada. |
+| `app/` | Aplicação React + Vite + TypeScript com Loja, Gestão, PDV e Entregas. Rodar: `cd app && npm install && npm run dev`. |
+| `supabase/` | Migrações do banco (base, catálogo e RLS por enquanto). |
 | `gen/` | Scripts Python que geram os arquivos de `design/`. |
 
 ## Onde começar
@@ -31,6 +33,7 @@ O **design está completo** (75 telas, 7 etapas). A próxima fase é a implement
 | 5 — PDV | Entregue |
 | 6 — Entregas | Entregue |
 | 7 — Auditoria | Entregue |
+| Implementação | Loja, Gestão, PDV e Entregas prontos com dados locais; falta o Supabase |
 
 ## Gerar as telas de novo
 
