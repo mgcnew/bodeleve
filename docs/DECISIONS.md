@@ -403,7 +403,7 @@ Nenhuma decisão D* foi mudada. Na implementação troquei **textos dos quadros*
 |---|---|---|---|
 | Equipe e permissões | "Convite enviado. A pessoa cria a senha pelo link do e-mail." | "Convite registrado para … O envio do e-mail ainda não está ligado nesta versão." | Nada é enviado (D21) |
 | Equipe e permissões | Papel "Gestora" | "Gestor" (o nome do papel em H-G27) | Os papéis são fixos; o gênero não vem do cadastro |
-| Pedidos de compra, Cliente | "Comprovante enviado." (PDV), "Cliente avisada às 15h44" (Em rota) | "Comprovante registrado. O envio por WhatsApp ainda não está ligado nesta versão." e "Pedido a caminho desde 15h44 no acompanhamento da loja." | Nada é enviado (D21) |
+| Venda concluída (PDV) e Em rota (Entregas) | "Comprovante enviado." e "Cliente avisada às 15h44" | "Comprovante registrado. O envio por WhatsApp ainda não está ligado nesta versão." e "Pedido a caminho desde 15h44 no acompanhamento da loja." | Nada é enviado (D21) |
 | Relatórios e Relatório de vendas | "Todos os relatórios exportam em planilha (.xlsx) e PDF." e "Exportar … fica no menu de compartilhar do aparelho." | "A exportação em planilha (.xlsx) e PDF ainda não está disponível nesta versão." | A exportação não existe (P45) |
 | Relatório de vendas | "Sexta e sábado vendem mais." | Retirado | É um achado que depende dos dados reais (H-I76) |
 | Cliente | "A cliente pode pedir para apagar a conta." | "Quem comprou pode pedir para apagar a conta." | Texto sem gênero, para qualquer cliente |
