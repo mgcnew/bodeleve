@@ -98,6 +98,15 @@ export function splitLabel(label: string, unit: string): { name: string; unit: s
   return { name: l, unit: unit && l === unit ? unit : '' }
 }
 
+/** Produto novo: a medida digitada no fim do nome ("Queijo coalho 500 g") vira a embalagem; sem medida, só o nome. */
+export function splitNewLabel(label: string): { name: string; unit: string } {
+  const l = label.trim().replace(/\s+/g, ' ')
+  const m = l.match(/^(.*\S) (\d+(?:[.,]\d+)?) ?(kg|g|ml|l|un)$/i)
+  if (!m) return { name: l, unit: '' }
+  const u = m[3].toLowerCase()
+  return { name: m[1], unit: `${m[2]} ${u === 'l' ? 'L' : u}` }
+}
+
 /** Aplica o formulário ao item de estoque e à venda. Matéria-prima não tem origem, preço, loja nem favorito. */
 export function applyProduct(item: StockItem, sale: SaleInfo, input: ProductInput): { item: StockItem; sale: SaleInfo } {
   const raw = input.itemType === 'raw_material'

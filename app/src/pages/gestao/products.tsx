@@ -1,7 +1,8 @@
 import { useId, useState, type FormEvent } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { AppLink, Banner, Button, ButtonLink, Chip, EmptyState, Icon, IndicatorSkeleton, ListSkeleton, OriginBadge, SearchField, StatusTag, Switch, TextField, ChoiceOption } from '@/components'
-import { kindFilters, kindLabel, marginLabel, validateProduct, type ProductInput, type ProductKind } from '@/domain/catalog'
+import { kindFilters, kindLabel, marginLabel, splitNewLabel, validateProduct, type ProductInput, type ProductKind } from '@/domain/catalog'
 import type { ItemType } from '@/domain/inventory'
 import { unitKg } from '@/domain/units'
 import { formatBRL, parseMoney } from '@/lib/format'
@@ -64,6 +65,7 @@ export function ProductsPage() {
                   </div>
                 )}
                 <div className={s.filters}>
+                  <ButtonLink href="/gestao/produtos/novo">Novo produto</ButtonLink>
                   <ButtonLink href="/gestao/produtos/categorias" variant="secondary">Categorias</ButtonLink>
                   <ButtonLink href="/gestao/producao/fichas" variant="secondary">Fichas técnicas</ButtonLink>
                 </div>
@@ -91,13 +93,13 @@ function SwitchRow({ label, hint, checked, onChange }: { label: string; hint: st
   )
 }
 
-function ProductForm({ detail }: { detail: ProductDetail }) {
+function ProductForm({ detail, isNew = false }: { detail: ProductDetail; isNew?: boolean }) {
   const { admin } = useServices()
+  const navigate = useNavigate()
   const invalidate = useInvalidateCatalog()
   const [form, setForm] = useState<ProductInput>(() => toInput(detail))
   const [priceText, setPriceText] = useState(() => (detail.priceCents == null ? '' : (detail.priceCents / 100).toFixed(2).replace('.', ',')))
   const [weightText, setWeightText] = useState(() => (detail.weightPriceCents == null ? '' : (detail.weightPriceCents / 100).toFixed(2).replace('.', ',')))
-  const canWeigh = unitKg(detail.unit) != null
   const [errors, setErrors] = useState<ReturnType<typeof validateProduct>>({})
   const [saved, setSaved] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -106,6 +108,8 @@ function ProductForm({ detail }: { detail: ProductDetail }) {
   const descId = useId()
   const set = <K extends keyof ProductInput>(k: K, v: ProductInput[K]) => { setForm((f) => ({ ...f, [k]: v })); setSaved(false) }
   const raw = form.itemType === 'raw_material'
+  // Produto novo: a medida no fim do nome ("Queijo coalho 500 g") é a embalagem.
+  const canWeigh = unitKg(isNew ? splitNewLabel(form.name).unit : detail.unit) != null
 
   const setType = (t: ItemType) => setForm((f) => ({ ...f, itemType: t, origin: t === 'raw_material' ? null : f.origin ?? (t === 'finished' ? 'house' : 'resale') }))
 
@@ -119,6 +123,12 @@ function ProductForm({ detail }: { detail: ProductDetail }) {
     if (Object.keys(errs).length) return
     setBusy(true)
     try {
+      if (isNew) {
+        const created = await admin.catalog.create(input)
+        await invalidate()
+        navigate(`/gestao/produtos/${created.id}`, { replace: true })
+        return
+      }
       await admin.catalog.save(detail.id, input)
       await invalidate()
       setSaved(true)
@@ -132,10 +142,11 @@ function ProductForm({ detail }: { detail: ProductDetail }) {
   return (
     <form onSubmit={submit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div className={l.sub} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 120, borderRadius: 12, border: '1.5px dashed var(--linha)' }}>[FOTO DO PRODUTO]</div>
-      <TextField label="Nome" value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} />
+      <TextField label="Nome" value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} hint={isNew ? 'Escreva a medida no fim, por exemplo Queijo coalho 500 g.' : undefined} />
       <div className={l.stack} style={{ gap: 6 }}>
         <label htmlFor={catId} style={{ fontWeight: 600 }}>Categoria</label>
         <select id={catId} value={form.categoryId} onChange={(e) => set('categoryId', e.target.value)} style={{ ...fieldStyle, height: 48 }}>
+          {(detail.categories.length === 0 || form.categoryId === '') && <option value="">Sem categoria</option>}
           {detail.categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
@@ -177,9 +188,34 @@ function ProductForm({ detail }: { detail: ProductDetail }) {
         {failed && <Banner tone="error">Não foi possível salvar. Nada foi alterado. Tente de novo.</Banner>}
       </div>
       <Footer>
-        <Button type="submit" size="lg" fullWidth loading={busy}>Salvar</Button>
+        <Button type="submit" size="lg" fullWidth loading={busy}>{isNew ? 'Cadastrar produto' : 'Salvar'}</Button>
       </Footer>
     </form>
+  )
+}
+
+export function NewProductPage() {
+  const { admin } = useServices()
+  const query = useQuery({
+    queryKey: ['admin', 'product-blank'],
+    queryFn: async (): Promise<ProductDetail> => {
+      const cats = await admin.catalog.categories()
+      return {
+        id: '', label: 'Novo produto', unit: '', name: '', categoryId: cats[0]?.id ?? '', itemType: 'finished', origin: 'house', priceCents: null, weightPriceCents: null,
+        minStock: '', published: false, favoritePos: false, soldByWeight: false, tracksExpiry: false, description: '', costCents: null, costSource: null,
+        categories: cats.map((c) => ({ id: c.id, name: c.name })),
+      }
+    },
+  })
+  return (
+    <>
+      <ScreenHeader title="Novo produto" back="/gestao/produtos" />
+      <main className={s.main} style={{ gap: 16, paddingTop: 16 }}>
+        <QueryBoundary query={query} skeleton={<IndicatorSkeleton label="Carregando" />} errorTitle="Não foi possível abrir o cadastro">
+          {(d) => <ProductForm key="novo" detail={d} isNew />}
+        </QueryBoundary>
+      </main>
+    </>
   )
 }
 

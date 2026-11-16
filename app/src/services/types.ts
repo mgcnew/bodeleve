@@ -334,6 +334,8 @@ export interface CatalogAdminService {
   get(id: string): Promise<ProductDetail | null>
   /** Lança `invalid` se o formulário não passa na validação. */
   save(id: string, input: ProductInput): Promise<ProductDetail>
+  /** Produto novo. A medida no fim do nome vira a embalagem. Lança `invalid` se o formulário não passa na validação. */
+  create(input: ProductInput): Promise<ProductDetail>
   categories(): Promise<CategoryRow[]>
   /** Lança `empty` ou `duplicate`. */
   addCategory(name: string): Promise<CategoryRow>

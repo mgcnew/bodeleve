@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { StockItem } from './inventory'
-import { applyProduct, splitLabel, channelLabel, checkNewCategory, defaultSale, kindOf, marginLabel, parseMinStock, slugify, validateProduct, type ProductInput } from './catalog'
+import { applyProduct, splitLabel, splitNewLabel, channelLabel, checkNewCategory, defaultSale, kindOf, marginLabel, parseMinStock, slugify, validateProduct, type ProductInput } from './catalog'
 
 const item: StockItem = { id: 'queijo-coalho', name: 'Queijo coalho', unit: '500 g', itemType: 'finished', origin: 'house', categoryId: 'laticinios', minStock: 15, tracksExpiry: true, supplierId: null, lastCostCents: 1420 }
 const input: ProductInput = { name: ' Queijo coalho 500 g ', categoryId: 'laticinios', itemType: 'finished', origin: 'house', priceCents: 3290, weightPriceCents: null, minStock: '15 un', published: true, favoritePos: true, soldByWeight: false, tracksExpiry: true, description: '' }
@@ -71,5 +71,13 @@ describe('catálogo', () => {
     expect(checkNewCategory('DOCES', cats)).toBe('duplicate')
     expect(checkNewCategory('Castanhas', cats)).toBeNull()
     expect(slugify('Pão de Queijo!')).toBe('pao-de-queijo')
+  })
+
+  it('produto novo: a medida no fim do nome vira a embalagem', () => {
+    expect(splitNewLabel('Queijo coalho 500 g')).toEqual({ name: 'Queijo coalho', unit: '500 g' })
+    expect(splitNewLabel('  Leite   1 l ')).toEqual({ name: 'Leite', unit: '1 L' })
+    expect(splitNewLabel('Farinha 1,5kg')).toEqual({ name: 'Farinha', unit: '1,5 kg' })
+    expect(splitNewLabel('Rapadura')).toEqual({ name: 'Rapadura', unit: '' })
+    expect(splitNewLabel('Doce 2 sabores')).toEqual({ name: 'Doce 2 sabores', unit: '' })
   })
 })

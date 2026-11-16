@@ -413,6 +413,7 @@ Nenhuma decisão D* foi mudada. Na implementação troquei **textos dos quadros*
 | Cliente | "A cliente pode pedir para apagar a conta." | "Quem comprou pode pedir para apagar a conta." | Texto sem gênero, para qualquer cliente |
 | Confirmar entrega, Problema na entrega | "Peça o código à cliente", "A cliente não tem o código", "a loja e a cliente foram avisadas", "Código não confere. Confira com a cliente." | Mesmas frases com "quem comprou" | Mesmo motivo, e nada é enviado (D21) |
 | Entrar (Entregas) | "Código enviado para …" | Igual, com aviso em desenvolvimento de que nada foi enviado e qual código usar | D21 |
+| Produtos (Gestão) | Só lista e edição de produto existente | Botão "Novo produto" e a tela `/gestao/produtos/novo` (mesmo formulário do Produto); a medida no fim do nome ("Queijo coalho 500 g") vira a embalagem | Com o banco real vazio, o dono não teria como cadastrar o primeiro produto (D33) |
 | Produto (Gestão) | Um campo de preço | Preço da embalagem e, para produto por peso, o preço do kg (H-I80) | A loja e o balcão precificam diferente (P39) |
 
 ## Pendências do banco (novas)

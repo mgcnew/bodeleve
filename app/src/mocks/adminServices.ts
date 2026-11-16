@@ -4,7 +4,7 @@ import type { Order } from '@/domain/types'
 import type { TeamMember } from '@/domain/settings'
 import { adjust, applyCount, buildRows, expiringLots, lowRows, reverse, stockValueCents, undoCount, reservedByItem, type StockState } from '@/domain/stock'
 import { products } from './seed'
-import { applyProduct, channelLabel, checkNewCategory, defaultSale, kindOf, slugify, validateProduct, type ProductInput } from '@/domain/catalog'
+import { applyProduct, channelLabel, checkNewCategory, defaultSale, kindOf, slugify, splitNewLabel, validateProduct, type ProductInput } from '@/domain/catalog'
 import { customerDetail, customerId, listCustomers } from '@/domain/customers'
 import { productCost } from './catalogView'
 import { accept as courierAccept, cashDue, confirm as courierConfirm, deliveryItems, depart as courierDepart, historyOf, reportProblem, take as courierTake, undoProblem as courierUndoProblem, visibleTo } from '@/domain/courierApp'
@@ -23,7 +23,7 @@ import { paymentLabel } from '@/config/storefront'
 import { formatBRL } from '@/lib/format'
 import { batchCostCents, checkInputs, finishOrder, formatContent, marginPercent, needs, nextOrderId, ProductionError, suggestLotCode, undoFinish, unitCostCents, type ProductionOrder } from '@/domain/production'
 import type { AccountView, AdminOrder, CashView, CourierCardView, CourierDetail, CategoryRow, PosSaleRow, PosSessionView, ProductDetail, AdminServices, Dashboard, EntryView, FinanceOverview, FinishDefaults, MovementView, ProductionOrderView, PurchaseSuggestion, PurchaseView, RecipeView, StockItemView, SupplierView } from '@/services/types'
-import { daysUntil, itemBalance, itemLabel, lotsFefo, nextLot } from '@/domain/inventory'
+import { daysUntil, itemBalance, itemLabel, lotsFefo, nextLot, type StockItem } from '@/domain/inventory'
 import { orderTotal, paymentTerms, purchaseMessage, receivedTotal, suggestQty, isOpen, type PurchaseOrder } from '@/domain/purchasing'
 import { closeShortOrder, receive, reverseLastReceipt } from '@/domain/receiving'
 import { accountName, balanceOf, daysFromToday, forecast, isOpen as entryOpen, ledger, ledgerTotals, payEntry, remaining, standingOf, totals as financeTotals, undoPayment, type FinancialEntry } from '@/domain/finance'
@@ -840,6 +840,22 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           out = productDetail(st, id)
         })
         return out as unknown as ProductDetail
+      },
+      async create(input: ProductInput) {
+        if (Object.keys(validateProduct(input)).length) throw new Error('invalid')
+        const { name, unit } = splitNewLabel(input.name)
+        if (input.soldByWeight && input.itemType !== 'raw_material' && unitKg(unit) == null) throw new Error('invalid')
+        let id = ''
+        db.update((st) => {
+          const base = slugify(`${name} ${unit}`) || 'item'
+          id = base
+          for (let n = 2; st.stockItems.some((x) => x.id === id); n++) id = `${base}-${n}`
+          const item = { id, name, unit, itemType: input.itemType, origin: null, categoryId: input.categoryId, minStock: 0, tracksExpiry: false, supplierId: null, lastCostCents: null } as StockItem
+          const r = applyProduct(item, defaultSale(id), { ...input, name: unit ? `${name} ${unit}` : name })
+          st.stockItems.push(r.item)
+          st.sales.push(r.sale)
+        })
+        return productDetail(db.read(), id)!
       },
       async categories() {
         return categoryRows(db.read())

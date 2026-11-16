@@ -96,6 +96,7 @@ export const routes: RouteObject[] = [
           { path: 'producao/ordens/:id', lazy: lazyOf(() => import('@/pages/gestao/ProductionOrderPage'), 'ProductionOrderPage'), handle: g('production') },
           { path: 'produtos', lazy: lazyOf(() => import('@/pages/gestao/products'), 'ProductsPage'), handle: g('stock') },
           { path: 'produtos/categorias', lazy: lazyOf(() => import('@/pages/gestao/products'), 'CategoriesPage'), handle: g('stock') },
+          { path: 'produtos/novo', lazy: lazyOf(() => import('@/pages/gestao/products'), 'NewProductPage'), handle: g('stock') },
           { path: 'produtos/:id', lazy: lazyOf(() => import('@/pages/gestao/products'), 'ProductPage'), handle: g('stock') },
           { path: 'clientes', lazy: lazyOf(() => import('@/pages/gestao/customers'), 'CustomersPage'), handle: g('orders') },
           { path: 'clientes/:id', lazy: lazyOf(() => import('@/pages/gestao/customers'), 'CustomerPage'), handle: g('orders') },
