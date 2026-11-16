@@ -55,12 +55,26 @@ Correções feitas durante o projeto: o pedido à Laticínios Serra Verde passou
 
 ## 5. Limites conhecidos do protótipo
 
-- Cada quadro guarda o próprio estado: a sacola, o pedido e o estoque não "andam" entre telas. No app real o estado é compartilhado.
+- Cada quadro guarda o próprio estado: a sacola, o pedido e o estoque não "andam" entre telas. No app implementado o estado é compartilhado (banco simulado único).
 - Nas listas, só o primeiro item de exemplo abre detalhe.
 - Fotos, logotipo, mapa e QR do Pix são marcadores.
 - Nenhum dado, pagamento, estoque ou envio é real.
 
-## 6. Pendências da auditoria
+## 6. O código implementado (Etapas 3 a 7, 2026-11-16)
+
+Conferido em `app/`, com os dados simulados:
+
+| Checagem | Resultado |
+|---|---|
+| Acessibilidade (axe, WCAG 2.1 A e AA) em teste automatizado, em cada tela e em cada estado principal | Sem violações. No teste (jsdom) a regra de contraste fica desligada, porque o jsdom não calcula cor |
+| Acessibilidade (axe) **em navegador real, com contraste**, em 37 telas de loja, gestão, PDV (celular e tablet), entregas e gestão no computador | Sem violações |
+| Alvo mínimo de 44 px, medido nos elementos de toque de 29 telas em celular | Dois achados corrigidos: o campo de busca (agora o contêiner inteiro é o rótulo e foca ao toque) e o campo de comprovante do pagamento de conta (altura mínima de 44 px). Nenhum restante |
+| Números entre telas (saldo, contas, estoque, caixa, vendas) | Conferidos por teste contra os quadros; onde o desenho não fecha, a divergência está em `DECISIONS.md` (P21, P25, P39) |
+| Cor como único sinal | Mantido: etiquetas com texto, estados em `aria-pressed`, aviso com ícone |
+
+Não foi feito: leitor de tela (A2), aparelho real (A3), nem uma revisão a olho de todas as telas nos três tamanhos (A1); as capturas feitas na implementação foram de celular e do PDV em tablet.
+
+## 7. Pendências da auditoria
 
 | ID | Pendência | Quem |
 |---|---|---|

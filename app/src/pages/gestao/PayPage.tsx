@@ -83,7 +83,7 @@ function Form({ entry, accounts, onDone }: { entry: EntryView; accounts: Array<{
       </div>
       <div className={l.stack} style={{ gap: 6 }}>
         <label htmlFor="comp" className={l.strong} style={{ fontSize: 14 }}>Comprovante (opcional)</label>
-        <input id="comp" type="file" accept="image/*,application/pdf" onChange={(e) => setReceipt(e.target.files?.[0]?.name)} />
+        <input id="comp" type="file" accept="image/*,application/pdf" style={{ minHeight: 44 }} onChange={(e) => setReceipt(e.target.files?.[0]?.name)} />
         {receipt && <div className={l.small}>Anexo: {receipt}. O arquivo só será guardado quando o armazenamento for ligado.</div>}
       </div>
       {insufficient ? (

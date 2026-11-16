@@ -397,4 +397,16 @@ Marcadores de conteúdo nas telas:
 
 ## Alterações de decisões aprovadas
 
-Nenhuma até o momento.
+Nenhuma decisão D* foi mudada. Na implementação troquei **textos dos quadros** que prometiam algo que o sistema ainda não faz (D21) ou que presumiam dado que não existe; cada um segue o motivo abaixo e pode voltar ao texto do quadro quando a funcionalidade existir. Os papéis e o que cada um acessa (H-G27) não mudaram.
+
+| Quadro | Texto do quadro | Texto no app | Motivo |
+|---|---|---|---|
+| Equipe e permissões | "Convite enviado. A pessoa cria a senha pelo link do e-mail." | "Convite registrado para … O envio do e-mail ainda não está ligado nesta versão." | Nada é enviado (D21) |
+| Equipe e permissões | Papel "Gestora" | "Gestor" (o nome do papel em H-G27) | Os papéis são fixos; o gênero não vem do cadastro |
+| Pedidos de compra, Cliente | "Comprovante enviado." (PDV), "Cliente avisada às 15h44" (Em rota) | "Comprovante registrado. O envio por WhatsApp ainda não está ligado nesta versão." e "Pedido a caminho desde 15h44 no acompanhamento da loja." | Nada é enviado (D21) |
+| Relatórios e Relatório de vendas | "Todos os relatórios exportam em planilha (.xlsx) e PDF." e "Exportar … fica no menu de compartilhar do aparelho." | "A exportação em planilha (.xlsx) e PDF ainda não está disponível nesta versão." | A exportação não existe (P45) |
+| Relatório de vendas | "Sexta e sábado vendem mais." | Retirado | É um achado que depende dos dados reais (H-I76) |
+| Cliente | "A cliente pode pedir para apagar a conta." | "Quem comprou pode pedir para apagar a conta." | Texto sem gênero, para qualquer cliente |
+| Confirmar entrega, Problema na entrega | "Peça o código à cliente", "A cliente não tem o código", "a loja e a cliente foram avisadas", "Código não confere. Confira com a cliente." | Mesmas frases com "quem comprou" | Mesmo motivo, e nada é enviado (D21) |
+| Entrar (Entregas) | "Código enviado para …" | Igual, com aviso em desenvolvimento de que nada foi enviado e qual código usar | D21 |
+| Produto (Gestão) | Um campo de preço | Preço da embalagem e, para produto por peso, o preço do kg (H-I80) | A loja e o balcão precificam diferente (P39) |

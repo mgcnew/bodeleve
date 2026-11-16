@@ -11,10 +11,10 @@ export function SearchField({ label, id, placeholder, ...rest }: SearchFieldProp
   const auto = useId()
   const inputId = id ?? auto
   return (
-    <div className={s.wrap}>
+    // O contêiner inteiro é o rótulo: tocar em qualquer ponto da caixa (44 px) foca o campo, não só nos 26 px do texto.
+    <label htmlFor={inputId} className={s.wrap}>
       <Icon name="buscar" size={20} />
-      <label htmlFor={inputId} className="sr-only">{label}</label>
-      <input id={inputId} type="search" className={s.input} placeholder={placeholder ?? label} {...rest} />
-    </div>
+      <input id={inputId} type="search" aria-label={label} className={s.input} placeholder={placeholder ?? label} {...rest} />
+    </label>
   )
 }
