@@ -1,5 +1,4 @@
 import type { RouteObject } from 'react-router-dom'
-import { Placeholder } from '@/components/Placeholder'
 import { GestaoShell, type GestaoHandle } from './GestaoShell'
 import { Entrar } from './screens/Entrar'
 import { Inicio } from './screens/Inicio'
@@ -17,18 +16,28 @@ import { Estoque } from './screens/estoque/Estoque'
 import { Inventario } from './screens/estoque/Inventario'
 import { Item } from './screens/estoque/Item'
 import { Movimentacoes } from './screens/estoque/Movimentacoes'
+import { Categorias } from './screens/catalogo/Categorias'
+import { Produto } from './screens/catalogo/Produto'
+import { Produtos } from './screens/catalogo/Produtos'
 import { Baixa } from './screens/financeiro/Baixa'
 import { Contas } from './screens/financeiro/Contas'
 import { Financeiro } from './screens/financeiro/Financeiro'
 import { Lancamentos } from './screens/financeiro/Lancamentos'
+import { Casa } from './screens/sistema/Casa'
+import { Configuracoes } from './screens/sistema/Configuracoes'
+import { Equipe } from './screens/sistema/Equipe'
+import { RelatorioVendas } from './screens/sistema/RelatorioVendas'
+import { Relatorios } from './screens/sistema/Relatorios'
+import { Atribuir } from './screens/relacionamento/Atribuir'
+import { Cliente } from './screens/relacionamento/Cliente'
+import { Clientes } from './screens/relacionamento/Clientes'
+import { Entregas } from './screens/relacionamento/Entregas'
 import { Ficha } from './screens/producao/Ficha'
 import { Fichas } from './screens/producao/Fichas'
 import { Ordem } from './screens/producao/Ordem'
 import { Producao } from './screens/producao/Producao'
 
-const env = 'Gestão'
 const tabs: GestaoHandle = { tabs: true }
-const todo = (title: string, design: string) => <Placeholder env={env} title={title} design={design} />
 
 // A — Gestão (36 telas)
 export const gestaoRoutes: RouteObject[] = [
@@ -60,11 +69,18 @@ export const gestaoRoutes: RouteObject[] = [
       { path: 'producao/fichas', element: <Fichas /> },
       { path: 'producao/fichas/:id', element: <Ficha /> },
       { path: 'producao/ordens/:id', element: <Ordem /> },
-      { path: 'produtos/*', element: todo('Produtos', 'Gestao-Produtos.dc.html') },
-      { path: 'clientes/*', element: todo('Clientes', 'Gestao-Clientes.dc.html') },
-      { path: 'entregas/*', element: todo('Entregas', 'Gestao-Entregas.dc.html') },
-      { path: 'relatorios/*', element: todo('Relatórios', 'Gestao-Relatorios.dc.html') },
-      { path: 'configuracoes/*', element: todo('Configurações', 'Gestao-Configuracoes.dc.html') },
+      { path: 'produtos', element: <Produtos /> },
+      { path: 'produtos/categorias', element: <Categorias /> },
+      { path: 'produtos/:id', element: <Produto /> },
+      { path: 'clientes', element: <Clientes /> },
+      { path: 'clientes/:id', element: <Cliente /> },
+      { path: 'entregas', element: <Entregas /> },
+      { path: 'entregas/atribuir/:id', element: <Atribuir /> },
+      { path: 'relatorios', element: <Relatorios /> },
+      { path: 'relatorios/vendas', element: <RelatorioVendas /> },
+      { path: 'configuracoes', element: <Configuracoes /> },
+      { path: 'configuracoes/casa', element: <Casa /> },
+      { path: 'configuracoes/equipe', element: <Equipe /> },
     ],
   },
 ]

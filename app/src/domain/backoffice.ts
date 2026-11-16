@@ -23,6 +23,8 @@ export type Item = {
   soldByWeight: boolean
   published: boolean
   favoritePos: boolean
+  /** texto da loja; marcador entre colchetes até o dono fornecer (P5) */
+  description?: string
 }
 
 export type Lot = { id: string; itemId: string; code: string; expiry: string | null; unitCostCents: Cents; createdAt: string }
@@ -153,3 +155,24 @@ export type LedgerTx = {
   kind: LedgerKind
   entryId: string | null
 }
+
+// Pessoas e casa
+export type Customer = {
+  id: string
+  name: string
+  phone: string
+  address: string
+  since: string
+  channel: string
+  orderCount: number
+  totalCents: Cents
+  fiadoCents: Cents
+  lastOrderLabel: string
+  topItems: { name: string; times: number }[]
+  history: { number: string; date: string; line: string; totalCents: Cents; status: string }[]
+  notes: string
+}
+
+export type Courier = { id: string; name: string; kind: 'own' | 'partner'; status: 'available' | 'en_route' | 'online'; note: string }
+
+export type TeamMember = { id: string; name: string; role: import('@/permissions/roles').Role; detail: string; pending?: boolean }

@@ -171,3 +171,73 @@
   background: var(--cor-grafite);
   color: var(--superficie);
 }
+
+.textarea {
+  padding: 12px 14px;
+  border-radius: var(--raio-campo);
+  border: 1.5px solid var(--linha);
+  background: var(--superficie);
+  color: var(--texto);
+  font: var(--corpo);
+  resize: vertical;
+  min-height: 88px;
+}
+
+.textarea:focus-visible {
+  outline: none;
+  border-color: var(--cor-grafite);
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  min-height: var(--toque-principal);
+  padding: var(--esp-2) 0;
+  border-bottom: 1px solid var(--linha);
+}
+
+.toggleRow:last-child {
+  border-bottom: 0;
+}
+
+.toggleText {
+  min-width: 0;
+}
+
+.toggleHit {
+  flex: none;
+  width: 60px;
+  height: var(--toque-min);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.track {
+  width: 52px;
+  height: 32px;
+  border-radius: var(--raio-pilula);
+  background: var(--linha);
+  padding: 4px;
+  display: flex;
+  justify-content: flex-start;
+  transition: background 0.15s;
+}
+
+.trackOn {
+  background: var(--cor-verde);
+  justify-content: flex-end;
+}
+
+.thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--raio-pilula);
+  background: var(--superficie);
+}

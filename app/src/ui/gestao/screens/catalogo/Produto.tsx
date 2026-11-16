@@ -1,0 +1,124 @@
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { Box } from '@/components/Card'
+import { Button, ButtonLink } from '@/components/Button'
+import { Banner, EmptyState } from '@/components/Feedback'
+import { RadioGroup, SelectField, TextAreaField, TextField, Toggle } from '@/components/Field'
+import type { Item, ItemType } from '@/domain/backoffice'
+import type { ProductOrigin } from '@/domain/catalog'
+import { formatCents, parseCents } from '@/domain/money'
+import { itemsStore } from '@/services/gestao/backoffice'
+import { categoriesStore } from '@/services/gestao/people'
+import { internalCategories } from '@/mocks/catalog'
+import o from '@/styles/ops.module.css'
+import { Bar, SumRow } from '../../../shared/OpsBits'
+import { ProductPhoto } from '@/ui/loja/components/ProductCard'
+
+const brl = (cents: number | null) => (cents === null ? '' : (cents / 100).toFixed(2).replace('.', ','))
+
+// H-G25 — cadastro separa tipo de item e origem; liga/desliga loja, favorito no PDV, peso e lote
+export function Produto() {
+  const { id = '' } = useParams()
+  const item = itemsStore.useStore().find((i) => i.id === id)
+  const categories = categoriesStore.useStore()
+  const [form, setForm] = useState<Item | null>(item ?? null)
+  const [price, setPrice] = useState(brl(item?.priceCents ?? null))
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    setForm(item ?? null)
+    setPrice(brl(item?.priceCents ?? null))
+  }, [item?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!item || !form) {
+    return (
+      <div className={o.screen}>
+        <Bar title="Produto" back="/gestao/produtos" />
+        <EmptyState bare icon="vender" title="Produto não encontrado" action={<ButtonLink to="/gestao/produtos">Ver produtos</ButtonLink>} />
+      </div>
+    )
+  }
+
+  const set = (patch: Partial<Item>) => {
+    setForm({ ...form, ...patch })
+    setSaved(false)
+  }
+  const raw = form.itemType === 'raw_material'
+  const priceCents = parseCents(price)
+  const margin = priceCents && priceCents > 0 ? Math.round(((priceCents - form.costCents) / priceCents) * 100) : null
+
+  const save = () => {
+    const next: Item = {
+      ...form,
+      priceCents: raw ? null : priceCents,
+      origin: raw ? null : (form.origin ?? 'third_party'),
+      published: raw ? false : form.published,
+      favoritePos: raw ? false : form.favoritePos,
+    }
+    itemsStore.set((all) => all.map((i) => (i.id === next.id ? next : i)))
+    setSaved(true)
+  }
+
+  return (
+    <div className={o.screen}>
+      <Bar title={item.name} back="/gestao/produtos" />
+      <main className={`${o.main} ${o.mainTop} ${o.narrow}`}>
+        <ProductPhoto white label="[FOTO DO PRODUTO]" />
+        <TextField label="Nome" value={form.name} onChange={(e) => set({ name: e.target.value })} />
+        <SelectField
+          label="Categoria"
+          value={form.categoryId}
+          onChange={(e) => set({ categoryId: e.target.value })}
+          options={[...categories, ...internalCategories].map((c) => ({ value: c.id, label: c.name }))}
+        />
+        <RadioGroup<ItemType>
+          legend="Tipo de item"
+          name="tipo"
+          value={form.itemType}
+          onChange={(t) => set({ itemType: t })}
+          options={[
+            { value: 'finished', title: 'Produto acabado', sub: 'Produzido a partir de uma ficha técnica' },
+            { value: 'resale', title: 'Revenda', sub: 'Comprado pronto de fornecedor' },
+            { value: 'raw_material', title: 'Matéria-prima', sub: 'Usado na produção, não vai à venda' },
+          ]}
+        />
+        {!raw && (
+          <RadioGroup<ProductOrigin>
+            legend="Origem na loja"
+            name="origem"
+            value={form.origin ?? 'third_party'}
+            onChange={(origin) => set({ origin })}
+            options={[
+              { value: 'house_made', title: 'Feito na casa' },
+              { value: 'bodeleve_brand', title: 'Marca Bodeleve', sub: 'Feito na casa ou por parceiro, com a marca' },
+              { value: 'third_party', title: 'Terceiros', sub: 'Sem selo na loja' },
+            ]}
+          />
+        )}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10, alignItems: 'start' }}>
+          {!raw && <TextField label="Preço de venda" inputMode="decimal" value={price} onChange={(e) => { setPrice(e.target.value); setSaved(false) }} />}
+          <TextField label={`Estoque mínimo (${form.unit})`} inputMode="decimal" value={String(form.minStock)} onChange={(e) => set({ minStock: Number(e.target.value.replace(',', '.')) || 0 })} />
+        </div>
+        <div className={o.card}>
+          <SumRow label={form.itemType === 'finished' ? 'Custo (da ficha técnica)' : 'Custo'} value={formatCents(form.costCents)} />
+          {!raw && <SumRow label="Margem" value={margin === null ? '—' : `${margin}%`} />}
+        </div>
+        {!raw && (
+          <Box>
+            <Toggle label="Publicar na loja online" sub="Aparece no catálogo para clientes" checked={form.published} onChange={(v) => set({ published: v })} />
+            <Toggle label="Favorito no PDV" sub="Fica na primeira tela do balcão" checked={form.favoritePos} onChange={(v) => set({ favoritePos: v })} />
+            <Toggle label="Vendido por peso" sub="Pede o peso na hora da venda" checked={form.soldByWeight} onChange={(v) => set({ soldByWeight: v })} />
+            <Toggle label="Controlar lote e validade" sub="Obrigatório para alimentos perecíveis" checked={form.tracksLots} onChange={(v) => set({ tracksLots: v })} />
+          </Box>
+        )}
+        {!raw && <TextAreaField label="Descrição na loja" rows={3} value={form.description ?? '[DESCRIÇÃO DO PRODUTO]'} onChange={(e) => set({ description: e.target.value })} />}
+        {saved && <Banner tone="success">Produto salvo.</Banner>}
+      </main>
+      <div className={o.footer}>
+        <Button size="l" block onClick={save}>
+          Salvar
+        </Button>
+      </div>
+    </div>
+  )
+}

@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
+import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { Icon } from './Icon'
 import styles from './Field.module.css'
 
@@ -156,6 +156,37 @@ export function SelectField({
           </option>
         ))}
       </select>
+    </div>
+  )
+}
+
+export function TextAreaField({ label, id, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement> & { label: string }) {
+  const auto = useId()
+  const fid = id ?? auto
+  return (
+    <div className={styles.field}>
+      <label htmlFor={fid} className={styles.label}>
+        {label}
+      </label>
+      <textarea id={fid} className={styles.textarea} {...rest} />
+    </div>
+  )
+}
+
+/** Liga/desliga com área de 60 × 44 px (DESIGN_SYSTEM.md) */
+export function Toggle({ label, sub, checked, onChange }: { label: string; sub?: string; checked: boolean; onChange: (v: boolean) => void }) {
+  const id = useId()
+  return (
+    <div className={styles.toggleRow}>
+      <span id={id} className={styles.toggleText}>
+        <span className={styles.optionTitle}>{label}</span>
+        {sub && <span className={styles.optionSub}>{sub}</span>}
+      </span>
+      <button type="button" role="switch" aria-checked={checked} aria-labelledby={id} className={styles.toggleHit} onClick={() => onChange(!checked)}>
+        <span aria-hidden="true" className={`${styles.track} ${checked ? styles.trackOn : ''}`}>
+          <span className={styles.thumb} />
+        </span>
+      </button>
     </div>
   )
 }

@@ -20,7 +20,7 @@ const all: Module[] = ['inicio', 'pedidos', 'estoque', 'financeiro', 'compras', 
 export const moduleAccess: Record<Role, Module[]> = {
   owner: all,
   manager: all.filter((m) => m !== 'configuracoes'),
-  clerk: ['inicio', 'pedidos', 'estoque', 'clientes', 'entregas'],
+  clerk: ['inicio', 'pedidos'],
   production: ['inicio', 'estoque', 'producao'],
   courier: [],
 }

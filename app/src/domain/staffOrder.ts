@@ -30,6 +30,9 @@ export type StaffOrder = {
   paymentLabel: string
   paid: boolean
   courierName: string | null
+  distanceKm?: number
+  /** entrega reservada ou publicada, ainda sem entregador em rota */
+  deliveryNote?: string
 }
 
 export const staffStatusLabels: Record<StaffOrderStatus, string> = {

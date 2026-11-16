@@ -27,7 +27,7 @@ export const seedStaffOrders = (): StaffOrder[] => [
   order({
     id: 'g-1043', number: '1043', createdAt: minutesBefore(10), status: 'new',
     customer: { id: 'maria-lima', name: 'Maria Lima', phone: '(00) 90000-0001', since: daysFromToday(-250), orderCount: 5 },
-    fulfillment: 'delivery', address: { line1: 'Av. das Palmeiras, 455 · casa 2', line2: 'Centro' }, windowLabel: 'O quanto antes',
+    fulfillment: 'delivery', address: { line1: 'Av. das Palmeiras, 455 · casa 2', line2: 'Centro' }, distanceKm: 1.8, windowLabel: 'O quanto antes',
     items: [queijo(), farinha(), tapioca()], feeCents: 800, paymentLabel: 'Pix', paid: true, courierName: null,
   }),
   order({
@@ -39,7 +39,7 @@ export const seedStaffOrders = (): StaffOrder[] => [
   order({
     id: 'g-1041', number: '1041', createdAt: minutesBefore(50), status: 'separating',
     customer: { id: 'paula-reis', name: 'Paula Reis', phone: '(00) 90000-0003', since: daysFromToday(-400), orderCount: 11 },
-    fulfillment: 'delivery', address: { line1: 'Rua do Sol, 88', line2: 'Jardim Norte' }, windowLabel: 'Hoje à tarde',
+    fulfillment: 'delivery', address: { line1: 'Rua do Sol, 88', line2: 'Bairro Alto' }, distanceKm: 4.1, windowLabel: 'Hoje à tarde',
     items: [queijo(2), carne(), doce(), farinha()], feeCents: 800, paymentLabel: 'Pix', paid: true, courierName: null,
   }),
   order({
@@ -57,7 +57,19 @@ export const seedStaffOrders = (): StaffOrder[] => [
   order({
     id: 'g-1042', number: '1042', createdAt: minutesBefore(38), status: 'en_route',
     customer: { id: 'ana-souza', name: 'Ana Souza', phone: '(00) 90000-0000', since: daysFromToday(-120), orderCount: 4 },
-    fulfillment: 'delivery', address: { line1: 'Rua das Camélias, 120 · apto 34', line2: 'Jardim das Flores' }, windowLabel: 'O quanto antes',
+    fulfillment: 'delivery', address: { line1: 'Rua das Camélias, 120 · apto 34', line2: 'Jardim das Flores' }, distanceKm: 2.6, windowLabel: 'O quanto antes',
     items: [queijo(), farinha(2), rapadura()], feeCents: 800, paymentLabel: 'Pix', paid: true, courierName: 'Carlos',
+  }),
+  order({
+    id: 'g-1038', number: '1038', createdAt: minutesBefore(150), status: 'delivered',
+    customer: { id: 'rafael-dias', name: 'Rafael Dias', phone: '(00) 90000-0005', since: daysFromToday(-15), orderCount: 1 },
+    fulfillment: 'delivery', address: { line1: 'Rua Nova, 12', line2: 'Centro' }, distanceKm: 1.2, windowLabel: 'O quanto antes',
+    items: [farinha(), tapioca()], feeCents: 800, paymentLabel: 'Pix', paid: true, courierName: 'Bruno',
+  }),
+  order({
+    id: 'g-1036', number: '1036', createdAt: minutesBefore(420), status: 'delivered',
+    customer: { id: 'paula-reis', name: 'Paula Reis', phone: '(00) 90000-0003', since: daysFromToday(-400), orderCount: 11 },
+    fulfillment: 'delivery', address: { line1: 'Rua do Sol, 88', line2: 'Bairro Alto' }, distanceKm: 4.1, windowLabel: 'Hoje à tarde',
+    items: [doce(), queijo()], feeCents: 800, paymentLabel: 'Pix', paid: true, courierName: 'Parceiro',
   }),
 ]
