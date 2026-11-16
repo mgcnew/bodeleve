@@ -1,0 +1,37 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item {
+  display: flex;
+  gap: var(--esp-3);
+  align-items: center;
+  padding: var(--esp-3);
+  border-radius: var(--raio-cartao);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+}
+
+.thumb {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  font-size: 0;
+}
+
+.itemText {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.itemName {
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.itemTotal {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

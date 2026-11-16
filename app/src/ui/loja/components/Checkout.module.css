@@ -1,0 +1,149 @@
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.bars {
+  display: flex;
+  gap: 6px;
+}
+
+.bar {
+  flex: 1 1 0;
+  height: 6px;
+  border-radius: var(--raio-pilula);
+  background: var(--linha);
+}
+
+.done {
+  background: var(--cor-terracota);
+}
+
+/* linha do tempo do pedido */
+.timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.step {
+  display: flex;
+  gap: var(--esp-3);
+  align-items: flex-start;
+}
+
+.dot {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--raio-pilula);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--superficie);
+  color: var(--texto-secundario);
+  border: 2px solid var(--linha);
+}
+
+.dotOk {
+  background: var(--cor-verde);
+  color: var(--superficie);
+  border-color: var(--cor-verde);
+}
+
+.dotNow {
+  color: var(--cor-terracota);
+  border-color: var(--cor-terracota);
+}
+
+.stepTitle {
+  font-weight: 600;
+}
+
+.stepTitle.later {
+  color: var(--texto-secundario);
+}
+
+.stepTitle.now {
+  font-weight: 700;
+}
+
+/* código de entrega */
+.code {
+  padding: var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-terracota-suave);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-4);
+}
+
+.codeTitle {
+  font-weight: 600;
+  color: var(--cor-terracota-pressionado);
+}
+
+.codeValue {
+  font: 700 34px/40px var(--fonte-titulo);
+  letter-spacing: 0.08em;
+  color: var(--cor-terracota-pressionado);
+  font-variant-numeric: tabular-nums;
+}
+
+/* bloco da revisão */
+.reviewBlock {
+  padding: 14px var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reviewHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--esp-3);
+}
+
+.reviewTitle {
+  font: 600 16px/24px var(--fonte-texto);
+}
+
+.place {
+  padding: 14px var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  display: flex;
+  gap: var(--esp-3);
+  align-items: flex-start;
+  color: var(--cor-terracota);
+}
+
+.placeText {
+  flex: 1 1 0;
+  min-width: 0;
+  color: var(--texto);
+}
+
+.fee {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-terracota-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.feeFree {
+  background: var(--sucesso-fundo);
+  color: var(--sucesso);
+}

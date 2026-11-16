@@ -1,0 +1,26 @@
+.digits {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--esp-2);
+}
+
+.digit {
+  width: 100%;
+  height: var(--toque-principal);
+  border-radius: var(--raio-campo);
+  border: 1.5px solid var(--linha);
+  background: var(--superficie);
+  text-align: center;
+  font: 600 22px/28px var(--fonte-texto);
+  color: var(--texto);
+}
+
+.digit:focus-visible {
+  outline: none;
+  border-color: var(--cor-grafite);
+}
+
+.divider {
+  padding-top: var(--esp-2);
+  border-top: 1px solid var(--linha);
+}

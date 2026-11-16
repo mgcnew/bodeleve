@@ -34,8 +34,18 @@ Plataforma da Bodeleve (Casa do Norte): loja online, gestão, PDV e app de entre
 
 Antes de pagamentos reais (Pix, cartão), nota fiscal e área de entrega, confirme com o dono as pendências Q6–Q8, Q12 e Q14.
 
+## Implementação
+
+- **Stack**: React + Vite + TypeScript em `app/`, React Router, `@supabase/supabase-js`. Um único app com os 4 ambientes por rota: Loja em `/`, Gestão em `/gestao`, PDV em `/pdv`, Entregas em `/entregas`.
+- **Rodar**: `cd app && npm install && npm run dev`. Supabase: copie `app/.env.example` para `app/.env.local`; sem ele, `supabase` é `null` e os serviços usam `src/mocks`.
+- **Camadas** (`app/src`): `ui/<ambiente>` (telas e rotas) · `components/` · `mocks/` · `services/` · `domain/` (regras, dinheiro em centavos) · `permissions/` (papéis H-G27) · `config/hypotheses.ts` (valores H-* isolados) · `lib/supabase.ts`.
+- **Tokens**: `src/styles/global.css` importa `design/tokens.css` pelo alias `@design`; não copie o arquivo. Ícones em `components/Icon.tsx` espelham `gen/common.py`.
+- **Banco**: migrações SQL em `supabase/migrations/`. A primeira cria base (estabelecimento, perfis, vínculos), catálogo e RLS com `has_role()` / `is_member()`.
+
 ## Estrutura
 
+- `app/` — aplicação React
+- `supabase/` — migrações do banco
 - `docs/` — documentação do projeto
 - `design/` — telas do canvas (`*.dc.html`), índice `canvas.json`, `tokens.css`
 - `gen/` — scripts Python que geram as telas (`cd gen && python3 b16_entregas.py` regenera gestão, PDV e entregas; `b8_loja3.py` a loja; `b1`–`b5` o design system; `b17_responsivo.py` as referências de tablet e computador)

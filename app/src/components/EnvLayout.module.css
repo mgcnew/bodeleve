@@ -1,0 +1,57 @@
+.shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.bottom {
+  position: sticky;
+  bottom: 0;
+}
+
+/* tablet e computador: a barra inferior vira menu lateral (DESIGN_SYSTEM.md, Responsivo) */
+@media (min-width: 768px) {
+  .shell {
+    flex-direction: row;
+  }
+
+  .bottom {
+    order: -1;
+    top: 0;
+    flex: none;
+    width: 220px;
+    height: 100dvh;
+  }
+
+  .bottom nav {
+    height: 100%;
+    flex-direction: column;
+    gap: 2px;
+    padding: 20px 12px;
+    border-top: 0;
+    border-right: 1px solid var(--linha);
+  }
+
+  .bottom nav a {
+    flex: none;
+    height: var(--toque-acao);
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--esp-3);
+    padding: 0 var(--esp-3);
+    border-radius: var(--raio-campo);
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  .bottom nav a[aria-current='page'] {
+    background: var(--cor-terracota-suave);
+  }
+}

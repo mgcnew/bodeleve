@@ -1,0 +1,111 @@
+.btn {
+  height: var(--toque-acao);
+  padding: 0 20px;
+  border-radius: var(--raio-cartao);
+  border: 0;
+  font: 600 16px/24px var(--fonte-texto);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.l {
+  height: var(--toque-principal);
+}
+
+.block {
+  display: flex;
+  width: 100%;
+}
+
+.spread {
+  justify-content: space-between;
+}
+
+.spread > :first-child {
+  flex: 1 1 0;
+  text-align: left;
+}
+
+.primary {
+  background: var(--cor-terracota);
+  color: var(--superficie);
+}
+.primary:active {
+  background: var(--cor-terracota-pressionado);
+}
+
+.secondary {
+  background: transparent;
+  color: var(--texto);
+  border: 1.5px solid var(--cor-grafite);
+}
+
+.quiet {
+  background: transparent;
+  color: var(--cor-terracota);
+}
+
+.danger {
+  background: var(--superficie);
+  color: var(--erro);
+  border: 1.5px solid var(--erro);
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  background: var(--linha);
+  color: var(--texto-secundario);
+  border: 0;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--raio-pilula);
+  border: 2px solid rgb(255 255 255 / 0.45);
+  border-top-color: var(--superficie);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon {
+  flex: none;
+  width: var(--toque-min);
+  height: var(--toque-min);
+  padding: 0;
+  border-radius: var(--raio-cartao);
+  border: 0;
+  background: transparent;
+  color: var(--texto);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.iconPrimary {
+  background: var(--cor-terracota);
+  color: var(--superficie);
+}
+
+.iconMuted {
+  background: var(--cor-creme);
+  border: 1px solid var(--linha);
+}
+
+.iconOutlined {
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+}

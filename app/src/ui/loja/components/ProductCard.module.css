@@ -1,0 +1,95 @@
+.card {
+  padding: 10px;
+  border-radius: var(--raio-cartao);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  min-width: 0;
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  text-decoration: none;
+  color: var(--texto);
+}
+
+.photo {
+  height: 110px;
+}
+
+@media (min-width: 1024px) {
+  .card {
+    padding: var(--esp-3);
+  }
+  .photo {
+    height: 160px;
+  }
+}
+
+.sealSlot {
+  min-height: 24px;
+}
+
+.name {
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.size {
+  font: 400 13px/18px var(--fonte-texto);
+  color: var(--texto-secundario);
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-2);
+  margin-top: auto;
+}
+
+.price {
+  font-weight: 600;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.unavailable {
+  font: 600 13px/18px var(--fonte-texto);
+  color: var(--atencao);
+}
+
+/* linha de resultado de busca */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  min-height: 64px;
+  padding: var(--esp-2) 0;
+  border-bottom: 1px solid var(--linha);
+  text-decoration: none;
+  color: var(--texto);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.rowPhoto {
+  flex: none;
+  width: 48px;
+  height: 48px;
+}
+
+.rowText {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.rowText > span {
+  display: block;
+}

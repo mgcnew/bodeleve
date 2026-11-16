@@ -1,0 +1,56 @@
+.photo {
+  height: 300px;
+  border-radius: var(--raio-folha);
+  background: var(--superficie);
+}
+
+.title {
+  font: var(--titulo-l);
+}
+
+.price {
+  font: var(--valor);
+  font-variant-numeric: tabular-nums;
+}
+
+.qty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-4);
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+}
+
+.info {
+  border-bottom: 1px solid var(--linha);
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--esp-4);
+  padding: 14px 0;
+  border-top: 1px solid var(--linha);
+}
+
+.infoRow dt {
+  color: var(--texto-secundario);
+}
+
+.infoRow dd {
+  margin: 0;
+  font-weight: 500;
+  text-align: right;
+}
+
+@media (min-width: 768px) {
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--esp-8);
+    align-items: start;
+  }
+}

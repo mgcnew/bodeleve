@@ -1,0 +1,128 @@
+/* topo do computador (Resp-Loja-Desktop): só a partir de 1024 px */
+.desk {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .desk {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--esp-4) var(--esp-8);
+    padding: var(--esp-4) var(--esp-8);
+    background: var(--superficie);
+    border-bottom: 1px solid var(--linha);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  .mobileOnly {
+    display: none !important;
+  }
+}
+
+.brand {
+  font: 700 28px/34px var(--fonte-titulo);
+  text-decoration: none;
+  color: var(--texto);
+}
+
+.sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-1);
+}
+
+.sections a {
+  min-height: var(--toque-min);
+  padding: 0 var(--esp-3);
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--texto);
+  font-weight: 500;
+  border-radius: var(--raio-campo);
+}
+
+.sections a[aria-current='page'] {
+  color: var(--cor-terracota);
+  font-weight: 700;
+}
+
+.search {
+  flex: 1 1 240px;
+  height: var(--toque-min);
+  background: var(--cor-creme);
+}
+
+.bag {
+  height: var(--toque-min);
+  padding: 0 var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-terracota);
+  color: var(--superficie);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-weight: 600;
+}
+
+/* barra de sacola (acima da navegação) */
+.cartBar {
+  margin: 0 var(--esp-3) var(--esp-3);
+  height: var(--toque-principal);
+  padding: 0 var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-terracota);
+  color: var(--superficie);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgb(41 38 33 / 0.16);
+}
+
+.cartBar > span:first-of-type {
+  flex: 1 1 0;
+}
+
+/* barra superior das telas internas */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-1);
+  height: var(--toque-principal);
+  padding: 0 6px;
+  flex: none;
+}
+
+.topbarTitle {
+  flex: 1 1 0;
+  min-width: 0;
+  font: 700 20px/26px var(--fonte-titulo);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-terracota);
+  color: var(--superficie);
+  font: 700 12px/20px var(--fonte-texto);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.relative {
+  position: relative;
+}

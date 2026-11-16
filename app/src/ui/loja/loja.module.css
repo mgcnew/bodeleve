@@ -1,0 +1,239 @@
+/* Peças compartilhadas pelas telas da loja (design/Loja-*.dc.html) */
+
+.shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--fundo-loja);
+}
+
+.screen {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* checkout e telas de tarefa: coluna única de até 560 px no computador */
+.narrow {
+  max-width: 560px;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+  padding: var(--esp-2) var(--esp-4) var(--esp-6);
+}
+
+.mainTight {
+  gap: var(--esp-4);
+  padding-top: var(--esp-1);
+}
+
+.mainCompact {
+  gap: var(--esp-3);
+  padding-top: var(--esp-1);
+}
+
+.mainForm {
+  gap: 20px;
+  padding-top: var(--esp-1);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.stack12 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.pageHeader {
+  padding: var(--esp-4) var(--esp-4) var(--esp-2);
+  flex: none;
+}
+
+.pageTitle {
+  font: var(--titulo-l);
+  letter-spacing: -0.01em;
+}
+
+.h1 {
+  font: 700 24px/30px var(--fonte-titulo);
+}
+
+.h2 {
+  font: 700 20px/26px var(--fonte-titulo);
+}
+
+.h2Section {
+  font: var(--titulo-m);
+}
+
+.muted {
+  font: var(--apoio);
+  color: var(--texto-secundario);
+}
+
+.secondary {
+  color: var(--texto-secundario);
+}
+
+.small {
+  font: 400 13px/18px var(--fonte-texto);
+  color: var(--texto-secundario);
+}
+
+.center {
+  text-align: center;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow {
+  font: 600 12px/16px var(--fonte-texto);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* grade de produtos: 2 colunas no celular, 3 no tablet, 4 no computador */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--esp-3);
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--esp-4);
+  }
+}
+
+/* rodapé fixo com a ação principal */
+.footer {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  flex: none;
+  padding: var(--esp-3) var(--esp-4) var(--esp-4);
+  padding-bottom: calc(var(--esp-4) + env(safe-area-inset-bottom));
+  background: var(--superficie);
+  border-top: 1px solid var(--linha);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.footerPlain {
+  position: static;
+  background: transparent;
+  border-top: 0;
+}
+
+.bottomStack {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.linkArrow {
+  align-self: flex-start;
+  min-height: var(--toque-min);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--cor-terracota);
+}
+
+.linkInline {
+  min-height: var(--toque-min);
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--cor-terracota);
+}
+
+.soft {
+  padding: 14px var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-terracota-suave);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.card {
+  padding: 14px var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+}
+
+.photo {
+  border-radius: 10px;
+  background: var(--cor-creme);
+  border: 1px dashed var(--texto-secundario);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font: 600 12px/16px var(--fonte-texto);
+  color: var(--texto-secundario);
+}
+
+.photoWhite {
+  background: var(--superficie);
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--toque-acao);
+  padding: 0 var(--esp-4);
+  border-radius: var(--raio-pilula);
+  background: var(--superficie);
+  border: 1.5px solid var(--linha);
+  color: var(--texto-secundario);
+}
+
+.searchBox:focus-within,
+.searchStrong {
+  border-color: var(--cor-grafite);
+}
+
+.searchInput {
+  flex: 1 1 0;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: var(--corpo);
+  color: var(--texto);
+  outline: none;
+}
+
+.searchInput::-webkit-search-cancel-button {
+  cursor: pointer;
+}

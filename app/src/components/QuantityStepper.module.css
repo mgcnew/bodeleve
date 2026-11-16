@@ -1,0 +1,17 @@
+.group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.value {
+  min-width: 28px;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.large {
+  min-width: 36px;
+  font-size: 18px;
+}

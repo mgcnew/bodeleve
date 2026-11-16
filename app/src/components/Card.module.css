@@ -1,0 +1,74 @@
+.box {
+  padding: var(--esp-1) var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+}
+
+.panel {
+  padding: var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.rowLink {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  min-height: var(--toque-principal);
+  padding: var(--esp-2) 0;
+  border-bottom: 1px solid var(--linha);
+  text-decoration: none;
+  color: var(--texto);
+}
+
+.rowLink:last-child {
+  border-bottom: 0;
+}
+
+.rowLink > svg {
+  color: var(--texto-secundario);
+}
+
+.rowText {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.rowTitle {
+  display: block;
+  font-weight: 600;
+}
+
+.rowSub {
+  display: block;
+  font: 400 13px/18px var(--fonte-texto);
+  color: var(--texto-secundario);
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  color: var(--texto-secundario);
+  font-variant-numeric: tabular-nums;
+}
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  padding-top: var(--esp-2);
+  border-top: 1px solid var(--linha);
+  font-weight: 600;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.panelTitle {
+  font-weight: 600;
+}

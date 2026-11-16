@@ -1,0 +1,45 @@
+.seal {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--raio-pilula);
+  color: var(--superficie);
+  font: 600 12px/18px var(--fonte-texto);
+  white-space: nowrap;
+}
+
+.house_made {
+  background: var(--cor-verde);
+}
+
+.bodeleve_brand {
+  background: var(--cor-terracota);
+}
+
+.third_party {
+  background: var(--texto-secundario);
+}
+
+.tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--raio-campo);
+  font: 600 13px/18px var(--fonte-texto);
+  white-space: nowrap;
+}
+
+.success {
+  color: var(--sucesso);
+  background: var(--sucesso-fundo);
+}
+.warning {
+  color: var(--atencao);
+  background: var(--atencao-fundo);
+}
+.error {
+  color: var(--erro);
+  background: var(--erro-fundo);
+}
+.info {
+  color: var(--info);
+  background: var(--info-fundo);
+}
