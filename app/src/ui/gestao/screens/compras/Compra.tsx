@@ -7,6 +7,7 @@ import { purchaseTotal } from '@/domain/backoffice'
 import { shortDate } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { purchasesStore, suppliersStore } from '@/services/gestao/backoffice'
+import { whatsappLink } from '@/services/gestao/purchases'
 import o from '@/styles/ops.module.css'
 import { Bar } from '../../../shared/OpsBits'
 import { purchaseTag } from './shared'
@@ -70,6 +71,20 @@ export function Compra() {
         </div>
       </main>
       <div className={o.footer}>
+        {canReceive && supplier.phone && (
+          <a
+            className={o.linkInline}
+            style={{ justifyContent: 'center' }}
+            target="_blank"
+            rel="noopener noreferrer"
+            href={whatsappLink(
+              supplier.phone,
+              [`Olá, ${supplier.contactName}! Pedido ${p.number} da Bodeleve:`, ...p.items.map((i) => `• ${i.qty} × ${i.name}`), `Previsão: ${new Date(p.expectedAt).toLocaleDateString('pt-BR')}`, `Pagamento: ${p.paymentTerms}`].join('\n'),
+            )}
+          >
+            Enviar pelo WhatsApp
+          </a>
+        )}
         {canReceive && (
           <ButtonLink to={`/gestao/compras/${p.id}/receber`} size="l" block>
             Receber mercadoria

@@ -15,7 +15,7 @@ import { daysFromToday } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { itemsStore, purchasesStore, stockStore, suppliersStore } from '@/services/gestao/backoffice'
 import { staffOrdersStore } from '@/services/gestao/orders'
-import { createPurchase, whatsappLink } from '@/services/gestao/purchases'
+import { createPurchase } from '@/services/gestao/purchases'
 import { balanceOf } from '@/services/gestao/stock'
 import o from '@/styles/ops.module.css'
 import { Bar, SumRow, SumTotal } from '../../../shared/OpsBits'
@@ -32,7 +32,9 @@ export function CompraNova() {
   const purchases = purchasesStore.useStore()
   const navigate = useNavigate()
 
-  const [supplierId, setSupplierId] = useState(params.get('fornecedor') ?? suppliers[0]?.id ?? '')
+  // a lista de fornecedores pode chegar depois da tela: enquanto nada foi escolhido vale o primeiro
+  const [chosen, setSupplierId] = useState(params.get('fornecedor') ?? '')
+  const supplierId = chosen || suppliers[0]?.id || ''
   const supplier = suppliers.find((s) => s.id === supplierId) ?? suppliers[0]
   const supplied = useMemo(() => items.filter((i) => i.supplierId === supplierId), [items, supplierId])
 
@@ -51,7 +53,10 @@ export function CompraNova() {
   const setItemQty = (id: string, q: number) => setQty((all) => ({ ...all, [supplierId]: { ...current, [id]: q } }))
 
   const [expected, setExpected] = useState(daysFromToday(4).slice(0, 10))
-  const [payment, setPayment] = useState(supplier?.paymentDays ? `Boleto, ${supplier.paymentDays} dias após receber` : 'Pix na entrega')
+  const [paymentChoice, setPayment] = useState<string | null>(null)
+  // por padrão, a condição do fornecedor; só sai disso se a pessoa escolher outra
+  const supplierDefault = supplier?.paymentDays ? 'Boleto, 14 dias após receber' : supplier?.paymentTerms?.toLowerCase().includes('dinheiro') ? 'Dinheiro na entrega' : 'Pix na entrega'
+  const payment = paymentChoice && paymentOptions.includes(paymentChoice) ? paymentChoice : supplierDefault
   const [error, setError] = useState(false)
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string>()
@@ -80,7 +85,6 @@ export function CompraNova() {
         },
         message,
       )
-      window.open(whatsappLink(supplier.phone, message.replace('{number}', p.number)), '_blank', 'noopener')
       navigate(`/gestao/compras/${p.id}`, { replace: true })
     } catch (e) {
       setProblem(backofficeErrorMessage(e))
@@ -106,6 +110,7 @@ export function CompraNova() {
           value={supplierId}
           onChange={(e) => {
             setSupplierId(e.target.value)
+            setPayment(null)
             setError(false)
           }}
           options={suppliers.map((s) => ({ value: s.id, label: s.name }))}
@@ -155,7 +160,7 @@ export function CompraNova() {
           Enviar ao fornecedor
         </Button>
         <p className={o.muted} style={{ textAlign: 'center' }}>
-          Envia o pedido pelo WhatsApp do fornecedor e salva como “Enviado”.
+          Salva como “Enviado”. Na tela do pedido você manda a mensagem pelo WhatsApp do fornecedor.
         </p>
       </div>
     </div>
