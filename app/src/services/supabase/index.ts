@@ -3,6 +3,7 @@ import { useAdminSession } from '@/store/admin'
 import type { Services } from '@/services/types'
 import { createSupabaseCatalogAdmin } from './admin/catalog'
 import { createAdminContext } from './admin/context'
+import { createHydratedAdmin } from './admin/hydrated'
 import { createSupabaseCustomers } from './admin/customers'
 import { createSupabaseOrdersAdmin } from './admin/orders'
 import { createSupabaseSettings } from './admin/settings'
@@ -14,8 +15,8 @@ export { storeSlug } from './client'
 
 /**
  * Serviços sobre o Supabase, ligados por partes. Já são reais: loja pública (catálogo, pedido, acompanhamento, A casa), entrada da equipe,
- * e na Gestão: pedidos, produtos e categorias, clientes, A casa e equipe. O que ainda não foi ligado (estoque, compras, produção, financeiro,
- * entregas, relatórios, início, PDV, app de Entregas) continua nos serviços simulados até ganhar a versão real; veja `docs/ROADMAP.md`.
+ * e na Gestão: pedidos, produtos e categorias, clientes, A casa, equipe, estoque, compras, produção, financeiro e início. O que ainda não foi ligado (
+ * entregas, relatórios, PDV, app de Entregas) continua nos serviços simulados até ganhar a versão real; veja `docs/ROADMAP.md`.
  * Por isso este modo só liga com `VITE_DATA_SOURCE=supabase` e não é o padrão.
  */
 export function createSupabaseServices(opts: { client?: Db; mock?: MockOptions } = {}): Services {
@@ -51,6 +52,7 @@ export function createSupabaseServices(opts: { client?: Db; mock?: MockOptions }
       catalog: createSupabaseCatalogAdmin(ctx),
       customers: createSupabaseCustomers(ctx),
       settings: createSupabaseSettings(ctx),
+      ...createHydratedAdmin(ctx),
     },
   }
 }

@@ -17,6 +17,8 @@ Aplicadas na ordem do nome. Cada arquivo é o mesmo SQL já aplicado no projeto;
 | `…07_funcoes_estoque_compras_producao` | baixa por lote que vence primeiro (FEFO), ajuste e estorno, inventário, recebimento de compra (lote, conta a pagar), produção com custo real; tudo com desfazer |
 | `…08_funcoes_pedidos_pdv_financeiro_entregas` | fila do pedido online, balcão (abrir/fechar/reabrir caixa, venda, sangria, cancelamento com senha de gestor), pagar conta e desfazer, atribuição de entrega e todo o fluxo do entregador |
 | `…09_corrige_nome_do_aprovador` | corrige o nome de quem aprova um cancelamento |
+| `…10_protege_escritas_diretas` e `…11_corrige_protecoes` | a equipe não consegue marcar compra como recebida, ordem como concluída ou conta como paga por fora das funções |
+| `…12_compras_e_producao_completas` e `…13_corrige_ordem_de_producao`, `…14_mensagem_da_compra_com_numero` | numera pedido de compra e ordem de produção, reserva insumos, encerra compra com falta, apontamento de produção com consumo real |
 
 ## Regras de segurança (RLS)
 
@@ -31,6 +33,7 @@ Aplicadas na ordem do nome. Cada arquivo é o mesmo SQL já aplicado no projeto;
 Toda escrita de estoque, caixa e dinheiro é por função (`security definer`, confere o papel da pessoa na casa). Erros esperados voltam como exceção com o código na mensagem (`insufficient_stock`, `forbidden`, `wrong_code`…).
 Exceção: `pos_cancel_sale` devolve `{ "error": "invalid_pin" | "pin_locked" }` em vez de lançar, para a tentativa errada ficar registrada (5 erros em 10 min travam por 10 min).
 
+- Compras/produção (novas): `create_purchase_order`, `close_purchase_short`, `create_production_order`, `start_production`, `delete_production_order`
 - Estoque/compras/produção: `stock_adjust`, `stock_reverse`, `stock_count_apply`, `stock_count_undo`, `receive_purchase`, `undo_receipt`, `finish_production`, `undo_finish_production`
 - Pedidos online: `order_accept`, `order_mark_ready`, `order_undo_ready`, `order_complete_pickup`
 - Balcão: `pos_open_session`, `pos_checkout`, `pos_cancel_sale`, `pos_cash_movement`, `pos_close_session`, `pos_reopen_session`, `pos_send_receipt` (só guarda na caixa de saída, D21), `pos_sync_pending`, `set_my_pin`
