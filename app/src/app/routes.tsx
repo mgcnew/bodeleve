@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
-import { createBrowserRouter, type RouteObject } from 'react-router-dom'
+import { createBrowserRouter, createMemoryRouter, type RouteObject } from 'react-router-dom'
+import { isPreview } from '@/config/preview'
 import { ButtonLink, EmptyState } from '@/components'
 import { LojaLayout, type LojaHandle } from '@/ui/loja/LojaLayout'
 import { AboutPage } from '@/pages/loja/AboutPage'
@@ -63,6 +64,7 @@ export const routes: RouteObject[] = [
     HydrateFallback: LoadingScreen,
     children: [
       { path: 'design-system', lazy: lazyOf(() => import('@/gallery/Gallery'), 'Gallery') },
+      ...(isPreview ? [{ path: 'atalhos', lazy: lazyOf(() => import('@/pages/Launcher'), 'Launcher') }] : []),
       { path: 'gestao/entrar', lazy: lazyOf(() => import('@/pages/gestao/LoginPage'), 'AdminLoginPage') },
       {
         path: 'gestao',
@@ -165,4 +167,11 @@ export const routes: RouteObject[] = [
   },
 ]
 
-export const router = createBrowserRouter(routes)
+/**
+ * Quem monta a demonstração num lugar sem endereço próprio (VITE_ROUTER=memory) navega só por dentro do app, começando em VITE_START
+ * (padrão: a página de atalhos). No resto, é o roteador do navegador.
+ */
+export const router =
+  import.meta.env.VITE_ROUTER === 'memory'
+    ? createMemoryRouter(routes, { initialEntries: [import.meta.env.VITE_START ?? '/atalhos'] })
+    : createBrowserRouter(routes)

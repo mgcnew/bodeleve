@@ -34,7 +34,7 @@ cd app && npm install && npm run dev      # http://localhost:5173
 | PDV | `/pdv` | Júlia, Ana ou o dono; senha do gestor para cancelar venda: `2468` (Ana) ou `1357` (dono) |
 | Entregas | `/entregas/entrar` | celular `(00) 90000-0300` (Bruno, da casa), `…0301` (Carlos, da casa), `…0302` (Diego, parceiro); código `1234` |
 
-Em desenvolvimento a base de exemplo traz pedidos, estoque, caixa aberto e entregas. Para ver o fluxo de entrega do começo ao fim: em Gestão → Pedidos, abra o #1041 (já em preparo), confira os itens e marque como pronto; em Entregas, entre como Bruno, pegue e aceite a entrega; confira, saia, informe o código do pedido (o do #1041 é `2290`) e acompanhe tudo no painel Gestão → Entregas. Nada é cobrado nem enviado. Testes: `npm test`; `npm run lint`; `npm run build`.
+Em desenvolvimento a base de exemplo traz pedidos, estoque, caixa aberto e entregas. Para ver o fluxo de entrega do começo ao fim: em Gestão → Pedidos, abra o #1041 (já em preparo), confira os itens e marque como pronto; em Entregas, entre como Bruno, pegue e aceite a entrega; confira, saia, informe o código do pedido (o do #1041 é `2290`) e acompanhe tudo no painel Gestão → Entregas. Nada é cobrado nem enviado. Testes: `npm test`; `npm run lint`; `npm run build`. A página `/atalhos` lista cada ambiente com a conta de teste. Para montar uma demonstração sem servidor próprio: `VITE_PREVIEW=1 VITE_ROUTER=memory npx vite build --base ./` (gera arquivos estáticos que abrem de qualquer lugar).
 
 ## Situação
 

@@ -307,6 +307,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-I102 | PDV em tablet (a partir de 768 px): grade de 4 colunas e sacola fixa à direita, com "Cobrar" e "Limpar sacola"; no celular a sacola é a barra de baixo. O peso abre em janela central (já era o comportamento da folha) | `ui/pdv/pdv.module.css` |
 | H-I103 | Gestão, PDV, Entregas e o catálogo do design system carregam sob demanda, então quem entra na loja baixa só o pacote principal (de 786 kB para 520 kB; 159 kB comprimido). A loja ainda não é dividida por página | `app/routes.tsx` |
 | H-I104 | Telas e consultas do balcão e das entregas rodam sem esperar a rede (o armazenamento é local); a revisão de políticas RLS e a de desempenho com `get_advisors` ficam para quando o Supabase existir | `networkMode: 'always'` |
+| H-I105 | Modo demonstração (`config/preview.ts`): dados de exemplo, avisos com as contas e códigos de teste e a página `/atalhos` ligam em desenvolvimento e em quem montar com `VITE_PREVIEW=1`; nunca em produção. `VITE_ROUTER=memory` navega só por dentro do app, para hospedar a demonstração onde não há endereço próprio | `config/preview.ts`, `app/routes.tsx`, `pages/Launcher.tsx` |
 
 ## Pendências
 

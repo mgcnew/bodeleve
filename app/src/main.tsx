@@ -10,14 +10,15 @@ import '@fontsource/inter/600.css'
 import '@fontsource/inter/700.css'
 import './styles/base.css'
 import { router } from './app/routes'
+import { isPreview } from './config/preview'
 import { createMockServices } from './mocks/services'
 import { ServicesProvider } from './services'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } })
 
 // D19: sem banco por enquanto. Os serviços são simulados; quando o Supabase for conectado, entra outra implementação aqui.
-// Os pedidos de exemplo dos quadros (1042, 1017, 0988) só aparecem em desenvolvimento.
-const services = createMockServices({ withSeedOrders: import.meta.env.DEV })
+// Os pedidos de exemplo dos quadros (1042, 1017, 0988) só aparecem em desenvolvimento ou na demonstração (config/preview.ts).
+const services = createMockServices({ withSeedOrders: isPreview })
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

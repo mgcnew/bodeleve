@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { isPreview } from '@/config/preview'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Banner, Button, TextField } from '@/components'
 import { adminUsers, MOCK_ADMIN_PASSWORD } from '@/mocks/adminSeed'
@@ -47,7 +48,7 @@ export function AdminLoginPage() {
         {failed && <Banner tone="error">E-mail ou senha incorretos. Confira e tente de novo.</Banner>}
         <Button type="submit" size="lg" fullWidth loading={busy}>{busy ? 'Entrando…' : 'Entrar'}</Button>
         <div className={l.sub}>Acesso só para a equipe. Quem cadastra novas pessoas é o dono ou o gestor.</div>
-        {import.meta.env.DEV && (
+        {isPreview && (
           <Banner tone="warning">
             Só em desenvolvimento (nada é enviado). Senha de todos: {MOCK_ADMIN_PASSWORD}. Contas: {adminUsers.map((u) => u.email).join(', ')}.
           </Banner>

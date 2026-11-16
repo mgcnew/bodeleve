@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { isPreview } from '@/config/preview'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AppLink, Banner, Button, ConfirmationCode, Icon, TextField } from '@/components'
 import { storefront } from '@/config/storefront'
@@ -61,7 +62,7 @@ export function LoginPage() {
           <>
             <h1 className={s.h1}>Digite o código</h1>
             <div className={s.sub}>Enviado para {phone}.</div>
-            {import.meta.env.DEV && <Banner tone="warning">Só em desenvolvimento: nada foi enviado. Use o código {MOCK_LOGIN_CODE}.</Banner>}
+            {isPreview && <Banner tone="warning">Só em desenvolvimento: nada foi enviado. Use o código {MOCK_LOGIN_CODE}.</Banner>}
             <ConfirmationCode label="Código de 4 dígitos" value={code} onChange={(v) => { setCode(v); setCodeError(false) }} invalid={codeError} />
             {codeError && <Banner tone="error">Código incorreto. Confira os números e tente de novo.</Banner>}
             <Button size="lg" fullWidth loading={busy} disabled={code.length < storefront.deliveryCodeLength} onClick={verify}>{busy ? 'Entrando…' : 'Entrar'}</Button>

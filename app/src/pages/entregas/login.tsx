@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { isPreview } from '@/config/preview'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Banner, Button, ConfirmationCode, TextField } from '@/components'
 import { formatPhone, isValidPhone } from '@/domain/checkout'
@@ -61,7 +62,7 @@ export function CourierLoginPage() {
         ) : (
           <>
             <div className={l.sub}>Código enviado para {phone}.</div>
-            {import.meta.env.DEV && <Banner tone="warning">Só em desenvolvimento: nada foi enviado. Use o código {MOCK_COURIER_CODE}.</Banner>}
+            {isPreview && <Banner tone="warning">Só em desenvolvimento: nada foi enviado. Use o código {MOCK_COURIER_CODE}.</Banner>}
             <ConfirmationCode label="Código de 4 dígitos" value={code} onChange={(v) => { setCode(v); setCodeError(false) }} invalid={codeError} />
             {codeError && <Banner tone="error">Código incorreto. Confira os números e tente de novo.</Banner>}
             <Button size="lg" fullWidth loading={busy} disabled={code.length < 4} onClick={verify}>{busy ? 'Entrando…' : 'Entrar'}</Button>
