@@ -1,3 +1,4 @@
+import type { Assignment, AssignOption, CourierRow, DispatchRow } from '@/domain/deliveries'
 import type { ProductInput, ProductKind } from '@/domain/catalog'
 import type { CustomerDetail, CustomerSummary } from '@/domain/customers'
 import type { IconName } from '@/components'
@@ -339,6 +340,29 @@ export interface CustomerAdminService {
   saveNotes(id: string, notes: string): Promise<void>
 }
 
+export type CourierView = CourierRow
+export type DeliveriesOverview = { rows: DispatchRow[]; couriers: CourierRow[] }
+
+export type AssignView = {
+  orderId: string
+  customer: string
+  statusLabel: string
+  address: string
+  /** "4,1 km · 6 itens · pago no Pix" */
+  summary: string
+  ready: boolean
+  options: AssignOption[]
+  current: (Assignment & { optionId: string }) | null
+}
+
+export interface DeliveryAdminService {
+  overview(): Promise<DeliveriesOverview>
+  getAssign(orderId: string): Promise<AssignView | null>
+  /** Lança `not_found`, `not_ready` ou `already_assigned`. */
+  assign(orderId: string, optionId: string): Promise<Assignment>
+  undoAssign(orderId: string): Promise<void>
+}
+
 export type AdminServices = {
   auth: AdminAuthService
   orders: AdminOrderService
@@ -349,6 +373,7 @@ export type AdminServices = {
   finance: FinanceService
   catalog: CatalogAdminService
   customers: CustomerAdminService
+  deliveries: DeliveryAdminService
 }
 
 export type Services = {

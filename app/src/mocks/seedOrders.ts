@@ -113,7 +113,7 @@ export function buildSeedOrders(now: Date): Order[] {
     }),
     make(now, {
       id: '1041', minutesAgo: 50, status: 'preparing', delivery: true, contact: { name: 'Paula Reis', phone: '(00) 90000-0003' },
-      address: { street: 'Rua do Sol', number: '88', complement: '', district: 'Centro' }, method: 'pix', paid: true, code: '2290',
+      address: { street: 'Rua do Sol', number: '88', complement: '', district: 'Bairro Alto' }, method: 'pix', paid: true, code: '2290',
       items: [item('queijo-manteiga', 1), item('farinha-de-mandioca', 2), item('doce-de-leite', 1), item('rapadura', 1), item('manteiga-de-garrafa', 1)],
       stepMinutesAgo: { preparing: 45 },
     }),

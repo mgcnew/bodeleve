@@ -1,3 +1,4 @@
+import type { DeliveryRecord } from '@/domain/deliveries'
 import type { CategoryRecord, SaleInfo } from '@/domain/catalog'
 import type { CustomerRecord } from '@/domain/customers'
 import type { CashTransaction, FinancialEntry } from '@/domain/finance'
@@ -8,6 +9,7 @@ import type { Order } from '@/domain/types'
 import { buildSeedOrders, DEVICE_SEED_IDS } from './seedOrders'
 import type { ProductionOrder, Recipe } from '@/domain/production'
 import type { Reservation } from '@/domain/stock'
+import { buildDeliverySeed } from './deliverySeed'
 import { buildCustomersSeed, buildSalesSeed, categoriesSeed } from './catalogSeed'
 import { buildFinanceSeed, buildProductionSeed, buildPurchaseSeed, buildStockSeed, recipesSeed, reservationsSeed, suppliersSeed } from './stockSeed'
 
@@ -41,6 +43,8 @@ export type MockState = {
   sales: SaleInfo[]
   categories: CategoryRecord[]
   customers: CustomerRecord[]
+  /** Entregas atribuídas (a fila 'para sair' vem dos pedidos). */
+  deliveries: DeliveryRecord[]
   /** Mensagens que o sistema montou mas NÃO enviou (D21): pedido de compra ao fornecedor, comprovantes… */
   outbox: Array<{ id: string; to: string; text: string; at: string; kind: 'purchase_order' }>
 }
@@ -54,7 +58,7 @@ export function createDb(opts: { storage: Storage | null; withSeed: boolean; now
   let memory: MockState | null = null
 
   const initial = (): MockState => {
-    const empty: MockState = { orders: [], deviceOrderIds: [], suppliers: [], purchaseOrders: [], stockItems: [], lots: [], movements: [], entries: [], transactions: [], receipts: [], reservations: [], recipes: [], productionOrders: [], sales: [], categories: [], customers: [], outbox: [] }
+    const empty: MockState = { orders: [], deviceOrderIds: [], suppliers: [], purchaseOrders: [], stockItems: [], lots: [], movements: [], entries: [], transactions: [], receipts: [], reservations: [], recipes: [], productionOrders: [], sales: [], categories: [], customers: [], deliveries: [], outbox: [] }
     if (!opts.withSeed) return empty
     const now = opts.now()
     const stock = buildStockSeed(now)
@@ -73,6 +77,7 @@ export function createDb(opts: { storage: Storage | null; withSeed: boolean; now
       sales: buildSalesSeed(),
       categories: categoriesSeed,
       customers: buildCustomersSeed(now),
+      deliveries: buildDeliverySeed(now),
       ...buildFinanceSeed(now),
     }
   }

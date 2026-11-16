@@ -29,6 +29,7 @@ import { AdminOrdersPage } from '@/pages/gestao/OrdersPage'
 import { AccountsPage, FinancePage, LedgerPage } from '@/pages/gestao/finance'
 import { CategoriesPage, ProductPage as AdminProductPage, ProductsPage } from '@/pages/gestao/products'
 import { CustomerPage, CustomersPage } from '@/pages/gestao/customers'
+import { AssignPage, DeliveriesPage } from '@/pages/gestao/deliveries'
 import { PayPage } from '@/pages/gestao/PayPage'
 import { NewPurchasePage } from '@/pages/gestao/NewPurchasePage'
 import { PurchasePage } from '@/pages/gestao/PurchasePage'
@@ -100,7 +101,8 @@ export const routes: RouteObject[] = [
           { path: 'produtos/:id', element: <AdminProductPage />, handle: g('stock') },
           { path: 'clientes', element: <CustomersPage />, handle: g('orders') },
           { path: 'clientes/:id', element: <CustomerPage />, handle: g('orders') },
-          { path: 'entregas/*', element: <ModulePlaceholder />, handle: g('deliveries') },
+          { path: 'entregas', element: <DeliveriesPage />, handle: g('deliveries') },
+          { path: 'entregas/atribuir/:id', element: <AssignPage />, handle: g('deliveries') },
           { path: 'relatorios/*', element: <ModulePlaceholder />, handle: g('dashboard') },
           { path: 'configuracoes/*', element: <ModulePlaceholder />, handle: g('team') },
           { path: '*', element: <ModulePlaceholder /> },

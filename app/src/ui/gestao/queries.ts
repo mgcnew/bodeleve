@@ -195,3 +195,18 @@ export function useCustomer(id: string | undefined) {
   const { admin } = useServices()
   return useQuery({ queryKey: ['admin', 'customer', id], queryFn: () => admin.customers.get(id!), enabled: !!id })
 }
+
+export function useDeliveries() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'deliveries'], queryFn: () => admin.deliveries.overview() })
+}
+
+export function useAssignView(orderId: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'assign', orderId], queryFn: () => admin.deliveries.getAssign(orderId!), enabled: !!orderId })
+}
+
+export function useInvalidateDeliveries() {
+  const client = useQueryClient()
+  return () => Promise.all(['deliveries', 'assign', 'dashboard', 'orders'].map((k) => client.invalidateQueries({ queryKey: ['admin', k] })))
+}

@@ -6,6 +6,8 @@ import { products } from './seed'
 import { applyProduct, channelLabel, checkNewCategory, defaultSale, kindOf, slugify, validateProduct, type ProductInput } from '@/domain/catalog'
 import { customerDetail, customerId, listCustomers } from '@/domain/customers'
 import { productCost } from './catalogView'
+import { assign as assignDelivery, assignmentOf, assignOptions, courierRows, dispatchRows, kmLabel, unassign } from '@/domain/deliveries'
+import { paymentLabel } from '@/config/storefront'
 import { formatBRL } from '@/lib/format'
 import { batchCostCents, checkInputs, finishOrder, formatContent, marginPercent, needs, nextOrderId, ProductionError, suggestLotCode, undoFinish, unitCostCents, type ProductionOrder } from '@/domain/production'
 import type { AccountView, AdminOrder, CategoryRow, ProductDetail, AdminServices, Dashboard, EntryView, FinanceOverview, FinishDefaults, MovementView, ProductionOrderView, PurchaseSuggestion, PurchaseView, RecipeView, StockItemView, SupplierView } from '@/services/types'
@@ -87,6 +89,8 @@ const sameDay = (iso: string, t: Date) => {
   const d = new Date(iso)
   return d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate()
 }
+
+const stageLabel = (o: Order) => (o.status === 'received' ? 'Novo' : o.status === 'preparing' ? 'Em preparo' : 'Pronto')
 
 const productDetail = (st: MockState, id: string): ProductDetail | null => {
   const i = st.stockItems.find((x) => x.id === id)
@@ -741,6 +745,46 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           const o = st.orders.find((x) => customerId(x.contact.phone) === id)
           if (!o) throw new Error('not_found')
           st.customers.push({ phone: o.contact.phone, name: o.contact.name, since: null, notes, channelNote: null, baseline: { orders: 0, spentCents: 0, products: {} } })
+        })
+      },
+    },
+
+    deliveries: {
+      async overview() {
+        const st = db.read()
+        return { rows: dispatchRows(st.orders, st.deliveries), couriers: courierRows(st.deliveries) }
+      },
+      async getAssign(orderId) {
+        const st = db.read()
+        const o = st.orders.find((x) => x.id === orderId)
+        if (!o || o.fulfillment !== 'delivery') return null
+        const rec = st.deliveries.find((r) => r.orderId === orderId)
+        const district = o.address?.district ?? ''
+        const addr = o.address ? `${o.address.street}, ${o.address.number}${o.address.complement ? ` · ${o.address.complement}` : ''}` : ''
+        const km = kmLabel(district)
+        const items = o.items.reduce((s, i) => s + i.qty, 0)
+        const pay = o.payment.paid ? `pago no ${paymentLabel[o.payment.method]}` : `${paymentLabel[o.payment.method].toLowerCase()} ao receber`
+        const optionId = rec ? (rec.courierId ?? 'partners') : ''
+        return {
+          orderId, customer: o.contact.name, statusLabel: o.status === 'ready_for_delivery' ? 'Pronto' : stageLabel(o),
+          address: [addr, district].filter(Boolean).join(' · '),
+          summary: [km, `${items} ${items === 1 ? 'item' : 'itens'}`, pay].filter(Boolean).join(' · '),
+          ready: o.status === 'ready_for_delivery' || !!rec,
+          options: assignOptions(st.deliveries.filter((r) => r.orderId !== orderId)),
+          current: rec ? { ...assignmentOf(rec), optionId } : null,
+        }
+      },
+      async assign(orderId, optionId) {
+        let out = null as ReturnType<typeof assignDelivery> | null
+        db.update((st) => {
+          out = assignDelivery(st.orders, st.deliveries, orderId, optionId, now())
+          st.deliveries.push(out.record)
+        })
+        return (out as unknown as ReturnType<typeof assignDelivery>).assignment
+      },
+      async undoAssign(orderId) {
+        db.update((st) => {
+          st.deliveries = unassign(st.deliveries, orderId)
         })
       },
     },
