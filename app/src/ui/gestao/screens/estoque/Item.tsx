@@ -66,7 +66,7 @@ export function Item() {
           <div className={s.bal}>
             <span>Reservado</span>
             <b>{q(b.reserved)}</b>
-            <small>{reservingOrders ? `${reservingOrders} ${reservingOrders === 1 ? 'pedido online' : 'pedidos online'}` : 'nenhum pedido'}</small>
+            <small>{reservingOrders ? `${reservingOrders} ${reservingOrders === 1 ? 'pedido online' : 'pedidos online'}` : b.reserved > 0 ? 'ordens de produção' : 'nenhum pedido'}</small>
           </div>
           <div className={s.bal}>
             <span>Projetado</span>

@@ -1,4 +1,4 @@
-import { itemsStore, productionStore, purchasesStore, stockStore } from './backoffice'
+import { itemsStore, productionStore, purchasesStore, recipesStore, stockStore } from './backoffice'
 import { staffOrdersStore } from './orders'
 import type { StockContext } from './stock'
 
@@ -12,5 +12,6 @@ export function useStockContext(): StockContext & { items: ReturnType<typeof ite
     orders: staffOrdersStore.useStore(),
     purchases: purchasesStore.useStore(),
     production: productionStore.useStore(),
+    recipes: recipesStore.useStore(),
   }
 }

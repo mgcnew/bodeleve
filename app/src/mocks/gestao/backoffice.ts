@@ -54,7 +54,7 @@ const lotSeeds: [string, string, number | null, number][] = [
   ['requeijao', 'RQ-1104', 30, 14],
   ['rapadura', 'RB-0412', 120, 4],
   ['carne-de-sol', 'CS-1110', 9, 6.4],
-  ['leite-integral', 'LT-1113', 3, 18],
+  ['leite-integral', 'LT-1113', 3, 300],
 ]
 
 const looseStock: [string, number][] = [
@@ -64,7 +64,7 @@ const looseStock: [string, number][] = [
   ['farinha-de-mandioca', 26],
   ['manteiga-de-garrafa', 11],
   ['feijao-de-corda', 9],
-  ['coalho-liquido', 50],
+  ['coalho-liquido', 300],
   ['embalagem-vacuo', 200],
   ['garrafa-200', 60],
   ['sal', 4],

@@ -1,7 +1,7 @@
 // Saldos derivados das movimentações (DATA_MODEL_DRAFT.md):
 // físico = Σ movimentos · reservado = pedidos em aberto · disponível = físico − reservado
 // projetado = disponível + a receber (compras enviadas) + em produção
-import type { Item, Lot, Movement, ProductionOrder, Purchase } from '@/domain/backoffice'
+import type { Item, Lot, Movement, ProductionOrder, Purchase, Recipe } from '@/domain/backoffice'
 import type { StaffOrder } from '@/domain/staffOrder'
 import { daysUntil } from '@/domain/dates'
 import { itemsStore, newId, stockStore } from './backoffice'
@@ -31,11 +31,23 @@ export function inProductionOf(itemId: string, production: ProductionOrder[]) {
   return production.filter((p) => p.productId === itemId && (p.status === 'in_progress' || p.status === 'planned')).reduce((n, p) => n + p.plannedQty, 0)
 }
 
-export type StockContext = { movements: Movement[]; orders: StaffOrder[]; purchases: Purchase[]; production?: ProductionOrder[] }
+export type StockContext = { movements: Movement[]; orders: StaffOrder[]; purchases: Purchase[]; production?: ProductionOrder[]; recipes?: Recipe[] }
+
+/** H-G17 — insumos das ordens ainda não concluídas ficam reservados */
+export function productionReservedOf(itemId: string, production: ProductionOrder[], recipes: Recipe[]) {
+  return round(
+    production
+      .filter((p) => p.status === 'planned' || p.status === 'in_progress')
+      .reduce((n, p) => {
+        const line = recipes.find((r) => r.id === p.recipeId)?.lines.find((l) => l.itemId === itemId)
+        return n + (line ? line.qty * p.batches : 0)
+      }, 0),
+  )
+}
 
 export function balanceOf(itemId: string, ctx: StockContext): Balance {
   const physical = physicalOf(itemId, ctx.movements)
-  const reserved = reservedOf(itemId, ctx.orders)
+  const reserved = round(reservedOf(itemId, ctx.orders) + (ctx.production && ctx.recipes ? productionReservedOf(itemId, ctx.production, ctx.recipes) : 0))
   const available = round(physical - reserved)
   const incoming = incomingOf(itemId, ctx.purchases)
   const inProduction = ctx.production ? inProductionOf(itemId, ctx.production) : 0

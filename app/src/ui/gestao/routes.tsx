@@ -17,6 +17,10 @@ import { Estoque } from './screens/estoque/Estoque'
 import { Inventario } from './screens/estoque/Inventario'
 import { Item } from './screens/estoque/Item'
 import { Movimentacoes } from './screens/estoque/Movimentacoes'
+import { Ficha } from './screens/producao/Ficha'
+import { Fichas } from './screens/producao/Fichas'
+import { Ordem } from './screens/producao/Ordem'
+import { Producao } from './screens/producao/Producao'
 
 const env = 'Gestão'
 const tabs: GestaoHandle = { tabs: true }
@@ -45,7 +49,10 @@ export const gestaoRoutes: RouteObject[] = [
       { path: 'compras/:id/receber', element: <Recebimento /> },
       { path: 'fornecedores', element: <Fornecedores /> },
       { path: 'fornecedores/:id', element: <Fornecedor /> },
-      { path: 'producao/*', element: todo('Produção', 'Gestao-Producao.dc.html') },
+      { path: 'producao', element: <Producao /> },
+      { path: 'producao/fichas', element: <Fichas /> },
+      { path: 'producao/fichas/:id', element: <Ficha /> },
+      { path: 'producao/ordens/:id', element: <Ordem /> },
       { path: 'produtos/*', element: todo('Produtos', 'Gestao-Produtos.dc.html') },
       { path: 'clientes/*', element: todo('Clientes', 'Gestao-Clientes.dc.html') },
       { path: 'entregas/*', element: todo('Entregas', 'Gestao-Entregas.dc.html') },
