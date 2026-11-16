@@ -27,6 +27,8 @@ import { MorePage } from '@/pages/gestao/MorePage'
 import { AdminOrderPage } from '@/pages/gestao/OrderPage'
 import { AdminOrdersPage } from '@/pages/gestao/OrdersPage'
 import { AccountsPage, FinancePage, LedgerPage } from '@/pages/gestao/finance'
+import { CategoriesPage, ProductPage as AdminProductPage, ProductsPage } from '@/pages/gestao/products'
+import { CustomerPage, CustomersPage } from '@/pages/gestao/customers'
 import { PayPage } from '@/pages/gestao/PayPage'
 import { NewPurchasePage } from '@/pages/gestao/NewPurchasePage'
 import { PurchasePage } from '@/pages/gestao/PurchasePage'
@@ -93,8 +95,11 @@ export const routes: RouteObject[] = [
           { path: 'producao/fichas', element: <RecipesPage />, handle: g('production') },
           { path: 'producao/fichas/:id', element: <RecipePage />, handle: g('production') },
           { path: 'producao/ordens/:id', element: <ProductionOrderPage />, handle: g('production') },
-          { path: 'produtos/*', element: <ModulePlaceholder />, handle: g('stock') },
-          { path: 'clientes/*', element: <ModulePlaceholder />, handle: g('orders') },
+          { path: 'produtos', element: <ProductsPage />, handle: g('stock') },
+          { path: 'produtos/categorias', element: <CategoriesPage />, handle: g('stock') },
+          { path: 'produtos/:id', element: <AdminProductPage />, handle: g('stock') },
+          { path: 'clientes', element: <CustomersPage />, handle: g('orders') },
+          { path: 'clientes/:id', element: <CustomerPage />, handle: g('orders') },
           { path: 'entregas/*', element: <ModulePlaceholder />, handle: g('deliveries') },
           { path: 'relatorios/*', element: <ModulePlaceholder />, handle: g('dashboard') },
           { path: 'configuracoes/*', element: <ModulePlaceholder />, handle: g('team') },

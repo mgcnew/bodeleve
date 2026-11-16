@@ -164,3 +164,34 @@ export function useInvalidateFinance() {
   return () =>
     Promise.all(['finance', 'finance-entries', 'finance-entry', 'ledger', 'dashboard', 'suppliers', 'supplier'].map((k) => client.invalidateQueries({ queryKey: ['admin', k] })))
 }
+
+export function useProducts() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'products'], queryFn: () => admin.catalog.list() })
+}
+
+export function useProduct(id: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'product', id], queryFn: () => admin.catalog.get(id!), enabled: !!id })
+}
+
+export function useCategoryRows() {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'categories'], queryFn: () => admin.catalog.categories() })
+}
+
+/** Mudar produto ou categoria muda também o que a loja mostra. */
+export function useInvalidateCatalog() {
+  const client = useQueryClient()
+  return () => client.invalidateQueries()
+}
+
+export function useCustomers(query: string) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'customers', query], queryFn: () => admin.customers.list(query) })
+}
+
+export function useCustomer(id: string | undefined) {
+  const { admin } = useServices()
+  return useQuery({ queryKey: ['admin', 'customer', id], queryFn: () => admin.customers.get(id!), enabled: !!id })
+}

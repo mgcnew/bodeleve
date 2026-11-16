@@ -251,4 +251,9 @@ Rotas em `app/src/app/routes.tsx` (`/gestao/...`); telas em `app/src/pages/gesta
 | 21 · Contas a pagar e a receber | `/gestao/financeiro/contas` | `finance.tsx` | 4 |
 | 22 · Pagar conta | `/gestao/financeiro/pagar/:id` | `PayPage.tsx` | 4 |
 | 23 · Lançamentos | `/gestao/financeiro/lancamentos` | `finance.tsx` | 4 |
+| 24 · Produtos | `/gestao/produtos` | `products.tsx` | 4 |
+| 25 · Produto | `/gestao/produtos/:id` | `products.tsx` | 4 |
+| 26 · Categorias | `/gestao/produtos/categorias` | `products.tsx` | 4 |
+| 27 · Clientes | `/gestao/clientes` | `customers.tsx` | 4 |
+| 28 · Cliente | `/gestao/clientes/:id` | `customers.tsx` | 4 |
 

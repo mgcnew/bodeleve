@@ -34,6 +34,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D25 | 2026-11-15 | Etapa 4, lote 3 (Estoque) implementado: visão geral, item (disponível = físico − reservado, projetado, lotes pelo que vence primeiro), movimentações com saldo, perda/consumo/correção e inventário por área. Início passa a calcular "estoque baixo" e "lotes vencendo" dos dados | Usuário (D18–D21) |
 | D26 | 2026-11-15 | Etapa 4, lote 4 (Produção) implementado: ordens (em produção, planejadas, concluídas; para estoque ou para pedido), fichas técnicas com custo por unidade e margem, conferência de insumos (H-G17) e apontamento com consumo real, unidades boas, lote do acabado e custo real (H-G18) | Usuário (D18–D21) |
 | D27 | 2026-11-15 | Etapa 4, lote 5 (Financeiro) implementado: saldo por conta (banco e caixa), contas que pedem ação hoje, previsão de 7 dias, contas a pagar e a receber, pagamento de conta (total ou em parte, com multa e juros, desfazível) e lançamentos. Contas de compra nascem no recebimento; despesas fixas se repetem todo mês | Usuário (D18–D21) |
+| D28 | 2026-11-16 | Etapa 4, lote 6a implementado: Produtos (lista, filtros, busca), Produto (edição com custo, margem e publicação na loja), Categorias, Clientes e Cliente. O catálogo da loja passa a ser o que a gestão publica | Usuário (D18–D21) |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
 
@@ -231,6 +232,22 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | H-I56 | As cifras do Início (aluguel atrasado, 2 contas hoje, a pagar hoje, a receber na semana) saem das mesmas contas do Financeiro | `dashboard` |
 | H-I57 | Acesso: dono e gestor veem o Financeiro; atendente, produção e entregador não (matriz H-G27) | `permissions/` |
 
+## Hipóteses de implementação de Produtos e Clientes — a confirmar
+
+| ID | O que foi feito | Onde |
+|---|---|---|
+| H-I58 | O cadastro do item (nome, medida, tipo, origem, categoria, mínimo, validade) é o do estoque; a gestão de produtos só acrescenta a venda: preço, publicar na loja, favorito no PDV, vendido por peso, descrição. Editar o produto edita o item do estoque | `domain/catalog.ts` |
+| H-I59 | O campo Nome mostra "Queijo coalho 500 g". Ao salvar, a medida no fim volta para o campo próprio; sem ela, tudo vira nome | `splitLabel` |
+| H-I60 | Custo do produto: da ficha técnica (feito na casa) pelo custo atual dos insumos; para revenda, o último recebimento. A margem do quadro Produto arredonda ao mais próximo (57%); a das fichas arredonda para baixo | `mocks/catalogView.ts` |
+| H-I61 | Matéria-prima não tem origem, preço, loja nem favorito: a tela esconde esses campos e o salvar os zera | `applyProduct` |
+| H-I62 | A loja mostra o que a gestão publicou, na ordem dos quadros, com a descrição escrita (ou o marcador entre colchetes). Categoria sem produto publicado não aparece na loja. Despublicar tira o produto também das seções do início | `mocks/services.ts` |
+| H-I63 | Charque, flocão, fubá e melaço são vendidos só no balcão (preços de exemplo). Carne de sol fica na loja a R$ 34,90 por 500 g como no quadro da loja; o quadro Produtos a mostra "só balcão, por peso, R$ 59,90 / kg" | `mocks/catalogSeed.ts` |
+| H-I64 | Categorias: só criar (nome vazio ou repetido é recusado). A etiqueta é "Nova" sem produtos e "Na loja" com produtos. Renomear, ocultar e reordenar não estão desenhados. "Insumos" é área interna do estoque e não aparece | `CategoriesPage` |
+| H-I65 | Cliente = cadastro + pedidos pelo celular. Quem compra com um celular novo entra como cliente novo. Total comprado = soma dos pedidos não cancelados (com a taxa de entrega) + histórico anterior ao sistema. Os totais de exemplo foram ajustados para fechar com o quadro | `domain/customers.ts` |
+| H-I66 | Etiqueta "Novo" = um pedido só. "Fiado R$ …" = contas a receber em aberto marcadas Fiado com o nome do cliente | `fiadoCents` |
+| H-I67 | A observação interna é salva ao sair do campo. O texto de privacidade do quadro foi escrito sem flexão de gênero ("Quem comprou pode pedir para apagar a conta") | `customers.tsx` |
+| H-I68 | O histórico da Maria Lima ganhou dois pedidos de exemplo (#1021 e #0997) para a lista do quadro; o contador do pedido na fila continua 5 | `mocks/seedOrders.ts` |
+
 ## Pendências
 
 O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada item usou uma hipótese marcada (H-*) ou um marcador entre colchetes.
@@ -274,6 +291,11 @@ O que depende do dono para fechar o projeto. Nada disso bloqueou o design: cada 
 | P35 | Decidir onde guardar o comprovante (armazenamento) e por quanto tempo | Gestão · Financeiro | H-I55 |
 | P36 | Confirmar se pagamento parcial e multa/juros devem existir, e a categoria financeira de cada despesa (hoje só Compras e Insumos de exemplo) | Gestão · Financeiro | H-I50, H-I51 |
 | P37 | Passar as despesas fixas reais (aluguel, energia, gás, internet, folha) com dia de vencimento e valor, e as regras de cartão (prazo, taxa) | Gestão · Financeiro | Q6, H-I53 |
+| P38 | Passar o cadastro real de produtos (nome, medida, preço, origem, categoria, foto) e a descrição de cada um; hoje as fotos são o marcador [FOTO DO PRODUTO] e o envio de imagem depende do armazenamento do Supabase | Gestão · Produtos | H-I58, P5 |
+| P39 | Resolver a divergência da carne de sol: loja a R$ 34,90 por 500 g × Produtos "só balcão por peso R$ 59,90 / kg". Definir também como o PDV vende por peso | Gestão · Produtos · PDV | H-I63 |
+| P40 | Desenhar criação de produto novo, renomear, ocultar e reordenar categorias, e a edição do cadastro do cliente | Gestão · Produtos · Clientes | H-I64 |
+| P41 | Definir o apagamento de dados do cliente (pedido do titular) e o que fica nos pedidos antigos | Gestão · Clientes | H-I67 |
+| P42 | Confirmar quem acessa Produtos e Clientes (hoje Produtos = Estoque e Clientes = Pedidos) | Gestão · Permissões | H-I14 |
 
 Marcadores de conteúdo nas telas:
 
