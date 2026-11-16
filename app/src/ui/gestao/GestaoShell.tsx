@@ -3,6 +3,7 @@ import { Navigate, NavLink, Outlet, useLocation, useMatches } from 'react-router
 import { BottomNav } from '@/components/BottomNav'
 import { Icon, type IconName } from '@/components/Icon'
 import { canAccess, type Module } from '@/permissions/modules'
+import { startBackofficeSync } from '@/services/gestao/backofficeRemote'
 import { startStaffSync } from '@/services/gestao/ordersRemote'
 import { sessionStore } from '@/services/gestao/session'
 import s from './GestaoShell.module.css'
@@ -40,8 +41,16 @@ export function GestaoShell() {
   const handle = (matches.at(-1)?.handle ?? {}) as GestaoHandle
   const signedIn = !!session
 
-  // com o Supabase, mantém os pedidos em dia (busca, Realtime e a cada 15 s)
-  useEffect(() => (signedIn ? startStaffSync() : undefined), [signedIn])
+  // com o Supabase, mantém pedidos, estoque e compras em dia (busca ao abrir e a cada poucos segundos)
+  useEffect(() => {
+    if (!signedIn) return
+    const stopOrders = startStaffSync()
+    const stopBackoffice = startBackofficeSync()
+    return () => {
+      stopOrders()
+      stopBackoffice()
+    }
+  }, [signedIn])
 
   if (!session) return <Navigate to="/gestao/entrar" replace state={{ from: location.pathname }} />
 

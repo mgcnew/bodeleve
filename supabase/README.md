@@ -8,3 +8,6 @@ O banco da Bodeleve é o projeto Supabase `afqcwqikkolyoowkozak` (organização 
 
 - **Usuário de teste**: `teste.gestao@bodeleve.test` (papel gestor), criado só para desenvolvimento. A senha está em `app/.env.local`. Para remover: apagar a linha em `memberships` e o usuário em Authentication.
 - **Pedido de teste**: nº 1001 ("TESTE Integração"), criado pelo teste de integração da loja.
+
+- **`seed_dev_estoque.sql`**: 4 fornecedores fictícios e custo, estoque mínimo, validade e fornecedor dos 10 produtos. **Ainda não foi aplicado** (altera linhas existentes de `products`); é opcional e reaplicável.
+- **Estoque de teste**: o teste de contagem deixou 5 un de Queijo coalho (lote `INV-261116`) no banco. Para desfazer, use `stock_count_undo` com o id da contagem em `inventory_counts`.

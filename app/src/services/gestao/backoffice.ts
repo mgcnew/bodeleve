@@ -2,17 +2,23 @@
 // DATA_MODEL_DRAFT.md e vira consulta ao Supabase na implementação do banco.
 import type { Account, FinancialEntry, Item, LedgerTx, Lot, Movement, ProductionOrder, Purchase, Recipe, Supplier } from '@/domain/backoffice'
 import { createStore } from '@/lib/store'
+import { supabase } from '@/lib/supabase'
 import { seedAccounts, seedEntries, seedLedger, seedItemsList, seedProduction, seedPurchases, seedRecipes, seedStock, suppliers as seedSuppliers } from '@/mocks/gestao/backoffice'
 
-export const itemsStore = createStore<Item[]>('bodeleve.gestao.itens', seedItemsList)
-export const suppliersStore = createStore<Supplier[]>('bodeleve.gestao.fornecedores', () => seedSuppliers)
-export const stockStore = createStore<{ lots: Lot[]; movements: Movement[] }>('bodeleve.gestao.estoque', () => seedStock(itemsStore.get()))
-export const purchasesStore = createStore<Purchase[]>('bodeleve.gestao.compras', seedPurchases)
+// Com o Supabase ligado, estes stores são caches do banco (começam vazios e têm chave própria);
+// sem ele, dados de exemplo no aparelho.
+const remote = supabase !== null
+
+export const itemsStore = createStore<Item[]>(remote ? 'bodeleve.gestao.itens.remoto' : 'bodeleve.gestao.itens', remote ? () => [] : seedItemsList)
+export const suppliersStore = createStore<Supplier[]>(remote ? 'bodeleve.gestao.fornecedores.remoto' : 'bodeleve.gestao.fornecedores', () => (remote ? [] : seedSuppliers))
+export const stockStore = createStore<{ lots: Lot[]; movements: Movement[] }>(remote ? 'bodeleve.gestao.estoque.remoto' : 'bodeleve.gestao.estoque', () => (remote ? { lots: [], movements: [] } : seedStock(itemsStore.get())))
+export const purchasesStore = createStore<Purchase[]>(remote ? 'bodeleve.gestao.compras.remoto' : 'bodeleve.gestao.compras', remote ? () => [] : seedPurchases)
 export const entriesStore = createStore<FinancialEntry[]>('bodeleve.gestao.financeiro', seedEntries)
 export const accountsStore = createStore<Account[]>('bodeleve.gestao.contas', seedAccounts)
 export const ledgerStore = createStore<LedgerTx[]>('bodeleve.gestao.lancamentos', seedLedger)
-export const recipesStore = createStore<Recipe[]>('bodeleve.gestao.fichas', seedRecipes)
-export const productionStore = createStore<ProductionOrder[]>('bodeleve.gestao.producao', seedProduction)
+// produção ainda não está ligada ao banco: com o Supabase começa vazia (as fichas de exemplo citam insumos que o banco não tem)
+export const recipesStore = createStore<Recipe[]>(remote ? 'bodeleve.gestao.fichas.remoto' : 'bodeleve.gestao.fichas', remote ? () => [] : seedRecipes)
+export const productionStore = createStore<ProductionOrder[]>(remote ? 'bodeleve.gestao.producao.remoto' : 'bodeleve.gestao.producao', remote ? () => [] : seedProduction)
 
 export function newId(prefix: string) {
   return `${prefix}-${crypto.randomUUID().slice(0, 8)}`

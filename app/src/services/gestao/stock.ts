@@ -4,7 +4,9 @@
 import type { Item, Lot, Movement, ProductionOrder, Purchase, Recipe } from '@/domain/backoffice'
 import type { StaffOrder } from '@/domain/staffOrder'
 import { daysUntil } from '@/domain/dates'
+import { supabase } from '@/lib/supabase'
 import { itemsStore, newId, stockStore } from './backoffice'
+import { remoteAdjust, remoteCount, remoteUndoStock, type UndoToken } from './backofficeRemote'
 import { sessionStore } from './session'
 
 export type Balance = { physical: number; reserved: number; available: number; incoming: number; inProduction: number; projected: number }
@@ -82,7 +84,10 @@ export type AdjustmentKind = 'loss' | 'internal' | 'correction'
  * H-G12 — perda e consumo interno registram lote, motivo e custo;
  * correção de contagem pode tirar ou somar. Devolve o id para desfazer.
  */
-export function registerAdjustment(input: { itemId: string; lotId: string | null; kind: AdjustmentKind; qty: number; reason: string }) {
+export type { UndoToken }
+
+export async function registerAdjustment(input: { itemId: string; lotId: string | null; kind: AdjustmentKind; qty: number; reason: string }): Promise<UndoToken> {
+  if (supabase) return remoteAdjust(input)
   const kindNote = { loss: 'Perda', internal: 'Consumo interno', correction: 'Correção de contagem' }[input.kind]
   const m: Movement = {
     id: newId('mv'),
@@ -96,15 +101,18 @@ export function registerAdjustment(input: { itemId: string; lotId: string | null
     ref: null,
   }
   stockStore.set((s) => ({ ...s, movements: [...s.movements, m] }))
-  return m.id
+  return { kind: 'movements', ids: [m.id] }
 }
 
-export function removeMovements(ids: string[]) {
-  stockStore.set((s) => ({ ...s, movements: s.movements.filter((m) => !ids.includes(m.id)) }))
+/** Desfaz um ajuste ou uma contagem (no banco, lança o movimento contrário e mantém a trilha) */
+export async function undoStock(token: UndoToken) {
+  if (supabase) return remoteUndoStock(token)
+  if (token.kind === 'movements') stockStore.set((s) => ({ ...s, movements: s.movements.filter((m) => !token.ids.includes(m.id)) }))
 }
 
 /** Inventário: lança a diferença entre contado e sistema; falta sai do lote que vence primeiro */
-export function applyInventory(counts: { itemId: string; counted: number }[]) {
+export async function applyInventory(counts: { itemId: string; counted: number }[]): Promise<{ token: UndoToken | null; changed: number }> {
+  if (supabase) return remoteCount(counts)
   const { lots, movements } = stockStore.get()
   const by = sessionStore.get()?.name ?? 'Equipe'
   const now = new Date().toISOString()
@@ -117,7 +125,7 @@ export function applyInventory(counts: { itemId: string; counted: number }[]) {
     created.push({ id: newId('mv'), itemId: c.itemId, lotId: lot?.id ?? null, type: 'inventory', qty: diff, at: now, note: 'Inventário', by, ref: null })
   }
   stockStore.set((s) => ({ ...s, movements: [...s.movements, ...created] }))
-  return created.map((m) => m.id)
+  return { token: { kind: 'movements', ids: created.map((m) => m.id) }, changed: created.length }
 }
 
 /** Saída de estoque pelo lote que vence primeiro (H-G11). Devolve os movimentos a lançar. */

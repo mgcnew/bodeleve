@@ -46,7 +46,9 @@ export function Fornecedores() {
       <Bar title="Fornecedores" back="/gestao/mais" />
       <main className={`${o.main} ${o.mainTop}`}>
         <SearchBox label="Buscar fornecedor" value={q} onChange={setQ} />
-        {visible.length === 0 ? (
+        {suppliers.length === 0 ? (
+          <EmptyState icon="entregas" title="Nenhum fornecedor cadastrado" text="Os fornecedores cadastrados aparecem aqui e podem receber pedidos de compra." />
+        ) : visible.length === 0 ? (
           <EmptyState icon="buscar" title={`Nada encontrado para “${q}”`} text="Confira a escrita ou busque pelo que o fornecedor vende." />
         ) : (
           <Box>

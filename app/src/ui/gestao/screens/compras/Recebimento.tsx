@@ -9,7 +9,9 @@ import { Icon } from '@/components/Icon'
 import { QuantityStepper } from '@/components/QuantityStepper'
 import { fullDate } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
-import { entriesStore, itemsStore, purchasesStore, suppliersStore } from '@/services/gestao/backoffice'
+import { itemsStore, purchasesStore, suppliersStore } from '@/services/gestao/backoffice'
+import { backofficeErrorMessage } from '@/services/gestao/backofficeRemote'
+import { Banner } from '@/components/Feedback'
 import { receivePurchase, setPurchaseClosed, undoReceipt, type Receipt } from '@/services/gestao/purchases'
 import o from '@/styles/ops.module.css'
 import { Bar, SumRow } from '../../../shared/OpsBits'
@@ -29,9 +31,10 @@ export function Recebimento() {
   const p = purchasesStore.useStore().find((x) => x.id === id)
   const items = itemsStore.useStore()
   const supplier = suppliersStore.useStore().find((s) => s.id === p?.supplierId)
-  const entries = entriesStore.useStore()
 
   const [receipt, setReceipt] = useState<Receipt | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
   const [closed, setClosed] = useState<'open' | 'close'>('open')
   const [lines, setLines] = useState<Record<string, Line>>(() =>
     Object.fromEntries(
@@ -56,27 +59,38 @@ export function Recebimento() {
   const complete = pending.filter((i) => lines[i.itemId].qty >= i.pending).length
   const missing = pending.filter((i) => lines[i.itemId].qty < i.pending)
 
-  const confirm = () => {
-    const r = receivePurchase(
-      p.id,
-      pending.map((i) => ({
-        itemId: i.itemId,
-        qty: lines[i.itemId].qty,
-        lotCode: items.find((x) => x.id === i.itemId)?.tracksLots ? lines[i.itemId].lotCode : '',
-        expiry: lines[i.itemId].expiry ? new Date(`${lines[i.itemId].expiry}T12:00:00`).toISOString() : null,
-      })),
-    )
-    setReceipt(r)
-    setClosed('open')
+  const confirm = async () => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      const r = await receivePurchase(
+        p.id,
+        pending.map((i) => ({
+          itemId: i.itemId,
+          qty: lines[i.itemId].qty,
+          lotCode: items.find((x) => x.id === i.itemId)?.tracksLots ? lines[i.itemId].lotCode : '',
+          expiry: lines[i.itemId].expiry ? new Date(`${lines[i.itemId].expiry}T12:00:00`).toISOString() : null,
+        })),
+      )
+      setReceipt(r)
+      setClosed('open')
+    } catch (e) {
+      setProblem(backofficeErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
-  const undo = () => {
-    if (receipt) undoReceipt(receipt)
-    setReceipt(null)
+  const undo = async () => {
+    try {
+      if (receipt) await undoReceipt(receipt)
+      setReceipt(null)
+    } catch (e) {
+      setProblem(backofficeErrorMessage(e))
+    }
   }
 
   if (receipt) {
-    const entry = entries.find((e) => e.id === receipt.entryId)
     return (
       <div className={o.screen}>
         <Bar title={`Receber ${p.number}`} back={`/gestao/compras/${p.id}`} />
@@ -113,15 +127,15 @@ export function Recebimento() {
                 ))}
             </Box>
           </section>
-          {entry && (
+          {receipt && (
             <section className={o.section}>
               <div className={o.iconLine} style={{ alignItems: 'center' }}>
                 <Icon name="financeiro" size={20} />
                 <b>Conta a pagar criada</b>
               </div>
               <div className={o.card}>
-                <SumRow label={`${supplier.name} · ${p.paymentTerms.split(',')[0].toLowerCase()}`} value={formatCents(entry.amountCents)} />
-                <SumRow label="Vencimento" value={fullDate(entry.dueDate)} />
+                <SumRow label={`${supplier.name} · ${p.paymentTerms.split(',')[0].toLowerCase()}`} value={formatCents(receipt.totalCents)} />
+                <SumRow label="Vencimento" value={fullDate(receipt.dueAt)} />
               </div>
             </section>
           )}
@@ -131,9 +145,13 @@ export function Recebimento() {
                 legend={`Faltaram ${missing.map((i) => `${i.pending - lines[i.itemId].qty} un de ${i.name}`).join(' e ')}. O que fazer?`}
                 name="falta"
                 value={closed}
-                onChange={(v) => {
-                  setClosed(v)
-                  setPurchaseClosed(p.id, v === 'close')
+                onChange={async (v) => {
+                  try {
+                    await setPurchaseClosed(p.id, v === 'close')
+                    setClosed(v)
+                  } catch (e) {
+                    setProblem(backofficeErrorMessage(e))
+                  }
                 }}
                 options={[
                   { value: 'open', title: 'Manter o restante em aberto no pedido' },
@@ -192,7 +210,8 @@ export function Recebimento() {
         </div>
       </main>
       <div className={o.footer}>
-        <Button size="l" block onClick={confirm} disabled={value === 0}>
+        {problem && <Banner tone="error">{problem}</Banner>}
+        <Button size="l" block loading={busy} onClick={confirm} disabled={value === 0 || busy}>
           Confirmar recebimento
         </Button>
       </div>

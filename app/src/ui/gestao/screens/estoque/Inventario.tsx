@@ -2,13 +2,15 @@ import { useMemo, useState } from 'react'
 import { Tag } from '@/components/Badges'
 import { Box } from '@/components/Card'
 import { Button, ButtonLink } from '@/components/Button'
+import { Banner } from '@/components/Feedback'
 import { SelectField } from '@/components/Field'
 import { Icon } from '@/components/Icon'
 import { QuantityStepper } from '@/components/QuantityStepper'
 import { formatQty } from '@/domain/backoffice'
 import { formatCents } from '@/domain/money'
 import { categories, internalCategories } from '@/mocks/catalog'
-import { applyInventory, physicalOf, removeMovements } from '@/services/gestao/stock'
+import { backofficeErrorMessage } from '@/services/gestao/backofficeRemote'
+import { applyInventory, physicalOf, undoStock, type UndoToken } from '@/services/gestao/stock'
 import { useStockContext } from '@/services/gestao/useBackoffice'
 import o from '@/styles/ops.module.css'
 import { Bar, SumRow, SumTotal } from '../../../shared/OpsBits'
@@ -24,7 +26,9 @@ export function Inventario() {
   const items = useMemo(() => ctx.items.filter((i) => area === 'all' || i.categoryId === area), [ctx.items, area])
   const system = useMemo(() => Object.fromEntries(ctx.items.map((i) => [i.id, physicalOf(i.id, ctx.movements)])), [ctx.items, ctx.movements])
   const [counted, setCounted] = useState<Record<string, number>>({})
-  const [applied, setApplied] = useState<{ ids: string[]; summary: string } | null>(null)
+  const [applied, setApplied] = useState<{ token: UndoToken | null; summary: string } | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
 
   const value = (id: string) => counted[id] ?? Math.max(0, Math.round(system[id]))
   const diffs = items.map((i) => ({ item: i, diff: Math.round((value(i.id) - system[i.id]) * 1000) / 1000 }))
@@ -32,12 +36,20 @@ export function Inventario() {
   const units = withDiff.reduce((n, d) => n + d.diff, 0)
   const cost = withDiff.reduce((n, d) => n + d.diff * d.item.costCents, 0)
 
-  const apply = () => {
-    const ids = applyInventory(items.map((i) => ({ itemId: i.id, counted: value(i.id) })))
-    setApplied({
-      ids,
-      summary: ids.length === 0 ? 'Tudo conferiu. Nenhum ajuste foi feito.' : `${ids.length} ${ids.length === 1 ? 'ajuste lançado' : 'ajustes lançados'} · ${sign(cost)} ${formatCents(Math.abs(cost))} em custo`,
-    })
+  const apply = async () => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      const { token, changed } = await applyInventory(items.map((i) => ({ itemId: i.id, counted: value(i.id) })))
+      setApplied({
+        token,
+        summary: changed === 0 ? 'Tudo conferiu. Nenhum ajuste foi feito.' : `${changed} ${changed === 1 ? 'ajuste lançado' : 'ajustes lançados'} · ${sign(cost)} ${formatCents(Math.abs(cost))} em custo`,
+      })
+    } catch (e) {
+      setProblem(backofficeErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
   if (applied) {
@@ -58,9 +70,13 @@ export function Inventario() {
           <Button
             variant="secondary"
             block
-            onClick={() => {
-              removeMovements(applied.ids)
-              setApplied(null)
+            onClick={async () => {
+              try {
+                if (applied.token) await undoStock(applied.token)
+                setApplied(null)
+              } catch (e) {
+                setProblem(backofficeErrorMessage(e))
+              }
             }}
           >
             Corrigir contagem
@@ -108,7 +124,8 @@ export function Inventario() {
         </div>
       </main>
       <div className={o.footer}>
-        <Button size="l" block onClick={apply}>
+        {problem && <Banner tone="error">{problem}</Banner>}
+        <Button size="l" block loading={busy} disabled={busy} onClick={apply}>
           Aplicar contagem
         </Button>
       </div>

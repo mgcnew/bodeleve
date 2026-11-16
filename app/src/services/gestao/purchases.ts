@@ -1,6 +1,8 @@
 import type { FinancialEntry, Lot, Movement, Purchase } from '@/domain/backoffice'
 import { daysFromToday } from '@/domain/dates'
+import { supabase } from '@/lib/supabase'
 import { entriesStore, newId, purchasesStore, stockStore, supplierById } from './backoffice'
+import { remoteClosePurchase, remoteCreatePurchase, remoteReceive, remoteUndoReceipt } from './backofficeRemote'
 import { sessionStore } from './session'
 
 export function nextPurchaseNumber() {
@@ -9,10 +11,19 @@ export function nextPurchaseNumber() {
 }
 
 /** H-G7 — pedido sai pelo WhatsApp do fornecedor e fica salvo como "Enviado" */
-export function createPurchase(input: Pick<Purchase, 'supplierId' | 'expectedAt' | 'paymentTerms' | 'items'>): Purchase {
+export async function createPurchase(input: Pick<Purchase, 'supplierId' | 'expectedAt' | 'paymentTerms' | 'items'>, message = ''): Promise<{ id: string; number: string }> {
+  if (supabase) {
+    return remoteCreatePurchase({
+      supplierId: input.supplierId,
+      expectedAt: input.expectedAt,
+      payment: input.paymentTerms,
+      items: input.items.map((i) => ({ itemId: i.itemId, qty: i.qty })),
+      message,
+    })
+  }
   const p: Purchase = { ...input, id: newId('pc'), number: nextPurchaseNumber(), status: 'sent', sentAt: new Date().toISOString(), receivedAt: null }
   purchasesStore.set((all) => [p, ...all])
-  return p
+  return { id: p.id, number: p.number }
 }
 
 export function whatsappLink(phone: string, text: string) {
@@ -21,16 +32,37 @@ export function whatsappLink(phone: string, text: string) {
 
 export type ReceiptLine = { itemId: string; qty: number; lotCode: string; expiry: string | null }
 
-export type Receipt = { purchaseId: string; lotIds: string[]; movementIds: string[]; entryId: string; previous: Purchase }
+export type Receipt = {
+  purchaseId: string
+  previous: Purchase
+  /** valor da nota e vencimento da conta a pagar criada */
+  totalCents: number
+  dueAt: string
+  /** id do recebimento no banco (com o Supabase) */
+  receiptId?: string
+  /** o que foi criado localmente, para desfazer (sem o Supabase) */
+  local?: { lotIds: string[]; movementIds: string[]; entryId: string }
+}
 
 /**
  * H-G8/H-G9 — recebimento item a item com lote e validade. Entra no estoque e cria a
  * conta a pagar com o valor do que chegou. Devolve o necessário para desfazer.
  */
-export function receivePurchase(purchaseId: string, lines: ReceiptLine[]): Receipt {
+export async function receivePurchase(purchaseId: string, lines: ReceiptLine[]): Promise<Receipt> {
   const p = purchasesStore.get().find((x) => x.id === purchaseId)
   if (!p) throw new Error('compra não encontrada')
   const supplier = supplierById(p.supplierId)
+  if (supabase) {
+    // H-G9 — a conta a pagar vence conforme o prazo do fornecedor
+    const dueAt = daysFromToday(supplier?.paymentDays ?? 0)
+    const res = await remoteReceive(
+      purchaseId,
+      lines.map((l) => ({ lineId: p.items.find((i) => i.itemId === l.itemId)?.lineId ?? '', qty: l.qty, lot: l.lotCode, expiresAt: l.expiry })),
+      dueAt,
+      p.paymentTerms.split(',')[0],
+    )
+    return { purchaseId, previous: p, totalCents: Number(res.total_cents), dueAt, receiptId: res.receipt_id }
+  }
   const now = new Date().toISOString()
   const by = sessionStore.get()?.name ?? 'Equipe'
 
@@ -71,20 +103,27 @@ export function receivePurchase(purchaseId: string, lines: ReceiptLine[]): Recei
   purchasesStore.set((all) =>
     all.map((x) => (x.id === p.id ? { ...x, items: received, receivedAt: now, status: complete ? 'received' : 'partially_received' } : x)),
   )
-  return { purchaseId: p.id, lotIds: lots.map((l) => l.id), movementIds: movements.map((m) => m.id), entryId: entry.id, previous: p }
+  return { purchaseId: p.id, previous: p, totalCents: value, dueAt: entry.dueDate, local: { lotIds: lots.map((l) => l.id), movementIds: movements.map((m) => m.id), entryId: entry.id } }
 }
 
 /** Falta no recebimento: manter o restante em aberto ou encerrar o pedido */
-export function setPurchaseClosed(purchaseId: string, closed: boolean) {
+export async function setPurchaseClosed(purchaseId: string, closed: boolean) {
+  if (supabase) {
+    // o banco só sabe encerrar; "manter em aberto" é o estado de partida
+    if (closed) await remoteClosePurchase(purchaseId)
+    return
+  }
   purchasesStore.set((all) => all.map((x) => (x.id === purchaseId ? { ...x, status: closed ? 'received' : 'partially_received' } : x)))
 }
 
 /** "Corrigir conferência": desfaz o recebimento por inteiro */
-export function undoReceipt(r: Receipt) {
+export async function undoReceipt(r: Receipt) {
+  if (supabase) return remoteUndoReceipt(r.receiptId!)
+  const local = r.local!
   stockStore.set((s) => ({
-    lots: s.lots.filter((l) => !r.lotIds.includes(l.id)),
-    movements: s.movements.filter((m) => !r.movementIds.includes(m.id)),
+    lots: s.lots.filter((l) => !local.lotIds.includes(l.id)),
+    movements: s.movements.filter((m) => !local.movementIds.includes(m.id)),
   }))
-  entriesStore.set((all) => all.filter((e) => e.id !== r.entryId))
+  entriesStore.set((all) => all.filter((e) => e.id !== local.entryId))
   purchasesStore.set((all) => all.map((x) => (x.id === r.purchaseId ? r.previous : x)))
 }

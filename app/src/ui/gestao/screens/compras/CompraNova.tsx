@@ -1,5 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { supabase } from '@/lib/supabase'
+import { backofficeErrorMessage } from '@/services/gestao/backofficeRemote'
+import { EmptyState } from '@/components/Feedback'
+import { ButtonLink } from '@/components/Button'
 import { Tag } from '@/components/Badges'
 import { Box } from '@/components/Card'
 import { Button } from '@/components/Button'
@@ -16,7 +20,8 @@ import { balanceOf } from '@/services/gestao/stock'
 import o from '@/styles/ops.module.css'
 import { Bar, SumRow, SumTotal } from '../../../shared/OpsBits'
 
-const paymentOptions = ['Boleto, 14 dias após receber', 'Boleto, 21 dias após receber', 'Pix na entrega', 'Dinheiro na entrega']
+// o banco aceita estas três condições; a de 21 dias só existe nos dados de exemplo
+const paymentOptions = supabase ? ['Boleto, 14 dias após receber', 'Pix na entrega', 'Dinheiro na entrega'] : ['Boleto, 14 dias após receber', 'Boleto, 21 dias após receber', 'Pix na entrega', 'Dinheiro na entrega']
 
 export function CompraNova() {
   const [params] = useSearchParams()
@@ -27,8 +32,8 @@ export function CompraNova() {
   const purchases = purchasesStore.useStore()
   const navigate = useNavigate()
 
-  const [supplierId, setSupplierId] = useState(params.get('fornecedor') ?? suppliers[0].id)
-  const supplier = suppliers.find((s) => s.id === supplierId)!
+  const [supplierId, setSupplierId] = useState(params.get('fornecedor') ?? suppliers[0]?.id ?? '')
+  const supplier = suppliers.find((s) => s.id === supplierId) ?? suppliers[0]
   const supplied = useMemo(() => items.filter((i) => i.supplierId === supplierId), [items, supplierId])
 
   // H-G7 — sugere quantidades pelo estoque mínimo
@@ -46,27 +51,50 @@ export function CompraNova() {
   const setItemQty = (id: string, q: number) => setQty((all) => ({ ...all, [supplierId]: { ...current, [id]: q } }))
 
   const [expected, setExpected] = useState(daysFromToday(4).slice(0, 10))
-  const [payment, setPayment] = useState(supplier.paymentDays ? `Boleto, ${supplier.paymentDays} dias após receber` : 'Pix na entrega')
+  const [payment, setPayment] = useState(supplier?.paymentDays ? `Boleto, ${supplier.paymentDays} dias após receber` : 'Pix na entrega')
   const [error, setError] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
 
   const lines = supplied.filter((i) => (current[i.id] ?? 0) > 0)
   const totalQty = lines.reduce((n, i) => n + current[i.id], 0)
   const total = lines.reduce((n, i) => n + current[i.id] * i.costCents, 0)
 
-  const send = () => {
+  const send = async () => {
     if (lines.length === 0) {
       setError(true)
       return
     }
-    const p = createPurchase({
-      supplierId,
-      expectedAt: new Date(`${expected}T12:00:00`).toISOString(),
-      paymentTerms: payment,
-      items: lines.map((i) => ({ itemId: i.id, name: i.name, qty: current[i.id], unitCostCents: i.costCents, receivedQty: 0 })),
-    })
-    const text = [`Olá, ${supplier.contactName}! Pedido ${p.number} da Bodeleve:`, ...lines.map((i) => `• ${current[i.id]} × ${i.name}`), `Previsão: ${new Date(`${expected}T12:00:00`).toLocaleDateString('pt-BR')}`, `Pagamento: ${payment}`].join('\n')
-    window.open(whatsappLink(supplier.phone, text), '_blank', 'noopener')
-    navigate(`/gestao/compras/${p.id}`, { replace: true })
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      const when = new Date(`${expected}T12:00:00`)
+      // `{number}` é trocado pelo banco pelo número do pedido criado (e por nós, abaixo, na mensagem do WhatsApp)
+      const message = [`Olá, ${supplier.contactName}! Pedido {number} da Bodeleve:`, ...lines.map((i) => `• ${current[i.id]} × ${i.name}`), `Previsão: ${when.toLocaleDateString('pt-BR')}`, `Pagamento: ${payment}`].join('\n')
+      const p = await createPurchase(
+        {
+          supplierId,
+          expectedAt: when.toISOString(),
+          paymentTerms: payment,
+          items: lines.map((i) => ({ itemId: i.id, name: i.name, qty: current[i.id], unitCostCents: i.costCents, receivedQty: 0 })),
+        },
+        message,
+      )
+      window.open(whatsappLink(supplier.phone, message.replace('{number}', p.number)), '_blank', 'noopener')
+      navigate(`/gestao/compras/${p.id}`, { replace: true })
+    } catch (e) {
+      setProblem(backofficeErrorMessage(e))
+      setBusy(false)
+    }
+  }
+
+  if (!supplier) {
+    return (
+      <div className={o.screen}>
+        <Bar title="Novo pedido de compra" back="/gestao/compras" />
+        <EmptyState bare icon="compras" title="Nenhum fornecedor cadastrado" text="Cadastre um fornecedor para poder fazer pedidos de compra." action={<ButtonLink to="/gestao/fornecedores">Ver fornecedores</ButtonLink>} />
+      </div>
+    )
   }
 
   return (
@@ -120,9 +148,10 @@ export function CompraNova() {
           <SumTotal label="Total previsto" value={formatCents(total)} />
         </div>
         {error && <Banner tone="error">Escolha a quantidade de pelo menos um item.</Banner>}
+        {problem && <Banner tone="error">{problem}</Banner>}
       </main>
       <div className={o.footer}>
-        <Button size="l" block onClick={send}>
+        <Button size="l" block loading={busy} disabled={busy} onClick={send}>
           Enviar ao fornecedor
         </Button>
         <p className={o.muted} style={{ textAlign: 'center' }}>

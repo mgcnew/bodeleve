@@ -7,6 +7,7 @@ import { RadioGroup, SelectField, TextAreaField, TextField, Toggle } from '@/com
 import type { Item, ItemType } from '@/domain/backoffice'
 import type { ProductOrigin } from '@/domain/catalog'
 import { formatCents, parseCents } from '@/domain/money'
+import { supabase } from '@/lib/supabase'
 import { itemsStore } from '@/services/gestao/backoffice'
 import { categoriesStore } from '@/services/gestao/people'
 import { internalCategories } from '@/mocks/catalog'
@@ -48,6 +49,8 @@ export function Produto() {
   const margin = priceCents && priceCents > 0 ? Math.round(((priceCents - form.costCents) / priceCents) * 100) : null
 
   const save = () => {
+    // o cadastro do produto ainda não está ligado ao banco: não finge que salvou
+    if (supabase) return
     const next: Item = {
       ...form,
       priceCents: raw ? null : priceCents,
@@ -113,9 +116,10 @@ export function Produto() {
         )}
         {!raw && <TextAreaField label="Descrição na loja" rows={3} value={form.description ?? '[DESCRIÇÃO DO PRODUTO]'} onChange={(e) => set({ description: e.target.value })} />}
         {saved && <Banner tone="success">Produto salvo.</Banner>}
+        {supabase && <Banner tone="info">A edição do cadastro ainda não está ligada ao banco; por enquanto os dados são só para consulta.</Banner>}
       </main>
       <div className={o.footer}>
-        <Button size="l" block onClick={save}>
+        <Button size="l" block onClick={save} disabled={!!supabase}>
           Salvar
         </Button>
       </div>

@@ -25,6 +25,8 @@ export type Item = {
   favoritePos: boolean
   /** texto da loja; marcador entre colchetes até o dono fornecer (P5) */
   description?: string
+  /** id do produto no banco (só com o Supabase ligado) */
+  dbId?: string
 }
 
 export type Lot = { id: string; itemId: string; code: string; expiry: string | null; unitCostCents: Cents; createdAt: string }
@@ -61,7 +63,15 @@ export type Supplier = {
 
 export type PurchaseStatus = 'draft' | 'sent' | 'partially_received' | 'received' | 'cancelled'
 
-export type PurchaseItem = { itemId: string; name: string; qty: number; unitCostCents: Cents; receivedQty: number }
+export type PurchaseItem = {
+  itemId: string
+  name: string
+  qty: number
+  unitCostCents: Cents
+  receivedQty: number
+  /** id da linha no banco; o recebimento confere por ele */
+  lineId?: string
+}
 
 export type Purchase = {
   id: string

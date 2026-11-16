@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Button, ButtonLink } from '@/components/Button'
+import { Banner } from '@/components/Feedback'
 import { RadioGroup, Segmented, SelectField } from '@/components/Field'
 import { Icon } from '@/components/Icon'
 import { QuantityStepper } from '@/components/QuantityStepper'
 import { formatQty } from '@/domain/backoffice'
 import { shortDate } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
-import { balanceOf, lotsOf, registerAdjustment, removeMovements, type AdjustmentKind } from '@/services/gestao/stock'
+import { supabase } from '@/lib/supabase'
+import { backofficeErrorMessage } from '@/services/gestao/backofficeRemote'
+import { balanceOf, lotsOf, registerAdjustment, undoStock, type AdjustmentKind, type UndoToken } from '@/services/gestao/stock'
 import { useStockContext } from '@/services/gestao/useBackoffice'
 import o from '@/styles/ops.module.css'
 import { Bar, SumRow } from '../../../shared/OpsBits'
@@ -32,7 +35,9 @@ export function Ajuste() {
   const [lotId, setLotId] = useState<string>(lots[0]?.id ?? '')
   const [qty, setQty] = useState(1)
   const [reason, setReason] = useState(reasons.loss[0])
-  const [done, setDone] = useState<{ id: string; summary: string } | null>(null)
+  const [done, setDone] = useState<{ token: UndoToken; summary: string } | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
 
   const lot = lots.find((l) => l.id === lotId) ?? null
   const signed = kind === 'correction' && direction === 'in' ? qty : -qty
@@ -46,13 +51,23 @@ export function Ajuste() {
     setQty(1)
   }
 
-  const submit = () => {
-    const id = registerAdjustment({ itemId: item.id, lotId: item.tracksLots ? lotId || null : null, kind, qty: signed, reason })
-    const what = kind === 'loss' ? 'de custo' : kind === 'internal' ? 'de consumo' : 'corrigidos'
-    setDone({
-      id,
-      summary: `${formatQty(qty, item.unit)} de ${item.name} · ${formatCents(cost)} ${what}${lot && item.tracksLots ? ` · lote ${lot.code}` : ''}`,
-    })
+  const submit = async () => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      // o banco exige o lote em toda saída; sem o banco, só itens com controle de lote
+      const lotForCall = supabase || item.tracksLots ? lotId || lots[0]?.id || null : null
+      const token = await registerAdjustment({ itemId: item.id, lotId: lotForCall, kind, qty: signed, reason })
+      const what = kind === 'loss' ? 'de custo' : kind === 'internal' ? 'de consumo' : 'corrigidos'
+      setDone({
+        token,
+        summary: `${formatQty(qty, item.unit)} de ${item.name} · ${formatCents(cost)} ${what}${lot && item.tracksLots ? ` · lote ${lot.code}` : ''}`,
+      })
+    } catch (e) {
+      setProblem(backofficeErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
   if (done) {
@@ -73,9 +88,13 @@ export function Ajuste() {
           <Button
             variant="secondary"
             block
-            onClick={() => {
-              removeMovements([done.id])
-              setDone(null)
+            onClick={async () => {
+              try {
+                await undoStock(done.token)
+                setDone(null)
+              } catch (e) {
+                setProblem(backofficeErrorMessage(e))
+              }
             }}
           >
             Desfazer
@@ -146,7 +165,8 @@ export function Ajuste() {
         </div>
       </main>
       <div className={o.footer}>
-        <Button size="l" block onClick={submit}>
+        {problem && <Banner tone="error">{problem}</Banner>}
+        <Button size="l" block loading={busy} disabled={busy} onClick={submit}>
           {signed > 0 ? 'Registrar entrada' : 'Registrar saída'}
         </Button>
       </div>

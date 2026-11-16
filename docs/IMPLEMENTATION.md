@@ -68,7 +68,9 @@ O app usa o projeto Supabase **já existente** (`afqcwqikkolyoowkozak`), que tem
 | Loja: fazer pedido e acompanhar | **Ligado e testado**: um pedido de teste (nº 1001, "TESTE Integração") foi criado e aparece no acompanhamento |
 | Gestão: login da equipe | **Ligado** (Supabase Auth + papel em `memberships`) |
 | Gestão: pedidos (fila, aceitar, conferir, pronto, desfazer, retirada) | **Ligado e testado** (`order_accept`, `order_mark_ready`, `order_undo_ready`, `order_complete_pickup`), com Realtime e atualização a cada 15 s |
-| Gestão: entregas (atribuir), estoque, compras, produção, financeiro, produtos, clientes | Ainda nos dados de exemplo |
+| Gestão: estoque (saldos, lotes, movimentos, ajuste/perda, contagem e desfazer) | **Ligado e testado** (`stock_adjust`, `stock_count_apply`, `stock_count_undo`, `stock_reverse`; saldo reservado pelos pedidos reais) |
+| Gestão: compras e fornecedores (criar pedido, receber, encerrar, desfazer) | **Ligado** (`create_purchase_order`, `receive_purchase`, `close_purchase_short`, `undo_receipt`); falta testar com dados, porque o banco ainda não tem fornecedores (ver `supabase/seed_dev_estoque.sql`, não aplicado) |
+| Gestão: entregas (atribuir), produção, financeiro, produtos (edição), clientes | Ainda nos dados de exemplo. Produção começa vazia com o banco ligado |
 | PDV e Entregas (app do entregador) | Ainda nos dados de exemplo (`pos_*`, `courier_*` existem no banco) |
 
 O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de desenvolvimento.
