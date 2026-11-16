@@ -35,7 +35,7 @@ export function SuppliersPage() {
           {(list) => {
             const shown = list.filter((f) => !q.trim() || norm(f.name).includes(norm(q)) || norm(f.supplies).includes(norm(q)))
             return shown.length === 0 ? (
-              <EmptyState icon="buscar" title={`Nada encontrado para “${q.trim()}”`} description="Confira a escrita." />
+              <EmptyState icon="buscar" title={list.length === 0 ? 'Nenhum fornecedor cadastrado' : `Nada encontrado para “${q.trim()}”`} description={list.length === 0 ? 'Cadastre quem vende para a casa para fazer pedidos de compra.' : 'Confira a escrita.'} action={<ButtonLink href="/gestao/fornecedores/novo">Novo fornecedor</ButtonLink>} />
             ) : (
               <>
                 <div className={l.linkList}>
@@ -51,6 +51,7 @@ export function SuppliersPage() {
                   ))}
                 </div>
                 <div className={l.sub}>{list.length} {list.length === 1 ? 'fornecedor ativo' : 'fornecedores ativos'}</div>
+                <ButtonLink href="/gestao/fornecedores/novo" variant="secondary">Novo fornecedor</ButtonLink>
               </>
             )
           }}
@@ -120,6 +121,7 @@ export function SupplierPage() {
               </section>
             </main>
             <Footer>
+              <ButtonLink href={`/gestao/fornecedores/${f.id}/editar`} variant="secondary" fullWidth>Editar fornecedor</ButtonLink>
               <ButtonLink href={`/gestao/compras/novo?fornecedor=${f.id}`} size="lg" fullWidth>Novo pedido para este fornecedor</ButtonLink>
             </Footer>
           </>

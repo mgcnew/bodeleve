@@ -15,6 +15,7 @@ import type { AccountId, ForecastRow, LedgerRow, PayInput, Standing } from '@/do
 import type { PaymentTermId, PurchaseOrder, ReceiptLine, Supplier } from '@/domain/purchasing'
 import type { ReceiveResult } from '@/domain/receiving'
 import type { Role } from '@/permissions'
+import type { CourierInput, RecipeFormOptions, RecipeInput, SupplierInput } from '@/domain/registry'
 
 /**
  * Contratos que as telas usam. Hoje têm implementação simulada (src/mocks); quando o Supabase for conectado (D19),
@@ -142,6 +143,8 @@ export interface PurchasingService {
   getOrder(id: string): Promise<PurchaseView | null>
   listSuppliers(): Promise<SupplierView[]>
   getSupplier(id: string): Promise<SupplierView | null>
+  /** Cria (id nulo) ou muda um fornecedor. Lança `invalid` se o formulário não passa na validação. */
+  saveSupplier(id: string | null, input: SupplierInput): Promise<SupplierView>
   /** Itens do fornecedor com estoque, mínimo e quantidade sugerida (H-G7). */
   suggest(supplierId: string): Promise<PurchaseSuggestion[]>
   /** Salva como "Enviado" e monta a mensagem. Nesta versão a mensagem NÃO é enviada (D21): fica no registro. */
@@ -214,7 +217,7 @@ export type RecipeView = {
   overheadCents: number
   method: string
   lotPrefix: string
-  lines: Array<{ itemId: string; name: string; qtyText: string; costCents: number }>
+  lines: Array<{ itemId: string; name: string; qtyText: string; qtyPerBatch: number; costCents: number }>
 }
 
 export type InputCheckView = {
@@ -250,6 +253,10 @@ export interface ProductionService {
   getOrder(id: string): Promise<ProductionOrderView | null>
   listRecipes(): Promise<RecipeView[]>
   getRecipe(id: string): Promise<RecipeView | null>
+  /** Produtos que podem ter ficha e itens que podem ser insumo. */
+  recipeOptions(): Promise<RecipeFormOptions>
+  /** Cria (id nulo) ou muda uma ficha. Lança `invalid`, `duplicate` (o produto já tem ficha) ou `not_found`. */
+  saveRecipe(id: string | null, input: RecipeInput): Promise<RecipeView>
   /** H-G17: confere os insumos para N fornadas. */
   check(recipeId: string, batches: number): Promise<InputCheckView>
   /** Cria a ordem e reserva os insumos que há. Pedidos abertos da loja podem ser o destino. */
@@ -368,6 +375,9 @@ export interface DeliveryAdminService {
   /** Lança `not_found`, `not_ready` ou `already_assigned`. */
   assign(orderId: string, optionId: string): Promise<Assignment>
   undoAssign(orderId: string): Promise<void>
+  getCourier(id: string): Promise<(CourierInput & { id: string }) | null>
+  /** Cria (id nulo) ou muda um entregador. Lança `invalid` ou `duplicate` (o celular já está cadastrado). */
+  saveCourier(id: string | null, input: CourierInput): Promise<CourierRow>
 }
 
 export type SalesReportView = Omit<SalesReport, 'top'> & { top: Array<{ productId: string; name: string; qty: number }> }

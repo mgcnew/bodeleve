@@ -1,8 +1,10 @@
+import { DeliveryError } from '@/domain/deliveries'
 import { FinanceError, accountName, type PayInput } from '@/domain/finance'
 import { itemBalance, itemLabel } from '@/domain/inventory'
 import { ProductionError, formatContent } from '@/domain/production'
 import { paymentTerms, purchaseMessage, validateReceipt, type PaymentTermId, type ReceiptErrors } from '@/domain/purchasing'
 import { ReceivingError } from '@/domain/receiving'
+import { validateCourier, validateRecipe, validateSupplier } from '@/domain/registry'
 import { createAdminServices } from '@/mocks/adminServices'
 import { createDb as createMemoryDb } from '@/mocks/db'
 import type { AdminServices, Dashboard } from '@/services/types'
@@ -10,7 +12,7 @@ import { ServiceError, unwrap } from '../client'
 import type { AdminContext } from './context'
 import { hydrate, type Registry } from './hydrate'
 
-type Hydrated = Pick<AdminServices, 'stock' | 'purchasing' | 'production' | 'finance' | 'dashboard'>
+type Hydrated = Pick<AdminServices, 'stock' | 'purchasing' | 'production' | 'finance' | 'dashboard' | 'deliveries'>
 
 const FRESH_MS = 1500
 const payLabel: Record<PaymentTermId, string> = { boleto14: 'Boleto', pix_on_delivery: 'Pix', cash_on_delivery: 'Dinheiro' }
@@ -77,6 +79,54 @@ export function createHydratedAdmin(ctx: AdminContext): Hydrated {
   }
 
   return {
+    deliveries: {
+      overview: async () => {
+        // Entrega publicada que ninguém aceitou no prazo volta para a casa (H-I71).
+        await rpc('delivery_expire_published', { p_establishment: await est() }).catch(() => 0)
+        await refresh()
+        return view.deliveries.overview()
+      },
+      getAssign: read((id: string) => view.deliveries.getAssign(id)),
+      async assign(orderNumber, optionId) {
+        const reg = await fresh()
+        try {
+          const order = reg.orderId.get(orderNumber)
+          if (!order) throw new DeliveryError('not_found')
+          await rpc('delivery_assign', { p_order: order, p_courier: optionId === 'partners' ? null : optionId })
+        } catch (e) {
+          if (e instanceof ServiceError && ['not_found', 'not_ready', 'already_assigned'].includes(e.code)) throw new DeliveryError(e.code as 'not_found')
+          throw e
+        }
+        await refresh()
+        const current = (await view.deliveries.getAssign(orderNumber))?.current
+        return { title: current?.title ?? '', summary: current?.summary ?? '' }
+      },
+      async undoAssign(orderNumber) {
+        const reg = await fresh()
+        try {
+          await rpc('delivery_unassign', { p_order: reg.orderId.get(orderNumber) })
+        } catch (e) {
+          if (e instanceof ServiceError) throw new DeliveryError(e.code === 'no_assignment' ? 'no_assignment' : 'not_found')
+          throw e
+        }
+        await refresh()
+      },
+      getCourier: read((id: string) => view.deliveries.getCourier(id)),
+      async saveCourier(id, input) {
+        if (Object.keys(validateCourier(input)).length) throw new Error('invalid')
+        const row = { name: input.name.trim(), kind: input.kind, phone: input.phone.trim(), vehicle: input.vehicle.trim() }
+        let savedId = id ?? ''
+        const { data, error } = id
+          ? await client.from('couriers').update(row).eq('id', id).select('id').single()
+          : await client.from('couriers').insert({ establishment_id: await est(), ...row }).select('id').single()
+        if (error) throw new Error(error.code === '23505' ? 'duplicate' : error.message)
+        savedId = data.id
+        await refresh()
+        const rows = (await view.deliveries.overview()).couriers
+        return rows.find((r) => r.id === savedId) ?? { id: savedId, name: row.name, initial: row.name.charAt(0), detail: 'Parceiro · avulso', tag: { label: 'Parceiro', tone: 'neutral' as const } }
+      },
+    },
+
     dashboard: { get: read((): Promise<Dashboard> => view.dashboard.get()) },
 
     stock: {
@@ -120,6 +170,24 @@ export function createHydratedAdmin(ctx: AdminContext): Hydrated {
       listSuppliers: read(() => view.purchasing.listSuppliers()),
       getSupplier: read((id: string) => view.purchasing.getSupplier(id)),
       suggest: read((id: string) => view.purchasing.suggest(id)),
+      async saveSupplier(id, input) {
+        if (Object.keys(validateSupplier(input)).length) throw new Error('invalid')
+        const row = {
+          name: input.name.trim(), supplies: input.supplies.trim(), contact_name: input.contactName.trim(), phone: input.phone.trim() || null, email: input.email.trim() || null,
+          tax_id: input.doc.trim() || null, payment_terms: input.defaultPayment, lead_time_days: input.leadTimeDays,
+        }
+        let savedId = id ?? ''
+        if (id) {
+          const { error } = await client.from('suppliers').update(row).eq('id', id)
+          if (error) throw new Error(error.message)
+        } else {
+          const { data, error } = await client.from('suppliers').insert({ establishment_id: await est(), ...row }).select('id').single()
+          if (error) throw new Error(error.message)
+          savedId = data.id
+        }
+        await refresh()
+        return (await view.purchasing.getSupplier(savedId))!
+      },
       async send(input) {
         const reg = await fresh()
         const supplier = reg.state.suppliers.find((s) => s.id === input.supplierId)
@@ -207,6 +275,25 @@ export function createHydratedAdmin(ctx: AdminContext): Hydrated {
       getOrder: read((id: string) => view.production.getOrder(id)),
       listRecipes: read(() => view.production.listRecipes()),
       getRecipe: read((id: string) => view.production.getRecipe(id)),
+      recipeOptions: read(() => view.production.recipeOptions()),
+      async saveRecipe(id, input) {
+        if (Object.keys(validateRecipe(input)).length) throw new Error('invalid')
+        let savedId: string
+        try {
+          savedId = await rpc<string>('save_recipe', {
+            p_establishment: await est(), p_recipe: id,
+            p_data: {
+              product_id: input.itemId, yield_per_batch: input.yieldPerBatch, batch_label: input.batchLabel, shelf_life_days: input.shelfLifeDays, lot_prefix: input.lotPrefix,
+              overhead_cents: input.overheadCents, method: input.method, lines: input.lines.filter((l) => l.itemId).map((l) => ({ product_id: l.itemId, qty_per_batch: l.qtyPerBatch })),
+            },
+          })
+        } catch (e) {
+          if (e instanceof ServiceError && ['invalid_input', 'invalid_product', 'empty_recipe'].includes(e.code)) throw new Error('invalid')
+          throw e
+        }
+        await refresh()
+        return (await view.production.getRecipe(savedId))!
+      },
       check: read((id: string, n: number) => view.production.check(id, n)),
       finishDefaults: read((id: string) => view.production.finishDefaults(id)),
       async createOrder(input) {

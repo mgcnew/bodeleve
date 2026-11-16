@@ -112,6 +112,8 @@ export function RecipesPage() {
                   </AppLink>
                 ))}
               </div>
+              {list.length === 0 && <EmptyState icon="producao" title="Nenhuma ficha técnica" description="A ficha diz o que entra e quanto rende. Cadastre a primeira para criar ordens de produção." />}
+              <ButtonLink href="/gestao/producao/fichas/nova" variant="secondary">Nova ficha técnica</ButtonLink>
               <div className={l.sub}>Produtos de revenda não têm ficha. A Rapadura da Linha Bodeleve é feita por parceiro (Engenho Boa Vista) e entra por compra.</div>
             </>
           )}

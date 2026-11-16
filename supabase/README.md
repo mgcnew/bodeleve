@@ -18,6 +18,7 @@ Aplicadas na ordem do nome. Cada arquivo é o mesmo SQL já aplicado no projeto;
 | `…08_funcoes_pedidos_pdv_financeiro_entregas` | fila do pedido online, balcão (abrir/fechar/reabrir caixa, venda, sangria, cancelamento com senha de gestor), pagar conta e desfazer, atribuição de entrega e todo o fluxo do entregador |
 | `…09_corrige_nome_do_aprovador` | corrige o nome de quem aprova um cancelamento |
 | `…10_protege_escritas_diretas` e `…11_corrige_protecoes` | a equipe não consegue marcar compra como recebida, ordem como concluída ou conta como paga por fora das funções |
+| `…15_cadastros_fornecedor_e_ficha` | contato do fornecedor e `save_recipe` (ficha técnica gravada de uma vez) |
 | `…12_compras_e_producao_completas` e `…13_corrige_ordem_de_producao`, `…14_mensagem_da_compra_com_numero` | numera pedido de compra e ordem de produção, reserva insumos, encerra compra com falta, apontamento de produção com consumo real |
 
 ## Regras de segurança (RLS)

@@ -4,6 +4,7 @@ import type { Order } from '@/domain/types'
 import type { TeamMember } from '@/domain/settings'
 import { adjust, applyCount, buildRows, expiringLots, lowRows, reverse, stockValueCents, undoCount, reservedByItem, type StockState } from '@/domain/stock'
 import { products } from './seed'
+import { validateCourier, validateRecipe, validateSupplier } from '@/domain/registry'
 import { applyProduct, channelLabel, checkNewCategory, defaultSale, kindOf, slugify, splitNewLabel, validateProduct, type ProductInput } from '@/domain/catalog'
 import { customerDetail, customerId, listCustomers } from '@/domain/customers'
 import { productCost } from './catalogView'
@@ -244,7 +245,7 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
       overheadCents: r.overheadCents, method: r.method, lotPrefix: r.lotPrefix,
       lines: r.lines.map((l) => {
         const it = st.stockItems.find((i) => i.id === l.itemId)!
-        return { itemId: l.itemId, name: it.name, qtyText: formatContent(l.qtyPerBatch, it), costCents: Math.round(l.qtyPerBatch * costOf(l.itemId)) }
+        return { itemId: l.itemId, name: it.name, qtyText: formatContent(l.qtyPerBatch, it), qtyPerBatch: l.qtyPerBatch, costCents: Math.round(l.qtyPerBatch * costOf(l.itemId)) }
       }),
     }
   }
@@ -366,6 +367,28 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
       },
       async getSupplier(id) {
         return supplierView(id, db.read())
+      },
+      async saveSupplier(id, input) {
+        if (Object.keys(validateSupplier(input)).length) throw new Error('invalid')
+        let savedId = id ?? ''
+        db.update((st) => {
+          const fields = {
+            name: input.name.trim(), supplies: input.supplies.trim(), contactName: input.contactName.trim() || '[NOME DO CONTATO]', phone: input.phone.trim(),
+            email: input.email.trim() || '[E-MAIL]', doc: input.doc.trim() || '[CNPJ OU CPF]', defaultPayment: input.defaultPayment,
+            leadTime: input.leadTimeDays == null ? '' : `${input.leadTimeDays} ${input.leadTimeDays === 1 ? 'dia' : 'dias'}`,
+          }
+          if (id) {
+            const cur = st.suppliers.find((x) => x.id === id)
+            if (!cur) throw new Error('not_found')
+            Object.assign(cur, fields)
+          } else {
+            const base = slugify(fields.name) || 'fornecedor'
+            savedId = base
+            for (let n = 2; st.suppliers.some((x) => x.id === savedId); n++) savedId = `${base}-${n}`
+            st.suppliers.push({ id: savedId, since: String(now().getFullYear()), previousPurchasesCents: 0, ...fields })
+          }
+        })
+        return supplierView(savedId, db.read())!
       },
       async suggest(supplierId) {
         const st = db.read()
@@ -556,6 +579,35 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
       },
       async getRecipe(id) {
         return recipeView(id, db.read())
+      },
+      async recipeOptions() {
+        const st = db.read()
+        const label = (i: StockItem) => itemLabel(i)
+        return { products: st.stockItems.filter((i) => i.itemType === 'finished').map((i) => ({ id: i.id, label: label(i) })), inputs: st.stockItems.map((i) => ({ id: i.id, label: label(i) })) }
+      },
+      async saveRecipe(id, input) {
+        if (Object.keys(validateRecipe(input)).length) throw new Error('invalid')
+        let savedId = id ?? ''
+        db.update((st) => {
+          const item = st.stockItems.find((i) => i.id === input.itemId)
+          if (!item || item.itemType !== 'finished') throw new Error('invalid')
+          const recipe = {
+            itemId: input.itemId, yieldPerBatch: input.yieldPerBatch, batchLabel: input.batchLabel.trim() || 'fornada', shelfLifeDays: input.shelfLifeDays,
+            lines: input.lines.filter((l) => l.itemId).map((l) => ({ itemId: l.itemId, qtyPerBatch: l.qtyPerBatch })), overheadCents: input.overheadCents, method: input.method, lotPrefix: input.lotPrefix.trim().toUpperCase(),
+          }
+          if (id) {
+            const cur = st.recipes.find((r) => r.id === id)
+            if (!cur) throw new Error('not_found')
+            if (cur.itemId !== input.itemId) throw new Error('invalid')
+            Object.assign(cur, recipe)
+          } else {
+            if (st.recipes.some((r) => r.itemId === input.itemId)) throw new Error('duplicate')
+            savedId = `ft-${slugify(item.name)}`
+            for (let n = 2; st.recipes.some((r) => r.id === savedId); n++) savedId = `ft-${slugify(item.name)}-${n}`
+            st.recipes.push({ id: savedId, ...recipe })
+          }
+        })
+        return recipeView(savedId, db.read())!
       },
       async check(recipeId, batches) {
         const st = db.read()
@@ -926,6 +978,31 @@ export function createAdminServices({ db, now }: { db: MockDb; now: () => Date }
           st.deliveries.push(out.record)
         })
         return (out as unknown as ReturnType<typeof assignDelivery>).assignment
+      },
+      async getCourier(id) {
+        const c = db.read().couriers.find((x) => x.id === id)
+        return c ? { id: c.id, name: c.name, kind: c.kind, phone: c.phone, vehicle: c.vehicle } : null
+      },
+      async saveCourier(id, input) {
+        if (Object.keys(validateCourier(input)).length) throw new Error('invalid')
+        let savedId = id ?? ''
+        db.update((st) => {
+          const digits = (t: string) => t.replace(/\D/g, '')
+          if (st.couriers.some((c) => c.id !== id && digits(c.phone) === digits(input.phone))) throw new Error('duplicate')
+          const fields = { name: input.name.trim(), kind: input.kind, phone: input.phone.trim(), vehicle: input.vehicle.trim() }
+          if (id) {
+            const cur = st.couriers.find((c) => c.id === id)
+            if (!cur) throw new Error('not_found')
+            Object.assign(cur, fields)
+          } else {
+            const base = slugify(fields.name) || 'entregador'
+            savedId = base
+            for (let n = 2; st.couriers.some((c) => c.id === savedId); n++) savedId = `${base}-${n}`
+            st.couriers.push({ id: savedId, available: true, pixKey: '', ...fields })
+          }
+        })
+        const saved = db.read().couriers.find((c) => c.id === savedId)!
+        return courierRows(db.read().couriers, db.read().deliveries).find((r) => r.id === savedId) ?? { id: saved.id, name: saved.name, initial: saved.name.charAt(0), detail: 'Parceiro · avulso', tag: { label: 'Parceiro', tone: 'neutral' as const } }
       },
       async undoAssign(orderId) {
         db.update((st) => {

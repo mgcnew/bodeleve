@@ -114,4 +114,17 @@ describe('Estoque, Compras, Produção e Financeiro sobre o banco', () => {
     expect(err).toBeInstanceOf(FinanceError)
     expect(err).toMatchObject({ code: 'insufficient_balance', detail: '5000' })
   })
+
+  it('entregas: atribui pelo pedido, publica para parceiros sem entregador e traduz os erros', async () => {
+    const order = { id: 'o-1', number: '1001', channel: 'online', status: 'ready_for_delivery', fulfillment: 'delivery', created_at: at, customer_id: null, contact_name: 'Ana', contact_phone: '11999990000', address: { street: 'Rua A', number: '1', district: 'Centro' }, delivery_window: { id: 'asap' }, subtotal_cents: 1000, delivery_fee_cents: 800, total_cents: 1800, payment_method: 'pix', payment_paid: true, change_for_cents: null, delivery_code: '1111', eta_label: null, courier_name: null, step_times: {}, order_items: [] }
+    const f = fake({ ...base, orders: [order], couriers: [{ id: 'c1', name: 'Carlos', kind: 'own', phone: '(00) 90000-0301', vehicle: 'Moto', available: true, pix_key: '', created_at: at }] })
+    const svc = createHydratedAdmin(createAdminContext(f.client))
+    await svc.deliveries.assign('1001', 'c1')
+    await svc.deliveries.assign('1001', 'partners')
+    expect(f.rpcs.filter((r) => r.fn === 'delivery_assign').map((r) => r.args)).toEqual([{ p_order: 'o-1', p_courier: 'c1' }, { p_order: 'o-1', p_courier: null }])
+    const bad = fake({ ...base, orders: [order] }, () => ({ error: { message: 'already_assigned' } }))
+    await expect(createHydratedAdmin(createAdminContext(bad.client)).deliveries.assign('1001', 'partners')).rejects.toMatchObject({ code: 'already_assigned' })
+    await expect(createHydratedAdmin(createAdminContext(bad.client)).deliveries.assign('9999', 'partners')).rejects.toMatchObject({ code: 'not_found' })
+  })
 })
+

@@ -152,6 +152,7 @@ function Producer({ recipe }: { recipe: RecipeView }) {
         </div>
         {error && <Banner tone="error">{error}</Banner>}
       </section>
+      <div style={{ padding: '0 16px 8px' }}><ButtonLink href={`/gestao/producao/fichas/${recipe.id}/editar`} variant="secondary" fullWidth>Editar ficha técnica</ButtonLink></div>
       <Footer>
         <Button size="lg" fullWidth loading={busy} onClick={create}>{busy ? 'Criando…' : 'Criar ordem de produção'}</Button>
       </Footer>

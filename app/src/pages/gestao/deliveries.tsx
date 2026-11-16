@@ -60,16 +60,17 @@ export function DeliveriesPage() {
                   <h2 id="entregadores" style={{ font: '700 17px/24px var(--fonte-titulo)', margin: 0 }}>Entregadores</h2>
                   <div className={l.linkList}>
                     {d.couriers.map((c) => (
-                      <div key={c.id} className={s.plainRow} style={{ minHeight: 64 }}>
+                      <AppLink key={c.id} href={c.id === 'partners' ? '/gestao/entregas' : `/gestao/entregas/entregadores/${c.id}/editar`} className={l.linkRow} style={{ minHeight: 64 }}>
                         <span className={s.disc} style={{ fontWeight: 700 }} aria-hidden="true">{c.initial}</span>
                         <span className={l.grow}>
                           <span className={l.optionTitle}>{c.name}</span>
                           <span className={l.optionDetail}>{c.detail}</span>
                         </span>
                         <StatusTag tone={c.tag.tone}>{c.tag.label}</StatusTag>
-                      </div>
+                      </AppLink>
                     ))}
                   </div>
+                  <ButtonLink href="/gestao/entregas/entregadores/novo" variant="secondary">Novo entregador</ButtonLink>
                 </section>
               </>
             )

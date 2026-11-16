@@ -414,6 +414,7 @@ Nenhuma decisão D* foi mudada. Na implementação troquei **textos dos quadros*
 | Confirmar entrega, Problema na entrega | "Peça o código à cliente", "A cliente não tem o código", "a loja e a cliente foram avisadas", "Código não confere. Confira com a cliente." | Mesmas frases com "quem comprou" | Mesmo motivo, e nada é enviado (D21) |
 | Entrar (Entregas) | "Código enviado para …" | Igual, com aviso em desenvolvimento de que nada foi enviado e qual código usar | D21 |
 | Produtos (Gestão) | Só lista e edição de produto existente | Botão "Novo produto" e a tela `/gestao/produtos/novo` (mesmo formulário do Produto); a medida no fim do nome ("Queijo coalho 500 g") vira a embalagem | Com o banco real vazio, o dono não teria como cadastrar o primeiro produto (D33) |
+| Fornecedores, Fichas técnicas, Entregas (Gestão) | Só ver e usar o que já existe | Telas de cadastro: "Novo fornecedor" / "Editar fornecedor", "Nova ficha técnica" / "Editar ficha técnica", "Novo entregador" / "Editar entregador" (mesmo formato de "Novo produto") | O banco real começa vazio (D33): sem elas o dono não consegue começar a usar Compras, Produção e Entregas |
 | Produto (Gestão) | Um campo de preço | Preço da embalagem e, para produto por peso, o preço do kg (H-I80) | A loja e o balcão precificam diferente (P39) |
 
 ## Pendências do banco (novas)

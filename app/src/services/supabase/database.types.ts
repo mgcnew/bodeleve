@@ -1907,6 +1907,7 @@ export type Database = {
       suppliers: {
         Row: {
           active: boolean
+          contact_name: string
           created_at: string
           email: string | null
           establishment_id: string
@@ -1922,6 +1923,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          contact_name?: string
           created_at?: string
           email?: string | null
           establishment_id: string
@@ -1937,6 +1939,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          contact_name?: string
           created_at?: string
           email?: string | null
           establishment_id?: string
@@ -2038,6 +2041,7 @@ export type Database = {
       }
     }
     Functions: {
+      close_purchase_short: { Args: { p_po: string }; Returns: undefined }
       courier_accept: { Args: { p_order: string }; Returns: undefined }
       courier_confirm: {
         Args: { p_code: string; p_order: string }
@@ -2059,6 +2063,29 @@ export type Database = {
       }
       courier_take: { Args: { p_order: string }; Returns: undefined }
       courier_undo_problem: { Args: { p_order: string }; Returns: undefined }
+      create_production_order: {
+        Args: {
+          p_batches: number
+          p_destination?: string
+          p_establishment: string
+          p_recipe: string
+          p_start_now?: boolean
+          p_starts_at?: string
+        }
+        Returns: Json
+      }
+      create_purchase_order: {
+        Args: {
+          p_establishment: string
+          p_expected: string
+          p_items: Json
+          p_message?: string
+          p_payment: string
+          p_supplier: string
+        }
+        Returns: Json
+      }
+      delete_production_order: { Args: { p_order: string }; Returns: undefined }
       delivery_assign: {
         Args: { p_courier?: string; p_order: string }
         Returns: Json
@@ -2070,6 +2097,7 @@ export type Database = {
       delivery_unassign: { Args: { p_order: string }; Returns: undefined }
       finish_production: {
         Args: {
+          p_consumption?: Json
           p_expires_at?: string
           p_good_qty: number
           p_lot_code?: string
@@ -2137,10 +2165,15 @@ export type Database = {
         }
         Returns: Json
       }
+      save_recipe: {
+        Args: { p_data: Json; p_establishment: string; p_recipe: string }
+        Returns: string
+      }
       set_my_pin: {
         Args: { p_establishment: string; p_pin: string }
         Returns: undefined
       }
+      start_production: { Args: { p_order: string }; Returns: undefined }
       stock_adjust: {
         Args: {
           p_add?: boolean
