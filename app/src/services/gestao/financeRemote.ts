@@ -41,10 +41,18 @@ type TxRow = {
 }
 
 let loading: Promise<void> | null = null
+let rerun: Promise<void> | null = null
 
-export async function refreshFinance() {
+export async function refreshFinance(): Promise<void> {
   if (!supabase) return
-  if (loading) return loading
+  if (loading) {
+    // uma busca em andamento pode ter começado antes da ação que pediu esta: refaz logo depois dela
+    rerun ??= loading.catch(() => undefined).then(() => {
+      rerun = null
+      return refreshFinance()
+    })
+    return rerun
+  }
   loading = (async () => {
     const [accs, bal, entries, txs] = await Promise.all([
       supabase!.from('financial_accounts').select('id, kind, name'),

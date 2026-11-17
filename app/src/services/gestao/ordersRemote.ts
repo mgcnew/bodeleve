@@ -95,10 +95,18 @@ const SELECT =
   'id, number, fulfillment, status, customer_id, contact_name, contact_phone, address, delivery_window, delivery_fee_cents, payment_method, payment_paid, delivery_code, courier_name, created_at, customers(since), order_items(id, product_id, name, unit, qty, unit_price_cents, lots, products(slug)), deliveries(status, courier_id)'
 
 let loading: Promise<void> | null = null
+let rerun: Promise<void> | null = null
 
-export async function refreshStaffOrders() {
+export async function refreshStaffOrders(): Promise<void> {
   if (!supabase) return
-  if (loading) return loading
+  if (loading) {
+    // uma busca em andamento pode ter começado antes da ação que pediu esta: refaz logo depois dela
+    rerun ??= loading.catch(() => undefined).then(() => {
+      rerun = null
+      return refreshStaffOrders()
+    })
+    return rerun
+  }
   loading = (async () => {
     const { data, error } = await supabase!.from('orders').select(SELECT).order('created_at', { ascending: false }).limit(200)
     if (error || !data) return

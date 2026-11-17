@@ -97,10 +97,18 @@ type ProductionRow = {
 }
 
 let loading: Promise<void> | null = null
+let rerun: Promise<void> | null = null
 
-export async function refreshBackoffice() {
+export async function refreshBackoffice(): Promise<void> {
   if (!supabase) return
-  if (loading) return loading
+  if (loading) {
+    // uma busca em andamento pode ter começado antes da ação que pediu esta: refaz logo depois dela
+    rerun ??= loading.catch(() => undefined).then(() => {
+      rerun = null
+      return refreshBackoffice()
+    })
+    return rerun
+  }
   loading = (async () => {
     const [prods, lots, moves, sups, pos, recs, ops] = await Promise.all([
       supabase!.from('products').select('id, slug, name, unit, item_type, origin, min_stock, tracks_expiry, supplier_id, last_cost_cents, price_cents, sold_by_weight, is_published, is_favorite_pos, description, details, categories(slug)').eq('is_active', true).order('name'),
