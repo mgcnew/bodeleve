@@ -3,16 +3,23 @@ import { Box } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Banner } from '@/components/Feedback'
 import { TextField } from '@/components/Field'
+import { supabase } from '@/lib/supabase'
 import { establishmentStore } from '@/services/gestao/people'
+import { remoteSaveEstablishment, teamErrorMessage } from '@/services/gestao/peopleRemote'
 import o from '@/styles/ops.module.css'
 import { Bar } from '../../../shared/OpsBits'
 import { ProductPhoto } from '@/ui/loja/components/ProductCard'
 
 export function Casa() {
-  const [form, setForm] = useState(establishmentStore.get())
+  // com o Supabase os dados chegam depois de abrir a tela: o rascunho só existe depois da primeira edição
+  const stored = establishmentStore.useStore()
+  const [draft, setDraft] = useState<typeof stored | null>(null)
+  const form = draft ?? stored
   const [saved, setSaved] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
   const set = (patch: Partial<typeof form>) => {
-    setForm({ ...form, ...patch })
+    setDraft({ ...form, ...patch })
     setSaved(false)
   }
   const hours = (k: keyof typeof form.hours, v: string) => set({ hours: { ...form.hours, [k]: v } })
@@ -57,6 +64,7 @@ export function Casa() {
           </Box>
         </section>
         {saved && <Banner tone="success">Dados da casa salvos.</Banner>}
+        {problem && <Banner tone="error">{problem}</Banner>}
         <p className="sr-only">
           <ProductPhoto label="[FOTO DA CASA]" />
         </p>
@@ -65,9 +73,20 @@ export function Casa() {
         <Button
           size="l"
           block
-          onClick={() => {
-            establishmentStore.set(form)
-            setSaved(true)
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true)
+            setProblem(undefined)
+            try {
+              if (supabase) await remoteSaveEstablishment(form)
+              else establishmentStore.set(form)
+              setDraft(null)
+              setSaved(true)
+            } catch (e) {
+              setProblem(teamErrorMessage(e))
+            } finally {
+              setBusy(false)
+            }
           }}
         >
           Salvar

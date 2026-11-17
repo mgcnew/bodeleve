@@ -1,11 +1,12 @@
 // Entregadores e atribuição de entregas no banco. A gestão lê `couriers` e as entregas em andamento
 // (`deliveries`) e atribui com `delivery_assign` / `delivery_unassign`, que só aceitam pedido pronto,
 // entregador próprio da casa e uma entrega ativa por pedido.
-import type { Courier, Customer, Item } from '@/domain/backoffice'
+import type { Courier, Customer, Item, TeamMember } from '@/domain/backoffice'
 import type { Category } from '@/domain/catalog'
 import { supabase } from '@/lib/supabase'
 import { getEstablishmentId, refreshBackoffice } from './backofficeRemote'
-import { categoriesStore, couriersStore, customersStore } from './people'
+import type { Role } from '@/permissions/roles'
+import { categoriesStore, couriersStore, customersStore, establishmentStore, teamStore } from './people'
 import { refreshStaffOrders } from './ordersRemote'
 
 type CourierRow = { id: string; name: string; kind: 'own' | 'partner'; available: boolean }
@@ -212,7 +213,76 @@ export async function remoteSaveCustomerNotes(customerId: string, notes: string)
   if (error) throw error
 }
 
-/** Categorias e clientes: busca ao abrir e junto com a atualização periódica */
+// ---------- a casa ----------
+type EstablishmentRow = { name: string; cnpj: string | null; address: string | null; whatsapp: string | null; hours: { weekdays?: string; saturday?: string; sunday?: string } | null }
+
+export async function refreshEstablishment() {
+  if (!supabase) return
+  const { data, error } = await supabase.from('establishments').select('name, cnpj, address, whatsapp, hours').limit(1).maybeSingle()
+  if (error || !data) return
+  const r = data as EstablishmentRow
+  establishmentStore.set({
+    name: r.name,
+    cnpj: r.cnpj ?? '',
+    address: r.address ?? '',
+    whatsapp: r.whatsapp ?? '',
+    hours: { weekdays: r.hours?.weekdays ?? '', saturday: r.hours?.saturday ?? '', sunday: r.hours?.sunday ?? '' },
+  })
+}
+
+/** O banco não dá erro quando a regra de acesso barra a gravação: atualiza zero linhas. Aqui isso vira "forbidden". */
+export async function remoteSaveEstablishment(form: ReturnType<typeof establishmentStore.get>) {
+  const { data, error } = await supabase!
+    .from('establishments')
+    .update({ name: form.name.trim(), cnpj: form.cnpj.trim() || null, address: form.address.trim() || null, whatsapp: form.whatsapp.trim() || null, hours: form.hours })
+    .eq('id', await getEstablishmentId())
+    .select('id')
+  if (error) throw error
+  if (!data?.length) throw new Error('forbidden')
+  await refreshEstablishment()
+}
+
+// ---------- equipe ----------
+type MembershipRow = { id: string; email: string | null; display_name: string | null; role: Role; status: 'active' | 'invited' | 'disabled'; note: string | null }
+
+export async function refreshTeam() {
+  if (!supabase) return
+  const { data, error } = await supabase.from('memberships').select('id, email, display_name, role, status, note').neq('status', 'disabled').order('created_at')
+  if (error || !data) return
+  const order: Role[] = ['owner', 'manager', 'clerk', 'production', 'courier']
+  const list: TeamMember[] = (data as MembershipRow[])
+    .map((m) => ({
+      id: m.id,
+      name: m.display_name || (m.email ?? '').split('@')[0] || 'Sem nome',
+      role: m.role,
+      detail: m.email || m.note || '',
+      pending: m.status === 'invited',
+    }))
+    .sort((a, b) => order.indexOf(a.role) - order.indexOf(b.role))
+  teamStore.set(list)
+}
+
+/** Registra o convite (status "invited"); o e-mail só sai quando o envio de mensagens estiver ligado (P8) */
+export async function remoteInvite(email: string, role: Role) {
+  const clean = email.trim().toLowerCase()
+  const { data, error } = await supabase!
+    .from('memberships')
+    .insert({ establishment_id: await getEstablishmentId(), email: clean, display_name: clean.split('@')[0], role, status: 'invited' })
+    .select('id')
+  if (error) throw error
+  if (!data?.length) throw new Error('forbidden')
+  await refreshTeam()
+}
+
+export function teamErrorMessage(e: unknown) {
+  const msg = String((e as { message?: string })?.message ?? '')
+  const code = String((e as { code?: string })?.code ?? '')
+  if (msg.includes('forbidden') || code === '42501' || msg.includes('row-level security')) return 'Só o dono pode alterar a casa e a equipe.'
+  if (code === '23505' || msg.includes('duplicate')) return 'Esse e-mail já está na equipe.'
+  return 'Não foi possível salvar. Nada foi alterado. Tente de novo.'
+}
+
+/** Categorias, clientes, a casa e a equipe: busca ao abrir e junto com a atualização periódica */
 export async function refreshPeople() {
-  await Promise.all([refreshCouriers(), refreshCategories(), refreshCustomers()])
+  await Promise.all([refreshCouriers(), refreshCategories(), refreshCustomers(), refreshEstablishment(), refreshTeam()])
 }

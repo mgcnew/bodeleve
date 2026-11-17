@@ -1,6 +1,6 @@
 # IMPLEMENTATION — estado da implementação
 
-Os quatro ambientes estão implementados em `app/` (React + Vite + TypeScript). **A gestão, o PDV, o app do entregador e a loja já falam com o Supabase** (login, pedidos, estoque, compras, produção, financeiro, entregas, produtos, clientes e caixa); sem `app/.env.local` o app roda com dados de exemplo no aparelho. Faltam a equipe, os dados da casa e as configurações. Este documento diz o que existe, o que é simulado e o que depende de você.
+Os quatro ambientes estão implementados em `app/` (React + Vite + TypeScript). **A gestão, o PDV, o app do entregador e a loja já falam com o Supabase** (login, pedidos, estoque, compras, produção, financeiro, entregas, produtos, clientes e caixa); sem `app/.env.local` o app roda com dados de exemplo no aparelho. Faltam o convite por e-mail, as configurações de loja, pagamentos e nota fiscal, e a fila do PDV sem internet. Este documento diz o que existe, o que é simulado e o que depende de você.
 
 ## Telas
 
@@ -76,14 +76,14 @@ O app usa o projeto Supabase **já existente** (`afqcwqikkolyoowkozak`), que tem
 | Gestão: produtos (edição), categorias e clientes | **Ligado e testado**: editar produto grava em `products` (preço, estoque mínimo, favorito no PDV, publicar, peso, lote, tipo, origem, descrição e nome); nova categoria grava em `categories`; clientes vêm de `customers` e dos pedidos (nº de pedidos, total, itens que mais compra, canal), e a observação interna grava ao sair do campo. Rapadura editada pela tela (preço R$ 15,00, mínimo 7, favorito) e restaurada; categoria de teste criada e removida. Não existe venda fiada no banco (o campo mostra zero) |
 | PDV (abrir caixa, vender, cancelar, sangria e suprimento, fechar e reabrir) | **Ligado e testado** (`pos_open_session`, `pos_checkout`, `pos_cancel_sale`, `pos_cash_movement`, `pos_close_session`, `pos_reopen_session`): venda V-0001 de 1 queijo coalho com desconto de 10% em dinheiro (troco R$ 0,39, saiu do lote que vence primeiro, R$ 29,61 no caixa); senha errada recusada com a mensagem certa e senha certa cancelou, devolveu o estoque e estornou o dinheiro; sangria de R$ 100 ao banco, fechar sem diferença e reabrir. Itens, estoque, caixa e vendas se atualizam ao abrir e a cada 20 s. **Falta**: fila de vendas sem internet (H-P7) e envio do comprovante por WhatsApp |
 | App do entregador (`/entregas`) | **Ligado e testado** (`courier_link`, `courier_list`, `courier_take`, `courier_accept`, `courier_depart`, `courier_problem`, `courier_undo_problem`, `courier_confirm`, `courier_history`, `courier_set_available`): entrada com o usuário de teste do entregador, pegar a entrega livre, aceitar, conferir a coleta e sair (pedido vira "saiu para entrega" e o estoque baixa), devolver à loja e desfazer, código de entrega errado recusado e o certo concluiu (pedido entregue e pago), histórico do dia e interruptor "Disponível". Com o banco ligado a entrada é por **e-mail e senha** até o código por celular (P8) existir. A lista atualiza a cada 10 s. Distância e endereço da loja ainda não vêm do banco (a tela mostra "—") |
-| Gestão: equipe, dados da casa e configurações | Ainda nos dados de exemplo (`memberships`, `establishments`) |
+| Gestão: equipe e dados da casa | **Ligado e testado** (`memberships`, `establishments`): a tela lê nome, CNPJ, endereço, WhatsApp e horários da casa e a equipe (convites ficam como "invited"). Só quem tem o módulo `team` (o dono) grava; o gestor de teste lê e, ao tentar gravar, recebe "Só o dono pode alterar a casa e a equipe" e o banco fica intacto (o Postgres atualiza 0 linhas sem erro, então a tela confere isso). Com o papel do dono (impersonado por SQL, com RLS) atualizar a casa e criar convite funcionaram; os dados de teste foram desfeitos. O gestor só vê a própria linha na equipe. **Falta**: o e-mail do convite (P8), trocar o papel e desativar alguém pela tela, e o cadastro de loja online, pagamentos e nota fiscal em Configurações (dependem de Q6 a Q8 e Q12) |
 
 O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de desenvolvimento.
 
 ## Próximos passos
 
-1. Ligar equipe, dados da casa e configurações (`memberships`, `establishments`).
-2. Fila de vendas sem internet no PDV (H-P7).
+1. Fila de vendas sem internet no PDV (H-P7).
+2. Telas de trocar papel e desativar pessoa da equipe, e o e-mail do convite.
 3. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.
 
 ## Depende de você (resolvemos no final)
@@ -106,6 +106,8 @@ Itens que o código não resolve sozinho, por tipo.
 - **Senha do gestor**: o usuário de teste usa uma senha de desenvolvimento (`VITE_DEV_MANAGER_PIN`). O dono e cada gerente precisam definir a sua.
 
 ### Acessos e provedores
+
+- **Quem edita a casa e a equipe**: só o dono. A conta do dono é a sua (`bodeleve@gmail.com`); o usuário de teste é gestor e não grava. Entre como dono para preencher nome, CNPJ, endereço, WhatsApp e horários reais da casa.
 
 - **Login do entregador por celular**: o vínculo usa o celular da conta do Supabase Auth (`courier_link`) e hoje o app entra por e-mail e senha. O código por mensagem (P8) precisa de provedor de SMS ou WhatsApp configurado no Auth; até lá cada entregador real precisaria de uma conta com e-mail, senha e celular criada por você.
 - **Mensagens** (P8): comprovante da venda por WhatsApp (o banco grava em `outbox_messages`), código de login e aviso de entrega dependem do provedor.

@@ -8,7 +8,9 @@ import type { TeamMember } from '@/domain/backoffice'
 import { moduleAccess, type Module } from '@/permissions/modules'
 import { roleLabels, roles, type Role } from '@/permissions/roles'
 import { newId } from '@/services/gestao/backoffice'
+import { supabase } from '@/lib/supabase'
 import { teamStore } from '@/services/gestao/people'
+import { remoteInvite, teamErrorMessage } from '@/services/gestao/peopleRemote'
 import o from '@/styles/ops.module.css'
 import { Bar } from '../../../shared/OpsBits'
 import s from './Sistema.module.css'
@@ -40,10 +42,17 @@ export function Equipe() {
   const [error, setError] = useState<string>()
   const [sent, setSent] = useState(false)
 
-  const invite = () => {
+  const invite = async () => {
     if (!email.includes('@')) return setError('Informe um e-mail válido, por exemplo nome@exemplo.com.')
-    const m: TeamMember = { id: newId('eq'), name: email.split('@')[0], role: inviteRole, detail: email, pending: true }
-    teamStore.set((all) => [...all, m])
+    try {
+      if (supabase) await remoteInvite(email, inviteRole)
+      else {
+        const m: TeamMember = { id: newId('eq'), name: email.split('@')[0], role: inviteRole, detail: email, pending: true }
+        teamStore.set((all) => [...all, m])
+      }
+    } catch (e) {
+      return setError(teamErrorMessage(e))
+    }
     setEmail('')
     setError(undefined)
     setOpen(false)
@@ -76,7 +85,7 @@ export function Equipe() {
           <div style={{ padding: 16, borderRadius: 12, background: 'var(--cor-terracota-suave)', display: 'flex', flexDirection: 'column', gap: 12 }}>
             <TextField label="E-mail" type="email" placeholder="nome@exemplo.com" value={email} error={error} onChange={(e) => setEmail(e.target.value)} />
             <SelectField label="Papel" value={inviteRole} onChange={(e) => setInviteRole(e.target.value as Role)} options={inviteRoles.map((r) => ({ value: r, label: roleLabels[r] }))} />
-            <Button onClick={invite}>Registrar convite</Button>
+            <Button onClick={() => void invite()}>Registrar convite</Button>
           </div>
         )}
         {sent && <Banner tone="info">Convite registrado. O e-mail só sai quando o login estiver ligado ao Supabase.</Banner>}
