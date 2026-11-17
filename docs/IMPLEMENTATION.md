@@ -51,7 +51,7 @@ Pedido feito na loja → aparece em Novos na gestão → aceite, conferência it
 | Senha do gestor ao cancelar venda | Só exige 4+ dígitos | Conferência no servidor |
 | Pix: QR e confirmação | Espaço reservado; confirmação manual | P8 (provedor de pagamento), Q8 |
 | Taxa e área de entrega | Taxa fixa R$ 8,00; todo CEP completo é aceito | Q6, Q7 |
-| Relatório de vendas e "resultado do mês" | Números de exemplo | Vendas gravadas no banco |
+| Relatório de vendas, "vendas de hoje" no Início e "resultado do mês" | **Ligado** ao banco: calculado dos pedidos não cancelados (balcão e loja), em `domain/reports.ts`. Sem Supabase mostra números de exemplo | Fórmula do resultado (veja "Depende de você") |
 | Anexos (comprovante de pagamento, foto de problema na entrega) | Campo desativado | Supabase Storage |
 | Fotos de produto e da casa, logotipo, textos da casa | Marcadores entre colchetes | P3, P4, P5 |
 | Convite de equipe por e-mail | Registra o convite; não envia | Supabase Auth |
@@ -95,6 +95,7 @@ Conferência "o sistema pode ir para o uso?" feita sobre o código e o banco. Re
 | Saldo inicial das contas | **Feito**: `/gestao/financeiro/saldo-inicial` (link no fim do Financeiro) chama `set_opening_balance`; o banco aceita uma vez por conta. Testado com reversão no banco (grava, recusa a segunda vez e valor negativo). **Não registrei nenhum saldo**: os valores reais são seus. |
 | Editar ficha técnica | **Feito**: "Nova ficha técnica" (lista) e "Editar ficha" (detalhe): produto, rendimento, validade, prefixo do lote, insumos e quantidades, gás e energia, modo de preparo (`save_recipe`). Só produto "acabado" sem ficha aparece ao criar. |
 | Cadastro manual de cliente | **Feito**: "Cadastrar cliente" na lista de clientes (nome e celular; celular repetido é recusado). |
+| Números de exemplo nos relatórios | **Trocados por números reais**: Início (vendas de hoje, balcão e internet, comparação com ontem), Relatórios (vendas por dia, canal, pagamento e mais vendidos; produto mais vendido; resultado do mês). Conferido contra o banco (2 pedidos, R$ 106,70) e com um teste de datas de borda (hoje, ontem até a mesma hora, 7 dias, mês, mês passado). |
 | Conta de cliente na loja | **Parcial**: o "Entrar" da loja não autentica (código por WhatsApp, P8). Com o banco ligado a tela agora **avisa** que a conta chega em breve e mostra "continuar sem conta", em vez de fingir que entrou. Veja "Depende de você". |
 
 Tudo foi testado contra o banco de desenvolvimento como gestor (criar, editar e arquivar produto e fornecedor; criar e desativar entregador; entregador inativo bloqueado em `courier_link` e `courier_list`; `set_my_name` recusa vazio e bloqueia anônimo) e pela tela (novo produto, arquivar, novo fornecedor, nome do perfil, menu do PDV). Os registros de teste foram apagados.
@@ -116,6 +117,7 @@ Itens que o código não resolve sozinho, por tipo.
 - **Fiado e contas a receber**: o banco não tem venda fiada, saldo de cliente nem função para receber (`pay_entry` só paga). A tela de cliente mostra zero. Decidir se entra antes de abrir o balcão.
 - **Clientes**: a loja cria o cliente pelo celular informado no pedido. Falta decidir como juntar dois cadastros do mesmo cliente e como atender o pedido de apagar a conta (LGPD).
 - **Telas novas para você conferir**: editar ficha técnica, saldo inicial das contas e cadastrar cliente já existem; veja se os campos e os textos servem. O PIN do gestor (`set_my_pin`) tem tela em "Meu perfil".
+- **Fórmula do "Resultado do mês"**: hoje é vendas do mês (todo pedido não cancelado, mesmo o da loja ainda não pago ou não entregue) menos as contas a pagar quitadas no mês. Não separa custo da mercadoria de despesa nem desconta taxa de maquininha. Decidir se serve ou se quer competência (custo do que foi vendido) e só pedidos pagos.
 - **Arquivar produto com estoque**: arquivar tira o produto da loja, do balcão e do estoque sem conferir se ainda há saldo ou se ele entra numa ficha técnica. Decidir se a tela deve bloquear ou avisar nesses casos.
 - **Quem pode cadastrar entregador, fornecedor e produto**: hoje dono e gestor (regra do banco). Confirmar que é isso.
 - **Entregador muda os próprios dados?**: hoje só a chave Pix e a senha; nome, celular e veículo o gestor altera. Confirmar.

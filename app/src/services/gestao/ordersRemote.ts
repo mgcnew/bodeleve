@@ -5,6 +5,7 @@ import type { StaffOrder, StaffOrderItem, StaffOrderStatus } from '@/domain/staf
 import { refreshCouriers, refreshPeople } from './peopleRemote'
 import { supabase } from '@/lib/supabase'
 import { staffOrdersStore } from './orders'
+import { refreshSales } from './reportsRemote'
 
 type Row = {
   id: string
@@ -134,13 +135,18 @@ export function startStaffSync() {
   if (!supabase) return () => undefined
   void refreshStaffOrders()
   void refreshPeople()
+  void refreshSales()
   const timer = setInterval(() => {
     void refreshStaffOrders()
     void refreshPeople()
+    void refreshSales()
   }, 15_000)
   const channel = supabase
     .channel('gestao-pedidos')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => void refreshStaffOrders())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+      void refreshStaffOrders()
+      void refreshSales()
+    })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'deliveries' }, () => {
       void refreshStaffOrders()
       void refreshCouriers()

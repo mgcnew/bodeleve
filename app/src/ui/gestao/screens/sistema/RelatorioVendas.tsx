@@ -1,22 +1,28 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FilterChips } from '@/components/Field'
 import { shortDate, daysFromToday } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
-import { salesReport } from '@/mocks/gestao/people'
+import { ticket } from '@/domain/reports'
+import { useSalesReport } from '@/services/gestao/reports'
+import { refreshSales } from '@/services/gestao/reportsRemote'
 import o from '@/styles/ops.module.css'
 import { Bar, SumRow } from '../../../shared/OpsBits'
 import s from './Sistema.module.css'
 
-const money = (v: number) => formatCents(Math.round(v * 100))
+const money = formatCents
 type Period = 'today' | 'week' | 'month'
 
 // H-G28 — vendas por período, canal, pagamento e mais vendidos; um único gráfico de barras por dia
 export function RelatorioVendas() {
   const [period, setPeriod] = useState<Period>('week')
   const [sel, setSel] = useState(6)
-  const p = salesReport.periods.find((x) => x.key === period)!
-  const days = salesReport.days
-  const max = Math.max(...days)
+  const report = useSalesReport()
+  useEffect(() => {
+    void refreshSales()
+  }, [])
+  const p = period === 'today' ? report.today : period === 'week' ? report.week : report.month
+  const days = report.days
+  const max = Math.max(1, ...days)
   const day = (i: number) => shortDate(daysFromToday(i - 6))
   const periodLabel = period === 'today' ? `Hoje, ${day(6)}` : period === 'week' ? `${day(0)} a ${day(6)}` : `01/${day(6).slice(3)} a ${day(6)}`
 
@@ -28,12 +34,18 @@ export function RelatorioVendas() {
           label="Período"
           value={period}
           onChange={setPeriod}
-          options={salesReport.periods.map((x) => ({ value: x.key as Period, label: x.label }))}
+          options={[
+            { value: 'today', label: 'Hoje' },
+            { value: 'week', label: '7 dias' },
+            { value: 'month', label: 'Mês' },
+          ]}
         />
         <div>
           <div className={o.muted}>{periodLabel}</div>
           <div style={{ font: '700 34px/40px var(--fonte-titulo)', fontVariantNumeric: 'tabular-nums' }}>{money(p.total)}</div>
-          <div className={`${o.muted} ${o.num}`}>{p.sub}</div>
+          <div className={`${o.muted} ${o.num}`}>
+            {p.count} {p.count === 1 ? 'venda' : 'vendas'} · ticket médio {money(ticket(p))}
+          </div>
         </div>
         {period === 'week' && (
           <section className={o.card} style={{ padding: 16 }}>
@@ -51,13 +63,13 @@ export function RelatorioVendas() {
                 </button>
               ))}
             </div>
-            <div className={o.small}>Toque numa barra para ver o valor do dia. Sexta e sábado vendem mais.</div>
+            <div className={o.small}>Toque numa barra para ver o valor do dia.</div>
           </section>
         )}
         <section className={o.card}>
           <b>Por canal</b>
-          <SumRow label="Balcão" value={money(p.counter)} />
-          <SumRow label="Loja online" value={money(p.online)} />
+          <SumRow label={`Balcão · ${p.counter.count}`} value={money(p.counter.total)} />
+          <SumRow label={`Loja online · ${p.online.count}`} value={money(p.online.total)} />
         </section>
         <section className={o.card}>
           <b>Por forma de pagamento</b>
@@ -67,11 +79,9 @@ export function RelatorioVendas() {
         </section>
         <section className={o.card}>
           <b>Mais vendidos</b>
-          <SumRow label="Queijo coalho 500 g" value={p.top[0]} />
-          <SumRow label="Farinha de mandioca 1 kg" value={p.top[1]} />
-          <SumRow label="Carne de sol" value={p.top[2]} />
+          {p.top.length === 0 ? <span className={o.muted}>Ainda não há vendas neste período.</span> : p.top.map((t) => <SumRow key={t.name} label={t.name} value={t.qty} />)}
         </section>
-        <p className={o.muted}>Exportar em planilha ou PDF fica no menu de compartilhar do aparelho. Números de exemplo até o PDV e a loja gravarem no banco.</p>
+        <p className={o.muted}>Exportar em planilha ou PDF fica no menu de compartilhar do aparelho. Vale como venda todo pedido não cancelado, do balcão e da loja.</p>
       </main>
     </div>
   )

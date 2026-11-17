@@ -3,7 +3,7 @@ import { Box } from '@/components/Card'
 import { Icon } from '@/components/Icon'
 import { greeting, longNow, minutesAgo } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
-import { salesToday } from '@/mocks/gestao/dashboard'
+import { useSalesReport } from '@/services/gestao/reports'
 import { daysUntil } from '@/domain/dates'
 import { entriesStore, productionStore } from '@/services/gestao/backoffice'
 import { openEntries, overdueDays, remaining } from '@/services/gestao/finance'
@@ -16,6 +16,7 @@ import s from './Inicio.module.css'
 
 // H-G2 — Início mostra primeiro "Pede ação hoje"; faturamento do mês e gráficos ficam em Relatórios
 export function Inicio() {
+  const { today: salesToday, yesterdaySameTime } = useSalesReport()
   const orders = staffOrdersStore.useStore()
   const session = sessionStore.useStore()
   const fresh = orders.filter((x) => x.status === 'new')
@@ -50,18 +51,18 @@ export function Inicio() {
               <span>Vendas de hoje</span>
               <Icon name="avancar" size={18} />
             </span>
-            <span className={s.salesValue}>{formatCents(salesToday.totalCents)}</span>
+            <span className={s.salesValue}>{formatCents(salesToday.total)}</span>
             <span className={s.salesSub}>
-              {salesToday.count} vendas · ontem até esta hora: {formatCents(salesToday.yesterdaySameTimeCents)}
+              {salesToday.count} {salesToday.count === 1 ? 'venda' : 'vendas'} · ontem até esta hora: {formatCents(yesterdaySameTime)}
             </span>
             <span className={s.split}>
               <span>
                 <small>Balcão · {salesToday.counter.count}</small>
-                <b>{formatCents(salesToday.counter.totalCents)}</b>
+                <b>{formatCents(salesToday.counter.total)}</b>
               </span>
               <span>
                 <small>Internet · {salesToday.online.count}</small>
-                <b>{formatCents(salesToday.online.totalCents)}</b>
+                <b>{formatCents(salesToday.online.total)}</b>
               </span>
             </span>
           </Link>
@@ -101,7 +102,10 @@ export function Inicio() {
                 <ListRow
                   icon="validade"
                   tone="warning"
-                  title={`${expiringRows.reduce((n, r) => n + r.expiring.length, 0)} lotes vencem em até 7 dias`}
+                  title={(() => {
+                    const n = expiringRows.reduce((acc, r) => acc + r.expiring.length, 0)
+                    return n === 1 ? '1 lote vence em até 7 dias' : `${n} lotes vencem em até 7 dias`
+                  })()}
                   sub={names(expiringRows.map((r) => r.item.name.replace(/ \d+ ?(g|ml)$/, '')), 3)}
                   to="/gestao/estoque"
                 />
