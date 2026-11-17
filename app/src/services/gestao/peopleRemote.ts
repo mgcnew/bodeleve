@@ -274,6 +274,21 @@ export async function remoteInvite(email: string, role: Role) {
   await refreshTeam()
 }
 
+async function changeMembership(change: () => PromiseLike<{ data: { id: string }[] | null; error: unknown }>) {
+  const { data, error } = await change()
+  if (error) throw error
+  if (!data?.length) throw new Error('forbidden')
+  await refreshTeam()
+}
+
+export const remoteChangeRole = (id: string, role: Role) => changeMembership(() => supabase!.from('memberships').update({ role }).eq('id', id).select('id'))
+
+/** Tira o acesso sem apagar o histórico (status "disabled"); a pessoa some da lista */
+export const remoteDisableMember = (id: string) => changeMembership(() => supabase!.from('memberships').update({ status: 'disabled' }).eq('id', id).select('id'))
+
+/** Convite que ainda não foi aceito: apaga o registro */
+export const remoteCancelInvite = (id: string) => changeMembership(() => supabase!.from('memberships').delete().eq('id', id).eq('status', 'invited').select('id'))
+
 export function teamErrorMessage(e: unknown) {
   const msg = String((e as { message?: string })?.message ?? '')
   const code = String((e as { code?: string })?.code ?? '')

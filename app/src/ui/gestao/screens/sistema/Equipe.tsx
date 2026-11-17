@@ -10,7 +10,9 @@ import { roleLabels, roles, type Role } from '@/permissions/roles'
 import { newId } from '@/services/gestao/backoffice'
 import { supabase } from '@/lib/supabase'
 import { teamStore } from '@/services/gestao/people'
-import { remoteInvite, teamErrorMessage } from '@/services/gestao/peopleRemote'
+import { remoteCancelInvite, remoteChangeRole, remoteDisableMember, remoteInvite, teamErrorMessage } from '@/services/gestao/peopleRemote'
+import { sessionStore } from '@/services/gestao/session'
+import { Sheet } from '@/components/Sheet'
 import o from '@/styles/ops.module.css'
 import { Bar } from '../../../shared/OpsBits'
 import s from './Sistema.module.css'
@@ -41,6 +43,34 @@ export function Equipe() {
   const [inviteRole, setInviteRole] = useState<Role>('clerk')
   const [error, setError] = useState<string>()
   const [sent, setSent] = useState(false)
+  const me = sessionStore.useStore()
+  const [editing, setEditing] = useState<TeamMember | null>(null)
+  const [newRole, setNewRole] = useState<Role>('clerk')
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
+
+  const manage = (m: TeamMember) => {
+    setEditing(m)
+    setNewRole(m.role)
+    setProblem(undefined)
+  }
+
+  // o dono e a própria pessoa não se alteram aqui (evita ficar sem acesso)
+  const editable = (m: TeamMember) => m.role !== 'owner' && m.detail !== me?.email
+
+  const apply = async (fn: () => Promise<void>, local: (all: TeamMember[]) => TeamMember[]) => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      if (supabase) await fn()
+      else teamStore.set(local)
+      setEditing(null)
+    } catch (e) {
+      setProblem(teamErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
+  }
 
   const invite = async () => {
     if (!email.includes('@')) return setError('Informe um e-mail válido, por exemplo nome@exemplo.com.')
@@ -74,6 +104,11 @@ export function Equipe() {
                 <span className={o.small}>{m.pending ? `Convite pendente · ${m.detail}` : m.detail}</span>
               </span>
               <span style={{ padding: '4px 10px', borderRadius: 8, background: 'var(--cor-creme)', border: '1px solid var(--linha)', font: '600 13px/18px var(--fonte-texto)' }}>{roleLabels[m.role]}</span>
+              {editable(m) && (
+                <Button variant="quiet" aria-label={`Alterar ${m.name}`} onClick={() => manage(m)}>
+                  Alterar
+                </Button>
+              )}
             </div>
           ))}
         </Box>
@@ -88,6 +123,35 @@ export function Equipe() {
             <Button onClick={() => void invite()}>Registrar convite</Button>
           </div>
         )}
+        <Sheet open={!!editing} onClose={() => setEditing(null)} title={editing ? editing.name : ''}>
+          {editing && (
+            <>
+              {!editing.pending && <SelectField label="Papel" value={newRole} onChange={(e) => setNewRole(e.target.value as Role)} options={inviteRoles.map((r) => ({ value: r, label: roleLabels[r] }))} />}
+              {problem && <Banner tone="error">{problem}</Banner>}
+              {!editing.pending && (
+                <Button
+                  size="l"
+                  block
+                  disabled={busy || newRole === editing.role}
+                  onClick={() => void apply(() => remoteChangeRole(editing.id, newRole), (all) => all.map((x) => (x.id === editing.id ? { ...x, role: newRole } : x)))}
+                >
+                  Salvar papel
+                </Button>
+              )}
+              <Button
+                variant="danger"
+                block
+                disabled={busy}
+                onClick={() => void apply(() => (editing.pending ? remoteCancelInvite(editing.id) : remoteDisableMember(editing.id)), (all) => all.filter((x) => x.id !== editing.id))}
+              >
+                {editing.pending ? 'Cancelar convite' : 'Tirar o acesso'}
+              </Button>
+              <Button variant="secondary" block onClick={() => setEditing(null)}>
+                Voltar
+              </Button>
+            </>
+          )}
+        </Sheet>
         {sent && <Banner tone="info">Convite registrado. O e-mail só sai quando o login estiver ligado ao Supabase.</Banner>}
         <section className={o.section}>
           <h2 className={o.h2}>O que cada papel vê</h2>
