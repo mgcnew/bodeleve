@@ -4,7 +4,9 @@ import { Box } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { TextField } from '@/components/Field'
 import { itemsStore } from '@/services/gestao/backoffice'
+import { supabase } from '@/lib/supabase'
 import { categoriesStore } from '@/services/gestao/people'
+import { productErrorMessage, remoteAddCategory } from '@/services/gestao/peopleRemote'
 import o from '@/styles/ops.module.css'
 import { Bar } from '../../../shared/OpsBits'
 
@@ -17,12 +19,17 @@ export function Categorias() {
   const [error, setError] = useState<string>()
   const baseIds = new Set(['queijos', 'carnes', 'farinhas', 'doces', 'temperos', 'bebidas'])
 
-  const add = (e: FormEvent) => {
+  const add = async (e: FormEvent) => {
     e.preventDefault()
     const n = name.trim()
     if (!n) return setError('Digite o nome da categoria.')
     if (categories.some((c) => c.name.toLowerCase() === n.toLowerCase())) return setError('Já existe uma categoria com esse nome.')
-    categoriesStore.set((all) => [...all, { id: slug(n) || `cat-${all.length + 1}`, name: n }])
+    try {
+      if (supabase) await remoteAddCategory(n)
+      else categoriesStore.set((all) => [...all, { id: slug(n) || `cat-${all.length + 1}`, name: n }])
+    } catch (err) {
+      return setError(productErrorMessage(err))
+    }
     setName('')
     setError(undefined)
   }
@@ -45,7 +52,7 @@ export function Categorias() {
             )
           })}
         </Box>
-        <form onSubmit={add} noValidate style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+        <form onSubmit={(e) => void add(e)} noValidate style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
           <div style={{ flex: '1 1 0', minWidth: 0 }}>
             <TextField label="Nova categoria" placeholder="Ex.: Castanhas" value={name} error={error} onChange={(e) => { setName(e.target.value); setError(undefined) }} />
           </div>

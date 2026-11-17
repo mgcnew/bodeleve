@@ -8,6 +8,8 @@ import { fullDate, hourMinute, isTodayIso, shortDate } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { staffTotal } from '@/domain/staffOrder'
 import { staffOrdersStore } from '@/services/gestao/orders'
+import { supabase } from '@/lib/supabase'
+import { remoteSaveCustomerNotes } from '@/services/gestao/peopleRemote'
 import { customersStore } from '@/services/gestao/people'
 import o from '@/styles/ops.module.css'
 import { Bar, ListRow } from '../../../shared/OpsBits'
@@ -110,6 +112,9 @@ export function Cliente() {
           rows={2}
           value={c.notes}
           onChange={(e) => customersStore.set((all) => all.map((x) => (x.id === c.id ? { ...x, notes: e.target.value } : x)))}
+          onBlur={() => {
+            if (supabase) void remoteSaveCustomerNotes(c.id, c.notes)
+          }}
         />
         <p className={o.muted}>Dados pessoais só para atender e entregar. A cliente pode pedir para apagar a conta.</p>
         <p className="sr-only">{fullDate(c.since)}</p>

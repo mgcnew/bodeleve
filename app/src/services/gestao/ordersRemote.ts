@@ -2,7 +2,7 @@
 // ele é um cache alimentado aqui (busca, Realtime e atualização a cada 15 s) e as ações chamam
 // as funções `order_*` do banco, que fazem a baixa por lote, a conferência e o aviso ao cliente.
 import type { StaffOrder, StaffOrderItem, StaffOrderStatus } from '@/domain/staffOrder'
-import { refreshCouriers } from './peopleRemote'
+import { refreshCouriers, refreshPeople } from './peopleRemote'
 import { supabase } from '@/lib/supabase'
 import { staffOrdersStore } from './orders'
 
@@ -133,10 +133,10 @@ export async function refreshStaffOrders(): Promise<void> {
 export function startStaffSync() {
   if (!supabase) return () => undefined
   void refreshStaffOrders()
-  void refreshCouriers()
+  void refreshPeople()
   const timer = setInterval(() => {
     void refreshStaffOrders()
-    void refreshCouriers()
+    void refreshPeople()
   }, 15_000)
   const channel = supabase
     .channel('gestao-pedidos')

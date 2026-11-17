@@ -10,6 +10,7 @@ import { formatCents, parseCents } from '@/domain/money'
 import { supabase } from '@/lib/supabase'
 import { itemsStore } from '@/services/gestao/backoffice'
 import { categoriesStore } from '@/services/gestao/people'
+import { productErrorMessage, remoteSaveProduct } from '@/services/gestao/peopleRemote'
 import { internalCategories } from '@/mocks/catalog'
 import o from '@/styles/ops.module.css'
 import { Bar, SumRow } from '../../../shared/OpsBits'
@@ -25,6 +26,8 @@ export function Produto() {
   const [form, setForm] = useState<Item | null>(item ?? null)
   const [price, setPrice] = useState(brl(item?.priceCents ?? null))
   const [saved, setSaved] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
 
   useEffect(() => {
     setForm(item ?? null)
@@ -48,9 +51,7 @@ export function Produto() {
   const priceCents = parseCents(price)
   const margin = priceCents && priceCents > 0 ? Math.round(((priceCents - form.costCents) / priceCents) * 100) : null
 
-  const save = () => {
-    // o cadastro do produto ainda não está ligado ao banco: não finge que salvou
-    if (supabase) return
+  const save = async () => {
     const next: Item = {
       ...form,
       priceCents: raw ? null : priceCents,
@@ -58,8 +59,17 @@ export function Produto() {
       published: raw ? false : form.published,
       favoritePos: raw ? false : form.favoritePos,
     }
-    itemsStore.set((all) => all.map((i) => (i.id === next.id ? next : i)))
-    setSaved(true)
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      if (supabase) await remoteSaveProduct(item, next)
+      else itemsStore.set((all) => all.map((i) => (i.id === next.id ? next : i)))
+      setSaved(true)
+    } catch (e) {
+      setProblem(productErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -116,10 +126,10 @@ export function Produto() {
         )}
         {!raw && <TextAreaField label="Descrição na loja" rows={3} value={form.description ?? '[DESCRIÇÃO DO PRODUTO]'} onChange={(e) => set({ description: e.target.value })} />}
         {saved && <Banner tone="success">Produto salvo.</Banner>}
-        {supabase && <Banner tone="info">A edição do cadastro ainda não está ligada ao banco; por enquanto os dados são só para consulta.</Banner>}
+        {problem && <Banner tone="error">{problem}</Banner>}
       </main>
       <div className={o.footer}>
-        <Button size="l" block onClick={save} disabled={!!supabase}>
+        <Button size="l" block onClick={() => void save()} disabled={busy}>
           Salvar
         </Button>
       </div>

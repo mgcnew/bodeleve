@@ -1,9 +1,11 @@
 // Entregadores e atribuição de entregas no banco. A gestão lê `couriers` e as entregas em andamento
 // (`deliveries`) e atribui com `delivery_assign` / `delivery_unassign`, que só aceitam pedido pronto,
 // entregador próprio da casa e uma entrega ativa por pedido.
-import type { Courier } from '@/domain/backoffice'
+import type { Courier, Customer, Item } from '@/domain/backoffice'
+import type { Category } from '@/domain/catalog'
 import { supabase } from '@/lib/supabase'
-import { couriersStore } from './people'
+import { getEstablishmentId, refreshBackoffice } from './backofficeRemote'
+import { categoriesStore, couriersStore, customersStore } from './people'
 import { refreshStaffOrders } from './ordersRemote'
 
 type CourierRow = { id: string; name: string; kind: 'own' | 'partner'; available: boolean }
@@ -77,4 +79,140 @@ export function deliveryErrorMessage(e: unknown) {
   if (msg.includes('no_assignment')) return 'Não há envio para desfazer, ou o entregador já saiu com o pedido.'
   if (msg.includes('forbidden')) return 'Seu papel não permite esta ação.'
   return 'Não foi possível concluir. Nada foi alterado. Tente de novo.'
+}
+
+// ---------- categorias ----------
+type CategoryRow = { id: string; slug: string; name: string; is_internal: boolean | null }
+
+export async function refreshCategories() {
+  if (!supabase) return
+  const { data, error } = await supabase.from('categories').select('id, slug, name, is_internal').order('position')
+  if (error || !data) return
+  const list: Category[] = (data as CategoryRow[]).filter((c) => !c.is_internal).map((c) => ({ id: c.slug, name: c.name }))
+  categoriesStore.set(list)
+}
+
+const slugify = (name: string) => name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+export async function remoteAddCategory(name: string) {
+  const { data: last } = await supabase!.from('categories').select('position').order('position', { ascending: false }).limit(1).maybeSingle()
+  const { error } = await supabase!.from('categories').insert({
+    establishment_id: await getEstablishmentId(),
+    slug: slugify(name) || `cat-${Date.now()}`,
+    name,
+    position: Number(last?.position ?? 0) + 1,
+  })
+  if (error) throw error
+  await refreshCategories()
+}
+
+// ---------- produtos ----------
+const originCodes: Record<string, string> = { house_made: 'house', bodeleve_brand: 'brand', third_party: 'resale' }
+const DESCRIPTION_PLACEHOLDER = '[DESCRIÇÃO DO PRODUTO]'
+
+/**
+ * Grava o cadastro do produto. O nome mostrado junta o tamanho (`details.size`); se o nome mudar, vale o novo
+ * e o tamanho antigo sai. Produto "por peso" usa o preço como preço do quilo (`weight_price_cents`), que é o que o
+ * PDV cobra: ver "Depende de você" em docs/IMPLEMENTATION.md.
+ */
+export async function remoteSaveProduct(before: Item, next: Item) {
+  const { data: row, error: readError } = await supabase!.from('products').select('details, categories(slug)').eq('id', before.dbId!).single()
+  if (readError) throw readError
+  const { data: cat } = next.categoryId ? await supabase!.from('categories').select('id').eq('slug', next.categoryId).maybeSingle() : { data: null }
+  const raw = next.itemType === 'raw_material'
+  const patch: Record<string, unknown> = {
+    category_id: cat?.id ?? null,
+    item_type: next.itemType,
+    min_stock: next.minStock,
+    tracks_expiry: next.tracksLots,
+    price_cents: raw ? null : next.priceCents,
+    weight_price_cents: !raw && next.soldByWeight ? next.priceCents : null,
+    is_published: raw ? false : next.published,
+    is_favorite_pos: raw ? false : next.favoritePos,
+    sold_by_weight: raw ? false : next.soldByWeight,
+  }
+  if (!raw) patch.origin = originCodes[next.origin ?? 'third_party']
+  if (next.description !== before.description && next.description && next.description !== DESCRIPTION_PLACEHOLDER) patch.description = next.description
+  if (next.name !== before.name) {
+    const details = { ...((row?.details as Record<string, unknown> | null) ?? {}) }
+    delete details.size
+    patch.name = next.name.trim()
+    patch.details = details
+  }
+  const { error } = await supabase!.from('products').update(patch).eq('id', before.dbId!)
+  if (error) throw error
+  await refreshBackoffice()
+}
+
+export function productErrorMessage(e: unknown) {
+  const msg = String((e as { message?: string; code?: string })?.message ?? '')
+  const code = String((e as { code?: string })?.code ?? '')
+  if (code === '42501' || msg.includes('row-level security')) return 'Seu papel não permite editar produtos.'
+  if (msg.includes('price') || code === '23514') return 'Confira o preço e os campos do produto.'
+  if (msg.includes('duplicate') || code === '23505') return 'Já existe um registro com esse nome.'
+  return 'Não foi possível salvar. Nada foi alterado. Tente de novo.'
+}
+
+// ---------- clientes ----------
+type CustomerRow = { id: string; phone: string; name: string; since: string; notes: string | null; channel_note: string | null; baseline_orders: number | null; baseline_spent_cents: number | null; baseline_products: { name: string; times: number }[] | Record<string, never> | null }
+type CustomerOrder = {
+  customer_id: string | null
+  status: string
+  channel: string
+  created_at: string
+  total_cents: number | null
+  address: { street?: string; number?: string; complement?: string; district?: string } | null
+  order_items: { name: string; qty: number }[]
+}
+
+const lastLabel = (iso: string) => {
+  const d = new Date(iso)
+  const today = new Date()
+  return d.toDateString() === today.toDateString() ? 'último hoje' : `último ${d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}`
+}
+
+export async function refreshCustomers() {
+  if (!supabase) return
+  const [cs, os] = await Promise.all([
+    supabase.from('customers').select('id, phone, name, since, notes, channel_note, baseline_orders, baseline_spent_cents, baseline_products'),
+    supabase.from('orders').select('customer_id, status, channel, created_at, total_cents, address, order_items(name, qty)').not('customer_id', 'is', null).order('created_at', { ascending: false }).limit(1000),
+  ])
+  if (cs.error || !cs.data) return
+  const orders = ((os.data ?? []) as unknown as CustomerOrder[]).filter((o) => o.status !== 'cancelled')
+  const list: Customer[] = (cs.data as unknown as CustomerRow[]).map((c) => {
+    const mine = orders.filter((o) => o.customer_id === c.id)
+    const items = new Map<string, number>()
+    for (const p of Array.isArray(c.baseline_products) ? c.baseline_products : []) items.set(p.name, (items.get(p.name) ?? 0) + Number(p.times))
+    for (const o of mine) for (const i of o.order_items) items.set(i.name, (items.get(i.name) ?? 0) + 1)
+    const a = mine.find((o) => o.address)?.address
+    const counter = mine.length > 0 && mine.every((o) => o.channel === 'pos')
+    return {
+      id: c.id,
+      name: c.name,
+      phone: c.phone,
+      address: a ? [`${a.street ?? ''}, ${a.number ?? ''}`, a.complement].filter(Boolean).join(' · ') + (a.district ? ` — ${a.district}` : '') : '—',
+      since: c.since,
+      channel: c.channel_note || (counter ? 'compra no balcão' : 'compra pela loja online'),
+      orderCount: Number(c.baseline_orders ?? 0) + mine.length,
+      totalCents: Number(c.baseline_spent_cents ?? 0) + mine.reduce((n, o) => n + Number(o.total_cents ?? 0), 0),
+      // o banco ainda não tem venda fiada
+      fiadoCents: 0,
+      lastOrderLabel: mine[0] ? lastLabel(mine[0].created_at) : 'sem pedidos',
+      topItems: [...items].sort((x, y) => y[1] - x[1]).slice(0, 3).map(([name, times]) => ({ name, times })),
+      history: [],
+      notes: c.notes ?? '',
+    }
+  })
+  list.sort((x, y) => y.orderCount - x.orderCount || x.name.localeCompare(y.name))
+  customersStore.set(list)
+}
+
+export async function remoteSaveCustomerNotes(customerId: string, notes: string) {
+  const { error } = await supabase!.from('customers').update({ notes }).eq('id', customerId)
+  if (error) throw error
+}
+
+/** Categorias e clientes: busca ao abrir e junto com a atualização periódica */
+export async function refreshPeople() {
+  await Promise.all([refreshCouriers(), refreshCategories(), refreshCustomers()])
 }
