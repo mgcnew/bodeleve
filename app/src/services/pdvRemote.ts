@@ -132,8 +132,8 @@ const isNetworkError = (e: unknown) => {
 
 const isOnline = () => typeof navigator === 'undefined' || navigator.onLine
 
-function enqueue(cart: PosCart, payments: Payment[], attempted: boolean): Sale {
-  const q: QueuedSale = { id: `fila-${crypto.randomUUID().slice(0, 8)}`, at: new Date().toISOString(), seller: sessionStore.get()?.name ?? 'Equipe', cart, payments, attempted }
+function enqueue(cart: PosCart, payments: Payment[], attempted: boolean, clientRef: string): Sale {
+  const q: QueuedSale = { id: `fila-${crypto.randomUUID().slice(0, 8)}`, at: new Date().toISOString(), seller: sessionStore.get()?.name ?? 'Equipe', cart, payments, clientRef, attempted }
   queueStore.set((all) => [...all, q])
   publishSales(lastRemote)
   return queuedToSale(q)
@@ -154,7 +154,8 @@ export async function flushQueue() {
     for (const q of queueStore.get()) {
       if (q.error) continue
       const total = cartTotal(q.cart)
-      if (q.attempted) {
+      // com chave, o servidor reconhece o reenvio; sem chave (fila antiga), confere por valor, vendedor e horário
+      if (q.attempted && !q.clientRef) {
         // a tentativa anterior ficou sem resposta: se a venda já está no servidor, não envia de novo
         const since = new Date(new Date(q.at).getTime() - 2 * 60_000).toISOString()
         const dup = await supabase.from('orders').select('id').eq('channel', 'pos').eq('total_cents', total).eq('created_by_name', q.seller).gte('created_at', since).limit(1)
@@ -166,8 +167,9 @@ export async function flushQueue() {
           continue
         }
       }
-      const { error } = await supabase.rpc('pos_checkout', { p_establishment: await getEstablishmentId(), p_sale: checkoutPayload(q.cart, q.payments, true) })
-      if (!error) {
+      const { error } = await supabase.rpc('pos_checkout', { p_establishment: await getEstablishmentId(), p_sale: checkoutPayload(q.cart, q.payments, true, q.clientRef) })
+      // 23505: outra tentativa da mesma venda gravou primeiro (chave repetida), então ela já está no servidor
+      if (!error || error.code === '23505') {
         queueStore.set((all) => all.filter((x) => x.id !== q.id))
         sent++
       } else if (isNetworkError(error)) {
@@ -285,7 +287,7 @@ export async function remoteCashMovement(kind: 'withdrawal' | 'supply', cents: n
   await refreshFinance()
 }
 
-function checkoutPayload(cart: PosCart, payments: Payment[], offline = false) {
+function checkoutPayload(cart: PosCart, payments: Payment[], offline = false, clientRef?: string) {
   const dbId = (slug: string) => {
     const id = itemsStore.get().find((i) => i.id === slug)?.dbId
     if (!id) throw new Error('unknown_product')
@@ -293,24 +295,26 @@ function checkoutPayload(cart: PosCart, payments: Payment[], offline = false) {
   }
   const lines = cart.lines.map((l) => (l.grams !== null ? { product_id: dbId(l.itemId), kind: 'weight', qty: l.grams / 1000 } : { product_id: dbId(l.itemId), kind: 'unit', qty: l.quantity }))
   const discount = cart.discount && cart.discount.cents > 0 ? { kind: discountKinds[cart.discount.label] ?? 'f500', reason: cart.discount.reason } : null
-  return { lines, discount, offline, payments: payments.map((p) => ({ method: p.method, cents: p.cents, received_cents: p.receivedCents ?? null })) }
+  return { lines, discount, offline, client_ref: clientRef ?? null, payments: payments.map((p) => ({ method: p.method, cents: p.cents, received_cents: p.receivedCents ?? null })) }
 }
 
 /** Sem internet (ou sem resposta), a venda fica guardada no aparelho e a tela segue como concluída */
 export async function remoteCheckout(cart: PosCart, payments: Payment[]): Promise<Sale> {
-  if (!isOnline()) return enqueue(cart, payments, false)
-  const sale = checkoutPayload(cart, payments)
+  // uma chave por venda, igual na primeira tentativa e em qualquer reenvio da fila
+  const clientRef = crypto.randomUUID()
+  if (!isOnline()) return enqueue(cart, payments, false, clientRef)
+  const sale = checkoutPayload(cart, payments, false, clientRef)
   let establishment: string
   try {
     establishment = await getEstablishmentId()
   } catch {
     // ainda sem o estabelecimento guardado e sem rede para buscar
-    return enqueue(cart, payments, false)
+    return enqueue(cart, payments, false, clientRef)
   }
   const { data, error } = await supabase!.rpc('pos_checkout', { p_establishment: establishment, p_sale: sale })
   if (error) {
     // sem código do banco = a chamada nem chegou, ou chegou e a resposta se perdeu
-    if (isNetworkError(error)) return enqueue(cart, payments, true)
+    if (isNetworkError(error)) return enqueue(cart, payments, true, clientRef)
     throw error
   }
   await refreshPdv()

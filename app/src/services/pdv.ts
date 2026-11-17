@@ -18,7 +18,7 @@ export const salesStore = createStore<Sale[]>(supabase ? 'bodeleve.pdv.vendas.re
 export const cashStore = createStore<{ session: CashSession | null; lastClose: { at: string; diffCents: number } | null }>(supabase ? 'bodeleve.pdv.caixa.remoto' : 'bodeleve.pdv.caixa', () => (supabase ? { session: null, lastClose: null } : seedCash()))
 
 /** H-P7 — vendas feitas sem internet, na ordem em que aconteceram; enviadas sozinhas quando a conexão volta (pdvRemote) */
-export type QueuedSale = { id: string; at: string; seller: string; cart: PosCart; payments: Payment[]; /** já houve uma tentativa sem resposta: pode ter chegado ao servidor */ attempted: boolean; error?: string }
+export type QueuedSale = { id: string; at: string; seller: string; cart: PosCart; payments: Payment[]; /** chave única da venda: o servidor ignora um reenvio com a mesma chave */ clientRef?: string; /** já houve uma tentativa sem resposta: pode ter chegado ao servidor */ attempted: boolean; error?: string }
 export const queueStore = createStore<QueuedSale[]>('bodeleve.pdv.fila', () => [])
 
 const by = () => sessionStore.get()?.name ?? 'Equipe'
