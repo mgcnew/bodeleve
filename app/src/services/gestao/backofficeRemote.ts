@@ -240,6 +240,7 @@ export function backofficeErrorMessage(e: unknown) {
   if (msg.includes('expiry_required')) return `Informe a validade de ${msg.split(':')[1] ?? 'um item'} para receber.`
   if (msg.includes('over_received')) return 'A quantidade passa do que falta receber neste pedido.'
   if (msg.includes('not_receivable')) return 'Este pedido já foi recebido ou encerrado.'
+  if (msg.includes('product_lots_product_id_code_key') || msg.includes('duplicate key')) return 'Já existe um lote com esse código para este item. Troque o código do lote.'
   if (msg.includes('forbidden')) return 'Seu papel não permite esta ação.'
   if (msg.includes('empty_order')) return 'Escolha a quantidade de pelo menos um item.'
   return 'Não foi possível concluir. Nada foi alterado. Tente de novo.'

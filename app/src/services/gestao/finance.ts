@@ -1,6 +1,8 @@
 import type { Account, FinancialEntry, LedgerTx } from '@/domain/backoffice'
 import { daysUntil } from '@/domain/dates'
+import { supabase } from '@/lib/supabase'
 import { accountsStore, entriesStore, ledgerStore, newId } from './backoffice'
+import { remotePay, remoteUndoPayment } from './financeRemote'
 
 export function accountBalance(account: Account, ledger: LedgerTx[]) {
   return ledger.reduce((n, t) => (t.accountId === account.id ? n + t.amountCents : n), account.openingCents)
@@ -29,13 +31,17 @@ function nextMonth(iso: string) {
   return d.toISOString()
 }
 
-export type Settlement = { entryId: string; previous: FinancialEntry; ledgerId: string; nextId: string | null }
+export type Settlement = { entryId: string; previous?: FinancialEntry; ledgerId?: string; nextId?: string | null; remoteTxId?: string; nextRemoteId?: string | null }
 
 /**
  * H-G23 — registra valor, multa e juros, data e origem. Para conta recorrente, a próxima
  * já fica lançada (H-G22). Serve para pagar (sai da conta) e para receber (entra).
  */
-export function settleEntry(input: { entryId: string; amountCents: number; extraCents: number; at: string; accountId: string; method: string }): Settlement {
+export async function settleEntry(input: { entryId: string; amountCents: number; extraCents: number; at: string; accountId: string; method: string }): Promise<Settlement> {
+  if (supabase) {
+    const r = await remotePay(input)
+    return { entryId: input.entryId, remoteTxId: r.transaction_id, nextRemoteId: r.next_entry_id }
+  }
   const e = entriesStore.get().find((x) => x.id === input.entryId)
   if (!e) throw new Error('conta não encontrada')
   const total = input.amountCents + input.extraCents
@@ -59,9 +65,10 @@ export function settleEntry(input: { entryId: string; amountCents: number; extra
   return { entryId: e.id, previous: e, ledgerId: tx.id, nextId: next?.id ?? null }
 }
 
-export function undoSettlement(s: Settlement) {
+export async function undoSettlement(s: Settlement) {
+  if (s.remoteTxId) return remoteUndoPayment(s.remoteTxId)
   ledgerStore.set((l) => l.filter((t) => t.id !== s.ledgerId))
-  entriesStore.set((all) => all.filter((x) => x.id !== s.nextId).map((x) => (x.id === s.entryId ? s.previous : x)))
+  entriesStore.set((all) => all.filter((x) => x.id !== s.nextId).map((x) => (x.id === s.entryId ? s.previous! : x)))
 }
 
 export type ForecastDay = { day: string; label: string; netCents: number; balanceCents: number; text: string }

@@ -24,7 +24,7 @@ function sub(e: FinancialEntry) {
   const d = daysUntil(e.dueDate)
   if (e.direction === 'payable') {
     if (d < 0) return `${kind} · venceu ${shortDate(e.dueDate)}`
-    return `${kind}${e.ref ? ` · ${e.description.replace('Compra ', '')}` : ''} · ${d === 0 ? 'hoje' : shortDate(e.dueDate)}`
+    return `${kind}${e.ref ? ` · ${e.ref}` : ''} · ${d === 0 ? 'hoje' : shortDate(e.dueDate)}`
   }
   return `${e.counterpart === 'Maquininha' ? 'Liquidação' : 'Combinado'} · ${shortDate(e.dueDate)}`
 }

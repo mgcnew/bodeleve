@@ -4,6 +4,7 @@ import { BottomNav } from '@/components/BottomNav'
 import { Icon, type IconName } from '@/components/Icon'
 import { canAccess, type Module } from '@/permissions/modules'
 import { startBackofficeSync } from '@/services/gestao/backofficeRemote'
+import { startFinanceSync } from '@/services/gestao/financeRemote'
 import { startStaffSync } from '@/services/gestao/ordersRemote'
 import { sessionStore } from '@/services/gestao/session'
 import s from './GestaoShell.module.css'
@@ -46,9 +47,11 @@ export function GestaoShell() {
     if (!signedIn) return
     const stopOrders = startStaffSync()
     const stopBackoffice = startBackofficeSync()
+    const stopFinance = startFinanceSync()
     return () => {
       stopOrders()
       stopBackoffice()
+      stopFinance()
     }
   }, [signedIn])
 

@@ -9,7 +9,7 @@ import { Icon } from '@/components/Icon'
 import { QuantityStepper } from '@/components/QuantityStepper'
 import { fullDate } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
-import { itemsStore, purchasesStore, suppliersStore } from '@/services/gestao/backoffice'
+import { itemsStore, purchasesStore, stockStore, suppliersStore } from '@/services/gestao/backoffice'
 import { backofficeErrorMessage } from '@/services/gestao/backofficeRemote'
 import { Banner } from '@/components/Feedback'
 import { receivePurchase, setPurchaseClosed, undoReceipt, type Receipt } from '@/services/gestao/purchases'
@@ -18,12 +18,17 @@ import { Bar, SumRow } from '../../../shared/OpsBits'
 
 type Line = { qty: number; lotCode: string; expiry: string }
 
-/** Sugestão de código de lote: iniciais do item + dia e mês (ex.: LT-1120) */
-function suggestLot(name: string) {
+/** Sugestão de código de lote: iniciais do item + mês e dia (ex.: CS-1116); se já existe, acrescenta -2, -3... */
+function suggestLot(name: string, itemId: string) {
   const words = name.split(/\s+/).filter((w) => /^\p{L}{3,}$/u.test(w))
   const initials = (words.length > 1 ? words[0][0] + words[1][0] : (words[0] ?? 'LT').slice(0, 2)).toUpperCase()
   const d = new Date()
-  return `${initials}-${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
+  const base = `${initials}-${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
+  // o banco não aceita o mesmo código duas vezes no mesmo produto
+  const used = new Set(stockStore.get().lots.filter((l) => l.itemId === itemId).map((l) => l.code))
+  let code = base
+  for (let n = 2; used.has(code); n++) code = `${base}-${n}`
+  return code
 }
 
 export function Recebimento() {
@@ -38,7 +43,7 @@ export function Recebimento() {
   const [closed, setClosed] = useState<'open' | 'close'>('open')
   const [lines, setLines] = useState<Record<string, Line>>(() =>
     Object.fromEntries(
-      (p?.items ?? []).map((i) => [i.itemId, { qty: Math.max(0, i.qty - i.receivedQty), lotCode: suggestLot(i.name), expiry: '' }]),
+      (p?.items ?? []).map((i) => [i.itemId, { qty: Math.max(0, i.qty - i.receivedQty), lotCode: suggestLot(i.name, i.itemId), expiry: '' }]),
     ),
   )
 

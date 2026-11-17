@@ -70,7 +70,8 @@ O app usa o projeto Supabase **já existente** (`afqcwqikkolyoowkozak`), que tem
 | Gestão: pedidos (fila, aceitar, conferir, pronto, desfazer, retirada) | **Ligado e testado** (`order_accept`, `order_mark_ready`, `order_undo_ready`, `order_complete_pickup`), com Realtime e atualização a cada 15 s |
 | Gestão: estoque (saldos, lotes, movimentos, ajuste/perda, contagem e desfazer) | **Ligado e testado** (`stock_adjust`, `stock_count_apply`, `stock_count_undo`, `stock_reverse`; saldo reservado pelos pedidos reais) |
 | Gestão: compras e fornecedores (criar pedido, receber, encerrar, desfazer) | **Ligado e testado** (`create_purchase_order`, `receive_purchase`, `undo_receipt`): pedido PC-0001, recebimento com lote e validade, conta a pagar criada e desfeita; falta testar o encerramento por falta (`close_purchase_short`) |
-| Gestão: entregas (atribuir), produção, financeiro, produtos (edição), clientes | Ainda nos dados de exemplo. Produção começa vazia com o banco ligado |
+| Gestão: financeiro (contas, saldos, lançamentos, pagar e desfazer) | **Ligado no código, só leitura testada** (`pay_entry`, `undo_payment`, visão `account_balances`): as telas leem o banco (contas zeradas, sem lançamentos). Pagar e desfazer **não foram testados**, porque o banco não tem saldo nem contas a pagar. Receber contas a receber não tem função no banco (a tela avisa) |
+| Gestão: entregas (atribuir), produção, produtos (edição), clientes | Ainda nos dados de exemplo. Produção começa vazia com o banco ligado |
 | PDV e Entregas (app do entregador) | Ainda nos dados de exemplo (`pos_*`, `courier_*` existem no banco) |
 
 O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de desenvolvimento.

@@ -8,6 +8,8 @@ import { Icon } from '@/components/Icon'
 import { daysFromToday, fullDate } from '@/domain/dates'
 import { formatCents, parseCents } from '@/domain/money'
 import { accountsStore, entriesStore, ledgerStore } from '@/services/gestao/backoffice'
+import { supabase } from '@/lib/supabase'
+import { financeErrorMessage } from '@/services/gestao/financeRemote'
 import { accountBalance, overdueDays, remaining, settleEntry, undoSettlement, type Settlement } from '@/services/gestao/finance'
 import o from '@/styles/ops.module.css'
 import { Bar } from '../../../shared/OpsBits'
@@ -29,6 +31,8 @@ export function Baixa() {
   const [accountId, setAccountId] = useState('banco')
   const [method, setMethod] = useState('Pix')
   const [done, setDone] = useState<{ settlement: Settlement; text: string } | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
 
   if (!entry) {
     return (
@@ -51,14 +55,25 @@ export function Baixa() {
   const insufficient = pay && total > balance
   const late = overdueDays(entry)
 
-  const submit = () => {
-    const settlement = settleEntry({ entryId: entry.id, amountCents: value, extraCents, at: new Date(`${date}T12:00:00`).toISOString(), accountId, method })
-    const next = settlement.nextId ? ` O próximo ${entry.description.toLowerCase()} já está lançado.` : ''
-    setDone({
-      settlement,
-      text: `${money(total)} ${pay ? `saiu da ${account.name.toLowerCase()}` : `entrou na ${account.name.toLowerCase()}`}. Saldo agora: ${money(after)}.${next}`,
-    })
+  const submit = async () => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      const settlement = await settleEntry({ entryId: entry.id, amountCents: value, extraCents, at: new Date(`${date}T12:00:00`).toISOString(), accountId, method })
+      const next = settlement.nextId || settlement.nextRemoteId ? ` O próximo ${entry.description.toLowerCase()} já está lançado.` : ''
+      setDone({
+        settlement,
+        text: `${money(total)} ${pay ? `saiu da ${account.name.toLowerCase()}` : `entrou na ${account.name.toLowerCase()}`}. Saldo agora: ${money(after)}.${next}`,
+      })
+    } catch (e) {
+      setProblem(financeErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
   }
+
+  // o banco ainda não tem a função de receber contas a receber (cartão a liquidar, fiado)
+  const unsupported = !!supabase && !pay
 
   if (done) {
     return (
@@ -80,9 +95,13 @@ export function Baixa() {
           <Button
             variant="secondary"
             block
-            onClick={() => {
-              undoSettlement(done.settlement)
-              setDone(null)
+            onClick={async () => {
+              try {
+                await undoSettlement(done.settlement)
+                setDone(null)
+              } catch (e) {
+                setProblem(financeErrorMessage(e))
+              }
             }}
           >
             Desfazer
@@ -146,6 +165,8 @@ export function Baixa() {
         </div>
         <SelectField label="Forma" value={method} onChange={(e) => setMethod(e.target.value)} options={methods.map((m) => ({ value: m, label: m }))} />
         <TextField label="Comprovante (opcional)" type="file" disabled help="Disponível quando o armazenamento de arquivos estiver ligado." />
+        {unsupported && <Banner tone="info">Receber contas a receber ainda não está ligado ao banco. Por enquanto só é possível pagar contas a pagar.</Banner>}
+        {problem && <Banner tone="error">{problem}</Banner>}
         {insufficient ? (
           <Banner tone="error">{`${account.name} tem ${money(balance)}. Escolha ${accounts.find((a) => a.id !== accountId)?.name.toLowerCase()} ou pague só uma parte.`}</Banner>
         ) : (
@@ -163,7 +184,7 @@ export function Baixa() {
             Saldo insuficiente {accountId === 'caixa' ? 'no caixa' : 'no banco'}
           </Button>
         ) : (
-          <Button size="l" block onClick={submit} disabled={total <= 0}>
+          <Button size="l" block loading={busy} onClick={submit} disabled={total <= 0 || busy || unsupported}>
             {pay ? 'Registrar pagamento' : 'Registrar recebimento'}
           </Button>
         )}
