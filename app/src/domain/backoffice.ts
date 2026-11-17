@@ -183,6 +183,6 @@ export type Customer = {
   notes: string
 }
 
-export type Courier = { id: string; name: string; kind: 'own' | 'partner'; status: 'available' | 'en_route' | 'online'; note: string }
+export type Courier = { id: string; name: string; kind: 'own' | 'partner'; status: 'available' | 'en_route' | 'online' | 'offline'; note: string }
 
 export type TeamMember = { id: string; name: string; role: import('@/permissions/roles').Role; detail: string; pending?: boolean }

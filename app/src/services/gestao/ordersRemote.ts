@@ -2,6 +2,7 @@
 // ele é um cache alimentado aqui (busca, Realtime e atualização a cada 15 s) e as ações chamam
 // as funções `order_*` do banco, que fazem a baixa por lote, a conferência e o aviso ao cliente.
 import type { StaffOrder, StaffOrderItem, StaffOrderStatus } from '@/domain/staffOrder'
+import { refreshCouriers } from './peopleRemote'
 import { supabase } from '@/lib/supabase'
 import { staffOrdersStore } from './orders'
 
@@ -32,7 +33,7 @@ type Row = {
     lots: { code?: string; lot_code?: string; expires_at?: string; expiry?: string }[] | null
     products: { slug?: string } | { slug?: string }[] | null
   }[]
-  deliveries: { status: string; courier_id: string | null }[] | null
+  deliveries: { status: string; courier_id: string | null; couriers: { name: string } | { name: string }[] | null }[] | null
 }
 
 const statusMap: Record<string, StaffOrderStatus | null> = {
@@ -66,7 +67,9 @@ function toStaff(r: Row, previous: StaffOrder | undefined): StaffOrder | null {
       lotExpiry: lot?.expires_at ?? lot?.expiry ?? null,
     }
   })
-  const delivery = one(r.deliveries)
+  // a entrega que ainda vale: a última não entregue nem devolvida
+  const delivery = (r.deliveries ?? []).find((d) => !['delivered', 'returned'].includes(d.status)) ?? null
+  const courierOf = one(delivery?.couriers)?.name ?? null
   const a = r.address
   return {
     id: r.id,
@@ -82,9 +85,16 @@ function toStaff(r: Row, previous: StaffOrder | undefined): StaffOrder | null {
     feeCents: Number(r.delivery_fee_cents),
     paymentLabel: paymentLabels[r.payment_method] ?? r.payment_method,
     paid: r.payment_paid,
-    courierName: r.courier_name,
+    courierName: r.courier_name ?? (delivery && delivery.status !== 'published' ? courierOf : null),
     deliveryCode: r.delivery_code ?? '',
-    deliveryNote: delivery?.status === 'published' ? 'publicado para parceiros' : delivery?.status === 'reserved' ? 'reservado' : undefined,
+    deliveryNote:
+      delivery?.status === 'published'
+        ? 'publicado para parceiros'
+        : delivery?.status === 'reserved'
+          ? `reservado para ${courierOf ?? 'o entregador'}`
+          : delivery?.status === 'assigned'
+            ? `atribuído a ${courierOf ?? 'o entregador'}`
+            : undefined,
     courierStage: delivery?.status === 'accepted' ? 'accepted' : undefined,
     // a função do banco confere pelos ids dos produtos, na mesma ordem dos itens
     itemIds: r.order_items.map((i) => i.product_id ?? ''),
@@ -92,7 +102,7 @@ function toStaff(r: Row, previous: StaffOrder | undefined): StaffOrder | null {
 }
 
 const SELECT =
-  'id, number, fulfillment, status, customer_id, contact_name, contact_phone, address, delivery_window, delivery_fee_cents, payment_method, payment_paid, delivery_code, courier_name, created_at, customers(since), order_items(id, product_id, name, unit, qty, unit_price_cents, lots, products(slug)), deliveries(status, courier_id)'
+  'id, number, fulfillment, status, customer_id, contact_name, contact_phone, address, delivery_window, delivery_fee_cents, payment_method, payment_paid, delivery_code, courier_name, created_at, customers(since), order_items(id, product_id, name, unit, qty, unit_price_cents, lots, products(slug)), deliveries(status, courier_id, couriers(name))'
 
 let loading: Promise<void> | null = null
 let rerun: Promise<void> | null = null
@@ -123,10 +133,18 @@ export async function refreshStaffOrders(): Promise<void> {
 export function startStaffSync() {
   if (!supabase) return () => undefined
   void refreshStaffOrders()
-  const timer = setInterval(() => void refreshStaffOrders(), 15_000)
+  void refreshCouriers()
+  const timer = setInterval(() => {
+    void refreshStaffOrders()
+    void refreshCouriers()
+  }, 15_000)
   const channel = supabase
     .channel('gestao-pedidos')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => void refreshStaffOrders())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'deliveries' }, () => {
+      void refreshStaffOrders()
+      void refreshCouriers()
+    })
     .subscribe()
   return () => {
     clearInterval(timer)

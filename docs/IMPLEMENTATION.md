@@ -72,7 +72,8 @@ O app usa o projeto Supabase **já existente** (`afqcwqikkolyoowkozak`), que tem
 | Gestão: compras e fornecedores (criar pedido, receber, encerrar, desfazer) | **Ligado e testado** (`create_purchase_order`, `receive_purchase`, `undo_receipt`): pedido PC-0001, recebimento com lote e validade, conta a pagar criada e desfeita; encerramento por falta (`close_purchase_short`) testado com o PC-0003: recebimento parcial de 4 de 10, encerrar, repetir é recusado e desfazer o recebimento volta o pedido a "enviado" |
 | Gestão: financeiro (contas, saldos, lançamentos, pagar e desfazer) | **Ligado e testado** (`pay_entry`, `undo_payment`, visão `account_balances`), pela tela: com R$ 1.000 de saldo de teste, pagar R$ 360 deixou R$ 640 e desfazer devolveu os R$ 1.000 (o saldo de teste foi removido depois). Pagar sem saldo é recusado pelo banco. Receber contas a receber não tem função no banco (a tela avisa) |
 | Gestão: produção (fichas, criar ordem, iniciar, concluir, corrigir apontamento, excluir) | **Ligado e testado** (`create_production_order`, `start_production`, `finish_production`, `undo_finish_production`, `delete_production_order`): ordem OP-0001 com reserva dos insumos, conclusão com lote, consumo pelo lote que vence primeiro e custo real; corrigir devolveu os saldos e excluir liberou as reservas. A tela não edita ficha (`save_recipe` existe no banco, sem tela); a ficha de teste vem de `supabase/seed_dev_producao.sql` |
-| Gestão: entregas (atribuir), produtos (edição), clientes | Ainda nos dados de exemplo |
+| Gestão: entregas (atribuir, publicar para parceiros, desfazer envio) | **Ligado e testado** (`delivery_assign`, `delivery_unassign`; entregadores de `couriers`, estado "em rota" e "na loja" derivado de `deliveries`, Realtime em `deliveries`): pedido 1001 enviado com o Carlos, recarregado (mostra "Enviado") e desfeito; publicar para parceiros gerou entrega de R$ 9,00 (configuração `partner_fee_cents` do banco) e repetir foi recusado |
+| Gestão: produtos (edição), clientes | Ainda nos dados de exemplo |
 | PDV e Entregas (app do entregador) | Ainda nos dados de exemplo (`pos_*`, `courier_*` existem no banco) |
 
 O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de desenvolvimento.
@@ -87,9 +88,11 @@ O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de 
 
 Itens que o código não resolve sozinho. Esta lista cresce a cada etapa.
 
-- **Saldo inicial das contas**: banco e caixa estão com R$ 0,00 e pagar recusa sem saldo. O app não tem tela para lançar o saldo inicial (no banco entra como lançamento do tipo `opening`). Informe os valores reais e diga se quer essa tela.
+- **Saldo inicial das contas**: banco e caixa estão com R$ 0,00 e pagar recusa sem saldo. O banco já tem `set_opening_balance(estabelecimento, conta, centavos)`, mas o app não tem tela para isso. Informe os valores reais e diga se quer essa tela.
 - **Receber contas a receber**: o banco não tem função para isso (`pay_entry` só paga). Decidir se vira função no banco antes de fiado ou venda a prazo.
 - **Compras de teste abertas no banco**: PC-0001 e PC-0002 (recebidas, R$ 360 a pagar cada) e PC-0003 (enviado, farinha de mandioca) são de teste. Apagar ou usar como exemplo.
 
 - **Insumos e fichas reais da casa**: o banco só tem a ficha de teste do doce de leite (nata e rapadura como insumos fictícios). Faltam cadastrar leite, coalho, sal, embalagens etc. como itens e preencher as fichas reais (rendimento, validade, consumo, gás e energia). Hoje não há tela para criar ou editar ficha; o banco já tem `save_recipe`, falta a tela (confirmar com você se quer essa tela agora).
 - **Dados de teste no banco de desenvolvimento**: lotes `TESTE-PROD-1` (20 un de nata e de rapadura) e a ficha de teste do doce de leite, criados por `seed_dev_producao.sql`. Apagar antes de usar o banco de verdade.
+- **App do entregador no banco**: o login do entregador vincula o celular da conta do Supabase Auth ao cadastro (`courier_link`), o que depende do código por mensagem (P8) ou de um usuário de teste do entregador no Auth (criar conta exige o seu OK). Sem isso o app do entregador continua com os dados de exemplo no aparelho e não enxerga as entregas atribuídas pela gestão. Os três entregadores de teste (Bruno, Carlos, Diego) vêm de `supabase/seed_dev_entregas.sql`.
+- **Entregadores e telefones reais**: trocar os de teste pelos cadastrados da casa (tela de entregadores da gestão ainda não grava no banco).

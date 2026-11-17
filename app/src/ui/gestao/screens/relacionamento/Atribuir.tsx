@@ -2,35 +2,50 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
 import { Button, ButtonLink } from '@/components/Button'
-import { EmptyState } from '@/components/Feedback'
+import { Banner, EmptyState } from '@/components/Feedback'
 import { Icon } from '@/components/Icon'
 import { hypotheses } from '@/config/hypotheses'
 import { formatCents } from '@/domain/money'
+import type { Courier } from '@/domain/backoffice'
 import type { StaffOrder } from '@/domain/staffOrder'
+import { supabase } from '@/lib/supabase'
 import { staffOrdersStore } from '@/services/gestao/orders'
 import { couriersStore } from '@/services/gestao/people'
+import { deliveryErrorMessage, remoteAssign, remoteUnassign } from '@/services/gestao/peopleRemote'
 import o from '@/styles/ops.module.css'
 import { Bar } from '../../../shared/OpsBits'
 import s from '../estoque/Estoque.module.css'
 
-type Choice = 'bruno' | 'carlos' | 'partners'
+/** id de um entregador próprio, ou 'partners' para publicar aos parceiros */
+type Choice = string
 
-const copy: Record<Choice, { button: string; title: string; result: string }> = {
-  bruno: { button: 'Enviar com o Bruno', title: 'Bruno recebeu a entrega', result: 'O pedido apareceu no app do Bruno. A cliente recebe o aviso quando ele sair.' },
-  carlos: { button: 'Reservar para o Carlos', title: 'Reservado para o Carlos', result: 'Entra na lista do Carlos quando ele voltar, às 15h50.' },
-  partners: {
-    button: `Publicar por ${formatCents(hypotheses.partnerFeePerDelivery)}`,
-    title: 'Publicado para parceiros',
-    result: `Avisamos aqui quando um parceiro aceitar. Se ninguém aceitar em ${hypotheses.partnerAcceptTimeoutMin} minutos, a entrega volta para a loja.`,
-  },
+const PARTNERS = 'partners'
+
+const copyFor = (choice: Choice, couriers: Courier[]) => {
+  if (choice === PARTNERS) {
+    return {
+      button: `Publicar por ${formatCents(hypotheses.partnerFeePerDelivery)}`,
+      title: 'Publicado para parceiros',
+      result: `Avisamos aqui quando um parceiro aceitar. Se ninguém aceitar em ${hypotheses.partnerAcceptTimeoutMin} minutos, a entrega volta para a loja.`,
+    }
+  }
+  const c = couriers.find((x) => x.id === choice)
+  const name = c?.name ?? 'o entregador'
+  return c?.status === 'en_route'
+    ? { button: `Reservar para ${name}`, title: `Reservado para ${name}`, result: `Entra na lista de ${name} quando voltar da rota.` }
+    : { button: `Enviar com ${name}`, title: `${name} recebeu a entrega`, result: `O pedido apareceu no app de ${name}. A cliente recebe o aviso quando sair.` }
 }
 
 export function Atribuir() {
   const { id = '' } = useParams()
   const order = staffOrdersStore.useStore().find((x) => x.id === id)
   const couriers = couriersStore.useStore()
-  const [choice, setChoice] = useState<Choice>('bruno')
+  const own = couriers.filter((c) => c.kind === 'own' && c.status !== 'offline')
+  const [picked, setChoice] = useState<Choice | null>(null)
+  const choice = picked ?? own.find((c) => c.status === 'available')?.id ?? own[0]?.id ?? PARTNERS
   const [done, setDone] = useState<StaffOrder | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
 
   if (!order) {
     return (
@@ -43,22 +58,62 @@ export function Atribuir() {
 
   const update = (patch: Partial<StaffOrder>) => staffOrdersStore.set((all) => all.map((x) => (x.id === order.id ? { ...x, ...patch } : x)))
 
-  const send = () => {
-    setDone(order)
-    if (choice === 'bruno') update({ courierName: 'Bruno', deliveryNote: 'atribuído ao Bruno' })
-    if (choice === 'carlos') update({ courierName: 'Carlos', deliveryNote: 'reservado para o Carlos' })
-    if (choice === 'partners') update({ courierName: null, deliveryNote: 'publicado para parceiros' })
+  const copy = copyFor(choice, couriers)
+  const chosen = couriers.find((c) => c.id === choice)
+
+  const send = async () => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      if (supabase) {
+        await remoteAssign(order.id, choice === PARTNERS ? null : choice)
+      } else if (choice === PARTNERS) {
+        update({ courierName: null, deliveryNote: 'publicado para parceiros' })
+      } else {
+        update({ courierName: chosen?.name ?? null, deliveryNote: chosen?.status === 'en_route' ? `reservado para ${chosen.name}` : `atribuído a ${chosen?.name}` })
+      }
+      setDone(order)
+    } catch (e) {
+      setProblem(deliveryErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
-  const bruno = couriers.find((c) => c.id === 'bruno')
-  const carlos = couriers.find((c) => c.id === 'carlos')
+  const undo = async (previous: StaffOrder) => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      if (supabase) await remoteUnassign(order.id)
+      else update({ status: previous.status, courierName: previous.courierName, deliveryNote: previous.deliveryNote, courierStage: previous.courierStage })
+      setDone(null)
+    } catch (e) {
+      setProblem(deliveryErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const partnerNote = couriers.find((c) => c.kind === 'partner')?.note.split(' com')[0]
   const opts: { value: Choice; title: string; sub: string; end: React.ReactNode }[] = [
-    { value: 'bruno', title: 'Bruno · próprio', sub: 'Na loja agora · sai em seguida', end: <Tag tone={bruno?.status === 'available' ? 'success' : 'info'}>{bruno?.status === 'available' ? 'Disponível' : 'Em rota'}</Tag> },
-    { value: 'carlos', title: 'Carlos · próprio', sub: 'Volta às 15h50 · pode levar junto na próxima saída', end: <Tag tone={carlos?.status === 'en_route' ? 'info' : 'success'}>{carlos?.status === 'en_route' ? 'Em rota' : 'Disponível'}</Tag> },
-    { value: 'partners', title: 'Publicar para parceiros', sub: 'O primeiro que aceitar leva · 2 online', end: <b className={o.num}>{formatCents(hypotheses.partnerFeePerDelivery)}</b> },
+    ...own.map((c) => ({
+      value: c.id,
+      title: `${c.name} · próprio`,
+      sub: c.status === 'en_route' ? `${c.note} · pode levar junto na próxima saída` : `${c.note[0].toUpperCase()}${c.note.slice(1)} · sai em seguida`,
+      end: <Tag tone={c.status === 'en_route' ? 'info' : 'success'}>{c.status === 'en_route' ? 'Em rota' : 'Disponível'}</Tag>,
+    })),
+    {
+      value: PARTNERS,
+      title: 'Publicar para parceiros',
+      sub: `O primeiro que aceitar leva${partnerNote ? ` · ${partnerNote} online` : ''}`,
+      end: <b className={o.num}>{formatCents(hypotheses.partnerFeePerDelivery)}</b>,
+    },
   ]
 
-  if (done) {
+  // pedido já enviado antes (ou depois de recarregar): mostra o estado e deixa desfazer
+  const alreadySent = !done && /^(atribuído|reservado|publicado)/.test(order.deliveryNote ?? '')
+
+  if (done || alreadySent) {
     return (
       <div className={o.screen}>
         <Bar title={`Enviar pedido #${order.number}`} back="/gestao/entregas" />
@@ -66,22 +121,16 @@ export function Atribuir() {
           <div aria-hidden="true" className={s.doneIcon}>
             <Icon name="entregas" size={32} />
           </div>
-          <h2 style={{ font: '700 24px/30px var(--fonte-titulo)' }}>{copy[choice].title}</h2>
-          <p className={o.secondary}>{copy[choice].result}</p>
+          <h2 style={{ font: '700 24px/30px var(--fonte-titulo)' }}>{done ? copy.title : `Enviado: ${order.deliveryNote}`}</h2>
+          {done && <p className={o.secondary}>{copy.result}</p>}
         </main>
         <div className={o.footer}>
           <ButtonLink to="/gestao/entregas" size="l" block>
             Voltar às entregas
           </ButtonLink>
-          <Button
-            variant="secondary"
-            block
-            onClick={() => {
-              update({ status: done.status, courierName: done.courierName, deliveryNote: done.deliveryNote, courierStage: done.courierStage })
-              setDone(null)
-            }}
-          >
-            Desfazer
+          {problem && <Banner tone="error">{problem}</Banner>}
+          <Button variant="secondary" block disabled={busy} onClick={() => void undo(done ?? order)}>
+            {done ? 'Desfazer' : 'Desfazer envio'}
           </Button>
         </div>
       </div>
@@ -146,8 +195,9 @@ export function Atribuir() {
         <p className={o.muted}>Entregador próprio recebe por mês; parceiro recebe por entrega, no valor mostrado.</p>
       </main>
       <div className={o.footer}>
-        <Button size="l" block onClick={send}>
-          {copy[choice].button}
+        {problem && <Banner tone="error">{problem}</Banner>}
+        <Button size="l" block disabled={busy} onClick={() => void send()}>
+          {copy.button}
         </Button>
       </div>
     </div>
