@@ -1,4 +1,5 @@
 import { ButtonLink } from '@/components/Button'
+import { supabase } from '@/lib/supabase'
 import { Box, RowLink } from '@/components/Card'
 import { useEstablishment } from '../state/storeInfo'
 import { PageHeader } from '../components/LojaShell'
@@ -17,11 +18,17 @@ export function Perfil() {
         <div className={l.card} style={{ padding: 20, borderRadius: 'var(--raio-folha)', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
             <h2 className={l.h2}>Você está comprando sem conta</h2>
-            <p className={l.muted}>Com uma conta você vê seus pedidos em qualquer aparelho e pede de novo em um toque.</p>
+            {supabase ? (
+              <p className={l.muted}>A conta com celular ainda não está disponível. Por enquanto você compra sem conta e acompanha o pedido em “Meus pedidos”.</p>
+            ) : (
+              <p className={l.muted}>Com uma conta você vê seus pedidos em qualquer aparelho e pede de novo em um toque.</p>
+            )}
           </div>
-          <ButtonLink to="/entrar" block>
-            Entrar ou criar conta
-          </ButtonLink>
+          {!supabase && (
+            <ButtonLink to="/entrar" block>
+              Entrar ou criar conta
+            </ButtonLink>
+          )}
         </div>
         <Box>
           <RowLink icon="pedidos" title="Meus pedidos" sub="Acompanhar e pedir de novo" to="/pedidos" />

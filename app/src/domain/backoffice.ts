@@ -127,6 +127,8 @@ export type Recipe = {
   /** H-G19 — gás e energia como custo indireto estimado por fornada */
   indirectCostCents: Cents
   prepNotes: string
+  /** prefixo do código de lote (ex.: DL) */
+  lotPrefix?: string
 }
 
 export type ProductionStatus = 'planned' | 'in_progress' | 'done' | 'cancelled'

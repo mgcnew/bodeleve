@@ -5,6 +5,7 @@ import { Banner } from '@/components/Feedback'
 import { TextField } from '@/components/Field'
 import { Icon } from '@/components/Icon'
 import { hypotheses } from '@/config/hypotheses'
+import { supabase } from '@/lib/supabase'
 import { formatPhone } from '@/domain/order'
 import { applyCodeInput } from '@/lib/otp'
 import { TopBar } from '../components/LojaShell'
@@ -51,6 +52,23 @@ export function Entrar() {
       return
     }
     navigate('/perfil')
+  }
+
+  // com o banco ligado o código por WhatsApp ainda não existe (P8): não finge que entrou
+  if (supabase) {
+    return (
+      <div className={`${l.screen} ${l.narrow}`}>
+        <TopBar title="Entrar" back="history" fallback="/perfil" cart={false} />
+        <main className={`${l.main} ${l.mainForm}`}>
+          <h1 className={l.h1}>Conta ainda não disponível</h1>
+          <p className={l.muted}>O acesso por celular chega em breve. Enquanto isso você compra sem conta e acompanha o pedido em “Meus pedidos”.</p>
+          <Link to="/" className={l.linkArrow}>
+            Continuar sem conta
+            <Icon name="avancar" size={18} />
+          </Link>
+        </main>
+      </div>
+    )
   }
 
   return (

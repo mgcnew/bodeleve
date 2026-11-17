@@ -77,6 +77,7 @@ type RecipeRow = {
   shelf_life_days: number | null
   overhead_cents: number | null
   method: string | null
+  lot_prefix: string | null
   recipe_items: { product_id: string; qty_per_batch: number }[]
 }
 
@@ -118,7 +119,7 @@ export async function refreshBackoffice(): Promise<void> {
       supabase!.from('stock_movements').select('id, product_id, lot_id, type, qty, at, ref, description, created_by_name').order('at', { ascending: false }).limit(1000),
       supabase!.from('suppliers').select('id, name, supplies, phone, email, tax_id, lead_time_days, payment_terms, created_at, contact_name').eq('active', true).order('name'),
       supabase!.from('purchase_orders').select('id, number, supplier_id, status, payment_term, expected_at, sent_at, received_at, purchase_order_items(id, product_id, qty, unit_cost_cents, received_qty)').order('created_at', { ascending: false }).limit(200),
-      supabase!.from('recipes').select('id, product_id, yield_per_batch, batch_label, shelf_life_days, overhead_cents, method, recipe_items(product_id, qty_per_batch)').order('created_at'),
+      supabase!.from('recipes').select('id, product_id, yield_per_batch, batch_label, shelf_life_days, overhead_cents, method, lot_prefix, recipe_items(product_id, qty_per_batch)').order('created_at'),
       supabase!.from('production_orders').select('id, number, recipe_id, product_id, batches, planned_qty, status, starts_at, ends_at, done_at, good_qty, lot_id, cost_per_unit_cents, destination_order_id, production_consumptions(product_id, qty)').order('created_at', { ascending: false }).limit(200),
     ])
     if (prods.error || !prods.data) return
@@ -189,6 +190,7 @@ export async function refreshBackoffice(): Promise<void> {
       lines: r.recipe_items.map((i) => ({ itemId: slugOf.get(i.product_id) ?? '', qty: Number(i.qty_per_batch) })),
       indirectCostCents: Number(r.overhead_cents ?? 0),
       prepNotes: r.method || '[MODO DE PREPARO DA CASA]',
+      lotPrefix: r.lot_prefix ?? '',
     }))
     const lotCodeOf = new Map(lotList.map((l) => [l.id, l.code]))
     // `destination_order_id` não tem chave estrangeira no banco; os números vêm de uma busca à parte
@@ -349,6 +351,26 @@ export const remoteFinishProduction = (orderId: string, input: { goodQty: number
   })
 
 /** Mensagem para o que o banco recusa (`raise exception`) */
+export const RECIPE_NOTES_PLACEHOLDER = '[MODO DE PREPARO DA CASA]'
+
+/** Cria (`recipeId` nulo) ou atualiza a ficha técnica; as linhas antigas são substituídas pelas enviadas */
+export async function remoteSaveRecipe(recipeId: string | null, input: { productId: string; yieldQty: number; batchLabel: string; shelfLifeDays: number; lotPrefix: string; indirectCostCents: number; prepNotes: string; lines: { itemId: string; qty: number }[] }) {
+  return rpc<string>('save_recipe', {
+    p_establishment: await getEstablishmentId(),
+    p_recipe: recipeId,
+    p_data: {
+      product_id: dbIdOf(input.productId),
+      yield_per_batch: input.yieldQty,
+      batch_label: input.batchLabel,
+      shelf_life_days: input.shelfLifeDays,
+      lot_prefix: input.lotPrefix,
+      overhead_cents: input.indirectCostCents,
+      method: input.prepNotes === RECIPE_NOTES_PLACEHOLDER ? '' : input.prepNotes,
+      lines: input.lines.map((l) => ({ product_id: dbIdOf(l.itemId), qty_per_batch: l.qty })),
+    },
+  })
+}
+
 export function backofficeErrorMessage(e: unknown) {
   const msg = String((e as { message?: string })?.message ?? '')
   if (msg.includes('insufficient_input')) return `Não há ${msg.split(':')[1] ?? 'insumo'} suficiente em estoque para concluir. Receba a compra ou ajuste o consumo.`
@@ -361,6 +383,9 @@ export function backofficeErrorMessage(e: unknown) {
   if (msg.includes('lot_already_used')) return 'O lote desta produção já foi usado (vendido ou baixado). Não dá para corrigir o apontamento.'
   if (msg.includes('already_done') || msg.includes('invalid_state')) return 'Esta ordem já mudou de situação. Atualize a tela.'
   if (msg.includes('forbidden')) return 'Seu papel não permite esta ação.'
+  if (msg.includes('empty_recipe')) return 'Coloque pelo menos um insumo na ficha.'
+  if (msg.includes('invalid_product')) return 'Escolha um produto acabado para a ficha.'
+  if (msg.includes('duplicate')) return 'Este produto já tem ficha.'
   if (msg.includes('empty_order')) return 'Escolha a quantidade de pelo menos um item.'
   return 'Não foi possível concluir. Nada foi alterado. Tente de novo.'
 }

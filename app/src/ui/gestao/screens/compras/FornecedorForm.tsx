@@ -17,8 +17,22 @@ const days = (leadTime: string) => Number(/(\d+)/.exec(leadTime)?.[1] ?? 0) || n
 // cadastro e edição de fornecedor (rotas fornecedores/novo e fornecedores/:id/editar)
 export function FornecedorForm() {
   const { id } = useParams()
-  const navigate = useNavigate()
   const existing = suppliersStore.useStore().find((s) => s.id === id)
+  if (id && !existing) {
+    return (
+      <div className={o.screen}>
+        <Bar title="Fornecedor" back="/gestao/fornecedores" />
+        <EmptyState bare icon="entregas" title="Fornecedor não encontrado" action={<ButtonLink to="/gestao/fornecedores">Ver fornecedores</ButtonLink>} />
+      </div>
+    )
+  }
+  // a chave refaz o formulário quando os dados chegam depois da tela (abrir direto pelo endereço)
+  return <FornecedorFormBody key={existing?.id ?? 'novo'} existing={existing} />
+}
+
+function FornecedorFormBody({ existing }: { existing?: Supplier }) {
+  const id = existing?.id
+  const navigate = useNavigate()
   const [name, setName] = useState(existing?.name ?? '')
   const [categories, setCategories] = useState(existing?.categories ?? '')
   const [contactName, setContactName] = useState(existing?.contactName ?? '')
@@ -32,15 +46,6 @@ export function FornecedorForm() {
   const [busy, setBusy] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const back = id ? `/gestao/fornecedores/${id}` : '/gestao/fornecedores'
-
-  if (id && !existing) {
-    return (
-      <div className={o.screen}>
-        <Bar title="Fornecedor" back="/gestao/fornecedores" />
-        <EmptyState bare icon="entregas" title="Fornecedor não encontrado" action={<ButtonLink to="/gestao/fornecedores">Ver fornecedores</ButtonLink>} />
-      </div>
-    )
-  }
 
   const save = async () => {
     if (!name.trim()) return setNameError('Digite o nome do fornecedor.')

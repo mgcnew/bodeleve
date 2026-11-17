@@ -1,7 +1,15 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
 import { Box } from '@/components/Card'
+import { Button } from '@/components/Button'
+import { TextField } from '@/components/Field'
+import { Sheet } from '@/components/Sheet'
+import { formatPhone } from '@/domain/order'
+import { supabase } from '@/lib/supabase'
+import { newId } from '@/services/gestao/backoffice'
+import { customerErrorMessage, remoteCreateCustomer } from '@/services/gestao/peopleRemote'
+import { Banner } from '@/components/Feedback'
 import { EmptyState } from '@/components/Feedback'
 import { Icon } from '@/components/Icon'
 import { normalize } from '@/domain/catalog'
@@ -14,7 +22,38 @@ import { SearchBox } from '../compras/Fornecedores'
 export function Clientes() {
   const customers = customersStore.useStore()
   const [q, setQ] = useState('')
+  const [adding, setAdding] = useState(false)
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [errors, setErrors] = useState<{ name?: string; phone?: string; form?: string }>({})
+  const [busy, setBusy] = useState(false)
   const digits = q.replace(/\D/g, '')
+
+  const create = async (e: FormEvent) => {
+    e.preventDefault()
+    const next: typeof errors = {}
+    if (!name.trim()) next.name = 'Digite o nome do cliente.'
+    if (phone.replace(/\D/g, '').length < 10) next.phone = 'Informe o celular com DDD.'
+    setErrors(next)
+    if (next.name || next.phone) return
+    if (customers.some((c) => c.phone.replace(/\D/g, '') === phone.replace(/\D/g, ''))) return setErrors({ phone: 'Já existe um cliente com esse celular. Procure na lista pelo número.' })
+    setBusy(true)
+    try {
+      if (supabase) await remoteCreateCustomer({ name, phone, notes: '' })
+      else
+        customersStore.set((all) => [
+          ...all,
+          { id: newId('cli'), name: name.trim(), phone, address: '—', since: new Date().getFullYear().toString(), channel: 'cadastrado na gestão', orderCount: 0, totalCents: 0, fiadoCents: 0, lastOrderLabel: 'sem pedidos', topItems: [], history: [], notes: '' },
+        ])
+      setName('')
+      setPhone('')
+      setAdding(false)
+    } catch (err) {
+      setErrors({ form: customerErrorMessage(err) })
+    } finally {
+      setBusy(false)
+    }
+  }
   const visible = customers.filter((c) => normalize(c.name).includes(normalize(q.trim())) || (digits.length > 1 && c.phone.replace(/\D/g, '').includes(digits)))
 
   return (
@@ -46,6 +85,19 @@ export function Clientes() {
             ))}
           </Box>
         )}
+        <Button variant="secondary" block style={{ maxWidth: 480 }} onClick={() => { setErrors({}); setAdding(true) }}>
+          Cadastrar cliente
+        </Button>
+        <Sheet open={adding} onClose={() => setAdding(false)} title="Novo cliente">
+          <form onSubmit={(e) => void create(e)} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <TextField label="Nome" autoComplete="off" value={name} error={errors.name} onChange={(e) => { setName(e.target.value); setErrors({}) }} />
+            <TextField label="Celular com DDD" type="tel" inputMode="tel" placeholder="(00) 90000-0000" value={phone} error={errors.phone} onChange={(e) => { setPhone(formatPhone(e.target.value)); setErrors({}) }} />
+            {errors.form && <Banner tone="error">{errors.form}</Banner>}
+            <Button type="submit" size="l" block disabled={busy}>
+              Cadastrar cliente
+            </Button>
+          </form>
+        </Sheet>
         <p className={o.muted}>Valor ao lado = total comprado. Quem compra na loja sem conta entra aqui pelo celular informado.</p>
       </main>
     </div>

@@ -28,6 +28,7 @@ import { Baixa } from './screens/financeiro/Baixa'
 import { Contas } from './screens/financeiro/Contas'
 import { Financeiro } from './screens/financeiro/Financeiro'
 import { Lancamentos } from './screens/financeiro/Lancamentos'
+import { SaldoInicial } from './screens/financeiro/SaldoInicial'
 import { Casa } from './screens/sistema/Casa'
 import { Configuracoes } from './screens/sistema/Configuracoes'
 import { Equipe } from './screens/sistema/Equipe'
@@ -38,6 +39,7 @@ import { Cliente } from './screens/relacionamento/Cliente'
 import { Clientes } from './screens/relacionamento/Clientes'
 import { Entregas } from './screens/relacionamento/Entregas'
 import { Ficha } from './screens/producao/Ficha'
+import { FichaForm } from './screens/producao/FichaForm'
 import { Fichas } from './screens/producao/Fichas'
 import { Ordem } from './screens/producao/Ordem'
 import { Producao } from './screens/producao/Producao'
@@ -66,6 +68,7 @@ export const gestaoRoutes: RouteObject[] = [
       { path: 'financeiro/contas', element: <Contas /> },
       { path: 'financeiro/contas/:id', element: <Baixa /> },
       { path: 'financeiro/lancamentos', element: <Lancamentos /> },
+      { path: 'financeiro/saldo-inicial', element: <SaldoInicial /> },
       { path: 'compras', element: <Compras /> },
       { path: 'compras/nova', element: <CompraNova /> },
       { path: 'compras/:id', element: <Compra /> },
@@ -76,7 +79,9 @@ export const gestaoRoutes: RouteObject[] = [
       { path: 'fornecedores/:id/editar', element: <FornecedorForm /> },
       { path: 'producao', element: <Producao /> },
       { path: 'producao/fichas', element: <Fichas /> },
+      { path: 'producao/fichas/nova', element: <FichaForm /> },
       { path: 'producao/fichas/:id', element: <Ficha /> },
+      { path: 'producao/fichas/:id/editar', element: <FichaForm /> },
       { path: 'producao/ordens/:id', element: <Ordem /> },
       { path: 'produtos', element: <Produtos /> },
       { path: 'produtos/categorias', element: <Categorias /> },

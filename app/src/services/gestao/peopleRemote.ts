@@ -331,6 +331,28 @@ export async function remoteSaveCustomerNotes(customerId: string, notes: string)
   if (error) throw error
 }
 
+/** Cliente cadastrado à mão (pelo celular, como a loja faz); celular repetido o banco recusa */
+export async function remoteCreateCustomer(input: { name: string; phone: string; notes: string }) {
+  const { error } = await supabase!.from('customers').insert({
+    establishment_id: await getEstablishmentId(),
+    name: input.name.trim(),
+    phone: input.phone.trim(),
+    notes: input.notes.trim(),
+    since: new Date().toISOString().slice(0, 10),
+    channel_note: 'cadastrado na gestão',
+  })
+  if (error) throw error
+  await refreshCustomers()
+}
+
+export function customerErrorMessage(e: unknown) {
+  const code = String((e as { code?: string })?.code ?? '')
+  const msg = String((e as { message?: string })?.message ?? '')
+  if (code === '23505') return 'Já existe um cliente com esse celular. Procure na lista pelo número.'
+  if (code === '42501' || msg.includes('row-level security')) return 'Seu papel não permite cadastrar clientes.'
+  return 'Não foi possível salvar. Nada foi alterado. Tente de novo.'
+}
+
 // ---------- a casa ----------
 type EstablishmentRow = { name: string; cnpj: string | null; address: string | null; whatsapp: string | null; hours: { weekdays?: string; saturday?: string; sunday?: string } | null }
 

@@ -120,6 +120,9 @@ export function Financeiro() {
             Lançamentos
           </ButtonLink>
         </div>
+        <ButtonLink to="/gestao/financeiro/saldo-inicial" variant="quiet" style={{ alignSelf: 'flex-start', padding: 0 }}>
+          Informar saldo inicial das contas
+        </ButtonLink>
       </main>
     </div>
   )

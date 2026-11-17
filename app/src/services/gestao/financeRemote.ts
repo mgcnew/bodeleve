@@ -5,6 +5,7 @@
 import type { Account, FinancialEntry, LedgerTx } from '@/domain/backoffice'
 import { supabase } from '@/lib/supabase'
 import { accountsStore, entriesStore, ledgerStore } from './backoffice'
+import { getEstablishmentId } from './backofficeRemote'
 
 const one = <T,>(v: T | T[] | null | undefined) => (Array.isArray(v) ? v[0] : v) ?? null
 
@@ -144,6 +145,13 @@ export async function remoteUndoPayment(transactionId: string) {
   await refreshFinance()
 }
 
+/** Saldo inicial de uma conta: o banco só aceita uma vez por conta (depois disso, só lançamentos) */
+export async function remoteSetOpeningBalance(accountId: string, cents: number) {
+  const { error } = await supabase!.rpc('set_opening_balance', { p_establishment: await getEstablishmentId(), p_account: accountKind(accountId), p_cents: cents })
+  if (error) throw error
+  await refreshFinance()
+}
+
 /** Mensagem para o que o banco recusa */
 export function financeErrorMessage(e: unknown) {
   const msg = String((e as { message?: string })?.message ?? '')
@@ -151,6 +159,7 @@ export function financeErrorMessage(e: unknown) {
   if (msg.includes('invalid_amount')) return 'O valor passa do que falta pagar. Confira o valor e a multa.'
   if (msg.includes('already_paid')) return 'Esta conta já foi paga. A tela foi atualizada.'
   if (msg.includes('cannot_reverse')) return 'Este pagamento não pode ser desfeito: a próxima conta lançada já recebeu pagamento.'
+  if (msg.includes('already_set')) return 'Esta conta já tem saldo inicial. Para ajustar, faça um lançamento.'
   if (msg.includes('forbidden')) return 'Seu papel não permite esta ação.'
   return 'Não foi possível concluir. Nada foi alterado. Tente de novo.'
 }

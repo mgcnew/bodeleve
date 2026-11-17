@@ -92,14 +92,17 @@ Conferência "o sistema pode ir para o uso?" feita sobre o código e o banco. Re
 | Não havia cadastro de entregador | **Feito**: `/gestao/entregas/entregadores` (nome, vínculo da casa ou parceiro, celular, veículo, desativar e reativar). Inativo some da atribuição e perde o acesso ao app (migração `couriers_active`). O celular é o que liga o login ao cadastro. |
 | Sair escondido ou ausente | **Feito**: botão "Sair da conta" visível no menu Mais, no rodapé da barra lateral do computador, no Perfil do entregador e, no PDV, um menu de conta no cabeçalho (bloqueia o Sair enquanto há venda sem enviar neste aparelho; o caixa continua aberto). |
 | Sem edição de perfil, senha ou recuperação | **Feito**: `/gestao/perfil` (nome, senha com conferência da atual, PIN do gestor), troca de senha no Perfil do entregador, "Esqueci minha senha" nos dois logins e `/gestao/redefinir-senha` (migração `set_my_name`). |
-| Conta de cliente na loja | **Não feito**: o "Entrar" da loja é só tela (código por WhatsApp, P8). Veja "Depende de você". |
+| Saldo inicial das contas | **Feito**: `/gestao/financeiro/saldo-inicial` (link no fim do Financeiro) chama `set_opening_balance`; o banco aceita uma vez por conta. Testado com reversão no banco (grava, recusa a segunda vez e valor negativo). **Não registrei nenhum saldo**: os valores reais são seus. |
+| Editar ficha técnica | **Feito**: "Nova ficha técnica" (lista) e "Editar ficha" (detalhe): produto, rendimento, validade, prefixo do lote, insumos e quantidades, gás e energia, modo de preparo (`save_recipe`). Só produto "acabado" sem ficha aparece ao criar. |
+| Cadastro manual de cliente | **Feito**: "Cadastrar cliente" na lista de clientes (nome e celular; celular repetido é recusado). |
+| Conta de cliente na loja | **Parcial**: o "Entrar" da loja não autentica (código por WhatsApp, P8). Com o banco ligado a tela agora **avisa** que a conta chega em breve e mostra "continuar sem conta", em vez de fingir que entrou. Veja "Depende de você". |
 
 Tudo foi testado contra o banco de desenvolvimento como gestor (criar, editar e arquivar produto e fornecedor; criar e desativar entregador; entregador inativo bloqueado em `courier_link` e `courier_list`; `set_my_name` recusa vazio e bloqueia anônimo) e pela tela (novo produto, arquivar, novo fornecedor, nome do perfil, menu do PDV). Os registros de teste foram apagados.
 
 ## Próximos passos
 
-1. Telas que o banco já suporta: editar ficha técnica, saldos iniciais das contas, cadastro manual de cliente e as linhas de Configurações (loja online, pagamentos, nota fiscal) que ainda não abrem nada.
-2. O e-mail do convite de equipe.
+1. As linhas de Configurações (loja online, pagamentos, nota fiscal) que ainda não abrem nada: esperam as respostas Q6 a Q8 e Q12.
+2. O e-mail do convite de equipe e o código de login por celular (provedor P8).
 3. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.
 
 ## Depende de você (resolvemos no final)
@@ -112,7 +115,7 @@ Itens que o código não resolve sozinho, por tipo.
 - **Produto vendido por peso**: o PDV cobra o preço do item como preço do quilo e o banco cobra `weight_price_cents`. Ao salvar um produto "por peso" a tela grava os dois iguais; confirme se o preço por quilo e o da embalagem podem ser diferentes (então o cadastro precisa de dois campos). Nenhum produto de teste é vendido por peso, então esse caminho ficou sem teste de venda.
 - **Fiado e contas a receber**: o banco não tem venda fiada, saldo de cliente nem função para receber (`pay_entry` só paga). A tela de cliente mostra zero. Decidir se entra antes de abrir o balcão.
 - **Clientes**: a loja cria o cliente pelo celular informado no pedido. Falta decidir como juntar dois cadastros do mesmo cliente e como atender o pedido de apagar a conta (LGPD).
-- **Telas que o banco já permite e o app ainda não tem**: editar ficha técnica (`save_recipe`) e lançar saldo inicial das contas (`set_opening_balance`). Diga se quer agora. O PIN do gestor (`set_my_pin`) já tem tela em "Meu perfil".
+- **Telas novas para você conferir**: editar ficha técnica, saldo inicial das contas e cadastrar cliente já existem; veja se os campos e os textos servem. O PIN do gestor (`set_my_pin`) tem tela em "Meu perfil".
 - **Arquivar produto com estoque**: arquivar tira o produto da loja, do balcão e do estoque sem conferir se ainda há saldo ou se ele entra numa ficha técnica. Decidir se a tela deve bloquear ou avisar nesses casos.
 - **Quem pode cadastrar entregador, fornecedor e produto**: hoje dono e gestor (regra do banco). Confirmar que é isso.
 - **Entregador muda os próprios dados?**: hoje só a chave Pix e a senha; nome, celular e veículo o gestor altera. Confirmar.
@@ -122,7 +125,7 @@ Itens que o código não resolve sozinho, por tipo.
 
 ### Cadastros reais da casa
 
-- **Saldo inicial das contas**: banco e caixa estão com R$ 0,00 e pagar recusa sem saldo. Informe os valores reais.
+- **Saldo inicial das contas**: banco e caixa estão com R$ 0,00 (o caixa mostra R$ 32,90 da venda de teste V-0002) e pagar recusa sem saldo. Informe os valores reais em Financeiro → "Informar saldo inicial das contas". Só dá para informar uma vez por conta, então confira os números antes.
 - **Insumos e fichas**: o banco só tem a ficha de teste do doce de leite (nata e rapadura como insumos fictícios). Faltam cadastrar leite, coalho, sal, embalagens etc. como itens e preencher as fichas reais (rendimento, validade, consumo, gás e energia).
 - **Entregadores e telefones reais**, no lugar de Bruno, Carlos e Diego de teste.
 - **Senha do gestor**: o usuário de teste usa uma senha de desenvolvimento (`VITE_DEV_MANAGER_PIN`). O dono e cada gerente precisam definir a sua.

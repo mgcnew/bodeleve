@@ -171,6 +171,9 @@ export function Ficha() {
             </div>
           </Box>
           <p className={o.muted}>Modo de preparo: {recipe.prepNotes}</p>
+          <ButtonLink to={`/gestao/producao/fichas/${recipe.id}/editar`} variant="secondary" style={{ alignSelf: 'flex-start' }}>
+            Editar ficha
+          </ButtonLink>
         </section>
 
         <section className={o.section} style={{ padding: 16, borderRadius: 16, background: 'var(--cor-terracota-suave)', gap: 12 }}>

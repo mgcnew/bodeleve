@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Box } from '@/components/Card'
+import { ButtonLink } from '@/components/Button'
 import { Icon } from '@/components/Icon'
 import { formatCents } from '@/domain/money'
 import { itemsStore, recipesStore } from '@/services/gestao/backoffice'
@@ -43,6 +44,9 @@ export function Fichas() {
             )
           })}
         </Box>
+        <ButtonLink to="/gestao/producao/fichas/nova" variant="secondary" block style={{ maxWidth: 480 }}>
+          Nova ficha técnica
+        </ButtonLink>
         <p className={o.muted}>Produtos de revenda não têm ficha. A Rapadura da Linha Bodeleve é feita por parceiro (Engenho Boa Vista) e entra por compra.</p>
       </main>
     </div>
