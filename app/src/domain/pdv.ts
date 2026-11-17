@@ -45,6 +45,9 @@ export type Sale = {
   cancelledAt: string | null
   cancelledBy: string | null
   effects: SaleEffects
+  /** venda guardada no aparelho por falta de internet: ainda não chegou ao servidor (`failed`: o servidor recusou) */
+  pending?: 'queued' | 'failed'
+  pendingError?: string
 }
 
 export type CashMovement = { id: string; kind: 'withdrawal' | 'supply'; cents: Cents; reason: string; at: string }

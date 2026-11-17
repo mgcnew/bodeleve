@@ -59,7 +59,7 @@ export function Vendas() {
                   </span>
                   <span className={o.rowEnd}>
                     <b style={{ textDecoration: s.status === 'cancelled' ? 'line-through' : undefined }}>{formatCents(s.totalCents)}</b>
-                    {s.status === 'cancelled' ? <Tag tone="error">Cancelada</Tag> : <Tag tone={t.tone}>{t.label}</Tag>}
+                    {s.status === 'cancelled' ? <Tag tone="error">Cancelada</Tag> : s.pending ? <Tag tone={s.pending === 'failed' ? 'error' : 'warning'}>{s.pending === 'failed' ? 'Não enviada' : 'A enviar'}</Tag> : <Tag tone={t.tone}>{t.label}</Tag>}
                   </span>
                   <Icon name="avancar" size={18} />
                 </Link>

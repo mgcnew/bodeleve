@@ -17,6 +17,10 @@ export const cartStore = createStore<PosCart>('bodeleve.pdv.sacola', () => ({ li
 export const salesStore = createStore<Sale[]>(supabase ? 'bodeleve.pdv.vendas.remoto' : 'bodeleve.pdv.vendas', () => (supabase ? [] : seedSales()))
 export const cashStore = createStore<{ session: CashSession | null; lastClose: { at: string; diffCents: number } | null }>(supabase ? 'bodeleve.pdv.caixa.remoto' : 'bodeleve.pdv.caixa', () => (supabase ? { session: null, lastClose: null } : seedCash()))
 
+/** H-P7 — vendas feitas sem internet, na ordem em que aconteceram; enviadas sozinhas quando a conexão volta (pdvRemote) */
+export type QueuedSale = { id: string; at: string; seller: string; cart: PosCart; payments: Payment[]; /** já houve uma tentativa sem resposta: pode ter chegado ao servidor */ attempted: boolean; error?: string }
+export const queueStore = createStore<QueuedSale[]>('bodeleve.pdv.fila', () => [])
+
 const by = () => sessionStore.get()?.name ?? 'Equipe'
 
 // ---------- sacola ----------
@@ -106,7 +110,11 @@ export async function addCashMovement(kind: 'withdrawal' | 'supply', cents: numb
 }
 
 export async function closeCash(countedCents: number) {
-  if (supabase) return remoteCloseCash(countedCents)
+  if (supabase) {
+    // vendas ainda no aparelho cairiam no caixa seguinte; espera enviarem
+    if (queueStore.get().length > 0) throw new Error('queue_pending')
+    return remoteCloseCash(countedCents)
+  }
   cashStore.set((s) => {
     if (!s.session) return s
     const expected = expectedCash(s.session, salesStore.get())

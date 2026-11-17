@@ -24,7 +24,7 @@ Plataforma da Bodeleve (Casa do Norte): loja online, gestão, PDV e app de entre
 
 ## Ordem sugerida de implementação
 
-Os passos 1 a 7 estão feitos, com o banco ligado na gestão, no PDV e na loja; o que falta (app do entregador, equipe e dados da casa, fila do PDV sem internet) e o que depende do dono está em `docs/IMPLEMENTATION.md`.
+Os passos 1 a 7 estão feitos, com o banco ligado na gestão, no PDV e na loja; o que falta (convite por e-mail, configurações de loja, pagamentos e nota fiscal) e o que depende do dono está em `docs/IMPLEMENTATION.md`.
 
 1. Supabase: projeto, Auth, tabelas do `DATA_MODEL_DRAFT.md` com `establishment_id` e RLS por papel (H-G27).
 2. Design system em componentes (tokens, botões, campos, etiquetas, selos, barras, folha, modal, estados).
@@ -38,7 +38,7 @@ Antes de pagamentos reais (Pix, cartão), nota fiscal e área de entrega, confir
 
 ## Implementação
 
-- **Estado**: as 75 telas existem; a gestão, o PDV e a loja falam com o Supabase (sem `.env.local` usam dados de exemplo). O que ainda é simulado, como entrar para testar e a lista do que depende do dono está em `docs/IMPLEMENTATION.md`.
+- **Estado**: as 75 telas existem; a gestão, o PDV (com fila de vendas sem internet), o app do entregador e a loja falam com o Supabase (sem `.env.local` usam dados de exemplo). O que ainda é simulado, como entrar para testar e a lista do que depende do dono está em `docs/IMPLEMENTATION.md`.
 
 - **Stack**: React + Vite + TypeScript em `app/`, React Router, `@supabase/supabase-js`. Um único app com os 4 ambientes por rota: Loja em `/`, Gestão em `/gestao`, PDV em `/pdv`, Entregas em `/entregas`.
 - **Rodar**: `cd app && npm install && npm run dev`. Supabase: copie `app/.env.example` para `app/.env.local`; sem ele, `supabase` é `null` e os serviços usam `src/mocks`.

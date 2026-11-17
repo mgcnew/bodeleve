@@ -1,6 +1,6 @@
 # IMPLEMENTATION — estado da implementação
 
-Os quatro ambientes estão implementados em `app/` (React + Vite + TypeScript). **A gestão, o PDV, o app do entregador e a loja já falam com o Supabase** (login, pedidos, estoque, compras, produção, financeiro, entregas, produtos, clientes e caixa); sem `app/.env.local` o app roda com dados de exemplo no aparelho. Faltam o convite por e-mail, as configurações de loja, pagamentos e nota fiscal, e a fila do PDV sem internet. Este documento diz o que existe, o que é simulado e o que depende de você.
+Os quatro ambientes estão implementados em `app/` (React + Vite + TypeScript). **A gestão, o PDV, o app do entregador e a loja já falam com o Supabase** (login, pedidos, estoque, compras, produção, financeiro, entregas, produtos, clientes e caixa); sem `app/.env.local` o app roda com dados de exemplo no aparelho. Faltam o convite por e-mail e as configurações de loja, pagamentos e nota fiscal. Este documento diz o que existe, o que é simulado e o que depende de você.
 
 ## Telas
 
@@ -55,7 +55,7 @@ Pedido feito na loja → aparece em Novos na gestão → aceite, conferência it
 | Fotos de produto e da casa, logotipo, textos da casa | Marcadores entre colchetes | P3, P4, P5 |
 | Convite de equipe por e-mail | Registra o convite; não envia | Supabase Auth |
 | Mapa e rastreio | Só "Abrir no mapa" do celular (H-E4) | — |
-| PDV em conexão ruim | Com o banco ligado cada venda vai direto ao servidor; sem internet a venda falha com aviso. A fila local (`pos_checkout` aceita `offline`) ainda não existe | Decisão sobre vender sem estoque conferido |
+| PDV em conexão ruim | **Ligado**: fila local de vendas (veja a linha do PDV acima). Sem internet não dá para abrir nem fechar caixa, movimentar dinheiro nem cancelar venda | Decisões sobre venda duplicada e estoque (veja "Depende de você") |
 | Realtime | **Ligado** na gestão (pedidos, entregas, estoque) e no PDV (caixa, vendas, estoque), testado: mudança feita fora do app aparece em ~2 s. Fica sem Realtime o acompanhamento do pedido na loja (cliente sem login) e o app do entregador (atualiza a cada 10 s) | Decisão sobre acesso anônimo ao Realtime |
 
 ## Backend (Supabase)
@@ -74,7 +74,7 @@ O app usa o projeto Supabase **já existente** (`afqcwqikkolyoowkozak`), que tem
 | Gestão: produção (fichas, criar ordem, iniciar, concluir, corrigir apontamento, excluir) | **Ligado e testado** (`create_production_order`, `start_production`, `finish_production`, `undo_finish_production`, `delete_production_order`): ordem OP-0001 com reserva dos insumos, conclusão com lote, consumo pelo lote que vence primeiro e custo real; corrigir devolveu os saldos e excluir liberou as reservas. A tela não edita ficha (`save_recipe` existe no banco, sem tela); a ficha de teste vem de `supabase/seed_dev_producao.sql` |
 | Gestão: entregas (atribuir, publicar para parceiros, desfazer envio) | **Ligado e testado** (`delivery_assign`, `delivery_unassign`; entregadores de `couriers`, estado "em rota" e "na loja" derivado de `deliveries`, Realtime em `deliveries`): pedido 1001 enviado com o Carlos, recarregado (mostra "Enviado") e desfeito; publicar para parceiros gerou entrega de R$ 9,00 (configuração `partner_fee_cents` do banco) e repetir foi recusado |
 | Gestão: produtos (edição), categorias e clientes | **Ligado e testado**: editar produto grava em `products` (preço, estoque mínimo, favorito no PDV, publicar, peso, lote, tipo, origem, descrição e nome); nova categoria grava em `categories`; clientes vêm de `customers` e dos pedidos (nº de pedidos, total, itens que mais compra, canal), e a observação interna grava ao sair do campo. Rapadura editada pela tela (preço R$ 15,00, mínimo 7, favorito) e restaurada; categoria de teste criada e removida. Não existe venda fiada no banco (o campo mostra zero) |
-| PDV (abrir caixa, vender, cancelar, sangria e suprimento, fechar e reabrir) | **Ligado e testado** (`pos_open_session`, `pos_checkout`, `pos_cancel_sale`, `pos_cash_movement`, `pos_close_session`, `pos_reopen_session`): venda V-0001 de 1 queijo coalho com desconto de 10% em dinheiro (troco R$ 0,39, saiu do lote que vence primeiro, R$ 29,61 no caixa); senha errada recusada com a mensagem certa e senha certa cancelou, devolveu o estoque e estornou o dinheiro; sangria de R$ 100 ao banco, fechar sem diferença e reabrir. Itens, estoque, caixa e vendas se atualizam ao abrir e a cada 20 s. **Falta**: fila de vendas sem internet (H-P7) e envio do comprovante por WhatsApp |
+| PDV (abrir caixa, vender, cancelar, sangria e suprimento, fechar e reabrir) | **Ligado e testado** (`pos_open_session`, `pos_checkout`, `pos_cancel_sale`, `pos_cash_movement`, `pos_close_session`, `pos_reopen_session`): venda V-0001 de 1 queijo coalho com desconto de 10% em dinheiro (troco R$ 0,39, saiu do lote que vence primeiro, R$ 29,61 no caixa); senha errada recusada com a mensagem certa e senha certa cancelou, devolveu o estoque e estornou o dinheiro; sangria de R$ 100 ao banco, fechar sem diferença e reabrir. Itens, estoque, caixa e vendas se atualizam ao abrir e a cada 20 s. **Fila sem internet** (testada): se a venda falha por falta de rede, ela fica guardada no aparelho, aparece no histórico como "A enviar", entra no caixa esperado e é enviada sozinha, em ordem, a cada 20 s ou quando a conexão volta (`pos_checkout` com `offline: true`, que não barra por falta de estoque). Se o servidor recusar (ex.: caixa fechado), a venda fica "Não enviada" com o motivo, e dá para tentar de novo ou descartar. Fechar o caixa é bloqueado enquanto houver venda na fila. Testado cortando as chamadas ao Supabase no navegador: venda guardada, fechar bloqueado, envio ao voltar (V-0002 gravada com o lote certo) e recusa com descarte. **Falta** o envio do comprovante por WhatsApp |
 | App do entregador (`/entregas`) | **Ligado e testado** (`courier_link`, `courier_list`, `courier_take`, `courier_accept`, `courier_depart`, `courier_problem`, `courier_undo_problem`, `courier_confirm`, `courier_history`, `courier_set_available`): entrada com o usuário de teste do entregador, pegar a entrega livre, aceitar, conferir a coleta e sair (pedido vira "saiu para entrega" e o estoque baixa), devolver à loja e desfazer, código de entrega errado recusado e o certo concluiu (pedido entregue e pago), histórico do dia e interruptor "Disponível". Com o banco ligado a entrada é por **e-mail e senha** até o código por celular (P8) existir. A lista atualiza a cada 10 s. Distância e endereço da loja ainda não vêm do banco (a tela mostra "—") |
 | Gestão: equipe e dados da casa | **Ligado e testado** (`memberships`, `establishments`): a tela lê nome, CNPJ, endereço, WhatsApp e horários da casa e a equipe (convites ficam como "invited"). Só quem tem o módulo `team` (o dono) grava; o gestor de teste lê e, ao tentar gravar, recebe "Só o dono pode alterar a casa e a equipe" e o banco fica intacto (o Postgres atualiza 0 linhas sem erro, então a tela confere isso). Com o papel do dono (impersonado por SQL, com RLS) atualizar a casa e criar convite funcionaram; os dados de teste foram desfeitos. O gestor só vê a própria linha na equipe. **Falta**: o e-mail do convite (P8), trocar o papel e desativar alguém pela tela, e o cadastro de loja online, pagamentos e nota fiscal em Configurações (dependem de Q6 a Q8 e Q12) |
 
@@ -82,9 +82,8 @@ O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de 
 
 ## Próximos passos
 
-1. Fila de vendas sem internet no PDV (H-P7).
-2. Telas de trocar papel e desativar pessoa da equipe, e o e-mail do convite.
-3. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.
+1. Telas de trocar papel e desativar pessoa da equipe, e o e-mail do convite.
+2. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.
 
 ## Depende de você (resolvemos no final)
 
@@ -97,6 +96,10 @@ Itens que o código não resolve sozinho, por tipo.
 - **Fiado e contas a receber**: o banco não tem venda fiada, saldo de cliente nem função para receber (`pay_entry` só paga). A tela de cliente mostra zero. Decidir se entra antes de abrir o balcão.
 - **Clientes**: a loja cria o cliente pelo celular informado no pedido. Falta decidir como juntar dois cadastros do mesmo cliente e como atender o pedido de apagar a conta (LGPD).
 - **Telas que o banco já permite e o app ainda não tem**: editar ficha técnica (`save_recipe`), lançar saldo inicial das contas (`set_opening_balance`) e cada gestor definir a própria senha de cancelamento (`set_my_pin`). Diga quais você quer agora.
+
+- **Venda sem internet pode duplicar**: o servidor não tem chave para reconhecer a mesma venda enviada duas vezes. Se a rede cair justo depois do servidor gravar e antes da resposta chegar, o app confere se já existe uma venda do mesmo vendedor, valor e horário antes de reenviar, o que cobre quase tudo mas não é garantia. A solução certa é uma chave única por venda em `pos_checkout` (mudança no banco; confirme se posso fazer).
+- **Estoque na venda sem internet**: a venda guardada baixa o estoque só quando chega ao servidor e, como o produto já saiu, o servidor não barra por falta de saldo (baixa o que houver). A tela do balcão não desconta do estoque mostrado enquanto está sem internet. Decidir se isso basta.
+- **Fila só neste aparelho**: se os dados do navegador forem apagados antes de enviar, as vendas guardadas se perdem. Decidir se há aviso ou cópia de segurança.
 
 ### Cadastros reais da casa
 
@@ -115,4 +118,4 @@ Itens que o código não resolve sozinho, por tipo.
 
 ### Limpeza dos dados de teste (antes de usar o banco de verdade)
 
-Usuário `teste.entregador@example.com` (criado direto no Auth porque o cadastro recusou o domínio; apagar a linha em `auth.users`); pedido 1001, que o teste do entregador deixou entregue e pago; compras PC-0001 e PC-0002 (recebidas, R$ 360 a pagar cada) e PC-0003 (enviado); lotes `TESTE-PROD-1` e a ficha de teste do doce de leite (`seed_dev_producao.sql`); entregadores de teste (`seed_dev_entregas.sql`); pedido 1001 e cliente "TESTE Integração"; venda V-0001 (cancelada) e a sessão de caixa de teste; fornecedores e catálogo fictícios (`seed_dev*.sql`); usuário `teste.gestao@bodeleve.test`.
+Usuário `teste.entregador@example.com` (criado direto no Auth porque o cadastro recusou o domínio; apagar a linha em `auth.users`); pedido 1001, que o teste do entregador deixou entregue e pago; compras PC-0001 e PC-0002 (recebidas, R$ 360 a pagar cada) e PC-0003 (enviado); lotes `TESTE-PROD-1` e a ficha de teste do doce de leite (`seed_dev_producao.sql`); entregadores de teste (`seed_dev_entregas.sql`); pedido 1001 e cliente "TESTE Integração"; vendas V-0001 (cancelada) e V-0002 (R$ 32,90, vinda da fila) e as sessões de caixa de teste; fornecedores e catálogo fictícios (`seed_dev*.sql`); usuário `teste.gestao@bodeleve.test`.

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
 import { Box } from '@/components/Card'
 import { Button, ButtonLink } from '@/components/Button'
@@ -10,12 +10,13 @@ import { hourMinute } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { payLabels, qtyText } from '@/domain/pdv'
 import { cancelSale, salesStore } from '@/services/pdv'
-import { posErrorMessage } from '@/services/pdvRemote'
+import { discardQueued, flushQueue, posErrorMessage, retryQueued } from '@/services/pdvRemote'
 import { Bar, SumRow } from '../../shared/OpsBits'
 import o from '@/styles/ops.module.css'
 
 export function Venda() {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
   const sale = salesStore.useStore().find((x) => x.id === id)
   const [asking, setAsking] = useState(false)
   const [pin, setPin] = useState('')
@@ -101,7 +102,29 @@ export function Venda() {
         )}
       </main>
       <div className={o.footer}>
-        {!cancelled && (
+        {sale.pending && (
+          <>
+            <Banner tone={sale.pending === 'failed' ? 'error' : 'warning'}>
+              {sale.pending === 'failed' ? `O servidor não aceitou esta venda: ${sale.pendingError}` : 'Esta venda ainda não chegou ao servidor. Ela é enviada sozinha quando a conexão voltar.'}
+            </Banner>
+            <Button size="l" block onClick={() => void (sale.pending === 'failed' ? retryQueued(sale.id) : flushQueue())}>
+              {sale.pending === 'failed' ? 'Tentar enviar de novo' : 'Enviar agora'}
+            </Button>
+            {sale.pending === 'failed' && (
+              <Button
+                variant="danger"
+                block
+                onClick={() => {
+                  discardQueued(sale.id)
+                  navigate('/pdv/vendas', { replace: true })
+                }}
+              >
+                Descartar esta venda
+              </Button>
+            )}
+          </>
+        )}
+        {!cancelled && !sale.pending && (
           <Button variant="danger" size="l" block onClick={() => setAsking(true)}>
             Cancelar venda
           </Button>

@@ -7,7 +7,7 @@ import { formatCents } from '@/domain/money'
 import { cartTotal } from '@/domain/pdv'
 import { startBackofficeSync } from '@/services/gestao/backofficeRemote'
 import { sessionStore } from '@/services/gestao/session'
-import { cartStore, cashStore } from '@/services/pdv'
+import { cartStore, cashStore, queueStore } from '@/services/pdv'
 import { startPdvSync } from '@/services/pdvRemote'
 import { Tag } from '@/components/Badges'
 import s from './PdvShell.module.css'
@@ -67,13 +67,17 @@ export function PdvShell() {
 export function CashHeader() {
   const { session } = cashStore.useStore()
   const open = !!session && !session.closedAt
+  const queued = queueStore.useStore().length
   return (
     <header className={s.head}>
       <div>
         <div className={s.headTitle}>Balcão</div>
         <div className={s.headSub}>{open ? `${session!.openedBy} · aberto às ${hourMinute(session!.openedAt)}` : 'Caixa fechado'}</div>
       </div>
-      <Tag tone={open ? 'success' : 'warning'}>{open ? 'Caixa aberto' : 'Caixa fechado'}</Tag>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+        {queued > 0 && <Tag tone="warning">{queued} a enviar</Tag>}
+        <Tag tone={open ? 'success' : 'warning'}>{open ? 'Caixa aberto' : 'Caixa fechado'}</Tag>
+      </div>
     </header>
   )
 }

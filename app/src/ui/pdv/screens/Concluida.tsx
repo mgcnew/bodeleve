@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { ButtonLink } from '@/components/Button'
-import { EmptyState } from '@/components/Feedback'
+import { Banner, EmptyState } from '@/components/Feedback'
 import { TextField } from '@/components/Field'
 import { Icon } from '@/components/Icon'
 import { hourMinute } from '@/domain/dates'
@@ -43,6 +43,7 @@ export function Concluida() {
             {sale.number} · {hourMinute(sale.at)} · {formatCents(sale.totalCents)}
           </p>
         </div>
+        {sale.pending && <Banner tone="warning">Sem internet: a venda ficou guardada neste aparelho e é enviada sozinha quando a conexão voltar. Pode seguir vendendo.</Banner>}
         {sale.changeCents > 0 && (
           <div className={s.change}>
             <b>Troco a devolver</b>
