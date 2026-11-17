@@ -1,6 +1,9 @@
 import type { Item, Lot, Movement, ProductionOrder, Recipe } from '@/domain/backoffice'
 import { daysFromToday } from '@/domain/dates'
+import { supabase } from '@/lib/supabase'
 import { itemsStore, newId, productionStore, recipesStore, stockStore } from './backoffice'
+import { remoteCreateProduction, remoteDeleteProduction, remoteFinishProduction, remoteStartProduction, remoteUndoProduction } from './backofficeRemote'
+import { staffOrdersStore } from './orders'
 import { sessionStore } from './session'
 import { lotsOf, physicalOf, type StockContext } from './stock'
 
@@ -46,7 +49,14 @@ export function nextOrderNumber() {
   return `OP-${String(max + 1).padStart(4, '0')}`
 }
 
-export function createOrder(input: { recipe: Recipe; batches: number; destination: ProductionOrder['destination']; startAt: string }): ProductionOrder {
+export async function createOrder(input: { recipe: Recipe; batches: number; destination: ProductionOrder['destination']; startAt: string }): Promise<Pick<ProductionOrder, 'id' | 'number' | 'plannedQty'>> {
+  if (supabase) {
+    const dest = input.destination
+    const orderId = dest.kind === 'order' ? staffOrdersStore.get().find((x) => x.number === dest.orderNumber)?.id : undefined
+    if (dest.kind === 'order' && !orderId) throw new Error('invalid_input:order')
+    const res = await remoteCreateProduction({ recipeId: input.recipe.id, batches: input.batches, destinationOrderId: orderId ?? null, startAt: input.startAt })
+    return { id: res.id, number: res.number, plannedQty: input.recipe.yieldQty * input.batches }
+  }
   const op: ProductionOrder = {
     id: newId('op'),
     number: nextOrderNumber(),
@@ -67,26 +77,33 @@ export function createOrder(input: { recipe: Recipe; batches: number; destinatio
   return op
 }
 
-export function removeOrder(id: string) {
+export async function removeOrder(id: string) {
+  if (supabase) return remoteDeleteProduction(id)
   productionStore.set((all) => all.filter((p) => p.id !== id))
 }
 
-export function startOrder(id: string) {
+export async function startOrder(id: string) {
+  if (supabase) return remoteStartProduction(id)
   productionStore.set((all) => all.map((p) => (p.id === id ? { ...p, status: 'in_progress', startAt: new Date().toISOString() } : p)))
 }
 
-export type Completion = { orderId: string; previous: ProductionOrder; movementIds: string[]; lotId: string | null }
+export type Completion = { orderId: string; previous: ProductionOrder; movementIds: string[]; lotId: string | null; remote?: boolean }
 
 /**
  * H-G18 — ao concluir: consumo real e unidades boas apontados; o lote do acabado entra no estoque
  * e o custo real substitui o previsto. Insumos saem do lote que vence primeiro.
  */
-export function completeOrder(
+export async function completeOrder(
   orderId: string,
   input: { consumptions: { itemId: string; qty: number }[]; goodQty: number; lotCode: string; expiry: string | null },
-): Completion {
+): Promise<Completion> {
   const op = productionStore.get().find((p) => p.id === orderId)
   if (!op) throw new Error('ordem não encontrada')
+  if (supabase) {
+    // o banco baixa os insumos pelo lote que vence primeiro, cria o lote do acabado e calcula o custo real
+    await remoteFinishProduction(orderId, { goodQty: input.goodQty, lotCode: input.lotCode.trim(), expiresAt: input.expiry, consumptions: input.consumptions })
+    return { orderId, previous: op, movementIds: [], lotId: null, remote: true }
+  }
   const recipe = recipesStore.get().find((r) => r.id === op.recipeId)!
   const items = itemsStore.get()
   const { lots, movements } = stockStore.get()
@@ -132,7 +149,8 @@ export function completeOrder(
   return { orderId, previous: op, movementIds: created.map((m) => m.id), lotId: lot?.id ?? null }
 }
 
-export function undoCompletion(c: Completion, previousItemCost: number) {
+export async function undoCompletion(c: Completion, previousItemCost: number) {
+  if (c.remote) return remoteUndoProduction(c.orderId)
   stockStore.set((s) => ({ lots: s.lots.filter((l) => l.id !== c.lotId), movements: s.movements.filter((m) => !c.movementIds.includes(m.id)) }))
   itemsStore.set((all) => all.map((i) => (i.id === c.previous.productId ? { ...i, costCents: previousItemCost } : i)))
   productionStore.set((all) => all.map((p) => (p.id === c.orderId ? c.previous : p)))

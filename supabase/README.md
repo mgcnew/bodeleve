@@ -13,3 +13,4 @@ O banco da Bodeleve é o projeto Supabase `afqcwqikkolyoowkozak` (organização 
 - **Estoque de teste**: o teste de contagem deixou 5 un de Queijo coalho (lote `INV-261116`) no banco. Para desfazer, use `stock_count_undo` com o id da contagem em `inventory_counts`.
 - **Compra de teste**: PC-0001 (Charqueada Norte, 10 kg de carne de sol, R$ 360,00), criada e deixada em aberto; o recebimento de teste foi desfeito.
 - **Lote de teste**: o recebimento desfeito do PC-0001 deixou o lote `CS-1116` (saldo 0) na carne de sol; o banco não aceita repetir código de lote no mesmo produto, e a tela agora sugere `CS-1116-2`, `-3`...
+- **`seed_dev_producao.sql`**: ficha de teste do doce de leite (nata e rapadura) e 20 un de cada insumo em lote `TESTE-PROD-1`. **Aplicado em 2026-11-17**; reaplicável sem duplicar. A produção de teste (OP-0001) foi criada, concluída, corrigida e excluída; o banco ficou sem ordens.

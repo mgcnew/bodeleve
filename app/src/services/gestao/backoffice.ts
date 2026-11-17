@@ -16,7 +16,7 @@ export const purchasesStore = createStore<Purchase[]>(remote ? 'bodeleve.gestao.
 export const entriesStore = createStore<FinancialEntry[]>(remote ? 'bodeleve.gestao.financeiro.remoto' : 'bodeleve.gestao.financeiro', remote ? () => [] : seedEntries)
 export const accountsStore = createStore<Account[]>(remote ? 'bodeleve.gestao.contas.remoto' : 'bodeleve.gestao.contas', remote ? () => [] : seedAccounts)
 export const ledgerStore = createStore<LedgerTx[]>(remote ? 'bodeleve.gestao.lancamentos.remoto' : 'bodeleve.gestao.lancamentos', remote ? () => [] : seedLedger)
-// produção ainda não está ligada ao banco: com o Supabase começa vazia (as fichas de exemplo citam insumos que o banco não tem)
+// fichas e ordens de produção: com o Supabase são cache do banco; sem ele, dados de exemplo
 export const recipesStore = createStore<Recipe[]>(remote ? 'bodeleve.gestao.fichas.remoto' : 'bodeleve.gestao.fichas', remote ? () => [] : seedRecipes)
 export const productionStore = createStore<ProductionOrder[]>(remote ? 'bodeleve.gestao.producao.remoto' : 'bodeleve.gestao.producao', remote ? () => [] : seedProduction)
 

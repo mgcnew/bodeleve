@@ -71,7 +71,8 @@ O app usa o projeto Supabase **já existente** (`afqcwqikkolyoowkozak`), que tem
 | Gestão: estoque (saldos, lotes, movimentos, ajuste/perda, contagem e desfazer) | **Ligado e testado** (`stock_adjust`, `stock_count_apply`, `stock_count_undo`, `stock_reverse`; saldo reservado pelos pedidos reais) |
 | Gestão: compras e fornecedores (criar pedido, receber, encerrar, desfazer) | **Ligado e testado** (`create_purchase_order`, `receive_purchase`, `undo_receipt`): pedido PC-0001, recebimento com lote e validade, conta a pagar criada e desfeita; falta testar o encerramento por falta (`close_purchase_short`) |
 | Gestão: financeiro (contas, saldos, lançamentos, pagar e desfazer) | **Ligado no código, só leitura testada** (`pay_entry`, `undo_payment`, visão `account_balances`): as telas leem o banco (contas zeradas, sem lançamentos). Pagar e desfazer **não foram testados**, porque o banco não tem saldo nem contas a pagar. Receber contas a receber não tem função no banco (a tela avisa) |
-| Gestão: entregas (atribuir), produção, produtos (edição), clientes | Ainda nos dados de exemplo. Produção começa vazia com o banco ligado |
+| Gestão: produção (fichas, criar ordem, iniciar, concluir, corrigir apontamento, excluir) | **Ligado e testado** (`create_production_order`, `start_production`, `finish_production`, `undo_finish_production`, `delete_production_order`): ordem OP-0001 com reserva dos insumos, conclusão com lote, consumo pelo lote que vence primeiro e custo real; corrigir devolveu os saldos e excluir liberou as reservas. A tela não edita ficha (`save_recipe` existe no banco, sem tela); a ficha de teste vem de `supabase/seed_dev_producao.sql` |
+| Gestão: entregas (atribuir), produtos (edição), clientes | Ainda nos dados de exemplo |
 | PDV e Entregas (app do entregador) | Ainda nos dados de exemplo (`pos_*`, `courier_*` existem no banco) |
 
 O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de desenvolvimento.
@@ -81,3 +82,10 @@ O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de 
 1. Ligar o login da equipe (Supabase Auth) e trocar cada `*Store` da gestão, do PDV e das entregas pelas funções do banco, uma área por vez.
 2. Ligar Realtime em pedidos, status do pedido e entregas livres.
 3. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.
+
+## Depende de você (resolvemos no final)
+
+Itens que o código não resolve sozinho. Esta lista cresce a cada etapa.
+
+- **Insumos e fichas reais da casa**: o banco só tem a ficha de teste do doce de leite (nata e rapadura como insumos fictícios). Faltam cadastrar leite, coalho, sal, embalagens etc. como itens e preencher as fichas reais (rendimento, validade, consumo, gás e energia). Hoje não há tela para criar ou editar ficha; o banco já tem `save_recipe`, falta a tela (confirmar com você se quer essa tela agora).
+- **Dados de teste no banco de desenvolvimento**: lotes `TESTE-PROD-1` (20 un de nata e de rapadura) e a ficha de teste do doce de leite, criados por `seed_dev_producao.sql`. Apagar antes de usar o banco de verdade.

@@ -143,3 +143,16 @@ export function fefoOut(input: { itemId: string; qty: number; type: Movement['ty
   if (left > 0) out.push({ id: newId('mv'), itemId: input.itemId, lotId: null, type: input.type, qty: -left, at: input.at, note: input.note, by: input.by, ref: input.ref })
   return out
 }
+
+/** Sugestão de código de lote: iniciais do item + mês e dia (ex.: CS-1116); se já existe, acrescenta -2, -3... */
+export function suggestLotCode(name: string, itemId: string) {
+  const words = name.split(/\s+/).filter((w) => /^\p{L}{3,}$/u.test(w))
+  const initials = (words.length > 1 ? words[0][0] + words[1][0] : (words[0] ?? 'LT').slice(0, 2)).toUpperCase()
+  const d = new Date()
+  const base = `${initials}-${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
+  // o banco não aceita o mesmo código duas vezes no mesmo produto
+  const used = new Set(stockStore.get().lots.filter((l) => l.itemId === itemId).map((l) => l.code))
+  let code = base
+  for (let n = 2; used.has(code); n++) code = `${base}-${n}`
+  return code
+}

@@ -11,6 +11,8 @@ import { formatQty } from '@/domain/backoffice'
 import { daysUntil, fullDate, hourMinute } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { itemsStore, productionStore, recipesStore } from '@/services/gestao/backoffice'
+import { backofficeErrorMessage } from '@/services/gestao/backofficeRemote'
+import { suggestLotCode } from '@/services/gestao/stock'
 import { completeOrder, defaultExpiry, startOrder, undoCompletion, type Completion } from '@/services/gestao/production'
 import o from '@/styles/ops.module.css'
 import { Bar, StepBars, SumRow } from '../../../shared/OpsBits'
@@ -30,6 +32,8 @@ export function Ordem() {
   const [good, setGood] = useState<number | null>(null)
   const [lot, setLot] = useState('')
   const [expiry, setExpiry] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
   const [done, setDone] = useState<{ completion: Completion; previousCost: number } | null>(null)
 
   if (!op || !recipe || !product) {
@@ -43,7 +47,7 @@ export function Ordem() {
 
   const qtyUsed = (itemId: string) => used[itemId] ?? planned[itemId]
   const goodQty = good ?? Math.max(0, op.plannedQty - 1)
-  const lotCode = lot || `${product.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()}-${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
+  const lotCode = lot || suggestLotCode(product.name, product.id)
   const expiryValue = expiry || defaultExpiry(recipe)
   const consumedCost = recipe.lines.reduce((n, l) => n + qtyUsed(l.itemId) * (items.find((i) => i.id === l.itemId)?.costCents ?? 0), 0)
   const realUnit = goodQty > 0 ? Math.round((consumedCost + recipe.indirectCostCents * op.batches) / goodQty) : null
@@ -52,16 +56,29 @@ export function Ordem() {
   )
   const when = `${op.batches} ${op.batches === 1 ? recipe.batchLabel : `${recipe.batchLabel}s`} · previsto ${op.plannedQty} un · ${op.destination.kind === 'order' ? `para o pedido #${op.destination.orderNumber}` : 'para estoque'}`
 
-  const finish = () => {
-    const previousCost = product.costCents
-    const completion = completeOrder(op.id, {
-      consumptions: recipe.lines.map((l) => ({ itemId: l.itemId, qty: qtyUsed(l.itemId) })),
-      goodQty,
-      lotCode,
-      expiry: expiryValue ? new Date(`${expiryValue}T12:00:00`).toISOString() : null,
-    })
-    setDone({ completion, previousCost })
+  const attempt = async (fn: () => Promise<void>) => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      await fn()
+    } catch (e) {
+      setProblem(backofficeErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
   }
+
+  const finish = () =>
+    attempt(async () => {
+      const previousCost = product.costCents
+      const completion = await completeOrder(op.id, {
+        consumptions: recipe.lines.map((l) => ({ itemId: l.itemId, qty: qtyUsed(l.itemId) })),
+        goodQty,
+        lotCode,
+        expiry: expiryValue ? new Date(`${expiryValue}T12:00:00`).toISOString() : null,
+      })
+      setDone({ completion, previousCost })
+    })
 
   // concluída agora ou aberta depois: o resumo vem da própria ordem
   if (op.status === 'done') {
@@ -114,6 +131,7 @@ export function Ordem() {
           </div>
         </main>
         <div className={o.footer}>
+          {problem && <Banner tone="error">{problem}</Banner>}
           <ButtonLink to={`/gestao/estoque/${product.id}`} size="l" block>
             Ver estoque de {product.name.split(' ')[0].toLowerCase()} {product.name.split(' ')[1]?.toLowerCase()}
           </ButtonLink>
@@ -121,10 +139,13 @@ export function Ordem() {
             <Button
               variant="secondary"
               block
-              onClick={() => {
-                undoCompletion(done.completion, done.previousCost)
-                setDone(null)
-              }}
+              disabled={busy}
+              onClick={() =>
+                attempt(async () => {
+                  await undoCompletion(done.completion, done.previousCost)
+                  setDone(null)
+                })
+              }
             >
               Corrigir apontamento
             </Button>
@@ -147,7 +168,8 @@ export function Ordem() {
           <Banner tone="info">Ordem planejada. Os insumos estão reservados; inicie quando a produção começar.</Banner>
         </main>
         <div className={o.footer}>
-          <Button size="l" block onClick={() => startOrder(op.id)}>
+          {problem && <Banner tone="error">{problem}</Banner>}
+          <Button size="l" block disabled={busy} onClick={() => attempt(() => startOrder(op.id))}>
             Iniciar produção
           </Button>
         </div>
@@ -217,7 +239,8 @@ export function Ordem() {
         </div>
       </main>
       <div className={o.footer}>
-        <Button size="l" block onClick={finish}>
+        {problem && <Banner tone="error">{problem}</Banner>}
+        <Button size="l" block disabled={busy} onClick={finish}>
           Concluir produção
         </Button>
       </div>

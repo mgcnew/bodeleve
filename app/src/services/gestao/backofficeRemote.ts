@@ -2,10 +2,10 @@
 // com o Supabase ligado eles são caches alimentados aqui, e as ações chamam as funções do banco
 // (`stock_adjust`, `stock_count_apply`, `create_purchase_order`, `receive_purchase`...), que fazem a
 // baixa pelo lote, a conta a pagar e a trilha de auditoria.
-import type { Item, ItemType, Lot, Movement, Purchase, StockUnit, Supplier } from '@/domain/backoffice'
+import type { Item, ItemType, Lot, Movement, ProductionOrder, Purchase, Recipe, StockUnit, Supplier } from '@/domain/backoffice'
 import type { ProductOrigin } from '@/domain/catalog'
 import { supabase } from '@/lib/supabase'
-import { itemsStore, purchasesStore, stockStore, suppliersStore } from './backoffice'
+import { itemsStore, productionStore, purchasesStore, recipesStore, stockStore, suppliersStore } from './backoffice'
 
 const one = <T,>(v: T | T[] | null | undefined) => (Array.isArray(v) ? v[0] : v) ?? null
 const units: StockUnit[] = ['un', 'kg', 'L', 'ml']
@@ -67,18 +67,49 @@ const paymentCodes: Record<string, string> = {
   cash_on_delivery: 'Dinheiro na entrega',
 }
 
+type RecipeRow = {
+  id: string
+  product_id: string
+  yield_per_batch: number
+  batch_label: string | null
+  shelf_life_days: number | null
+  overhead_cents: number | null
+  method: string | null
+  recipe_items: { product_id: string; qty_per_batch: number }[]
+}
+
+type ProductionRow = {
+  id: string
+  number: string
+  recipe_id: string
+  product_id: string
+  batches: number
+  planned_qty: number
+  status: ProductionOrder['status']
+  starts_at: string
+  ends_at: string | null
+  done_at: string | null
+  good_qty: number | null
+  lot_id: string | null
+  cost_per_unit_cents: number | null
+  destination_order_id: string | null
+  production_consumptions: { product_id: string; qty: number }[]
+}
+
 let loading: Promise<void> | null = null
 
 export async function refreshBackoffice() {
   if (!supabase) return
   if (loading) return loading
   loading = (async () => {
-    const [prods, lots, moves, sups, pos] = await Promise.all([
+    const [prods, lots, moves, sups, pos, recs, ops] = await Promise.all([
       supabase!.from('products').select('id, slug, name, unit, item_type, origin, min_stock, tracks_expiry, supplier_id, last_cost_cents, price_cents, sold_by_weight, is_published, is_favorite_pos, description, details, categories(slug)').eq('is_active', true).order('name'),
       supabase!.from('product_lots').select('id, product_id, code, expires_at, unit_cost_cents, received_at'),
       supabase!.from('stock_movements').select('id, product_id, lot_id, type, qty, at, ref, description, created_by_name').order('at', { ascending: false }).limit(1000),
       supabase!.from('suppliers').select('id, name, supplies, phone, email, tax_id, lead_time_days, payment_terms, created_at, contact_name').eq('active', true).order('name'),
       supabase!.from('purchase_orders').select('id, number, supplier_id, status, payment_term, expected_at, sent_at, received_at, purchase_order_items(id, product_id, qty, unit_cost_cents, received_qty)').order('created_at', { ascending: false }).limit(200),
+      supabase!.from('recipes').select('id, product_id, yield_per_batch, batch_label, shelf_life_days, overhead_cents, method, recipe_items(product_id, qty_per_batch)').order('created_at'),
+      supabase!.from('production_orders').select('id, number, recipe_id, product_id, batches, planned_qty, status, starts_at, ends_at, done_at, good_qty, lot_id, cost_per_unit_cents, destination_order_id, production_consumptions(product_id, qty)').order('created_at', { ascending: false }).limit(200),
     ])
     if (prods.error || !prods.data) return
     const productRows = prods.data as unknown as ProductRow[]
@@ -139,7 +170,50 @@ export async function refreshBackoffice() {
       })),
     }))
 
+    const recipes: Recipe[] = ((recs.data ?? []) as unknown as RecipeRow[]).map((r) => ({
+      id: r.id,
+      productId: slugOf.get(r.product_id) ?? '',
+      yieldQty: Number(r.yield_per_batch),
+      batchLabel: r.batch_label || 'fornada',
+      shelfLifeDays: Number(r.shelf_life_days ?? 0),
+      lines: r.recipe_items.map((i) => ({ itemId: slugOf.get(i.product_id) ?? '', qty: Number(i.qty_per_batch) })),
+      indirectCostCents: Number(r.overhead_cents ?? 0),
+      prepNotes: r.method || '[MODO DE PREPARO DA CASA]',
+    }))
+    const lotCodeOf = new Map(lotList.map((l) => [l.id, l.code]))
+    // `destination_order_id` não tem chave estrangeira no banco; os números vêm de uma busca à parte
+    const productionRows = (ops.data ?? []) as unknown as ProductionRow[]
+    const destinationIds = [...new Set(productionRows.map((p) => p.destination_order_id).filter((x): x is string => !!x))]
+    const orderNumbers = new Map<string, string>()
+    if (destinationIds.length) {
+      const { data } = await supabase!.from('orders').select('id, number').in('id', destinationIds)
+      for (const r of (data ?? []) as { id: string; number: string }[]) orderNumbers.set(r.id, r.number)
+    }
+    const production: ProductionOrder[] = productionRows.map((p) => {
+      const consumed = new Map<string, number>()
+      for (const c of p.production_consumptions) consumed.set(c.product_id, (consumed.get(c.product_id) ?? 0) + Number(c.qty))
+      const done = p.status === 'done'
+      return {
+        id: p.id,
+        number: p.number,
+        recipeId: p.recipe_id,
+        productId: slugOf.get(p.product_id) ?? '',
+        batches: p.batches,
+        plannedQty: Number(p.planned_qty),
+        destination: p.destination_order_id ? { kind: 'order', orderNumber: orderNumbers.get(p.destination_order_id) ?? '' } : { kind: 'stock' },
+        status: p.status,
+        startAt: p.starts_at,
+        endAt: p.done_at ?? p.ends_at ?? new Date(new Date(p.starts_at).getTime() + 9 * 3_600_000).toISOString(),
+        goodQty: done ? Number(p.good_qty ?? 0) : null,
+        lotCode: done && p.lot_id ? lotCodeOf.get(p.lot_id) ?? null : null,
+        consumptions: done ? [...consumed].map(([id, qty]) => ({ itemId: slugOf.get(id) ?? '', qty })) : null,
+        realUnitCostCents: done ? Number(p.cost_per_unit_cents ?? 0) : null,
+      }
+    })
+
     itemsStore.set(items)
+    recipesStore.set(recipes)
+    productionStore.set(production)
     stockStore.set({ lots: lotList, movements })
     suppliersStore.set(suppliers)
     purchasesStore.set(purchases)
@@ -232,15 +306,43 @@ export async function remoteReceive(purchaseId: string, lines: { lineId: string;
 export const remoteUndoReceipt = (receiptId: string) => rpc<void>('undo_receipt', { p_receipt: receiptId })
 export const remoteClosePurchase = (purchaseId: string) => rpc<void>('close_purchase_short', { p_po: purchaseId })
 
+// ---------- ações de produção ----------
+export async function remoteCreateProduction(input: { recipeId: string; batches: number; destinationOrderId: string | null; startAt: string }) {
+  return rpc<{ id: string; number: string }>('create_production_order', {
+    p_establishment: await getEstablishmentId(),
+    p_recipe: input.recipeId,
+    p_batches: input.batches,
+    p_destination: input.destinationOrderId,
+    p_starts_at: input.startAt,
+    p_start_now: false,
+  })
+}
+
+export const remoteStartProduction = (orderId: string) => rpc<void>('start_production', { p_order: orderId })
+export const remoteDeleteProduction = (orderId: string) => rpc<void>('delete_production_order', { p_order: orderId })
+export const remoteUndoProduction = (orderId: string) => rpc<void>('undo_finish_production', { p_order: orderId })
+
+export const remoteFinishProduction = (orderId: string, input: { goodQty: number; lotCode: string; expiresAt: string | null; consumptions: { itemId: string; qty: number }[] }) =>
+  rpc<{ lot_id: string; lot_code: string; cost_per_unit_cents: number }>('finish_production', {
+    p_order: orderId,
+    p_good_qty: input.goodQty,
+    p_lot_code: input.lotCode,
+    p_expires_at: input.expiresAt,
+    p_consumption: input.consumptions.map((c) => ({ product_id: dbIdOf(c.itemId), qty: c.qty })),
+  })
+
 /** Mensagem para o que o banco recusa (`raise exception`) */
 export function backofficeErrorMessage(e: unknown) {
   const msg = String((e as { message?: string })?.message ?? '')
+  if (msg.includes('insufficient_input')) return `Não há ${msg.split(':')[1] ?? 'insumo'} suficiente em estoque para concluir. Receba a compra ou ajuste o consumo.`
   if (msg.includes('insufficient')) return 'O lote não tem saldo suficiente para essa saída.'
   if (msg.includes('no_lot')) return 'Este item não tem lote com saldo. Receba uma compra ou conte o estoque primeiro.'
   if (msg.includes('expiry_required')) return `Informe a validade de ${msg.split(':')[1] ?? 'um item'} para receber.`
   if (msg.includes('over_received')) return 'A quantidade passa do que falta receber neste pedido.'
   if (msg.includes('not_receivable')) return 'Este pedido já foi recebido ou encerrado.'
   if (msg.includes('product_lots_product_id_code_key') || msg.includes('duplicate key')) return 'Já existe um lote com esse código para este item. Troque o código do lote.'
+  if (msg.includes('lot_already_used')) return 'O lote desta produção já foi usado (vendido ou baixado). Não dá para corrigir o apontamento.'
+  if (msg.includes('already_done') || msg.includes('invalid_state')) return 'Esta ordem já mudou de situação. Atualize a tela.'
   if (msg.includes('forbidden')) return 'Seu papel não permite esta ação.'
   if (msg.includes('empty_order')) return 'Escolha a quantidade de pelo menos um item.'
   return 'Não foi possível concluir. Nada foi alterado. Tente de novo.'

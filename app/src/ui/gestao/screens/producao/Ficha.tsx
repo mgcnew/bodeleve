@@ -12,6 +12,8 @@ import { daysFromToday, hourMinute } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { itemsStore, recipesStore } from '@/services/gestao/backoffice'
 import { staffOrdersStore } from '@/services/gestao/orders'
+import { supabase } from '@/lib/supabase'
+import { backofficeErrorMessage } from '@/services/gestao/backofficeRemote'
 import { batchCostCents, createOrder, margin, needsFor, removeOrder, unitCostCents } from '@/services/gestao/production'
 import { useStockContext } from '@/services/gestao/useBackoffice'
 import o from '@/styles/ops.module.css'
@@ -30,6 +32,8 @@ export function Ficha() {
   const [dest, setDest] = useState<'stock' | 'order'>('stock')
   const [orderNumber, setOrderNumber] = useState('')
   const [start, setStart] = useState(`${daysFromToday(1).slice(0, 10)}T08:00`)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
   const [created, setCreated] = useState<{ id: string; number: string; summary: string } | null>(null)
 
   const needs = useMemo(() => (recipe ? needsFor(recipe, batches, items, ctx) : []), [recipe, batches, items, ctx])
@@ -68,9 +72,13 @@ export function Ficha() {
           <Button
             variant="secondary"
             block
-            onClick={() => {
-              removeOrder(created.id)
-              setCreated(null)
+            onClick={async () => {
+              try {
+                await removeOrder(created.id)
+                setCreated(null)
+              } catch (e) {
+                setProblem(backofficeErrorMessage(e))
+              }
             }}
           >
             Desfazer
@@ -80,14 +88,24 @@ export function Ficha() {
     )
   }
 
-  const create = () => {
+  const create = async () => {
     const startAt = new Date(start).toISOString()
-    const op = createOrder({
-      recipe,
-      batches,
-      destination: dest === 'order' && orderNumber ? { kind: 'order', orderNumber } : { kind: 'stock' },
-      startAt,
-    })
+    setBusy(true)
+    setProblem(undefined)
+    let op
+    try {
+      op = await createOrder({
+        recipe,
+        batches,
+        destination: dest === 'order' && orderNumber ? { kind: 'order', orderNumber } : { kind: 'stock' },
+        startAt,
+      })
+    } catch (e) {
+      setProblem(backofficeErrorMessage(e))
+      return
+    } finally {
+      setBusy(false)
+    }
     setCreated({
       id: op.id,
       number: op.number,
@@ -194,7 +212,7 @@ export function Ficha() {
               label="Pedido"
               value={orderNumber}
               onChange={(e) => setOrderNumber(e.target.value)}
-              options={[{ value: '', label: 'Escolha o pedido' }, ...eligible.map((x) => ({ value: x.number, label: `#${x.number} · ${x.customer.name}` })), { value: '1045', label: '#1045 · pedido a chegar' }]}
+              options={[{ value: '', label: 'Escolha o pedido' }, ...eligible.map((x) => ({ value: x.number, label: `#${x.number} · ${x.customer.name}` })), ...(supabase ? [] : [{ value: '1045', label: '#1045 · pedido a chegar' }])]}
             />
           )}
           <TextField label="Começar em" type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} />
@@ -214,7 +232,8 @@ export function Ficha() {
         </div>
       </main>
       <div className={o.footer}>
-        <Button size="l" block onClick={create} disabled={dest === 'order' && !orderNumber}>
+        {problem && <Banner tone="error">{problem}</Banner>}
+        <Button size="l" block onClick={create} disabled={busy || (dest === 'order' && !orderNumber)}>
           Criar ordem de produção
         </Button>
       </div>
