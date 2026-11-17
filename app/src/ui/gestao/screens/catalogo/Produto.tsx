@@ -1,29 +1,62 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Box } from '@/components/Card'
 import { Button, ButtonLink } from '@/components/Button'
 import { Banner, EmptyState } from '@/components/Feedback'
 import { RadioGroup, SelectField, TextAreaField, TextField, Toggle } from '@/components/Field'
-import type { Item, ItemType } from '@/domain/backoffice'
+import type { Item, ItemType, StockUnit } from '@/domain/backoffice'
 import type { ProductOrigin } from '@/domain/catalog'
 import { formatCents, parseCents } from '@/domain/money'
 import { supabase } from '@/lib/supabase'
 import { itemsStore } from '@/services/gestao/backoffice'
 import { categoriesStore } from '@/services/gestao/people'
-import { productErrorMessage, remoteSaveProduct } from '@/services/gestao/peopleRemote'
+import { productErrorMessage, remoteArchiveProduct, remoteCreateProduct, remoteSaveProduct } from '@/services/gestao/peopleRemote'
+import { Sheet } from '@/components/Sheet'
 import { internalCategories } from '@/mocks/catalog'
 import o from '@/styles/ops.module.css'
 import { Bar, SumRow } from '../../../shared/OpsBits'
 import { ProductPhoto } from '@/ui/loja/components/ProductCard'
+
+const slugOf = (name: string) => name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+const unitOptions: { value: StockUnit; label: string }[] = [
+  { value: 'un', label: 'Unidade (un)' },
+  { value: 'kg', label: 'Quilo (kg)' },
+  { value: 'L', label: 'Litro (L)' },
+  { value: 'ml', label: 'Mililitro (ml)' },
+]
+
+const blank = (categoryId: string): Item => ({
+  id: '',
+  name: '',
+  unit: 'un',
+  itemType: 'resale',
+  origin: 'third_party',
+  categoryId,
+  minStock: 0,
+  costCents: 0,
+  priceCents: null,
+  supplierId: null,
+  tracksLots: false,
+  soldByWeight: false,
+  published: false,
+  favoritePos: false,
+})
 
 const brl = (cents: number | null) => (cents === null ? '' : (cents / 100).toFixed(2).replace('.', ','))
 
 // H-G25 — cadastro separa tipo de item e origem; liga/desliga loja, favorito no PDV, peso e lote
 export function Produto() {
   const { id = '' } = useParams()
-  const item = itemsStore.useStore().find((i) => i.id === id)
+  const navigate = useNavigate()
+  const isNew = id === 'novo'
+  const items = itemsStore.useStore()
+  const found = items.find((i) => i.id === id)
   const categories = categoriesStore.useStore()
+  // produto novo parte de um modelo em branco; o existente, do cadastro
+  const item = isNew ? blank(categories[0]?.id ?? '') : found
   const [form, setForm] = useState<Item | null>(item ?? null)
+  const [confirming, setConfirming] = useState(false)
   const [price, setPrice] = useState(brl(item?.priceCents ?? null))
   const [saved, setSaved] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -32,7 +65,7 @@ export function Produto() {
   useEffect(() => {
     setForm(item ?? null)
     setPrice(brl(item?.priceCents ?? null))
-  }, [item?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [item?.id, isNew]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!item || !form) {
     return (
@@ -52,6 +85,9 @@ export function Produto() {
   const margin = priceCents && priceCents > 0 ? Math.round(((priceCents - form.costCents) / priceCents) * 100) : null
 
   const save = async () => {
+    if (!form.name.trim()) return setProblem('Digite o nome do produto.')
+    if (!raw && form.published && !priceCents) return setProblem('Para publicar na loja, informe o preço de venda.')
+    if (!raw && form.soldByWeight && !priceCents) return setProblem('Produto vendido por peso precisa do preço do quilo.')
     const next: Item = {
       ...form,
       priceCents: raw ? null : priceCents,
@@ -62,6 +98,16 @@ export function Produto() {
     setBusy(true)
     setProblem(undefined)
     try {
+      if (isNew) {
+        if (supabase) await remoteCreateProduct(next)
+        else {
+          const base = slugOf(next.name) || 'produto'
+          const slug = items.some((i) => i.id === base) ? `${base}-${items.length + 1}` : base
+          itemsStore.set((all) => [...all, { ...next, id: slug }])
+        }
+        navigate('/gestao/produtos', { replace: true })
+        return
+      }
       if (supabase) await remoteSaveProduct(item, next)
       else itemsStore.set((all) => all.map((i) => (i.id === next.id ? next : i)))
       setSaved(true)
@@ -74,9 +120,9 @@ export function Produto() {
 
   return (
     <div className={o.screen}>
-      <Bar title={item.name} back="/gestao/produtos" />
+      <Bar title={isNew ? 'Novo produto' : item.name} back="/gestao/produtos" />
       <main className={`${o.main} ${o.mainTop} ${o.narrow}`}>
-        <ProductPhoto white label="[FOTO DO PRODUTO]" />
+ {!isNew && <ProductPhoto white label="[FOTO DO PRODUTO]" />}
         <TextField label="Nome" value={form.name} onChange={(e) => set({ name: e.target.value })} />
         <SelectField
           label="Categoria"
@@ -84,6 +130,7 @@ export function Produto() {
           onChange={(e) => set({ categoryId: e.target.value })}
           options={[...categories, ...internalCategories].map((c) => ({ value: c.id, label: c.name }))}
         />
+        {isNew && <SelectField label="Unidade de estoque" value={form.unit} onChange={(e) => set({ unit: e.target.value as StockUnit })} options={unitOptions} />}
         <RadioGroup<ItemType>
           legend="Tipo de item"
           name="tipo"
@@ -127,10 +174,43 @@ export function Produto() {
         {!raw && <TextAreaField label="Descrição na loja" rows={3} value={form.description ?? '[DESCRIÇÃO DO PRODUTO]'} onChange={(e) => set({ description: e.target.value })} />}
         {saved && <Banner tone="success">Produto salvo.</Banner>}
         {problem && <Banner tone="error">{problem}</Banner>}
+        {!isNew && (
+          <Button variant="quiet" style={{ alignSelf: 'flex-start', padding: 0 }} onClick={() => setConfirming(true)}>
+            Arquivar produto
+          </Button>
+        )}
       </main>
+      <Sheet open={confirming} onClose={() => setConfirming(false)} title="Arquivar este produto?" variant="modal">
+        <p className={o.muted}>
+          {item.name} sai da loja, do balcão e do estoque. O histórico de vendas e compras continua guardado.
+        </p>
+        <Button
+          variant="danger"
+          block
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true)
+            try {
+              if (supabase) await remoteArchiveProduct(item)
+              else itemsStore.set((all) => all.filter((i) => i.id !== item.id))
+              navigate('/gestao/produtos', { replace: true })
+            } catch (e) {
+              setConfirming(false)
+              setProblem(productErrorMessage(e))
+            } finally {
+              setBusy(false)
+            }
+          }}
+        >
+          Arquivar
+        </Button>
+        <Button variant="secondary" block onClick={() => setConfirming(false)}>
+          Voltar
+        </Button>
+      </Sheet>
       <div className={o.footer}>
         <Button size="l" block onClick={() => void save()} disabled={busy}>
-          Salvar
+          {isNew ? 'Cadastrar produto' : 'Salvar'}
         </Button>
       </div>
     </div>

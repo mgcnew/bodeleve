@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
 import { Box } from '@/components/Card'
@@ -9,6 +9,7 @@ import { setAvailable, signOutCourier } from '@/services/entregas'
 import { courierErrorMessage, remoteSavePix } from '@/services/entregasRemote'
 import { supabase } from '@/lib/supabase'
 import { PageHeader, SumRow } from '../../shared/OpsBits'
+import { PasswordForm } from '../../shared/PasswordForm'
 import { useCourier } from '../useCourier'
 import o from '@/styles/ops.module.css'
 
@@ -16,6 +17,10 @@ export function Perfil() {
   const { account, session } = useCourier()
   const navigate = useNavigate()
   const [problem, setProblem] = useState<string>()
+  const [email, setEmail] = useState<string>()
+  useEffect(() => {
+    void supabase?.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? undefined))
+  }, [])
   if (!account || !session) return null
   const partner = account.kind === 'partner'
 
@@ -59,15 +64,22 @@ export function Perfil() {
           />
         )}
         {problem && <Banner tone="error">{problem}</Banner>}
+        {email && (
+          <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <h2 className={o.h2}>Senha</h2>
+            <PasswordForm email={email} />
+          </section>
+        )}
+        <p className={o.muted}>Para mudar nome, celular ou veículo, peça à casa.</p>
         <Button
-          variant="quiet"
-          style={{ alignSelf: 'flex-start', padding: 0 }}
+          variant="secondary"
+          block
           onClick={() => {
             signOutCourier()
             navigate('/entregas/entrar')
           }}
         >
-          Sair
+          Sair da conta
         </Button>
       </main>
     </div>

@@ -6,10 +6,10 @@ import type { Category } from '@/domain/catalog'
 import { supabase } from '@/lib/supabase'
 import { getEstablishmentId, refreshBackoffice } from './backofficeRemote'
 import type { Role } from '@/permissions/roles'
-import { categoriesStore, couriersStore, customersStore, establishmentStore, teamStore } from './people'
+import { categoriesStore, courierRegistryStore, couriersStore, customersStore, establishmentStore, teamStore } from './people'
 import { refreshStaffOrders } from './ordersRemote'
 
-type CourierRow = { id: string; name: string; kind: 'own' | 'partner'; available: boolean }
+type CourierRow = { id: string; name: string; kind: 'own' | 'partner'; available: boolean; phone: string; vehicle: string; active: boolean }
 type ActiveDelivery = { courier_id: string | null; status: string; orders: { number: string } | { number: string }[] | null }
 
 const one = <T,>(v: T | T[] | null | undefined) => (Array.isArray(v) ? v[0] : v) ?? null
@@ -28,12 +28,14 @@ export async function refreshCouriers(): Promise<void> {
   }
   loading = (async () => {
     const [cs, ds] = await Promise.all([
-      supabase!.from('couriers').select('id, name, kind, available').order('name'),
+      supabase!.from('couriers').select('id, name, kind, available, phone, vehicle, active').order('name'),
       supabase!.from('deliveries').select('courier_id, status, orders(number)').in('status', ['reserved', 'assigned', 'accepted', 'en_route']),
     ])
     if (cs.error || !cs.data) return
     const active = ((ds.data ?? []) as unknown as ActiveDelivery[]).filter((d) => d.courier_id)
-    const rows = cs.data as CourierRow[]
+    const all = cs.data as CourierRow[]
+    courierRegistryStore.set(all.map((c) => ({ id: c.id, name: c.name, kind: c.kind, phone: c.phone, vehicle: c.vehicle, active: c.active })))
+    const rows = all.filter((c) => c.active)
 
     const own: Courier[] = rows
       .filter((c) => c.kind === 'own')
@@ -145,12 +147,128 @@ export async function remoteSaveProduct(before: Item, next: Item) {
   await refreshBackoffice()
 }
 
+/** Cria o produto. O `slug` (endereço na loja) nasce do nome e ganha -2, -3 se já existir. */
+export async function remoteCreateProduct(next: Item): Promise<string> {
+  const { data: cat } = next.categoryId ? await supabase!.from('categories').select('id').eq('slug', next.categoryId).maybeSingle() : { data: null }
+  const raw = next.itemType === 'raw_material'
+  const establishment = await getEstablishmentId()
+  const base = slugify(next.name) || `produto-${Date.now()}`
+  for (let n = 1; n <= 20; n++) {
+    const slug = n === 1 ? base : `${base}-${n}`
+    const { error } = await supabase!.from('products').insert({
+      establishment_id: establishment,
+      slug,
+      name: next.name.trim(),
+      unit: next.unit,
+      item_type: next.itemType,
+      origin: raw ? null : originCodes[next.origin ?? 'third_party'],
+      category_id: cat?.id ?? null,
+      min_stock: next.minStock,
+      tracks_expiry: next.tracksLots,
+      price_cents: raw ? null : next.priceCents,
+      weight_price_cents: !raw && next.soldByWeight ? next.priceCents : null,
+      is_published: raw ? false : next.published,
+      is_favorite_pos: raw ? false : next.favoritePos,
+      sold_by_weight: raw ? false : next.soldByWeight,
+      description: next.description && next.description !== DESCRIPTION_PLACEHOLDER ? next.description : '',
+    })
+    if (!error) {
+      await refreshBackoffice()
+      return slug
+    }
+    if (error.code !== '23505') throw error
+  }
+  throw new Error('duplicate')
+}
+
+/** Tira o produto das telas (loja, balcão, estoque) sem apagar o histórico: marca como inativo */
+export async function remoteArchiveProduct(item: Item) {
+  const { data, error } = await supabase!.from('products').update({ is_active: false, is_published: false, is_favorite_pos: false }).eq('id', item.dbId!).select('id')
+  if (error) throw error
+  if (!data?.length) throw Object.assign(new Error('forbidden'), { code: '42501' })
+  await refreshBackoffice()
+}
+
 export function productErrorMessage(e: unknown) {
   const msg = String((e as { message?: string; code?: string })?.message ?? '')
   const code = String((e as { code?: string })?.code ?? '')
   if (code === '42501' || msg.includes('row-level security')) return 'Seu papel não permite editar produtos.'
   if (msg.includes('price') || code === '23514') return 'Confira o preço e os campos do produto.'
   if (msg.includes('duplicate') || code === '23505') return 'Já existe um registro com esse nome.'
+  return 'Não foi possível salvar. Nada foi alterado. Tente de novo.'
+}
+
+// ---------- fornecedores ----------
+export type SupplierInput = { name: string; categories: string; contactName: string; phone: string; email: string; document: string; leadDays: number | null; paymentTerms: string }
+
+const clean = (v: string) => v.trim() || null
+const PLACEHOLDER = /^\[.*\]$/
+
+export async function remoteSaveSupplier(input: SupplierInput, id?: string) {
+  const row = {
+    name: input.name.trim(),
+    supplies: input.categories.trim(),
+    contact_name: input.contactName.trim(),
+    phone: clean(input.phone),
+    email: PLACEHOLDER.test(input.email.trim()) ? null : clean(input.email),
+    tax_id: PLACEHOLDER.test(input.document.trim()) ? null : clean(input.document),
+    lead_time_days: input.leadDays,
+    payment_terms: clean(input.paymentTerms),
+  }
+  if (id) {
+    const { data, error } = await supabase!.from('suppliers').update(row).eq('id', id).select('id')
+    if (error) throw error
+    if (!data?.length) throw Object.assign(new Error('forbidden'), { code: '42501' })
+  } else {
+    const { error } = await supabase!.from('suppliers').insert({ ...row, establishment_id: await getEstablishmentId() })
+    if (error) throw error
+  }
+  await refreshBackoffice()
+}
+
+/** Fornecedor arquivado some das listas, mas os pedidos antigos continuam com o nome dele */
+export async function remoteArchiveSupplier(id: string) {
+  const { data, error } = await supabase!.from('suppliers').update({ active: false }).eq('id', id).select('id')
+  if (error) throw error
+  if (!data?.length) throw Object.assign(new Error('forbidden'), { code: '42501' })
+  await refreshBackoffice()
+}
+
+export function supplierErrorMessage(e: unknown) {
+  const code = String((e as { code?: string })?.code ?? '')
+  const msg = String((e as { message?: string })?.message ?? '')
+  if (code === '42501' || msg.includes('row-level security') || msg === 'forbidden') return 'Seu papel não permite cadastrar fornecedores.'
+  return 'Não foi possível salvar. Nada foi alterado. Tente de novo.'
+}
+
+// ---------- cadastro de entregadores ----------
+export type CourierInput = { name: string; kind: 'own' | 'partner'; phone: string; vehicle: string }
+
+export async function remoteSaveCourier(input: CourierInput, id?: string) {
+  const row = { name: input.name.trim(), kind: input.kind, phone: input.phone.trim(), vehicle: input.vehicle.trim() }
+  if (id) {
+    const { data, error } = await supabase!.from('couriers').update(row).eq('id', id).select('id')
+    if (error) throw error
+    if (!data?.length) throw Object.assign(new Error('forbidden'), { code: '42501' })
+  } else {
+    const { error } = await supabase!.from('couriers').insert({ ...row, establishment_id: await getEstablishmentId() })
+    if (error) throw error
+  }
+  await refreshCouriers()
+}
+
+/** Entregador inativo perde o acesso ao app e some da atribuição; o histórico de entregas fica */
+export async function remoteSetCourierActive(id: string, active: boolean) {
+  const { data, error } = await supabase!.from('couriers').update({ active, available: active ? undefined : false }).eq('id', id).select('id')
+  if (error) throw error
+  if (!data?.length) throw Object.assign(new Error('forbidden'), { code: '42501' })
+  await afterChange()
+}
+
+export function courierRegistryErrorMessage(e: unknown) {
+  const code = String((e as { code?: string })?.code ?? '')
+  const msg = String((e as { message?: string })?.message ?? '')
+  if (code === '42501' || msg.includes('row-level security') || msg === 'forbidden') return 'Seu papel não permite cadastrar entregadores.'
   return 'Não foi possível salvar. Nada foi alterado. Tente de novo.'
 }
 

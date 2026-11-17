@@ -183,6 +183,9 @@ export type Customer = {
   notes: string
 }
 
+/** Cadastro do entregador (nome, contato e veículo); `Courier` abaixo é o estado do dia na tela de atribuição */
+export type CourierRecord = { id: string; name: string; kind: 'own' | 'partner'; phone: string; vehicle: string; active: boolean }
+
 export type Courier = { id: string; name: string; kind: 'own' | 'partner'; status: 'available' | 'en_route' | 'online' | 'offline'; note: string }
 
 export type TeamMember = { id: string; name: string; role: import('@/permissions/roles').Role; detail: string; pending?: boolean }

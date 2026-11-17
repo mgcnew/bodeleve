@@ -1,6 +1,8 @@
 import type { RouteObject } from 'react-router-dom'
 import { GestaoShell, type GestaoHandle } from './GestaoShell'
 import { Entrar } from './screens/Entrar'
+import { EsqueciSenha } from './screens/EsqueciSenha'
+import { RedefinirSenha } from './screens/RedefinirSenha'
 import { Inicio } from './screens/Inicio'
 import { Mais } from './screens/Mais'
 import { Pedido } from './screens/Pedido'
@@ -10,6 +12,9 @@ import { CompraNova } from './screens/compras/CompraNova'
 import { Compras } from './screens/compras/Compras'
 import { Fornecedor } from './screens/compras/Fornecedor'
 import { Fornecedores } from './screens/compras/Fornecedores'
+import { FornecedorForm } from './screens/compras/FornecedorForm'
+import { Entregadores } from './screens/relacionamento/Entregadores'
+import { Perfil } from './screens/sistema/Perfil'
 import { Recebimento } from './screens/compras/Recebimento'
 import { Ajuste } from './screens/estoque/Ajuste'
 import { Estoque } from './screens/estoque/Estoque'
@@ -42,6 +47,8 @@ const tabs: GestaoHandle = { tabs: true }
 // A — Gestão (36 telas)
 export const gestaoRoutes: RouteObject[] = [
   { path: '/gestao/entrar', element: <Entrar /> },
+  { path: '/gestao/esqueci-senha', element: <EsqueciSenha /> },
+  { path: '/gestao/redefinir-senha', element: <RedefinirSenha /> },
   {
     path: '/gestao',
     element: <GestaoShell />,
@@ -64,7 +71,9 @@ export const gestaoRoutes: RouteObject[] = [
       { path: 'compras/:id', element: <Compra /> },
       { path: 'compras/:id/receber', element: <Recebimento /> },
       { path: 'fornecedores', element: <Fornecedores /> },
+      { path: 'fornecedores/novo', element: <FornecedorForm /> },
       { path: 'fornecedores/:id', element: <Fornecedor /> },
+      { path: 'fornecedores/:id/editar', element: <FornecedorForm /> },
       { path: 'producao', element: <Producao /> },
       { path: 'producao/fichas', element: <Fichas /> },
       { path: 'producao/fichas/:id', element: <Ficha /> },
@@ -76,11 +85,13 @@ export const gestaoRoutes: RouteObject[] = [
       { path: 'clientes/:id', element: <Cliente /> },
       { path: 'entregas', element: <Entregas /> },
       { path: 'entregas/atribuir/:id', element: <Atribuir /> },
+      { path: 'entregas/entregadores', element: <Entregadores /> },
       { path: 'relatorios', element: <Relatorios /> },
       { path: 'relatorios/vendas', element: <RelatorioVendas /> },
       { path: 'configuracoes', element: <Configuracoes /> },
       { path: 'configuracoes/casa', element: <Casa /> },
       { path: 'configuracoes/equipe', element: <Equipe /> },
+      { path: 'perfil', element: <Perfil /> },
     ],
   },
 ]

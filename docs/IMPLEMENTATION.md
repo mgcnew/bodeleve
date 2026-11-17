@@ -46,7 +46,8 @@ Pedido feito na loja → aparece em Novos na gestão → aceite, conferência it
 
 | O quê | Situação | Depende de |
 |---|---|---|
-| Login da equipe, do entregador e do cliente (código por WhatsApp) | Simulado; aceita qualquer senha ou código válido no formato | Supabase Auth, P8 (provedor de mensagens) |
+| Login da equipe e do entregador | **Ligado** ao Supabase Auth (e-mail e senha), com troca de senha e recuperação por e-mail | URLs permitidas do Auth e e-mail de envio (veja "Depende de você") |
+| Login do cliente da loja (código por WhatsApp) | Só tela; o "Entrar" não autentica nada | P8 (provedor de mensagens) |
 | Senha do gestor ao cancelar venda | Só exige 4+ dígitos | Conferência no servidor |
 | Pix: QR e confirmação | Espaço reservado; confirmação manual | P8 (provedor de pagamento), Q8 |
 | Taxa e área de entrega | Taxa fixa R$ 8,00; todo CEP completo é aceito | Q6, Q7 |
@@ -80,10 +81,26 @@ O app usa o projeto Supabase **já existente** (`afqcwqikkolyoowkozak`), que tem
 
 O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de desenvolvimento.
 
+## Auditoria de entrega (2026-11-17)
+
+Conferência "o sistema pode ir para o uso?" feita sobre o código e o banco. Resultado e o que foi fechado:
+
+| Lacuna encontrada | Situação |
+|---|---|
+| Não havia cadastro de produto | **Feito**: `/gestao/produtos/novo` (nome, categoria, unidade, tipo, origem, preço, peso, lote, loja, favorito) e "Arquivar produto" na edição. O endereço na loja (`slug`) nasce do nome e ganha -2, -3 se repetir. A unidade só se escolhe ao cadastrar: trocar depois bagunçaria o estoque. |
+| Não havia cadastro de fornecedor | **Feito**: `/gestao/fornecedores/novo`, "Editar fornecedor" e "Arquivar fornecedor". Arquivar não apaga: pedidos e contas antigos mantêm o nome. |
+| Não havia cadastro de entregador | **Feito**: `/gestao/entregas/entregadores` (nome, vínculo da casa ou parceiro, celular, veículo, desativar e reativar). Inativo some da atribuição e perde o acesso ao app (migração `couriers_active`). O celular é o que liga o login ao cadastro. |
+| Sair escondido ou ausente | **Feito**: botão "Sair da conta" visível no menu Mais, no rodapé da barra lateral do computador, no Perfil do entregador e, no PDV, um menu de conta no cabeçalho (bloqueia o Sair enquanto há venda sem enviar neste aparelho; o caixa continua aberto). |
+| Sem edição de perfil, senha ou recuperação | **Feito**: `/gestao/perfil` (nome, senha com conferência da atual, PIN do gestor), troca de senha no Perfil do entregador, "Esqueci minha senha" nos dois logins e `/gestao/redefinir-senha` (migração `set_my_name`). |
+| Conta de cliente na loja | **Não feito**: o "Entrar" da loja é só tela (código por WhatsApp, P8). Veja "Depende de você". |
+
+Tudo foi testado contra o banco de desenvolvimento como gestor (criar, editar e arquivar produto e fornecedor; criar e desativar entregador; entregador inativo bloqueado em `courier_link` e `courier_list`; `set_my_name` recusa vazio e bloqueia anônimo) e pela tela (novo produto, arquivar, novo fornecedor, nome do perfil, menu do PDV). Os registros de teste foram apagados.
+
 ## Próximos passos
 
-1. Telas de trocar papel e desativar pessoa da equipe, e o e-mail do convite.
-2. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.
+1. Telas que o banco já suporta: editar ficha técnica, saldos iniciais das contas, cadastro manual de cliente e as linhas de Configurações (loja online, pagamentos, nota fiscal) que ainda não abrem nada.
+2. O e-mail do convite de equipe.
+3. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.
 
 ## Depende de você (resolvemos no final)
 
@@ -95,7 +112,10 @@ Itens que o código não resolve sozinho, por tipo.
 - **Produto vendido por peso**: o PDV cobra o preço do item como preço do quilo e o banco cobra `weight_price_cents`. Ao salvar um produto "por peso" a tela grava os dois iguais; confirme se o preço por quilo e o da embalagem podem ser diferentes (então o cadastro precisa de dois campos). Nenhum produto de teste é vendido por peso, então esse caminho ficou sem teste de venda.
 - **Fiado e contas a receber**: o banco não tem venda fiada, saldo de cliente nem função para receber (`pay_entry` só paga). A tela de cliente mostra zero. Decidir se entra antes de abrir o balcão.
 - **Clientes**: a loja cria o cliente pelo celular informado no pedido. Falta decidir como juntar dois cadastros do mesmo cliente e como atender o pedido de apagar a conta (LGPD).
-- **Telas que o banco já permite e o app ainda não tem**: editar ficha técnica (`save_recipe`), lançar saldo inicial das contas (`set_opening_balance`) e cada gestor definir a própria senha de cancelamento (`set_my_pin`). Diga quais você quer agora.
+- **Telas que o banco já permite e o app ainda não tem**: editar ficha técnica (`save_recipe`) e lançar saldo inicial das contas (`set_opening_balance`). Diga se quer agora. O PIN do gestor (`set_my_pin`) já tem tela em "Meu perfil".
+- **Arquivar produto com estoque**: arquivar tira o produto da loja, do balcão e do estoque sem conferir se ainda há saldo ou se ele entra numa ficha técnica. Decidir se a tela deve bloquear ou avisar nesses casos.
+- **Quem pode cadastrar entregador, fornecedor e produto**: hoje dono e gestor (regra do banco). Confirmar que é isso.
+- **Entregador muda os próprios dados?**: hoje só a chave Pix e a senha; nome, celular e veículo o gestor altera. Confirmar.
 
 - **Estoque na venda sem internet**: a venda guardada baixa o estoque só quando chega ao servidor e, como o produto já saiu, o servidor não barra por falta de saldo (baixa o que houver). A tela do balcão não desconta do estoque mostrado enquanto está sem internet. Decidir se isso basta.
 - **Fila só neste aparelho**: se os dados do navegador forem apagados antes de enviar, as vendas guardadas se perdem. Decidir se há aviso ou cópia de segurança.
@@ -109,6 +129,10 @@ Itens que o código não resolve sozinho, por tipo.
 
 ### Acessos e provedores
 
+- **Recuperação de senha por e-mail**: no painel do Supabase (Authentication → URL Configuration) cadastre o endereço do app em *Site URL* e em *Redirect URLs* (precisa incluir `/gestao/redefinir-senha`), do contrário o link do e-mail não abre a tela de senha nova. O envio usa o e-mail padrão do Supabase, que tem limite baixo de mensagens por hora: para uso real configure um SMTP próprio. O texto do e-mail (modelo "Reset Password") também pode ser traduzido lá.
+- **Regra de senha**: a tela exige 8 caracteres; o Supabase tem a própria regra (Authentication → Providers → Email). Decida se quer exigir letras e números.
+- **Cadastrar entregador real**: a tela cadastra nome e celular, mas o entregador só entra se existir uma conta no Auth com o e-mail e a senha dele e o celular igual ao do cadastro (`courier_link`). Hoje essa conta é criada por você no painel; o login por código no celular (P8) tira esse passo.
+
 - **Conferir a tela da equipe como dono**: o botão "Alterar" só aparece para o dono (o gestor de teste não tem permissão). Entre com a sua conta e experimente trocar o papel de um convite de teste e tirar o acesso.
 - **Quem edita a casa e a equipe**: só o dono. A conta do dono é a sua (`bodeleve@gmail.com`); o usuário de teste é gestor e não grava. Entre como dono para preencher nome, CNPJ, endereço, WhatsApp e horários reais da casa.
 
@@ -118,4 +142,4 @@ Itens que o código não resolve sozinho, por tipo.
 
 ### Limpeza dos dados de teste (antes de usar o banco de verdade)
 
-Usuário `teste.entregador@example.com` (criado direto no Auth porque o cadastro recusou o domínio; apagar a linha em `auth.users`); pedido 1001, que o teste do entregador deixou entregue e pago; compras PC-0001 e PC-0002 (recebidas, R$ 360 a pagar cada) e PC-0003 (enviado); lotes `TESTE-PROD-1` e a ficha de teste do doce de leite (`seed_dev_producao.sql`); entregadores de teste (`seed_dev_entregas.sql`); pedido 1001 e cliente "TESTE Integração"; vendas V-0001, V-0003 e V-0004 (canceladas) e V-0002 (R$ 32,90, vinda da fila) e as sessões de caixa de teste; fornecedores e catálogo fictícios (`seed_dev*.sql`); usuário `teste.gestao@bodeleve.test`.
+Registros da auditoria de 2026-11-17 (produto "TESTE Doce da auditoria", fornecedor "TESTE Fornecedor UI") já foram apagados. Usuário `teste.entregador@example.com` (criado direto no Auth porque o cadastro recusou o domínio; apagar a linha em `auth.users`); pedido 1001, que o teste do entregador deixou entregue e pago; compras PC-0001 e PC-0002 (recebidas, R$ 360 a pagar cada) e PC-0003 (enviado); lotes `TESTE-PROD-1` e a ficha de teste do doce de leite (`seed_dev_producao.sql`); entregadores de teste (`seed_dev_entregas.sql`); pedido 1001 e cliente "TESTE Integração"; vendas V-0001, V-0003 e V-0004 (canceladas) e V-0002 (R$ 32,90, vinda da fila) e as sessões de caixa de teste; fornecedores e catálogo fictícios (`seed_dev*.sql`); usuário `teste.gestao@bodeleve.test`.

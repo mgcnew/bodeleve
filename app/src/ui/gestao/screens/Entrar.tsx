@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/Button'
 import { Banner } from '@/components/Feedback'
 import { TextField } from '@/components/Field'
@@ -55,6 +55,9 @@ export function Entrar() {
             Entrar
           </Button>
         )}
+        <Link to="/gestao/esqueci-senha" className={o.muted} style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center', alignSelf: 'flex-start' }}>
+          Esqueci minha senha
+        </Link>
         <p className={o.muted}>Acesso só para a equipe. Quem cadastra novas pessoas é o dono ou o gestor.</p>
       </form>
     </div>

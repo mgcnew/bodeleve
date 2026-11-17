@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Box } from '@/components/Card'
+import { ButtonLink } from '@/components/Button'
 import { EmptyState } from '@/components/Feedback'
 import { Icon } from '@/components/Icon'
 import { normalize } from '@/domain/catalog'
@@ -47,7 +48,7 @@ export function Fornecedores() {
       <main className={`${o.main} ${o.mainTop}`}>
         <SearchBox label="Buscar fornecedor" value={q} onChange={setQ} />
         {suppliers.length === 0 ? (
-          <EmptyState icon="entregas" title="Nenhum fornecedor cadastrado" text="Os fornecedores cadastrados aparecem aqui e podem receber pedidos de compra." />
+          <EmptyState icon="entregas" title="Nenhum fornecedor cadastrado" text="Cadastre o primeiro com o botão abaixo. Os cadastrados recebem pedidos de compra." />
         ) : visible.length === 0 ? (
           <EmptyState icon="buscar" title={`Nada encontrado para “${q}”`} text="Confira a escrita ou busque pelo que o fornecedor vende." />
         ) : (
@@ -64,6 +65,11 @@ export function Fornecedores() {
         )}
         <p className={o.muted}>{suppliers.length} fornecedores ativos</p>
       </main>
+      <div className={o.footer}>
+        <ButtonLink to="/gestao/fornecedores/novo" size="l" block>
+          Novo fornecedor
+        </ButtonLink>
+      </div>
     </div>
   )
 }

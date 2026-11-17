@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/Button'
 import { Banner } from '@/components/Feedback'
 import { TextField } from '@/components/Field'
@@ -80,6 +80,9 @@ export function Entrar() {
             <Button type="submit" size="l" block disabled={busy}>
               Entrar
             </Button>
+            <Link to="/gestao/esqueci-senha?de=entregas" className={o.muted} style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center', alignSelf: 'flex-start' }}>
+              Esqueci minha senha
+            </Link>
           </form>
         ) : step === 'phone' ? (
           <form onSubmit={requestCode} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>

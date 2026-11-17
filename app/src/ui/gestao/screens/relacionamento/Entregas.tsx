@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
+import { ButtonLink } from '@/components/Button'
 import { Box } from '@/components/Card'
 import { EmptyState } from '@/components/Feedback'
 import { FilterChips } from '@/components/Field'
@@ -40,6 +41,9 @@ export function Entregas() {
             { value: 'done', label: `Entregues · ${groups.done.length}` },
           ]}
         />
+        <ButtonLink to="/gestao/entregas/entregadores" variant="secondary" block>
+          Cadastro de entregadores
+        </ButtonLink>
         {visible.length === 0 ? (
           <EmptyState icon="entregas" title="Nenhuma entrega aqui" text="Pedidos com entrega aparecem nesta lista conforme avançam." />
         ) : (

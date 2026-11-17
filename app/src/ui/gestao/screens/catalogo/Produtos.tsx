@@ -85,6 +85,11 @@ export function Produtos() {
           {items.length} itens cadastrados{visible.length !== items.length ? `; a lista mostra ${visible.length}` : ''}.
         </p>
       </main>
+      <div className={o.footer}>
+        <ButtonLink to="/gestao/produtos/novo" size="l" block>
+          Novo produto
+        </ButtonLink>
+      </div>
     </div>
   )
 }

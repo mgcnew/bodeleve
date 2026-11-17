@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
-import { Navigate, NavLink, Outlet, useLocation, useMatches } from 'react-router-dom'
+import { Navigate, NavLink, Outlet, useLocation, useMatches, useNavigate } from 'react-router-dom'
 import { BottomNav } from '@/components/BottomNav'
 import { Icon, type IconName } from '@/components/Icon'
 import { canAccess, type Module } from '@/permissions/modules'
 import { startBackofficeSync } from '@/services/gestao/backofficeRemote'
 import { startFinanceSync } from '@/services/gestao/financeRemote'
 import { startStaffSync } from '@/services/gestao/ordersRemote'
-import { sessionStore } from '@/services/gestao/session'
+import { sessionStore, signOut } from '@/services/gestao/session'
 import s from './GestaoShell.module.css'
 
 export type GestaoHandle = { tabs?: boolean }
@@ -37,6 +37,7 @@ const tabs = [
 
 export function GestaoShell() {
   const session = sessionStore.useStore()
+  const navigate = useNavigate()
   const location = useLocation()
   const matches = useMatches()
   const handle = (matches.at(-1)?.handle ?? {}) as GestaoHandle
@@ -69,7 +70,24 @@ export function GestaoShell() {
               <span>{m.label}</span>
             </NavLink>
           ))}
-        <div className={s.sideFoot}>{session.name} · {session.establishment}</div>
+        <div className={s.sideFoot}>
+          <NavLink to="/gestao/perfil">
+            <Icon name="perfil" size={20} />
+            <span>
+              {session.name}
+              <small>{session.establishment}</small>
+            </span>
+          </NavLink>
+          <button
+            type="button"
+            onClick={() => {
+              signOut()
+              navigate('/gestao/entrar')
+            }}
+          >
+            Sair da conta
+          </button>
+        </div>
       </nav>
       <div className={s.content}>
         <Outlet />

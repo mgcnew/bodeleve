@@ -1,12 +1,15 @@
-import { useEffect } from 'react'
-import { Link, Navigate, Outlet, useLocation, useMatches } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, Navigate, Outlet, useLocation, useMatches, useNavigate } from 'react-router-dom'
+import { Button, ButtonLink } from '@/components/Button'
+import { Sheet } from '@/components/Sheet'
+import { roleLabels } from '@/permissions/roles'
 import { BottomNav } from '@/components/BottomNav'
 import { Icon } from '@/components/Icon'
 import { hourMinute } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { cartTotal } from '@/domain/pdv'
 import { startBackofficeSync } from '@/services/gestao/backofficeRemote'
-import { sessionStore } from '@/services/gestao/session'
+import { sessionStore, signOut } from '@/services/gestao/session'
 import { cartStore, cashStore, queueStore } from '@/services/pdv'
 import { startPdvSync } from '@/services/pdvRemote'
 import { Tag } from '@/components/Badges'
@@ -68,6 +71,9 @@ export function CashHeader() {
   const { session } = cashStore.useStore()
   const open = !!session && !session.closedAt
   const queued = queueStore.useStore().length
+  const me = sessionStore.useStore()
+  const navigate = useNavigate()
+  const [menu, setMenu] = useState(false)
   return (
     <header className={s.head}>
       <div>
@@ -77,7 +83,36 @@ export function CashHeader() {
       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
         {queued > 0 && <Tag tone="warning">{queued} a enviar</Tag>}
         <Tag tone={open ? 'success' : 'warning'}>{open ? 'Caixa aberto' : 'Caixa fechado'}</Tag>
+        <button
+          type="button"
+          aria-label="Minha conta e sair"
+          onClick={() => setMenu(true)}
+          style={{ width: 44, height: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 0, background: 'transparent', color: 'inherit', cursor: 'pointer' }}
+        >
+          <Icon name="perfil" size={22} />
+        </button>
       </div>
+      <Sheet open={menu} onClose={() => setMenu(false)} title={me?.name ?? 'Minha conta'}>
+        {me && <p className={s.headSub}>{roleLabels[me.role]} · {me.email}</p>}
+        <p className={s.headSub}>{queued > 0 ? `Há ${queued} ${queued === 1 ? 'venda' : 'vendas'} sem enviar neste aparelho. Saia só depois que forem enviadas.` : open ? 'O caixa continua aberto depois que você sair.' : 'O caixa está fechado.'}</p>
+        <ButtonLink to="/gestao/perfil" variant="secondary" block>
+          Meu perfil e senha
+        </ButtonLink>
+        <Button
+          variant="danger"
+          block
+          disabled={queued > 0}
+          onClick={() => {
+            signOut()
+            navigate('/gestao/entrar')
+          }}
+        >
+          Sair
+        </Button>
+        <Button variant="quiet" block onClick={() => setMenu(false)}>
+          Voltar
+        </Button>
+      </Sheet>
     </header>
   )
 }

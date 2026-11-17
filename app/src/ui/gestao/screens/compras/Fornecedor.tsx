@@ -86,6 +86,9 @@ export function Fornecedor() {
         <ButtonLink to={`/gestao/compras/nova?fornecedor=${s.id}`} size="l" block>
           Novo pedido para este fornecedor
         </ButtonLink>
+        <ButtonLink to={`/gestao/fornecedores/${s.id}/editar`} variant="secondary" block>
+          Editar fornecedor
+        </ButtonLink>
       </div>
     </div>
   )

@@ -3,6 +3,7 @@ import { Box } from '@/components/Card'
 import { Button } from '@/components/Button'
 import type { IconName } from '@/components/Icon'
 import { canAccess, type Module } from '@/permissions/modules'
+import { roleLabels } from '@/permissions/roles'
 import { sessionStore, signOut } from '@/services/gestao/session'
 import o from '@/styles/ops.module.css'
 import { ListRow, PageHeader } from '../../shared/OpsBits'
@@ -40,6 +41,12 @@ export function Mais() {
     <div className={o.screen}>
       <PageHeader title="Mais" sub="Todos os módulos da gestão" />
       <main className={o.main}>
+        <section className={o.section}>
+          <h2 className={o.caps}>Você</h2>
+          <Box>
+            <ListRow icon="perfil" title={session?.name ?? 'Meu perfil'} sub={`${roleLabels[role]} · nome, senha e PIN`} to="/gestao/perfil" />
+          </Box>
+        </section>
         {groups.map((g) => {
           const entries = g.entries.filter((e) => canAccess(role, e.module))
           if (entries.length === 0) return null
@@ -55,14 +62,15 @@ export function Mais() {
           )
         })}
         <Button
-          variant="quiet"
-          style={{ alignSelf: 'flex-start', padding: 0 }}
+          variant="secondary"
+          block
+          style={{ maxWidth: 480 }}
           onClick={() => {
             signOut()
             navigate('/gestao/entrar')
           }}
         >
-          Sair
+          Sair da conta
         </Button>
       </main>
     </div>

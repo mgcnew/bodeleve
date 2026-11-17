@@ -73,7 +73,37 @@
 
 .sideFoot {
   margin-top: auto;
-  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 12px;
+  border-top: 1px solid var(--linha);
+}
+
+.sideFoot a span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sideFoot small {
   font: var(--apoio);
   color: var(--texto-secundario);
+}
+
+.sideFoot button {
+  min-height: var(--toque-min);
+  padding: 0 var(--esp-3);
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--texto-secundario);
+  font: 500 15px/20px var(--fonte-texto);
+  text-align: left;
+  cursor: pointer;
+}
+
+.sideFoot button:hover {
+  background: var(--fundo-operacao);
+  color: var(--texto);
 }
