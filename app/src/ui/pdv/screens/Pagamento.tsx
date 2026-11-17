@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/Button'
+import { Banner } from '@/components/Feedback'
 import { Icon, type IconName } from '@/components/Icon'
 import { formatCents } from '@/domain/money'
 import { cartTotal, payLabels, type PayMethod } from '@/domain/pdv'
 import { cartStore, completeSale } from '@/services/pdv'
+import { posErrorMessage } from '@/services/pdvRemote'
 import { Bar } from '../../shared/OpsBits'
 import { BigChip } from '../components/PdvBits'
 import o from '@/styles/ops.module.css'
@@ -29,6 +31,8 @@ export function Pagamento() {
   const total = cartTotal(cart)
   const [method, setMethod] = useState<PayMethod>('cash')
   const [received, setReceived] = useState<number | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
 
   if (cart.lines.length === 0) return <Navigate to="/pdv" replace />
 
@@ -38,9 +42,16 @@ export function Pagamento() {
   const label =
     method === 'cash' ? `Recebi ${formatCents(cashIn)} · concluir` : method === 'pix' ? 'Pix recebido · concluir' : 'Cartão aprovado · concluir'
 
-  const finish = () => {
-    const sale = completeSale(cart, [{ method, cents: total, receivedCents: method === 'cash' ? cashIn : undefined }])
-    navigate(`/pdv/concluida/${sale.id}`, { replace: true, state: { placed: true } })
+  const finish = async () => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      const sale = await completeSale(cart, [{ method, cents: total, receivedCents: method === 'cash' ? cashIn : undefined }])
+      navigate(`/pdv/concluida/${sale.id}`, { replace: true, state: { placed: true } })
+    } catch (e) {
+      setProblem(posErrorMessage(e))
+      setBusy(false)
+    }
   }
 
   return (
@@ -105,7 +116,8 @@ export function Pagamento() {
         </Link>
       </main>
       <div className={o.footer}>
-        <Button size="l" block onClick={finish}>
+        {problem && <Banner tone="error">{problem}</Banner>}
+        <Button size="l" block disabled={busy} onClick={() => void finish()}>
           {label}
         </Button>
       </div>

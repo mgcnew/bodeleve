@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button, ButtonLink } from '@/components/Button'
+import { Banner } from '@/components/Feedback'
 import { SelectField } from '@/components/Field'
 import { Icon } from '@/components/Icon'
 import { QuantityStepper } from '@/components/QuantityStepper'
@@ -7,6 +8,7 @@ import { Sheet } from '@/components/Sheet'
 import { formatCents } from '@/domain/money'
 import { payGroup } from '@/domain/pdv'
 import { addCashMovement, cashSales, cashStore, closeCash, expectedCash, reopenCash, salesStore, supplyReasons, withdrawalReasons } from '@/services/pdv'
+import { posErrorMessage } from '@/services/pdvRemote'
 import { SumRow } from '../../shared/OpsBits'
 import { CashHeader } from '../PdvShell'
 import { BigChip } from '../components/PdvBits'
@@ -24,6 +26,22 @@ export function Caixa() {
   const [value, setValue] = useState(10000)
   const [reason, setReason] = useState(withdrawalReasons[0])
   const [counted, setCounted] = useState<number | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
+
+  const attempt = async (fn: () => Promise<unknown>) => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      await fn()
+      return true
+    } catch (e) {
+      setProblem(posErrorMessage(e))
+      return false
+    } finally {
+      setBusy(false)
+    }
+  }
 
   const open = !!session && !session.closedAt
   const mine = session ? sales.filter((x) => x.status === 'done' && x.at >= session.openedAt) : []
@@ -83,7 +101,8 @@ export function Caixa() {
               <span>Diferença</span>
               <span>{diff === 0 ? 'zero' : `${diff > 0 ? 'sobra de' : 'falta de'} ${formatCents(Math.abs(diff))}`}</span>
             </div>
-            <Button size="l" block onClick={() => closeCash(count * 100)}>
+            {problem && <Banner tone="error">{problem}</Banner>}
+            <Button size="l" block disabled={busy} onClick={() => void attempt(() => closeCash(count * 100))}>
               Fechar caixa
             </Button>
           </section>
@@ -104,7 +123,7 @@ export function Caixa() {
               Abrir novo caixa
             </ButtonLink>
             {session?.closedAt && (
-              <Button variant="secondary" block onClick={reopenCash}>
+              <Button variant="secondary" block disabled={busy} onClick={() => void attempt(reopenCash)}>
                 Reabrir (corrigir)
               </Button>
             )}
@@ -129,12 +148,13 @@ export function Caixa() {
           ))}
         </div>
         <SelectField label="Motivo" value={reason} onChange={(e) => setReason(e.target.value)} options={(kind === 'withdrawal' ? withdrawalReasons : supplyReasons).map((r) => ({ value: r, label: r }))} />
+        {problem && <Banner tone="error">{problem}</Banner>}
         <Button
           size="l"
           block
-          onClick={() => {
-            addCashMovement(kind, value, reason)
-            setSheet(false)
+          disabled={busy}
+          onClick={async () => {
+            if (await attempt(() => addCashMovement(kind, value, reason))) setSheet(false)
           }}
         >
           Registrar

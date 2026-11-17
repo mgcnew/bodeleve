@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/Button'
+import { Banner } from '@/components/Feedback'
 import { SumRow } from '../../shared/OpsBits'
 import { TextField } from '@/components/Field'
 import { fullDate, longNow } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { sessionStore } from '@/services/gestao/session'
 import { cashStore, openCash } from '@/services/pdv'
+import { posErrorMessage } from '@/services/pdvRemote'
 import { BigChip } from '../components/PdvBits'
 import o from '@/styles/ops.module.css'
 import s from './Pdv.module.css'
@@ -18,6 +20,8 @@ export function Abertura() {
   const { lastClose } = cashStore.useStore()
   const navigate = useNavigate()
   const [value, setValue] = useState(15000)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
 
   return (
     <div className={o.screen}>
@@ -44,12 +48,21 @@ export function Abertura() {
         <p className={o.muted}>Conte o dinheiro antes de abrir. Esse valor é a base para conferir o caixa no fechamento.</p>
       </main>
       <div className={o.footer}>
+        {problem && <Banner tone="error">{problem}</Banner>}
         <Button
           size="l"
           block
-          onClick={() => {
-            openCash(value)
-            navigate('/pdv', { replace: true })
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true)
+            setProblem(undefined)
+            try {
+              await openCash(value)
+              navigate('/pdv', { replace: true })
+            } catch (e) {
+              setProblem(posErrorMessage(e))
+              setBusy(false)
+            }
           }}
         >
           Abrir caixa

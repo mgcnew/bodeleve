@@ -55,7 +55,7 @@ Pedido feito na loja → aparece em Novos na gestão → aceite, conferência it
 | Fotos de produto e da casa, logotipo, textos da casa | Marcadores entre colchetes | P3, P4, P5 |
 | Convite de equipe por e-mail | Registra o convite; não envia | Supabase Auth |
 | Mapa e rastreio | Só "Abrir no mapa" do celular (H-E4) | — |
-| PDV em conexão ruim | Funciona local; fila de envio ainda não existe | Banco ligado |
+| PDV em conexão ruim | Com o banco ligado cada venda vai direto ao servidor; sem internet a venda falha com aviso. A fila local (`pos_checkout` aceita `offline`) ainda não existe | Decisão sobre vender sem estoque conferido |
 | Realtime (pedido novo, status, entregas livres) | A tela atualiza ao recarregar ou navegar | Supabase Realtime |
 
 ## Backend (Supabase)
@@ -74,7 +74,8 @@ O app usa o projeto Supabase **já existente** (`afqcwqikkolyoowkozak`), que tem
 | Gestão: produção (fichas, criar ordem, iniciar, concluir, corrigir apontamento, excluir) | **Ligado e testado** (`create_production_order`, `start_production`, `finish_production`, `undo_finish_production`, `delete_production_order`): ordem OP-0001 com reserva dos insumos, conclusão com lote, consumo pelo lote que vence primeiro e custo real; corrigir devolveu os saldos e excluir liberou as reservas. A tela não edita ficha (`save_recipe` existe no banco, sem tela); a ficha de teste vem de `supabase/seed_dev_producao.sql` |
 | Gestão: entregas (atribuir, publicar para parceiros, desfazer envio) | **Ligado e testado** (`delivery_assign`, `delivery_unassign`; entregadores de `couriers`, estado "em rota" e "na loja" derivado de `deliveries`, Realtime em `deliveries`): pedido 1001 enviado com o Carlos, recarregado (mostra "Enviado") e desfeito; publicar para parceiros gerou entrega de R$ 9,00 (configuração `partner_fee_cents` do banco) e repetir foi recusado |
 | Gestão: produtos (edição), clientes | Ainda nos dados de exemplo |
-| PDV e Entregas (app do entregador) | Ainda nos dados de exemplo (`pos_*`, `courier_*` existem no banco) |
+| PDV (abrir caixa, vender, cancelar, sangria e suprimento, fechar e reabrir) | **Ligado e testado** (`pos_open_session`, `pos_checkout`, `pos_cancel_sale`, `pos_cash_movement`, `pos_close_session`, `pos_reopen_session`): venda V-0001 de 1 queijo coalho com desconto de 10% em dinheiro (troco R$ 0,39, saiu do lote que vence primeiro, R$ 29,61 no caixa); senha errada recusada com a mensagem certa e senha certa cancelou, devolveu o estoque e estornou o dinheiro; sangria de R$ 100 ao banco, fechar sem diferença e reabrir. Itens, estoque, caixa e vendas se atualizam ao abrir e a cada 20 s. **Falta**: fila de vendas sem internet (H-P7) e envio do comprovante por WhatsApp |
+| App do entregador (`/entregas`) | Ainda nos dados de exemplo (`courier_*` existem no banco; veja "Depende de você") |
 
 O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de desenvolvimento.
 
@@ -96,3 +97,6 @@ Itens que o código não resolve sozinho. Esta lista cresce a cada etapa.
 - **Dados de teste no banco de desenvolvimento**: lotes `TESTE-PROD-1` (20 un de nata e de rapadura) e a ficha de teste do doce de leite, criados por `seed_dev_producao.sql`. Apagar antes de usar o banco de verdade.
 - **App do entregador no banco**: o login do entregador vincula o celular da conta do Supabase Auth ao cadastro (`courier_link`), o que depende do código por mensagem (P8) ou de um usuário de teste do entregador no Auth (criar conta exige o seu OK). Sem isso o app do entregador continua com os dados de exemplo no aparelho e não enxerga as entregas atribuídas pela gestão. Os três entregadores de teste (Bruno, Carlos, Diego) vêm de `supabase/seed_dev_entregas.sql`.
 - **Entregadores e telefones reais**: trocar os de teste pelos cadastrados da casa (tela de entregadores da gestão ainda não grava no banco).
+- **Senha do gestor para cancelar venda**: o usuário de teste tem uma senha numérica de desenvolvimento (`VITE_DEV_MANAGER_PIN` no `app/.env.local`). Cada gestor e o dono definem a própria (`set_my_pin`); falta a tela para isso (hoje só pelo banco).
+- **Dinheiro do caixa**: abrir o caixa com troco (ex.: R$ 150) não lança nada na conta "Caixa (gaveta)"; só vendas, sangria e suprimento mexem nela. Por isso uma sangria pode deixar a conta com saldo negativo. Decidir se o fundo de troco entra como saldo inicial do caixa (`set_opening_balance`).
+- **Comprovante da venda por WhatsApp**: o banco grava a mensagem em `outbox_messages` (`pos_send_receipt`), mas o envio depende do provedor de mensagens (P8).

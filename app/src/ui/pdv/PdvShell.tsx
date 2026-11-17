@@ -1,11 +1,14 @@
+import { useEffect } from 'react'
 import { Link, Navigate, Outlet, useLocation, useMatches } from 'react-router-dom'
 import { BottomNav } from '@/components/BottomNav'
 import { Icon } from '@/components/Icon'
 import { hourMinute } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { cartTotal } from '@/domain/pdv'
+import { startBackofficeSync } from '@/services/gestao/backofficeRemote'
 import { sessionStore } from '@/services/gestao/session'
 import { cartStore, cashStore } from '@/services/pdv'
+import { startPdvSync } from '@/services/pdvRemote'
 import { Tag } from '@/components/Badges'
 import s from './PdvShell.module.css'
 
@@ -23,6 +26,18 @@ export function PdvShell() {
   const cart = cartStore.useStore()
   const location = useLocation()
   const handle = (useMatches().at(-1)?.handle ?? {}) as PdvHandle
+  const signedIn = !!session
+
+  // com o Supabase, mantém itens, estoque, caixa e vendas em dia
+  useEffect(() => {
+    if (!signedIn) return
+    const stopBackoffice = startBackofficeSync()
+    const stopPdv = startPdvSync()
+    return () => {
+      stopBackoffice()
+      stopPdv()
+    }
+  }, [signedIn])
 
   if (!session) return <Navigate to="/gestao/entrar" replace state={{ from: location.pathname }} />
 

@@ -5,14 +5,17 @@ import type { CartLine, CashSession, Discount, PayMethod, Payment, PosCart, Sale
 import { cartSubtotal, cartTotal, lineTotal } from '@/domain/pdv'
 import type { FinancialEntry, LedgerTx } from '@/domain/backoffice'
 import { createStore } from '@/lib/store'
+import { supabase } from '@/lib/supabase'
 import { seedCash, seedSales } from '@/mocks/pdv/seed'
 import { entriesStore, ledgerStore, newId, stockStore } from './gestao/backoffice'
 import { sessionStore } from './gestao/session'
 import { fefoOut } from './gestao/stock'
+import { remoteCancelSale, remoteCashMovement, remoteCheckout, remoteCloseCash, remoteOpenCash, remoteReopenCash } from './pdvRemote'
 
 export const cartStore = createStore<PosCart>('bodeleve.pdv.sacola', () => ({ lines: [], discount: null }))
-export const salesStore = createStore<Sale[]>('bodeleve.pdv.vendas', seedSales)
-export const cashStore = createStore<{ session: CashSession | null; lastClose: { at: string; diffCents: number } | null }>('bodeleve.pdv.caixa', seedCash)
+// com o Supabase são cache do banco (alimentado por pdvRemote); sem ele, dados de exemplo no aparelho
+export const salesStore = createStore<Sale[]>(supabase ? 'bodeleve.pdv.vendas.remoto' : 'bodeleve.pdv.vendas', () => (supabase ? [] : seedSales()))
+export const cashStore = createStore<{ session: CashSession | null; lastClose: { at: string; diffCents: number } | null }>(supabase ? 'bodeleve.pdv.caixa.remoto' : 'bodeleve.pdv.caixa', () => (supabase ? { session: null, lastClose: null } : seedCash()))
 
 const by = () => sessionStore.get()?.name ?? 'Equipe'
 
@@ -56,7 +59,8 @@ export function applyDiscount(d: Discount | null) {
 }
 
 // ---------- caixa ----------
-export function openCash(floatCents: number) {
+export async function openCash(floatCents: number) {
+  if (supabase) return remoteOpenCash(floatCents)
   cashStore.set((s) => ({
     ...s,
     session: { id: newId('cx'), openedAt: new Date().toISOString(), openedBy: by(), floatCents, movements: [], closedAt: null, countedCents: null, expectedCents: null },
@@ -83,7 +87,8 @@ export const withdrawalReasons = [toBank, 'Troco para entregador', cashPayment]
 export const supplyReasons = [reinforce]
 
 /** Sangria ou suprimento. Entre caixa e banco é transferência, que não conta como entrada nem saída (H-G20). */
-export function addCashMovement(kind: 'withdrawal' | 'supply', cents: number, reason: string) {
+export async function addCashMovement(kind: 'withdrawal' | 'supply', cents: number, reason: string) {
+  if (supabase) return remoteCashMovement(kind, cents, reason)
   const at = new Date().toISOString()
   const leg = (accountId: string, amount: number, k: LedgerTx['kind'], title: string, sub: string): LedgerTx => ({ id: newId('lx'), at, title, sub, accountId, amountCents: amount, kind: k, entryId: null })
   const tx: LedgerTx[] = []
@@ -100,7 +105,8 @@ export function addCashMovement(kind: 'withdrawal' | 'supply', cents: number, re
   )
 }
 
-export function closeCash(countedCents: number) {
+export async function closeCash(countedCents: number) {
+  if (supabase) return remoteCloseCash(countedCents)
   cashStore.set((s) => {
     if (!s.session) return s
     const expected = expectedCash(s.session, salesStore.get())
@@ -108,7 +114,8 @@ export function closeCash(countedCents: number) {
   })
 }
 
-export function reopenCash() {
+export async function reopenCash() {
+  if (supabase) return remoteReopenCash()
   cashStore.set((s) => (s.session ? { ...s, session: { ...s.session, closedAt: null, countedCents: null, expectedCents: null } } : s))
 }
 
@@ -129,7 +136,8 @@ export function stockShortages(cart: PosCart, available: (itemId: string) => num
  * H-P3/H-P4 — conclui a venda: baixa o estoque pelo lote que vence antes e lança o dinheiro.
  * Dinheiro entra no caixa; Pix no banco; cartão fica a receber (H-G24).
  */
-export function completeSale(cart: PosCart, payments: Payment[]): Sale {
+export async function completeSale(cart: PosCart, payments: Payment[]): Promise<Sale> {
+  if (supabase) return remoteCheckout(cart, payments)
   const now = new Date().toISOString()
   const number = nextSaleNumber()
   const seller = by()
@@ -175,8 +183,13 @@ export function completeSale(cart: PosCart, payments: Payment[]): Sale {
   return sale
 }
 
-/** H-P6 — cancelar exige senha de gestor; itens voltam ao estoque e o dinheiro lançado é desfeito */
-export function cancelSale(id: string, managerName: string) {
+/**
+ * H-P6 — cancelar exige senha de gestor; itens voltam ao estoque e o dinheiro lançado é desfeito.
+ * Com o Supabase o banco confere a senha (`pin`); sem ele, `pin` só precisa existir e quem aprovou é fixo.
+ */
+export async function cancelSale(id: string, pin: string) {
+  if (supabase) return remoteCancelSale(id, pin)
+  const managerName = 'Ana (gestora)'
   const sale = salesStore.get().find((s) => s.id === id)
   if (!sale || sale.status === 'cancelled') return
   stockStore.set((s) => ({ ...s, movements: s.movements.filter((m) => !sale.effects.movementIds.includes(m.id)) }))

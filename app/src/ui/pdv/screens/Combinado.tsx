@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/Button'
+import { Banner } from '@/components/Feedback'
 import { Box } from '@/components/Card'
 import { TextField } from '@/components/Field'
 import { formatCents, parseCents } from '@/domain/money'
 import { cartTotal, payLabels, type PayMethod, type Payment } from '@/domain/pdv'
 import { cartStore, completeSale } from '@/services/pdv'
+import { posErrorMessage } from '@/services/pdvRemote'
 import { Bar } from '../../shared/OpsBits'
 import { BigChip } from '../components/PdvBits'
 import o from '@/styles/ops.module.css'
@@ -20,6 +22,8 @@ export function Combinado() {
   const [method, setMethod] = useState<PayMethod>('cash')
   const [value, setValue] = useState('')
   const [error, setError] = useState<string>()
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
 
   if (cart.lines.length === 0) return <Navigate to="/pdv" replace />
 
@@ -38,9 +42,16 @@ export function Combinado() {
     setError(undefined)
   }
 
-  const finish = () => {
-    const sale = completeSale(cart, parts)
-    navigate(`/pdv/concluida/${sale.id}`, { replace: true, state: { placed: true } })
+  const finish = async () => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      const sale = await completeSale(cart, parts)
+      navigate(`/pdv/concluida/${sale.id}`, { replace: true, state: { placed: true } })
+    } catch (e) {
+      setProblem(posErrorMessage(e))
+      setBusy(false)
+    }
   }
 
   return (
@@ -87,8 +98,9 @@ export function Combinado() {
         )}
       </main>
       <div className={o.footer}>
+        {problem && <Banner tone="error">{problem}</Banner>}
         {settled ? (
-          <Button size="l" block onClick={finish}>
+          <Button size="l" block disabled={busy} onClick={() => void finish()}>
             Concluir venda
           </Button>
         ) : (

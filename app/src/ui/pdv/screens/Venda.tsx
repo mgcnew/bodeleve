@@ -10,6 +10,7 @@ import { hourMinute } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { payLabels, qtyText } from '@/domain/pdv'
 import { cancelSale, salesStore } from '@/services/pdv'
+import { posErrorMessage } from '@/services/pdvRemote'
 import { Bar, SumRow } from '../../shared/OpsBits'
 import o from '@/styles/ops.module.css'
 
@@ -19,6 +20,7 @@ export function Venda() {
   const [asking, setAsking] = useState(false)
   const [pin, setPin] = useState('')
   const [error, setError] = useState<string>()
+  const [busy, setBusy] = useState(false)
 
   if (!sale) {
     return (
@@ -34,12 +36,19 @@ export function Venda() {
 
   // H-P6 — cancelar exige senha de gestor. A conferência real da senha fica no servidor (Supabase);
   // aqui só se exige uma senha numérica de 4 dígitos para o fluxo ficar completo.
-  const confirm = () => {
+  const confirm = async () => {
     if (!/^\d{4,}$/.test(pin)) return setError('Digite a senha numérica do gestor (4 números ou mais).')
-    cancelSale(sale.id, 'Ana (gestora)')
-    setAsking(false)
-    setPin('')
-    setError(undefined)
+    setBusy(true)
+    try {
+      await cancelSale(sale.id, pin)
+      setAsking(false)
+      setPin('')
+      setError(undefined)
+    } catch (e) {
+      setError(posErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -105,7 +114,7 @@ export function Venda() {
       <Sheet open={asking} onClose={() => setAsking(false)} title={`Cancelar a venda ${sale.number}?`} variant="modal">
         <p className={o.muted}>Os itens voltam ao estoque. Cancelamento precisa da senha de um gestor.</p>
         <TextField label="Senha do gestor" type="password" inputMode="numeric" autoComplete="off" placeholder="••••" value={pin} error={error} onChange={(e) => { setPin(e.target.value); setError(undefined) }} />
-        <Button variant="danger" size="l" block onClick={confirm}>
+        <Button variant="danger" size="l" block disabled={busy} onClick={() => void confirm()}>
           Cancelar venda
         </Button>
         <Button variant="secondary" block onClick={() => setAsking(false)}>
