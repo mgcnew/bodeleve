@@ -127,12 +127,21 @@ export async function refreshPdv(): Promise<void> {
   return loading
 }
 
-/** Mantém o caixa e as vendas em dia: busca ao abrir e a cada 20 s */
+/** Mantém o caixa e as vendas em dia: busca ao abrir, a cada 20 s e quando o caixa ou os pedidos mudam (Realtime) */
 export function startPdvSync() {
   if (!supabase) return () => undefined
   void refreshPdv()
   const timer = setInterval(() => void refreshPdv(), 20_000)
-  return () => clearInterval(timer)
+  const channel = supabase
+    .channel(`pdv-caixa-${Math.random().toString(36).slice(2)}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'cash_sessions' }, () => void refreshPdv())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'cash_movements' }, () => void refreshPdv())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => void refreshPdv())
+    .subscribe()
+  return () => {
+    clearInterval(timer)
+    void supabase!.removeChannel(channel)
+  }
 }
 
 async function rpc<T>(fn: string, args: Record<string, unknown>) {

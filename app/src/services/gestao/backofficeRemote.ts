@@ -233,12 +233,19 @@ export async function refreshBackoffice(): Promise<void> {
   return loading
 }
 
-/** Mantém o cache em dia: busca ao abrir, a cada 20 s e depois de cada ação */
+/** Mantém o cache em dia: busca ao abrir, a cada 20 s, depois de cada ação e quando o estoque muda (Realtime) */
 export function startBackofficeSync() {
   if (!supabase) return () => undefined
   void refreshBackoffice()
   const timer = setInterval(() => void refreshBackoffice(), 20_000)
-  return () => clearInterval(timer)
+  const channel = supabase
+    .channel(`backoffice-estoque-${Math.random().toString(36).slice(2)}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_movements' }, () => void refreshBackoffice())
+    .subscribe()
+  return () => {
+    clearInterval(timer)
+    void supabase!.removeChannel(channel)
+  }
 }
 
 async function rpc<T>(fn: string, args: Record<string, unknown>) {

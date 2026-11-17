@@ -1,6 +1,6 @@
 # IMPLEMENTATION — estado da implementação
 
-Os quatro ambientes estão implementados em `app/` (React + Vite + TypeScript), com **dados de exemplo guardados no aparelho**. Nada fala com o banco ainda. Este documento diz o que existe, o que é simulado e o que falta para ligar o Supabase.
+Os quatro ambientes estão implementados em `app/` (React + Vite + TypeScript). **A gestão, o PDV e a loja já falam com o Supabase** (login, pedidos, estoque, compras, produção, financeiro, entregas, produtos, clientes e caixa); sem `app/.env.local` o app roda com dados de exemplo no aparelho. Faltam o **app do entregador**, a equipe, os dados da casa e as configurações. Este documento diz o que existe, o que é simulado e o que depende de você.
 
 ## Telas
 
@@ -15,7 +15,7 @@ Os quatro ambientes estão implementados em `app/` (React + Vite + TypeScript), 
 
 - **Gestão e PDV com o Supabase ligado**: `/gestao/entrar` com o usuário de teste de desenvolvimento (papel gestor), cujo e-mail e senha ficam só no seu `app/.env.local` (`VITE_DEV_STAFF_EMAIL` e `VITE_DEV_STAFF_PASSWORD`) e preenchem o formulário no modo dev. Sem o Supabase, qualquer e-mail com `@` e senha de 4+ caracteres entra como dono.
 - **Entregas**: `/entregas/entrar` com um celular cadastrado — Bruno `(00) 90000-0300` (da casa), Carlos `(00) 90000-0310` (da casa), Diego `(00) 90000-0301` (parceiro) — e qualquer código de 4 números.
-- **Cancelar venda no PDV**: qualquer senha numérica de 4 ou mais dígitos.
+- **Cancelar venda no PDV**: com o Supabase, a senha numérica do gestor (a de teste está em `VITE_DEV_MANAGER_PIN` no `app/.env.local`); sem ele, qualquer senha numérica de 4 ou mais dígitos.
 
 Para voltar aos dados de exemplo, apague as chaves `bodeleve.*` do `localStorage` do navegador.
 
@@ -56,7 +56,7 @@ Pedido feito na loja → aparece em Novos na gestão → aceite, conferência it
 | Convite de equipe por e-mail | Registra o convite; não envia | Supabase Auth |
 | Mapa e rastreio | Só "Abrir no mapa" do celular (H-E4) | — |
 | PDV em conexão ruim | Com o banco ligado cada venda vai direto ao servidor; sem internet a venda falha com aviso. A fila local (`pos_checkout` aceita `offline`) ainda não existe | Decisão sobre vender sem estoque conferido |
-| Realtime (pedido novo, status, entregas livres) | A tela atualiza ao recarregar ou navegar | Supabase Realtime |
+| Realtime | **Ligado** na gestão (pedidos, entregas, estoque) e no PDV (caixa, vendas, estoque), testado: mudança feita fora do app aparece em ~2 s. Fica sem Realtime o acompanhamento do pedido na loja (cliente sem login) e as entregas livres do app do entregador | Decisão sobre acesso anônimo ao Realtime; login do entregador |
 
 ## Backend (Supabase)
 
@@ -82,25 +82,36 @@ O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de 
 
 ## Próximos passos
 
-1. Ligar o login da equipe (Supabase Auth) e trocar cada `*Store` da gestão, do PDV e das entregas pelas funções do banco, uma área por vez.
-2. Ligar Realtime em pedidos, status do pedido e entregas livres.
-3. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.
+1. Ligar o app do entregador (`courier_*`), que depende do login por celular (P8) ou de um usuário de teste do entregador.
+2. Ligar equipe, dados da casa e configurações (`memberships`, `establishments`).
+3. Fila de vendas sem internet no PDV (H-P7).
+4. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.
 
 ## Depende de você (resolvemos no final)
 
-Itens que o código não resolve sozinho. Esta lista cresce a cada etapa.
+Itens que o código não resolve sozinho, por tipo.
 
-- **Saldo inicial das contas**: banco e caixa estão com R$ 0,00 e pagar recusa sem saldo. O banco já tem `set_opening_balance(estabelecimento, conta, centavos)`, mas o app não tem tela para isso. Informe os valores reais e diga se quer essa tela.
-- **Receber contas a receber**: o banco não tem função para isso (`pay_entry` só paga). Decidir se vira função no banco antes de fiado ou venda a prazo.
-- **Compras de teste abertas no banco**: PC-0001 e PC-0002 (recebidas, R$ 360 a pagar cada) e PC-0003 (enviado, farinha de mandioca) são de teste. Apagar ou usar como exemplo.
+### Decisões
 
-- **Insumos e fichas reais da casa**: o banco só tem a ficha de teste do doce de leite (nata e rapadura como insumos fictícios). Faltam cadastrar leite, coalho, sal, embalagens etc. como itens e preencher as fichas reais (rendimento, validade, consumo, gás e energia). Hoje não há tela para criar ou editar ficha; o banco já tem `save_recipe`, falta a tela (confirmar com você se quer essa tela agora).
-- **Dados de teste no banco de desenvolvimento**: lotes `TESTE-PROD-1` (20 un de nata e de rapadura) e a ficha de teste do doce de leite, criados por `seed_dev_producao.sql`. Apagar antes de usar o banco de verdade.
-- **App do entregador no banco**: o login do entregador vincula o celular da conta do Supabase Auth ao cadastro (`courier_link`), o que depende do código por mensagem (P8) ou de um usuário de teste do entregador no Auth (criar conta exige o seu OK). Sem isso o app do entregador continua com os dados de exemplo no aparelho e não enxerga as entregas atribuídas pela gestão. Os três entregadores de teste (Bruno, Carlos, Diego) vêm de `supabase/seed_dev_entregas.sql`.
-- **Entregadores e telefones reais**: trocar os de teste pelos cadastrados da casa (tela de entregadores da gestão ainda não grava no banco).
-- **Senha do gestor para cancelar venda**: o usuário de teste tem uma senha numérica de desenvolvimento (`VITE_DEV_MANAGER_PIN` no `app/.env.local`). Cada gestor e o dono definem a própria (`set_my_pin`); falta a tela para isso (hoje só pelo banco).
-- **Dinheiro do caixa**: abrir o caixa com troco (ex.: R$ 150) não lança nada na conta "Caixa (gaveta)"; só vendas, sangria e suprimento mexem nela. Por isso uma sangria pode deixar a conta com saldo negativo. Decidir se o fundo de troco entra como saldo inicial do caixa (`set_opening_balance`).
-- **Comprovante da venda por WhatsApp**: o banco grava a mensagem em `outbox_messages` (`pos_send_receipt`), mas o envio depende do provedor de mensagens (P8).
-- **Produto vendido por peso**: o PDV cobra o preço do item como preço do quilo e o banco cobra `weight_price_cents`. Ao salvar um produto "por peso" a tela grava os dois iguais; confirme se o preço por quilo e o preço da embalagem podem ser diferentes (nesse caso o cadastro precisa de dois campos). Nenhum produto de teste é vendido por peso, então esse caminho ficou sem teste de venda.
-- **Fiado**: o banco não tem venda fiada nem saldo de cliente; a tela de cliente mostra zero. Decidir se fiado entra antes de abrir o balcão.
+- **Dinheiro do caixa**: abrir o caixa com troco (ex.: R$ 150) não lança nada na conta "Caixa (gaveta)"; só vendas, sangria e suprimento mexem nela. Por isso uma sangria pode deixar a conta com saldo negativo. Decidir se o fundo de troco entra como saldo inicial do caixa.
+- **Produto vendido por peso**: o PDV cobra o preço do item como preço do quilo e o banco cobra `weight_price_cents`. Ao salvar um produto "por peso" a tela grava os dois iguais; confirme se o preço por quilo e o da embalagem podem ser diferentes (então o cadastro precisa de dois campos). Nenhum produto de teste é vendido por peso, então esse caminho ficou sem teste de venda.
+- **Fiado e contas a receber**: o banco não tem venda fiada, saldo de cliente nem função para receber (`pay_entry` só paga). A tela de cliente mostra zero. Decidir se entra antes de abrir o balcão.
 - **Clientes**: a loja cria o cliente pelo celular informado no pedido. Falta decidir como juntar dois cadastros do mesmo cliente e como atender o pedido de apagar a conta (LGPD).
+- **Telas que o banco já permite e o app ainda não tem**: editar ficha técnica (`save_recipe`), lançar saldo inicial das contas (`set_opening_balance`) e cada gestor definir a própria senha de cancelamento (`set_my_pin`). Diga quais você quer agora.
+
+### Cadastros reais da casa
+
+- **Saldo inicial das contas**: banco e caixa estão com R$ 0,00 e pagar recusa sem saldo. Informe os valores reais.
+- **Insumos e fichas**: o banco só tem a ficha de teste do doce de leite (nata e rapadura como insumos fictícios). Faltam cadastrar leite, coalho, sal, embalagens etc. como itens e preencher as fichas reais (rendimento, validade, consumo, gás e energia).
+- **Entregadores e telefones reais**, no lugar de Bruno, Carlos e Diego de teste.
+- **Senha do gestor**: o usuário de teste usa uma senha de desenvolvimento (`VITE_DEV_MANAGER_PIN`). O dono e cada gerente precisam definir a sua.
+
+### Acessos e provedores
+
+- **App do entregador**: o login vincula o celular da conta do Supabase Auth ao cadastro (`courier_link`). Isso depende do código por mensagem (P8) ou de um usuário de teste do entregador no Auth (criar conta exige o seu OK). Sem isso o app do entregador segue com dados de exemplo e não enxerga as entregas atribuídas pela gestão.
+- **Mensagens** (P8): comprovante da venda por WhatsApp (o banco grava em `outbox_messages`), código de login e aviso de entrega dependem do provedor.
+- **Pix e cartão reais, nota fiscal e área de entrega**: Q6–Q8, Q12 e Q14, como no `CLAUDE.md`.
+
+### Limpeza dos dados de teste (antes de usar o banco de verdade)
+
+Compras PC-0001 e PC-0002 (recebidas, R$ 360 a pagar cada) e PC-0003 (enviado); lotes `TESTE-PROD-1` e a ficha de teste do doce de leite (`seed_dev_producao.sql`); entregadores de teste (`seed_dev_entregas.sql`); pedido 1001 e cliente "TESTE Integração"; venda V-0001 (cancelada) e a sessão de caixa de teste; fornecedores e catálogo fictícios (`seed_dev*.sql`); usuário `teste.gestao@bodeleve.test`.
