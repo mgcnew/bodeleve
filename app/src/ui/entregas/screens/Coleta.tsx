@@ -4,7 +4,9 @@ import { Button } from '@/components/Button'
 import { Box } from '@/components/Card'
 import { formatCents } from '@/domain/money'
 import { staffTotal } from '@/domain/staffOrder'
+import { Banner } from '@/components/Feedback'
 import { leaveStore } from '@/services/entregas'
+import { courierErrorMessage } from '@/services/entregasRemote'
 import { Bar } from '../../shared/OpsBits'
 import { StepHeader, useOrder } from './Detalhe'
 import o from '@/styles/ops.module.css'
@@ -14,6 +16,8 @@ export function Coleta() {
   const order = useOrder()
   const navigate = useNavigate()
   const [checked, setChecked] = useState<boolean[]>([false, false, false])
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
   if (!order) return null
 
   const items = [
@@ -41,16 +45,27 @@ export function Coleta() {
       </main>
       <div className={o.footer}>
         {n === 3 ? (
-          <Button
-            size="l"
-            block
-            onClick={() => {
-              leaveStore(order.id)
-              navigate(`/entregas/pedido/${order.id}/rota`)
-            }}
-          >
-            Saí da loja
-          </Button>
+          <>
+            {problem && <Banner tone="error">{problem}</Banner>}
+            <Button
+              size="l"
+              block
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true)
+                setProblem(undefined)
+                try {
+                  await leaveStore(order.id)
+                  navigate(`/entregas/pedido/${order.id}/rota`)
+                } catch (e) {
+                  setProblem(courierErrorMessage(e))
+                  setBusy(false)
+                }
+              }}
+            >
+              Saí da loja
+            </Button>
+          </>
         ) : (
           <Button size="l" block disabled>
             <span className={o.num}>Confira os itens · {n} de 3</span>

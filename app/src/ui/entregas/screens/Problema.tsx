@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Button, ButtonLink } from '@/components/Button'
+import { Banner } from '@/components/Feedback'
 import { Icon } from '@/components/Icon'
 import { RadioGroup, TextAreaField, TextField } from '@/components/Field'
-import { returnToStore, undoReturn } from '@/services/entregas'
+import { returnToStore, undoReturn, type ReturnToken } from '@/services/entregas'
+import { courierErrorMessage } from '@/services/entregasRemote'
 import { Bar } from '../../shared/OpsBits'
 import { useOrder } from './Detalhe'
 import { useCourier } from '../useCourier'
@@ -16,7 +18,21 @@ export function Problema() {
   const { account } = useCourier()
   const [reason, setReason] = useState(reasons[0])
   const [note, setNote] = useState('')
-  const [undo, setUndo] = useState<ReturnType<typeof returnToStore>>(null)
+  const [undo, setUndo] = useState<ReturnToken | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
+
+  const attempt = async (fn: () => Promise<void>) => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      await fn()
+    } catch (e) {
+      setProblem(courierErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
+  }
   if (!order || !account) return null
 
   if (undo) {
@@ -34,13 +50,17 @@ export function Problema() {
           <ButtonLink to="/entregas" size="l" block>
             Voltar às entregas
           </ButtonLink>
+          {problem && <Banner tone="error">{problem}</Banner>}
           <Button
             variant="secondary"
             block
-            onClick={() => {
-              undoReturn(order.id, undo)
-              setUndo(null)
-            }}
+            disabled={busy}
+            onClick={() =>
+              attempt(async () => {
+                await undoReturn(order.id, undo)
+                setUndo(null)
+              })
+            }
           >
             Desfazer
           </Button>
@@ -62,7 +82,8 @@ export function Problema() {
         <ButtonLink to={`/entregas/pedido/${order.id}/rota`} variant="secondary" block>
           Tentar de novo
         </ButtonLink>
-        <Button size="l" block onClick={() => setUndo(returnToStore(order.id, account, note ? `${reason} · ${note}` : reason))}>
+        {problem && <Banner tone="error">{problem}</Banner>}
+        <Button size="l" block disabled={busy} onClick={() => attempt(async () => setUndo(await returnToStore(order.id, account, note ? `${reason} · ${note}` : reason)))}>
           Devolver à loja
         </Button>
       </div>

@@ -1,9 +1,13 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
 import { Box } from '@/components/Card'
+import { Banner } from '@/components/Feedback'
 import { Button } from '@/components/Button'
 import { TextField, Toggle } from '@/components/Field'
 import { setAvailable, signOutCourier } from '@/services/entregas'
+import { courierErrorMessage, remoteSavePix } from '@/services/entregasRemote'
+import { supabase } from '@/lib/supabase'
 import { PageHeader, SumRow } from '../../shared/OpsBits'
 import { useCourier } from '../useCourier'
 import o from '@/styles/ops.module.css'
@@ -11,6 +15,7 @@ import o from '@/styles/ops.module.css'
 export function Perfil() {
   const { account, session } = useCourier()
   const navigate = useNavigate()
+  const [problem, setProblem] = useState<string>()
   if (!account || !session) return null
   const partner = account.kind === 'partner'
 
@@ -28,14 +33,32 @@ export function Perfil() {
           </div>
         </div>
         <Box>
-          <Toggle label="Disponível para entregas" sub="Desligue quando parar o turno" checked={session.available} onChange={setAvailable} />
+          <Toggle label="Disponível para entregas" sub="Desligue quando parar o turno" checked={session.available}
+            onChange={async (v) => {
+              setProblem(undefined)
+              try {
+                await setAvailable(v)
+              } catch (e) {
+                setProblem(courierErrorMessage(e))
+              }
+            }}
+          />
         </Box>
         <div className={o.card}>
           <SumRow label="Veículo" value={account.vehicle} />
           <SumRow label="Celular" value={account.phone} />
           <SumRow label="Pagamento" value={partner ? 'Por entrega, Pix às segundas' : 'Mensal, pela casa'} />
         </div>
-        {partner && <TextField label="Chave Pix para receber" placeholder="[CHAVE PIX]" />}
+        {partner && (
+          <TextField
+            label="Chave Pix para receber"
+            placeholder="[CHAVE PIX]"
+            onBlur={(e) => {
+              if (supabase) void remoteSavePix(e.target.value).catch((err) => setProblem(courierErrorMessage(err)))
+            }}
+          />
+        )}
+        {problem && <Banner tone="error">{problem}</Banner>}
         <Button
           variant="quiet"
           style={{ alignSelf: 'flex-start', padding: 0 }}

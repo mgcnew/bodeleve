@@ -1,6 +1,8 @@
+import { useEffect } from 'react'
 import { Navigate, Outlet, useLocation, useMatches } from 'react-router-dom'
 import { BottomNav } from '@/components/BottomNav'
 import { courierSessionStore } from '@/services/entregas'
+import { startCourierSync } from '@/services/entregasRemote'
 
 export type EntHandle = { tabs?: boolean }
 
@@ -15,6 +17,13 @@ export function EntregasShell() {
   const session = courierSessionStore.useStore()
   const location = useLocation()
   const handle = (useMatches().at(-1)?.handle ?? {}) as EntHandle
+  const signedIn = !!session
+
+  // com o Supabase, mantém as entregas livres e as minhas em dia (a cada 10 s)
+  useEffect(() => {
+    if (!signedIn) return
+    return startCourierSync()
+  }, [signedIn])
 
   if (!session) return <Navigate to="/entregas/entrar" replace state={{ from: location.pathname }} />
 

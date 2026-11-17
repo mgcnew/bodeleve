@@ -1,6 +1,6 @@
 # IMPLEMENTATION — estado da implementação
 
-Os quatro ambientes estão implementados em `app/` (React + Vite + TypeScript). **A gestão, o PDV e a loja já falam com o Supabase** (login, pedidos, estoque, compras, produção, financeiro, entregas, produtos, clientes e caixa); sem `app/.env.local` o app roda com dados de exemplo no aparelho. Faltam o **app do entregador**, a equipe, os dados da casa e as configurações. Este documento diz o que existe, o que é simulado e o que depende de você.
+Os quatro ambientes estão implementados em `app/` (React + Vite + TypeScript). **A gestão, o PDV, o app do entregador e a loja já falam com o Supabase** (login, pedidos, estoque, compras, produção, financeiro, entregas, produtos, clientes e caixa); sem `app/.env.local` o app roda com dados de exemplo no aparelho. Faltam a equipe, os dados da casa e as configurações. Este documento diz o que existe, o que é simulado e o que depende de você.
 
 ## Telas
 
@@ -14,7 +14,7 @@ Os quatro ambientes estão implementados em `app/` (React + Vite + TypeScript). 
 ## Como entrar para testar
 
 - **Gestão e PDV com o Supabase ligado**: `/gestao/entrar` com o usuário de teste de desenvolvimento (papel gestor), cujo e-mail e senha ficam só no seu `app/.env.local` (`VITE_DEV_STAFF_EMAIL` e `VITE_DEV_STAFF_PASSWORD`) e preenchem o formulário no modo dev. Sem o Supabase, qualquer e-mail com `@` e senha de 4+ caracteres entra como dono.
-- **Entregas**: `/entregas/entrar` com um celular cadastrado — Bruno `(00) 90000-0300` (da casa), Carlos `(00) 90000-0310` (da casa), Diego `(00) 90000-0301` (parceiro) — e qualquer código de 4 números.
+- **Entregas**: com o Supabase, `/entregas/entrar` com o entregador de teste (e-mail e senha em `VITE_DEV_COURIER_EMAIL` e `VITE_DEV_COURIER_PASSWORD` no `app/.env.local`, vinculado ao Bruno pelo celular). Atenção: o login do entregador e o da gestão usam a mesma sessão do navegador, então entrar em um sai do outro (em celulares diferentes não acontece). Sem o Supabase: celular cadastrado — Bruno `(00) 90000-0300`, Carlos `(00) 90000-0310`, Diego `(00) 90000-0301` (parceiro) — e qualquer código de 4 números.
 - **Cancelar venda no PDV**: com o Supabase, a senha numérica do gestor (a de teste está em `VITE_DEV_MANAGER_PIN` no `app/.env.local`); sem ele, qualquer senha numérica de 4 ou mais dígitos.
 
 Para voltar aos dados de exemplo, apague as chaves `bodeleve.*` do `localStorage` do navegador.
@@ -56,7 +56,7 @@ Pedido feito na loja → aparece em Novos na gestão → aceite, conferência it
 | Convite de equipe por e-mail | Registra o convite; não envia | Supabase Auth |
 | Mapa e rastreio | Só "Abrir no mapa" do celular (H-E4) | — |
 | PDV em conexão ruim | Com o banco ligado cada venda vai direto ao servidor; sem internet a venda falha com aviso. A fila local (`pos_checkout` aceita `offline`) ainda não existe | Decisão sobre vender sem estoque conferido |
-| Realtime | **Ligado** na gestão (pedidos, entregas, estoque) e no PDV (caixa, vendas, estoque), testado: mudança feita fora do app aparece em ~2 s. Fica sem Realtime o acompanhamento do pedido na loja (cliente sem login) e as entregas livres do app do entregador | Decisão sobre acesso anônimo ao Realtime; login do entregador |
+| Realtime | **Ligado** na gestão (pedidos, entregas, estoque) e no PDV (caixa, vendas, estoque), testado: mudança feita fora do app aparece em ~2 s. Fica sem Realtime o acompanhamento do pedido na loja (cliente sem login) e o app do entregador (atualiza a cada 10 s) | Decisão sobre acesso anônimo ao Realtime |
 
 ## Backend (Supabase)
 
@@ -74,18 +74,17 @@ O app usa o projeto Supabase **já existente** (`afqcwqikkolyoowkozak`), que tem
 | Gestão: produção (fichas, criar ordem, iniciar, concluir, corrigir apontamento, excluir) | **Ligado e testado** (`create_production_order`, `start_production`, `finish_production`, `undo_finish_production`, `delete_production_order`): ordem OP-0001 com reserva dos insumos, conclusão com lote, consumo pelo lote que vence primeiro e custo real; corrigir devolveu os saldos e excluir liberou as reservas. A tela não edita ficha (`save_recipe` existe no banco, sem tela); a ficha de teste vem de `supabase/seed_dev_producao.sql` |
 | Gestão: entregas (atribuir, publicar para parceiros, desfazer envio) | **Ligado e testado** (`delivery_assign`, `delivery_unassign`; entregadores de `couriers`, estado "em rota" e "na loja" derivado de `deliveries`, Realtime em `deliveries`): pedido 1001 enviado com o Carlos, recarregado (mostra "Enviado") e desfeito; publicar para parceiros gerou entrega de R$ 9,00 (configuração `partner_fee_cents` do banco) e repetir foi recusado |
 | Gestão: produtos (edição), categorias e clientes | **Ligado e testado**: editar produto grava em `products` (preço, estoque mínimo, favorito no PDV, publicar, peso, lote, tipo, origem, descrição e nome); nova categoria grava em `categories`; clientes vêm de `customers` e dos pedidos (nº de pedidos, total, itens que mais compra, canal), e a observação interna grava ao sair do campo. Rapadura editada pela tela (preço R$ 15,00, mínimo 7, favorito) e restaurada; categoria de teste criada e removida. Não existe venda fiada no banco (o campo mostra zero) |
-| Gestão: equipe, dados da casa e configurações | Ainda nos dados de exemplo (`memberships`, `establishments`) |
 | PDV (abrir caixa, vender, cancelar, sangria e suprimento, fechar e reabrir) | **Ligado e testado** (`pos_open_session`, `pos_checkout`, `pos_cancel_sale`, `pos_cash_movement`, `pos_close_session`, `pos_reopen_session`): venda V-0001 de 1 queijo coalho com desconto de 10% em dinheiro (troco R$ 0,39, saiu do lote que vence primeiro, R$ 29,61 no caixa); senha errada recusada com a mensagem certa e senha certa cancelou, devolveu o estoque e estornou o dinheiro; sangria de R$ 100 ao banco, fechar sem diferença e reabrir. Itens, estoque, caixa e vendas se atualizam ao abrir e a cada 20 s. **Falta**: fila de vendas sem internet (H-P7) e envio do comprovante por WhatsApp |
-| App do entregador (`/entregas`) | Ainda nos dados de exemplo (`courier_*` existem no banco; veja "Depende de você") |
+| App do entregador (`/entregas`) | **Ligado e testado** (`courier_link`, `courier_list`, `courier_take`, `courier_accept`, `courier_depart`, `courier_problem`, `courier_undo_problem`, `courier_confirm`, `courier_history`, `courier_set_available`): entrada com o usuário de teste do entregador, pegar a entrega livre, aceitar, conferir a coleta e sair (pedido vira "saiu para entrega" e o estoque baixa), devolver à loja e desfazer, código de entrega errado recusado e o certo concluiu (pedido entregue e pago), histórico do dia e interruptor "Disponível". Com o banco ligado a entrada é por **e-mail e senha** até o código por celular (P8) existir. A lista atualiza a cada 10 s. Distância e endereço da loja ainda não vêm do banco (a tela mostra "—") |
+| Gestão: equipe, dados da casa e configurações | Ainda nos dados de exemplo (`memberships`, `establishments`) |
 
 O catálogo fictício de `supabase/seed_dev.sql` já está aplicado no banco de desenvolvimento.
 
 ## Próximos passos
 
-1. Ligar o app do entregador (`courier_*`), que depende do login por celular (P8) ou de um usuário de teste do entregador.
-2. Ligar equipe, dados da casa e configurações (`memberships`, `establishments`).
-3. Fila de vendas sem internet no PDV (H-P7).
-4. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.
+1. Ligar equipe, dados da casa e configurações (`memberships`, `establishments`).
+2. Fila de vendas sem internet no PDV (H-P7).
+3. Resolver P2 e P8 de `DECISIONS.md` antes de pagamentos reais, nota fiscal e área de entrega.
 
 ## Depende de você (resolvemos no final)
 
@@ -108,10 +107,10 @@ Itens que o código não resolve sozinho, por tipo.
 
 ### Acessos e provedores
 
-- **App do entregador**: o login vincula o celular da conta do Supabase Auth ao cadastro (`courier_link`). Isso depende do código por mensagem (P8) ou de um usuário de teste do entregador no Auth (criar conta exige o seu OK). Sem isso o app do entregador segue com dados de exemplo e não enxerga as entregas atribuídas pela gestão.
+- **Login do entregador por celular**: o vínculo usa o celular da conta do Supabase Auth (`courier_link`) e hoje o app entra por e-mail e senha. O código por mensagem (P8) precisa de provedor de SMS ou WhatsApp configurado no Auth; até lá cada entregador real precisaria de uma conta com e-mail, senha e celular criada por você.
 - **Mensagens** (P8): comprovante da venda por WhatsApp (o banco grava em `outbox_messages`), código de login e aviso de entrega dependem do provedor.
 - **Pix e cartão reais, nota fiscal e área de entrega**: Q6–Q8, Q12 e Q14, como no `CLAUDE.md`.
 
 ### Limpeza dos dados de teste (antes de usar o banco de verdade)
 
-Compras PC-0001 e PC-0002 (recebidas, R$ 360 a pagar cada) e PC-0003 (enviado); lotes `TESTE-PROD-1` e a ficha de teste do doce de leite (`seed_dev_producao.sql`); entregadores de teste (`seed_dev_entregas.sql`); pedido 1001 e cliente "TESTE Integração"; venda V-0001 (cancelada) e a sessão de caixa de teste; fornecedores e catálogo fictícios (`seed_dev*.sql`); usuário `teste.gestao@bodeleve.test`.
+Usuário `teste.entregador@example.com` (criado direto no Auth porque o cadastro recusou o domínio; apagar a linha em `auth.users`); pedido 1001, que o teste do entregador deixou entregue e pago; compras PC-0001 e PC-0002 (recebidas, R$ 360 a pagar cada) e PC-0003 (enviado); lotes `TESTE-PROD-1` e a ficha de teste do doce de leite (`seed_dev_producao.sql`); entregadores de teste (`seed_dev_entregas.sql`); pedido 1001 e cliente "TESTE Integração"; venda V-0001 (cancelada) e a sessão de caixa de teste; fornecedores e catálogo fictícios (`seed_dev*.sql`); usuário `teste.gestao@bodeleve.test`.

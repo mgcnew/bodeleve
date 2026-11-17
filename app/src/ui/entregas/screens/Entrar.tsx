@@ -6,7 +6,8 @@ import { TextField } from '@/components/Field'
 import { hypotheses } from '@/config/hypotheses'
 import { formatPhone } from '@/domain/order'
 import { applyCodeInput } from '@/lib/otp'
-import { courierSessionStore, findCourierByPhone, signInCourier } from '@/services/entregas'
+import { supabase } from '@/lib/supabase'
+import { courierSessionStore, findCourierByPhone, signInCourier, signInCourierWithPassword } from '@/services/entregas'
 import o from '@/styles/ops.module.css'
 
 // H-E1 — entregador entra com celular e código pelo WhatsApp; só entra quem a casa cadastrou
@@ -16,6 +17,9 @@ export function Entrar() {
   const from = (useLocation().state as { from?: string } | null)?.from ?? '/entregas'
   const [step, setStep] = useState<'phone' | 'code'>('phone')
   const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState(import.meta.env.DEV ? (import.meta.env.VITE_DEV_COURIER_EMAIL ?? '') : '')
+  const [password, setPassword] = useState(import.meta.env.DEV ? (import.meta.env.VITE_DEV_COURIER_PASSWORD ?? '') : '')
+  const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
   const length = hypotheses.loginCodeLength
   const [code, setCode] = useState<string[]>(Array(length).fill(''))
@@ -40,6 +44,21 @@ export function Entrar() {
     }
   }
 
+  // com o banco, e-mail e senha até o código por celular (P8) existir; só entra quem a casa cadastrou
+  const enterWithPassword = async (e: FormEvent) => {
+    e.preventDefault()
+    setBusy(true)
+    setError(undefined)
+    try {
+      await signInCourierWithPassword(email.trim(), password)
+      navigate(from, { replace: true })
+    } catch (err) {
+      setError(String((err as Error).message) === 'unknown_phone' ? 'Esse acesso não está vinculado a um entregador cadastrado. Peça à casa para cadastrar você.' : 'E-mail ou senha incorretos.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const setDigit = (i: number, v: string) => {
     const r = applyCodeInput(code, i, v)
     setCode(r.digits)
@@ -54,7 +73,15 @@ export function Entrar() {
           <div style={{ font: 'var(--titulo-xl)', letterSpacing: '-0.01em' }}>Bodeleve</div>
           <div className={o.muted}>Entregas</div>
         </div>
-        {step === 'phone' ? (
+        {supabase ? (
+          <form onSubmit={(e) => void enterWithPassword(e)} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <TextField label="E-mail" type="email" autoComplete="username" value={email} onChange={(e) => { setEmail(e.target.value); setError(undefined) }} />
+            <TextField label="Senha" type="password" autoComplete="current-password" value={password} error={error} onChange={(e) => { setPassword(e.target.value); setError(undefined) }} />
+            <Button type="submit" size="l" block disabled={busy}>
+              Entrar
+            </Button>
+          </form>
+        ) : step === 'phone' ? (
           <form onSubmit={requestCode} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <TextField label="Celular" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="(00) 90000-0300" value={phone} error={error} onChange={(e) => { setPhone(formatPhone(e.target.value)); setError(undefined) }} />
             <Button type="submit" size="l" block>

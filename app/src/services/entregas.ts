@@ -3,14 +3,18 @@
 import type { CourierAccount, CourierSession, DeliveryLogEntry } from '@/domain/courier'
 import type { StaffOrder } from '@/domain/staffOrder'
 import { createStore } from '@/lib/store'
+import { supabase } from '@/lib/supabase'
 import { courierAccounts, seedDeliveryLog } from '@/mocks/entregas'
+import { remoteAccept, remoteConfirm, remoteDepart, remoteProblem, remoteSetAvailable, remoteSignInCourier, remoteSignOutCourier, remoteTake, remoteUndoProblem } from './entregasRemote'
 import { newId } from './gestao/backoffice'
 import { staffOrdersStore } from './gestao/orders'
 
-export const courierSessionStore = createStore<CourierSession | null>('bodeleve.entregas.sessao', () => null)
-export const deliveryLogStore = createStore<DeliveryLogEntry[]>('bodeleve.entregas.historico', seedDeliveryLog)
+// com o Supabase a sessão, a conta e o histórico vêm do banco (entregasRemote); sem ele, dados de exemplo
+export const courierSessionStore = createStore<CourierSession | null>(supabase ? 'bodeleve.entregas.sessao.remoto' : 'bodeleve.entregas.sessao', () => null)
+export const courierAccountStore = createStore<CourierAccount | null>('bodeleve.entregas.conta.remoto', () => null)
+export const deliveryLogStore = createStore<DeliveryLogEntry[]>(supabase ? 'bodeleve.entregas.historico.remoto' : 'bodeleve.entregas.historico', () => (supabase ? [] : seedDeliveryLog()))
 
-export const accountById = (id: string) => courierAccounts.find((c) => c.id === id) ?? null
+export const accountById = (id: string) => (supabase ? courierAccountStore.get() : (courierAccounts.find((c) => c.id === id) ?? null))
 
 const digits = (s: string) => s.replace(/\D/g, '')
 
@@ -31,7 +35,13 @@ export function signInCourier(phone: string, code: string): CourierAccount {
   return c
 }
 
-export const signOutCourier = () => courierSessionStore.set(null)
+/** Com o Supabase, entra por e-mail e senha enquanto o código por celular (P8) não existe */
+export const signInCourierWithPassword = (email: string, password: string) => remoteSignInCourier(email, password)
+
+export function signOutCourier() {
+  courierSessionStore.set(null)
+  if (supabase) void remoteSignOutCourier()
+}
 
 const delivery = (orders: StaffOrder[]) => orders.filter((o) => o.fulfillment === 'delivery')
 
@@ -49,15 +59,25 @@ function patch(id: string, p: Partial<StaffOrder>) {
 }
 
 /** Pegar uma entrega livre: fica na fila do entregador */
-export const claim = (id: string, c: CourierAccount) => patch(id, { courierName: c.name, deliveryNote: 'pego pelo entregador' })
+export async function claim(id: string, c: CourierAccount) {
+  if (supabase) return remoteTake(id)
+  patch(id, { courierName: c.name, deliveryNote: 'pego pelo entregador' })
+}
 
-export const accept = (id: string) => patch(id, { courierStage: 'accepted', deliveryNote: 'aceito' })
+export async function accept(id: string) {
+  if (supabase) return remoteAccept(id)
+  patch(id, { courierStage: 'accepted', deliveryNote: 'aceito' })
+}
 
 /** Coleta conferida: sai da loja e o pedido passa a "em rota" */
-export const leaveStore = (id: string) => patch(id, { status: 'en_route', courierStage: 'collected', deliveryNote: undefined })
+export async function leaveStore(id: string) {
+  if (supabase) return remoteDepart(id)
+  patch(id, { status: 'en_route', courierStage: 'collected', deliveryNote: undefined })
+}
 
 /** H-E5 — entrega confirmada com o código de 4 números da cliente */
-export function confirmDelivery(id: string, code: string, c: CourierAccount) {
+export async function confirmDelivery(id: string, code: string, c: CourierAccount): Promise<boolean> {
+  if (supabase) return remoteConfirm(id, code.trim())
   const o = staffOrdersStore.get().find((x) => x.id === id)
   if (!o || o.deliveryCode !== code.trim()) return false
   patch(id, { status: 'delivered', courierStage: undefined })
@@ -66,7 +86,13 @@ export function confirmDelivery(id: string, code: string, c: CourierAccount) {
 }
 
 /** Devolve à loja: o pedido volta a "pronto" para a loja decidir se reenvia */
-export function returnToStore(id: string, c: CourierAccount, reason: string) {
+export type ReturnToken = { remote: true } | { before: Pick<StaffOrder, 'status' | 'courierName' | 'courierStage' | 'deliveryNote'>; logId: string }
+
+export async function returnToStore(id: string, c: CourierAccount, reason: string): Promise<ReturnToken | null> {
+  if (supabase) {
+    await remoteProblem(id, reason, '')
+    return { remote: true }
+  }
   const o = staffOrdersStore.get().find((x) => x.id === id)
   if (!o) return null
   const before = { status: o.status, courierName: o.courierName, courierStage: o.courierStage, deliveryNote: o.deliveryNote }
@@ -76,11 +102,13 @@ export function returnToStore(id: string, c: CourierAccount, reason: string) {
   return { before, logId: log.id }
 }
 
-export function undoReturn(id: string, undo: NonNullable<ReturnType<typeof returnToStore>>) {
+export async function undoReturn(id: string, undo: ReturnToken) {
+  if ('remote' in undo) return remoteUndoProblem(id)
   patch(id, undo.before)
   deliveryLogStore.set((l) => l.filter((x) => x.id !== undo.logId))
 }
 
-export function setAvailable(available: boolean) {
+export async function setAvailable(available: boolean) {
+  if (supabase) return remoteSetAvailable(available)
   courierSessionStore.set((s) => (s ? { ...s, available } : s))
 }

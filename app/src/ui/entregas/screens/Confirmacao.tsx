@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button, ButtonLink } from '@/components/Button'
+import { Banner } from '@/components/Feedback'
 import { Icon } from '@/components/Icon'
 import { hypotheses } from '@/config/hypotheses'
 import { hourMinute } from '@/domain/dates'
 import { confirmDelivery } from '@/services/entregas'
+import { courierErrorMessage } from '@/services/entregasRemote'
 import { Bar } from '../../shared/OpsBits'
 import { StepHeader, useOrder } from './Detalhe'
 import { useCourier } from '../useCourier'
@@ -13,11 +15,17 @@ import e from '../../gestao/screens/estoque/Estoque.module.css'
 
 // H-E5 — entrega confirmada com o código de 4 números da cliente; sem código, vai para "Problema na entrega"
 export function Confirmacao() {
-  const order = useOrder()
+  const live = useOrder()
   const { account } = useCourier()
+  // depois de entregue o banco tira o pedido da lista do entregador; a tela de "Entregue" segue com a última cópia
+  const last = useRef(live)
+  if (live) last.current = live
+  const order = live ?? last.current
   const [code, setCode] = useState('')
   const [error, setError] = useState(false)
   const [done, setDone] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
   if (!order || !account) return null
 
   if (done || order.status === 'delivered') {
@@ -45,9 +53,17 @@ export function Confirmacao() {
     )
   }
 
-  const submit = () => {
-    if (confirmDelivery(order.id, code, account)) setDone(true)
-    else setError(true)
+  const submit = async () => {
+    setBusy(true)
+    setProblem(undefined)
+    try {
+      if (await confirmDelivery(order.id, code, account)) setDone(true)
+      else setError(true)
+    } catch (e) {
+      setProblem(courierErrorMessage(e))
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -90,7 +106,8 @@ export function Confirmacao() {
         </Link>
       </main>
       <div className={o.footer}>
-        <Button size="l" block onClick={submit} disabled={code.length < hypotheses.deliveryCodeLength}>
+        {problem && <Banner tone="error">{problem}</Banner>}
+        <Button size="l" block onClick={() => void submit()} disabled={busy || code.length < hypotheses.deliveryCodeLength}>
           Confirmar entrega
         </Button>
       </div>

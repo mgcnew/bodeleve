@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Button, ButtonLink } from '@/components/Button'
 import { Banner, EmptyState } from '@/components/Feedback'
@@ -7,6 +8,7 @@ import { formatCents } from '@/domain/money'
 import { staffTotal, type StaffOrder } from '@/domain/staffOrder'
 import { staffOrdersStore } from '@/services/gestao/orders'
 import { accept } from '@/services/entregas'
+import { courierErrorMessage } from '@/services/entregasRemote'
 import { establishmentStore } from '@/services/gestao/people'
 import { Bar, StepBars } from '../../shared/OpsBits'
 import { useCourier } from '../useCourier'
@@ -48,6 +50,8 @@ export function Detalhe() {
   const order = useOrder()
   const { account } = useCourier()
   const casa = establishmentStore.useStore()
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
 
   if (!order || !account) {
     return (
@@ -112,9 +116,27 @@ export function Detalhe() {
             </ButtonLink>
           </>
         ) : (
-          <Button size="l" block onClick={() => accept(order.id)}>
-            {partner ? `Aceitar por ${fee}` : 'Aceitar entrega'}
-          </Button>
+          <>
+            {problem && <Banner tone="error">{problem}</Banner>}
+            <Button
+              size="l"
+              block
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true)
+                setProblem(undefined)
+                try {
+                  await accept(order.id)
+                } catch (e) {
+                  setProblem(courierErrorMessage(e))
+                } finally {
+                  setBusy(false)
+                }
+              }}
+            >
+              {partner ? `Aceitar por ${fee}` : 'Aceitar entrega'}
+            </Button>
+          </>
         )}
       </div>
     </div>

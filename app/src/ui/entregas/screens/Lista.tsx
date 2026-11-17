@@ -10,6 +10,7 @@ import { hourMinute } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { staffOrdersStore } from '@/services/gestao/orders'
 import { availableFor, claim, mineFor } from '@/services/entregas'
+import { courierErrorMessage } from '@/services/entregasRemote'
 import { PageHeader } from '../../shared/OpsBits'
 import { useCourier } from '../useCourier'
 import o from '@/styles/ops.module.css'
@@ -21,6 +22,8 @@ export function Lista() {
   const orders = staffOrdersStore.useStore()
   const [tab, setTab] = useState<Tab>('mine')
   const [claimed, setClaimed] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string>()
   if (!account) return null
 
   const available = availableFor(account, orders)
@@ -89,9 +92,18 @@ export function Lista() {
                   <Button
                     size="l"
                     block
-                    onClick={() => {
-                      claim(x.id, account)
-                      setClaimed(x.id)
+                    disabled={busy}
+                    onClick={async () => {
+                      setBusy(true)
+                      setProblem(undefined)
+                      try {
+                        await claim(x.id, account)
+                        setClaimed(x.id)
+                      } catch (e) {
+                        setProblem(courierErrorMessage(e))
+                      } finally {
+                        setBusy(false)
+                      }
                     }}
                   >
                     {partner ? `Aceitar por ${fee}` : 'Pegar esta entrega'}
@@ -101,6 +113,7 @@ export function Lista() {
             ),
           )
         )}
+        {problem && <Banner tone="error">{problem}</Banner>}
         <p className={o.muted}>
           {partner ? 'Como parceiro, você vê só as entregas que a casa publicou e recebe por entrega.' : 'Como entregador da casa, você recebe as entregas que o balcão atribui e pode pegar as que estão livres.'}
         </p>
