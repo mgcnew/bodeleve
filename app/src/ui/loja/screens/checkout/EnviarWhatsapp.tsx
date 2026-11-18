@@ -7,6 +7,7 @@ import { RadioGroup, TextAreaField, TextField } from '@/components/Field'
 import { formatCents } from '@/domain/money'
 import { formatPhone } from '@/domain/order'
 import { orderMessage, saveWhatsappText } from '@/lib/whatsappOrder'
+import { MessagePreview } from '../../components/MessagePreview'
 import { createOrder } from '@/services/orders'
 import { orderErrorMessage } from '@/services/ordersRemote'
 import { hasWhatsapp, whatsappLink } from '@/services/gestao/purchases'
@@ -111,6 +112,20 @@ export function EnviarWhatsapp() {
           ))}
           <SummaryTotal value={formatCents(subtotalCents)} />
         </Panel>
+
+        <MessagePreview
+          text={orderMessage(
+            {
+              number: 'número gerado ao enviar',
+              windowLabel,
+              contact: { name: draft.name.trim() || '[seu nome]', phone: draft.phone || '[seu celular]' },
+              items: lines.map((li) => ({ productId: li.productId, name: li.name, quantity: li.quantity, unitPriceCents: li.unitPriceCents })),
+              feeCents: 0,
+            },
+            note,
+            establishment.name,
+          )}
+        />
 
         {!configured && <Banner tone="warning">O atendimento por WhatsApp da loja ainda não foi configurado. Volte mais tarde.</Banner>}
         {failMessage && <Banner tone="error">{failMessage}</Banner>}

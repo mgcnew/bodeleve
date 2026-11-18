@@ -1,0 +1,29 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.title {
+  font: 650 19px/26px var(--fonte-titulo);
+}
+
+.help {
+  font: var(--apoio);
+  color: var(--texto-secundario);
+}
+
+.bubble {
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--raio-cartao);
+  border-top-right-radius: 4px;
+  background: var(--cor-primaria-suave);
+  color: var(--texto);
+  font: 400 15px/22px var(--fonte-texto);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.gap {
+  line-height: 10px;
+}

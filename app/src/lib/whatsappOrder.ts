@@ -1,7 +1,7 @@
 // Pedido da loja pelo WhatsApp (D19): a mensagem sai pronta, por escrito, para o WhatsApp da casa.
 import { plural } from '@/domain/catalog'
 import { formatCents } from '@/domain/money'
-import { orderTotal, type Order } from '@/domain/order'
+import type { Order } from '@/domain/order'
 import { readJSON, writeJSON } from './storage'
 
 const KEY = 'bodeleve.whatsapp'
@@ -10,7 +10,9 @@ const KEY = 'bodeleve.whatsapp'
  * Texto do pedido para o WhatsApp. Usa o que o WhatsApp entende: *negrito*, linhas em branco entre
  * os blocos e um item por linha, com o produto em destaque.
  */
-export function orderMessage(order: Order, note: string, storeName: string) {
+export type MessageOrder = Pick<Order, 'number' | 'windowLabel' | 'contact' | 'items' | 'feeCents'>
+
+export function orderMessage(order: MessageOrder, note: string, storeName: string) {
   const items = order.items.flatMap((i) => {
     const line = formatCents(i.quantity * i.unitPriceCents)
     return [
@@ -21,9 +23,9 @@ export function orderMessage(order: Order, note: string, storeName: string) {
   const count = order.items.reduce((n, i) => n + i.quantity, 0)
   const blocks = [
     [`Olá, *${storeName}*! Gostaria de fazer um pedido para retirar na loja.`],
-    [`*PEDIDO ${order.number.startsWith('#') ? order.number : `#${order.number}`}*`],
+    [`*PEDIDO ${/^\d/.test(order.number) ? `#${order.number}` : order.number}*`],
     ['*Itens*', ...items],
-    [`*Total: ${formatCents(orderTotal(order))}*`, `${plural(count, 'item', 'itens')} · pagamento na retirada`],
+    [`*Total: ${formatCents(order.items.reduce((n, i) => n + i.quantity * i.unitPriceCents, 0) + order.feeCents)}*`, `${plural(count, 'item', 'itens')} · pagamento na retirada`],
     ['*Retirada na loja*', order.windowLabel],
     ['*Meus dados*', `Nome: ${order.contact.name}`, `Celular: ${order.contact.phone}`],
     ...(note.trim() ? [['*Observação*', note.trim()]] : []),
