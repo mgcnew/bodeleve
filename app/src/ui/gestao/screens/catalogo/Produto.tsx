@@ -15,7 +15,7 @@ import { Sheet } from '@/components/Sheet'
 import { internalCategories } from '@/mocks/catalog'
 import o from '@/styles/ops.module.css'
 import { Bar, SumRow } from '../../../shared/OpsBits'
-import { ProductPhoto } from '@/ui/loja/components/ProductCard'
+import { PhotoField } from '../../components/PhotoField'
 
 const slugOf = (name: string) => name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
@@ -122,7 +122,7 @@ export function Produto() {
     <div className={o.screen}>
       <Bar title={isNew ? 'Novo produto' : item.name} back="/gestao/produtos" />
       <main className={`${o.main} ${o.mainTop} ${o.narrow}`}>
- {!isNew && <ProductPhoto white label="[FOTO DO PRODUTO]" />}
+        {form.itemType !== 'raw_material' && <PhotoField value={form.photoUrl ?? null} onChange={(photoUrl) => set({ photoUrl })} />}
         <TextField label="Nome" value={form.name} onChange={(e) => set({ name: e.target.value })} />
         <SelectField
           label="Categoria"

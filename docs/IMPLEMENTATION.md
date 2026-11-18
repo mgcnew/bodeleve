@@ -160,6 +160,17 @@ Loja por WhatsApp: a tela de envio tem "Como vai pagar?" (na retirada ou **a pra
 
 Limites: sem limite de crédito por cliente, sem juros e sem aviso de atraso.
 
+## Fotos dos produtos (2026-11-18)
+
+| Item | Situação |
+|---|---|
+| Enviar foto | **Feito**: no produto (Gestão > Produtos > abrir o produto) há "Foto do produto": **Enviar foto** (arquivo JPG, PNG ou WebP até 15 MB, ou câmera no celular), **Usar um endereço (link)** e **Remover foto**. A foto é reduzida no aparelho (1200 px, WebP) antes de subir; clique em Salvar para guardar. |
+| Endereço (link) | Só aceita `https://`; se a imagem não abrir, a tela avisa e a loja mostra o espaço vazio. |
+| Loja | **Feito**: a foto aparece nos cartões, na busca, na página do produto e na sacola. Sem foto, continua o marcador "[FOTO DO PRODUTO]". Na gestão, a lista de produtos mostra a miniatura. |
+| Banco | `supabase/patches/2026-11-18_product_photos.sql`: coluna `products.photo_url`, espaço de armazenamento `produtos` (leitura pública, só imagem, até 3 MB) com regras para quem mexe no estoque, e a vitrine (`store_catalog`) devolvendo a foto. Testado de verdade: envio, vitrine e limpeza. |
+
+Limites: ao trocar ou remover uma foto o arquivo antigo fica guardado (não é apagado sozinho). Sem o Supabase (dados de exemplo) a foto fica só no aparelho e não aparece na loja de exemplo, que é outro cadastro. A foto da casa (página "Sobre") e o logotipo continuam como marcador.
+
 ## Próximos passos
 
 1. As linhas de Configurações (loja online, pagamentos, nota fiscal) que ainda não abrem nada: esperam as respostas Q6 a Q8 e Q12.

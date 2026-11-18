@@ -50,7 +50,7 @@ export function Sacola() {
         <ul className={s.list} style={{ margin: 0, padding: 0, listStyle: 'none' }}>
           {lines.map((line) => (
             <li key={line.productId} className={s.item}>
-              <ProductPhoto className={s.thumb} label="" />
+              <ProductPhoto className={s.thumb} label="" src={line.photoUrl} alt={line.name} />
               <div className={s.itemText}>
                 <Link to={`/produto/${line.productId}`} className={s.itemName} style={{ textDecoration: 'none', color: 'inherit' }}>
                   {line.name}

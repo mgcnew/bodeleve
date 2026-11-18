@@ -26,3 +26,4 @@ O banco da Bodeleve é o projeto Supabase `afqcwqikkolyoowkozak` (organização 
 
 - `patches/2026-11-18_customer_credit.sql`: prazo por cliente, pagamento `on_account`, venda a prazo no `pos_checkout`, `receive_entry`, cancelamento (D21). Testado com `raise exception 'ROLLBACK_TESTE'`.
 - `patches/2026-11-18_online_order_on_account.sql`: pedido da loja a prazo (`place_order`, `order_accept`, `order_complete_pickup`, `order_set_payment`). Depende do `customer_credit`. Testado com reversão.
+- `patches/2026-11-18_product_photos.sql`: `products.photo_url`, bucket `produtos` com regras e `store_catalog` com foto. Testado enviando uma foto de verdade e limpando depois.

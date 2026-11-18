@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { IconButton } from '@/components/Button'
 import { Seal } from '@/components/Badges'
@@ -8,8 +9,30 @@ import { useCart } from '../state/cart'
 import l from '../loja.module.css'
 import s from './ProductCard.module.css'
 
-/** Espaço para foto até haver material próprio (P-P) */
-export function ProductPhoto({ className, white, label = '[FOTO DO PRODUTO]', origin }: { className?: string; white?: boolean; label?: string; origin?: Product['origin'] }) {
+/** Foto do produto; sem foto (ou se a imagem não abrir) mostra o marcador do espaço (P-P) */
+export function ProductPhoto({
+  className,
+  white,
+  label = '[FOTO DO PRODUTO]',
+  origin,
+  src,
+  alt = '',
+}: {
+  className?: string
+  white?: boolean
+  label?: string
+  origin?: Product['origin']
+  src?: string | null
+  alt?: string
+}) {
+  const [failed, setFailed] = useState(false)
+  if (src && !failed) {
+    return (
+      <div className={`${l.photo} ${l.photoImg} ${className ?? ''}`}>
+        <img src={src} alt={alt} loading="lazy" decoding="async" onError={() => setFailed(true)} />
+      </div>
+    )
+  }
   return (
     <div
       role="img"
@@ -32,7 +55,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <article className={s.card}>
       <Link to={`/produto/${product.id}`} className={s.link}>
-        <ProductPhoto className={s.photo} origin={product.origin} />
+        <ProductPhoto className={s.photo} origin={product.origin} src={product.photoUrl} alt={product.name} />
         <div className={s.sealSlot}>
           <LojaSeal product={product} />
         </div>
@@ -93,7 +116,7 @@ export function ProductGridSkeleton({ count = 4 }: { count?: number }) {
 export function ProductRow({ product }: { product: Product }) {
   return (
     <Link to={`/produto/${product.id}`} className={s.row}>
-      <span role="img" aria-label="Espaço para foto do produto" className={`${l.photo} ${s.rowPhoto}`} />
+      <ProductPhoto className={s.rowPhoto} label="" src={product.photoUrl} alt={product.name} origin={product.origin} />
       <span className={s.rowText}>
         <span style={{ fontWeight: 600 }}>{product.name}</span>
         <span className={s.size}>{product.sizeLabel}</span>

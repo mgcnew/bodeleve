@@ -12,6 +12,7 @@ type Row = {
   origin: 'house' | 'brand' | 'resale' | null
   category_slug: string | null
   description: string | null
+  photo_url?: string | null
   details: { size?: string; storage?: string; shelf_life?: string; ingredients?: string; popular_rank?: number | null } | null
 }
 
@@ -46,6 +47,7 @@ async function load() {
     storage: r.details?.storage ?? '',
     shelfLife: r.details?.shelf_life ?? '',
     ingredients: r.details?.ingredients ?? '',
+    photoUrl: r.photo_url ?? null,
   }))
   cache = { at: Date.now(), products, categories }
   return cache

@@ -21,6 +21,8 @@ export type Product = {
   storage: string
   shelfLife: string
   ingredients: string
+  /** foto do produto; sem ela a loja mostra o marcador */
+  photoUrl?: string | null
 }
 
 const originNames: Record<ProductOrigin, string> = {

@@ -77,6 +77,7 @@ export function Produtos() {
           <Box>
             {pg.items.map((i) => (
               <Link key={i.id} to={`/gestao/produtos/${i.id}`} className={o.row} style={{ minHeight: 76 }}>
+                {i.photoUrl && <img src={i.photoUrl} alt="" loading="lazy" style={{ flex: 'none', width: 52, height: 52, borderRadius: 'var(--raio-campo)', objectFit: 'cover', background: 'var(--fundo-suave)' }} />}
                 <span className={o.rowText}>
                   <span className={o.rowTitle}>{i.name}</span>
                   <span style={{ display: 'block', paddingTop: 4 }}>

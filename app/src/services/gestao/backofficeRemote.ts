@@ -36,6 +36,7 @@ type ProductRow = {
   last_cost_cents: number | null
   price_cents: number | null
   weight_price_cents: number | null
+  photo_url: string | null
   sold_by_weight: boolean | null
   is_published: boolean | null
   is_favorite_pos: boolean | null
@@ -62,6 +63,7 @@ const mapItem = (r: ProductRow): Item => ({
   published: !!r.is_published,
   favoritePos: !!r.is_favorite_pos,
   description: r.description ?? undefined,
+  photoUrl: r.photo_url,
 })
 
 const paymentCodes: Record<string, string> = {
@@ -115,7 +117,7 @@ export async function refreshBackoffice(): Promise<void> {
   }
   loading = (async () => {
     const [prods, lots, moves, sups, pos, recs, ops] = await Promise.all([
-      supabase!.from('products').select('id, slug, name, unit, item_type, origin, min_stock, tracks_expiry, supplier_id, last_cost_cents, price_cents, weight_price_cents, sold_by_weight, is_published, is_favorite_pos, description, details, categories(slug)').eq('is_active', true).order('name'),
+      supabase!.from('products').select('id, slug, name, unit, item_type, origin, min_stock, tracks_expiry, supplier_id, last_cost_cents, price_cents, weight_price_cents, sold_by_weight, is_published, is_favorite_pos, description, photo_url, details, categories(slug)').eq('is_active', true).order('name'),
       supabase!.from('product_lots').select('id, product_id, code, expires_at, unit_cost_cents, received_at'),
       supabase!.from('stock_movements').select('id, product_id, lot_id, type, qty, at, ref, description, created_by_name').order('at', { ascending: false }).limit(1000),
       supabase!.from('suppliers').select('id, name, supplies, phone, email, tax_id, lead_time_days, payment_terms, created_at, contact_name').eq('active', true).order('name'),

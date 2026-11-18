@@ -25,6 +25,8 @@ export type Item = {
   favoritePos: boolean
   /** texto da loja; marcador entre colchetes até o dono fornecer (P5) */
   description?: string
+  /** endereço da foto (https): enviada para o armazenamento ou colada pelo dono */
+  photoUrl?: string | null
   /** id do produto no banco (só com o Supabase ligado) */
   dbId?: string
 }

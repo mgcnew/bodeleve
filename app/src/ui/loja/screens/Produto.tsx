@@ -75,7 +75,7 @@ export function Produto() {
     <div className={l.screen}>
       <TopBar back="history" />
       <main className={`${l.main} ${l.mainForm} ${s.layout}`}>
-        <ProductPhoto className={s.photo} />
+        <ProductPhoto className={s.photo} src={p.photoUrl} alt={p.name} origin={p.origin} />
         <div className={l.main} style={{ padding: 0, gap: 20 }}>
           <div className={l.stack}>
             {p.origin !== 'third_party' && (

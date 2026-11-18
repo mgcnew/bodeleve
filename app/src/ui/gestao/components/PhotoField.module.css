@@ -1,0 +1,47 @@
+.preview {
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--raio-cartao);
+  border: 1px dashed var(--linha-forte);
+  background: var(--fundo-suave);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--esp-3);
+  color: var(--texto-secundario);
+  font: var(--apoio);
+}
+
+.preview:has(img) {
+  padding: 0;
+  border-style: solid;
+  border-color: var(--linha);
+}
+
+.preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.empty {
+  max-width: 220px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.urlRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  align-items: flex-start;
+  max-width: 480px;
+}

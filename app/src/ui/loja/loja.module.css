@@ -221,6 +221,20 @@
   border-color: transparent;
 }
 
+.photoImg {
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: var(--fundo-suave);
+}
+
+.photoImg img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .photoWhite {
   background: var(--superficie);
 }

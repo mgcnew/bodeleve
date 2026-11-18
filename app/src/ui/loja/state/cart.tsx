@@ -8,6 +8,7 @@ export type CartLine = {
   sizeLabel: string
   unitPriceCents: number
   quantity: number
+  photoUrl?: string | null
 }
 
 type Cart = {
@@ -41,6 +42,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           sizeLabel: product.sizeLabel,
           unitPriceCents: product.priceCents,
           quantity,
+          photoUrl: product.photoUrl ?? null,
         },
       ]
     })

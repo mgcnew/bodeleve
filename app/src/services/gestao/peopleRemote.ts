@@ -133,6 +133,7 @@ export async function remoteSaveProduct(before: Item, next: Item) {
     is_published: raw ? false : next.published,
     is_favorite_pos: raw ? false : next.favoritePos,
     sold_by_weight: raw ? false : next.soldByWeight,
+    photo_url: raw ? null : (next.photoUrl ?? null),
   }
   if (!raw) patch.origin = originCodes[next.origin ?? 'third_party']
   if (next.description !== before.description && next.description && next.description !== DESCRIPTION_PLACEHOLDER) patch.description = next.description
@@ -170,6 +171,7 @@ export async function remoteCreateProduct(next: Item): Promise<string> {
       is_published: raw ? false : next.published,
       is_favorite_pos: raw ? false : next.favoritePos,
       sold_by_weight: raw ? false : next.soldByWeight,
+      photo_url: raw ? null : (next.photoUrl ?? null),
       description: next.description && next.description !== DESCRIPTION_PLACEHOLDER ? next.description : '',
     })
     if (!error) {
@@ -193,6 +195,7 @@ export function productErrorMessage(e: unknown) {
   const msg = String((e as { message?: string; code?: string })?.message ?? '')
   const code = String((e as { code?: string })?.code ?? '')
   if (code === '42501' || msg.includes('row-level security')) return 'Seu papel não permite editar produtos.'
+  if (msg.includes('photo_url')) return 'O endereço da foto precisa começar com https:// e ter até 1000 letras.'
   if (msg.includes('price') || code === '23514') return 'Confira o preço e os campos do produto.'
   if (msg.includes('duplicate') || code === '23505') return 'Já existe um registro com esse nome.'
   return 'Não foi possível salvar. Nada foi alterado. Tente de novo.'
