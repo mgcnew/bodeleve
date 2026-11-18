@@ -101,7 +101,7 @@ export async function createOrder(input: NewOrder, windowId = 'asap'): Promise<O
     items: order.items.map((i) => ({ productId: i.productId, name: i.name, qtyLabel: `${i.quantity} un`, quantity: i.quantity, unitPriceCents: i.unitPriceCents, lot: null, lotExpiry: null })),
     checked: order.items.map(() => false),
     feeCents: order.feeCents,
-    paymentLabel: input.payment === 'pix' ? 'Pix' : input.payment === 'cash' ? 'Dinheiro na entrega' : 'Cartão na entrega',
+    paymentLabel: input.payment === 'pix' ? 'Pix' : input.payment === 'cash' ? 'Dinheiro na entrega' : input.payment === 'on_pickup' ? 'Pagar na retirada' : 'Cartão na entrega',
     // Pix é pago pelo cliente fora do balcão; cartão e dinheiro são cobrados na entrega ou retirada
     paid: input.payment === 'pix',
     courierName: null,

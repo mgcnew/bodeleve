@@ -24,6 +24,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D16 | 2026-11-15 | Etapa 6 (Entregas) entregue: 9 telas; próprio × parceiro mostrado pelo ajuste “perfil” nos quadros | — |
 | D17 | 2026-11-15 | Etapa 7 (auditoria) concluída: alvo mínimo de toque passa a 44 px; referências de tablet e computador; pacote de passagem (CLAUDE.md, tokens.css, mapa tela → arquivo) | — |
 | D18 | 2026-11-18 | Renovação visual total pedida pelo dono: paleta nova, celular colorido, computador sóbrio com transições leves, esqueletos e responsividade. Escolhido "o padrão da categoria" (referências Linear/Stripe, iFood/Rappi, Shopify) | Usuário |
+| D19 | 2026-11-18 | Fase atual sem entrega: o cliente só retira na loja e fecha o pedido enviando-o por escrito ao WhatsApp da casa. O pedido é salvo no sistema antes (fila da gestão, estoque e relatórios seguem funcionando) e continua reservando estoque até o gestor aceitar ou cancelar. Entrega, quando pedida, é combinada na conversa. O checkout completo (entrega, Pix, cartão, código) fica guardado atrás de `hypotheses.checkoutMode` ('whatsapp' ou 'complete') | Usuário |
 | D14 | 2026-11-15 | Seguir até concluir todas as etapas sem parar; o que depender do usuário é documentado como pendência | Usuário |
 
 ## Propostas da Etapa 1 — aprovadas (D10)

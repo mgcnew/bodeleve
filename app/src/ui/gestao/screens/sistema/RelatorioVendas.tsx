@@ -76,6 +76,7 @@ export function RelatorioVendas() {
           <SumRow label="Pix" value={money(p.pix)} />
           <SumRow label="Cartão" value={money(p.card)} />
           <SumRow label="Dinheiro" value={money(p.cash)} />
+          {p.pending > 0 && <SumRow label="A receber na retirada" value={money(p.pending)} />}
         </section>
         <section className={o.card}>
           <b>Mais vendidos</b>

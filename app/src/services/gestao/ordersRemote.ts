@@ -50,7 +50,7 @@ const statusMap: Record<string, StaffOrderStatus | null> = {
   cancelled: null,
 }
 
-const paymentLabels: Record<string, string> = { pix: 'Pix', card_on_delivery: 'Cartão na entrega', cash: 'Dinheiro na entrega', debit: 'Débito', credit: 'Crédito' }
+const paymentLabels: Record<string, string> = { pix: 'Pix', card_on_delivery: 'Cartão na entrega', cash: 'Dinheiro na entrega', on_pickup: 'Pagar na retirada', debit: 'Débito', credit: 'Crédito' }
 const one = <T,>(v: T | T[] | null | undefined) => (Array.isArray(v) ? v[0] : v) ?? null
 
 /** `checked` é só estado da tela (conferência item a item); vem do que já estava no cache */

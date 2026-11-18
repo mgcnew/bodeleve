@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { hypotheses } from '@/config/hypotheses'
 import { ButtonLink } from '@/components/Button'
 import { Panel, SummaryRow, SummaryTotal } from '@/components/Card'
 import { EmptyState } from '@/components/Feedback'
@@ -23,6 +24,7 @@ export function Sacola() {
   const { lines, setQuantity, subtotalCents } = useCart()
   const { draft, update, feeCents, windowsFor } = useCheckout()
   const delivery = draft.fulfillment === 'delivery'
+  const whatsapp = hypotheses.checkoutMode === 'whatsapp'
 
   if (lines.length === 0) {
     return (
@@ -72,10 +74,17 @@ export function Sacola() {
           Adicionar mais produtos
         </Link>
 
-        <div className={l.stack}>
-          <div style={{ fontWeight: 600 }}>Como você quer receber?</div>
-          <Segmented label="Como receber" options={fulfillmentOptions} value={draft.fulfillment} onChange={changeFulfillment} />
-        </div>
+        {whatsapp ? (
+          <div className={l.card}>
+            <div style={{ fontWeight: 600 }}>Retirada na loja</div>
+            <div className={l.muted}>Você envia o pedido por escrito pelo WhatsApp e paga na retirada. Precisa de entrega? Combine na mesma conversa.</div>
+          </div>
+        ) : (
+          <div className={l.stack}>
+            <div style={{ fontWeight: 600 }}>Como você quer receber?</div>
+            <Segmented label="Como receber" options={fulfillmentOptions} value={draft.fulfillment} onChange={changeFulfillment} />
+          </div>
+        )}
 
         <Panel>
           <SummaryRow label="Subtotal" value={formatCents(subtotalCents)} />
@@ -89,8 +98,8 @@ export function Sacola() {
         <p className={l.muted}>Você não precisa criar conta para comprar.</p>
       </main>
       <div className={l.footer}>
-        <ButtonLink to="/checkout/identificacao" size="l" block spread>
-          <span>Continuar</span>
+        <ButtonLink to={whatsapp ? '/checkout/whatsapp' : '/checkout/identificacao'} size="l" block spread>
+          <span>{whatsapp ? 'Enviar pedido' : 'Continuar'}</span>
           <span className={l.num}>{formatCents(subtotalCents + feeCents)}</span>
         </ButtonLink>
       </div>

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { hypotheses } from '@/config/hypotheses'
 import type { Address, Fulfillment, PaymentMethod } from '@/domain/order'
 import { readJSON, writeJSON } from '@/lib/storage'
 import type { TimeWindow } from '@/services/store'
@@ -41,9 +42,11 @@ const CheckoutContext = createContext<Checkout | null>(null)
 
 export function CheckoutProvider({ children }: { children: ReactNode }) {
   const info = useStoreInfo()
-  const [draft, setDraft] = useState<CheckoutDraft>(() => ({ ...initial, ...readJSON<Partial<CheckoutDraft>>(KEY, {}) }))
+  const [saved, setDraft] = useState<CheckoutDraft>(() => ({ ...initial, ...readJSON<Partial<CheckoutDraft>>(KEY, {}) }))
+  // D19 — no modo WhatsApp só há retirada na loja e o pagamento é feito lá
+  const draft: CheckoutDraft = hypotheses.checkoutMode === 'whatsapp' ? { ...saved, fulfillment: 'pickup', payment: 'on_pickup' } : saved
 
-  useEffect(() => writeJSON(KEY, draft), [draft])
+  useEffect(() => writeJSON(KEY, saved), [saved])
 
   const value = useMemo<Checkout>(() => {
     const windowsFor = (f: Fulfillment) => (f === 'delivery' ? info.deliveryWindows : info.pickupWindows)

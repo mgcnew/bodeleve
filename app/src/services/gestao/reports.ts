@@ -17,6 +17,7 @@ function sampleReport(): SalesReport {
     pix: cents(p.pix),
     card: cents(p.card),
     cash: cents(p.cash),
+    pending: 0,
     top: [
       { name: 'Queijo coalho 500 g', qty: p.top[0] },
       { name: 'Farinha de mandioca 1 kg', qty: p.top[1] },

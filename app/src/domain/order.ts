@@ -1,7 +1,7 @@
 import type { Cents } from './money'
 
 export type Fulfillment = 'delivery' | 'pickup'
-export type PaymentMethod = 'pix' | 'card_on_delivery' | 'cash'
+export type PaymentMethod = 'pix' | 'card_on_delivery' | 'cash' | 'on_pickup'
 
 export type OrderStatus =
   | 'received'
@@ -65,6 +65,7 @@ export const paymentLabels: Record<PaymentMethod, string> = {
   pix: 'Pix',
   card_on_delivery: 'Cartão na entrega',
   cash: 'Dinheiro',
+  on_pickup: 'Pagar na retirada',
 }
 
 export function formatAddress(a: Address) {

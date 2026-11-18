@@ -18,6 +18,8 @@ export type SalesPeriod = {
   pix: number
   card: number
   cash: number
+  /** pedidos de "pagar na retirada" ainda sem forma de pagamento definida */
+  pending: number
   /** mais vendidos por valor, com a quantidade já escrita (un ou kg) */
   top: { name: string; qty: string }[]
 }
@@ -35,9 +37,9 @@ export type SalesReport = {
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
 const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n)
 
-const method = (m: string): 'pix' | 'cash' | 'card' => (m === 'pix' ? 'pix' : m === 'cash' ? 'cash' : 'card')
+const method = (m: string): 'pix' | 'cash' | 'card' | 'pending' => (m === 'pix' ? 'pix' : m === 'cash' ? 'cash' : m === 'on_pickup' ? 'pending' : 'card')
 
-const emptyPeriod = (): SalesPeriod => ({ total: 0, count: 0, counter: { count: 0, total: 0 }, online: { count: 0, total: 0 }, pix: 0, card: 0, cash: 0, top: [] })
+const emptyPeriod = (): SalesPeriod => ({ total: 0, count: 0, counter: { count: 0, total: 0 }, online: { count: 0, total: 0 }, pix: 0, card: 0, cash: 0, pending: 0, top: [] })
 
 function period(rows: SalesRow[]): SalesPeriod {
   const p = emptyPeriod()

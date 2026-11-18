@@ -26,8 +26,19 @@ export async function createPurchase(input: Pick<Purchase, 'supplierId' | 'expec
   return { id: p.id, number: p.number }
 }
 
+/** Só números, com o 55 do Brasil na frente (sem repetir se já veio com ele) */
+export function whatsappDigits(phone: string) {
+  const d = phone.replace(/\D/g, '')
+  return d.length > 11 && d.startsWith('55') ? d : `55${d}`
+}
+
+/** O número foi preenchido de verdade (e não é o marcador [WHATSAPP DA LOJA]) */
+export function hasWhatsapp(phone: string) {
+  return phone.replace(/\D/g, '').length >= 10
+}
+
 export function whatsappLink(phone: string, text: string) {
-  return `https://wa.me/55${phone.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`
+  return `https://wa.me/${whatsappDigits(phone)}?text=${encodeURIComponent(text)}`
 }
 
 export type ReceiptLine = { itemId: string; qty: number; lotCode: string; expiry: string | null }

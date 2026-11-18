@@ -9,6 +9,9 @@ import { Perfil } from './screens/Perfil'
 import { Produto } from './screens/Produto'
 import { Sacola } from './screens/Sacola'
 import { Sobre } from './screens/Sobre'
+import { Navigate } from 'react-router-dom'
+import { hypotheses } from '@/config/hypotheses'
+import { EnviarWhatsapp } from './screens/checkout/EnviarWhatsapp'
 import { Endereco } from './screens/checkout/Endereco'
 import { Entrega } from './screens/checkout/Entrega'
 import { RequireCart } from './screens/checkout/guard'
@@ -39,13 +42,20 @@ export const lojaRoutes: RouteObject = {
     { path: 'entrar', element: <Entrar /> },
     {
       path: 'checkout',
-      children: [
-        { path: 'identificacao', element: <RequireCart><Identificacao /></RequireCart> },
-        { path: 'entrega', element: <RequireCart><Entrega /></RequireCart> },
-        { path: 'endereco', element: <Endereco /> },
-        { path: 'pagamento', element: <RequireCart><Pagamento /></RequireCart> },
-        { path: 'revisao', element: <RequireCart><Revisao /></RequireCart> },
-      ],
+      // D19 — modo WhatsApp: uma tela só; o checkout completo (entrega, pagamento) fica guardado para depois
+      children:
+        hypotheses.checkoutMode === 'whatsapp'
+          ? [
+              { path: 'whatsapp', element: <RequireCart><EnviarWhatsapp /></RequireCart> },
+              { path: '*', element: <Navigate to="/checkout/whatsapp" replace /> },
+            ]
+          : [
+              { path: 'identificacao', element: <RequireCart><Identificacao /></RequireCart> },
+              { path: 'entrega', element: <RequireCart><Entrega /></RequireCart> },
+              { path: 'endereco', element: <Endereco /> },
+              { path: 'pagamento', element: <RequireCart><Pagamento /></RequireCart> },
+              { path: 'revisao', element: <RequireCart><Revisao /></RequireCart> },
+            ],
     },
     { path: 'pedidos/:id', element: <Pedido /> },
     { path: 'pedidos/:id/confirmado', element: <Confirmado /> },

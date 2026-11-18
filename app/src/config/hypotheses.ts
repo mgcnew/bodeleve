@@ -6,6 +6,12 @@
 import type { Cents } from '@/domain/money'
 
 export const hypotheses = {
+  /**
+   * D19 — como o cliente fecha o pedido na loja.
+   * 'whatsapp': só retirada na loja; o pedido é salvo e a mensagem sai pronta para o WhatsApp da casa (fase atual, sem entrega).
+   * 'complete': checkout completo com entrega, pagamento e código de confirmação (para quando a casa crescer).
+   */
+  checkoutMode: 'whatsapp' as 'whatsapp' | 'complete',
   /** H-L1 — taxa de entrega fixa de exemplo, mostrada como "estimada" (Q6) */
   deliveryFee: 800 as Cents,
   /** H-L2 — retirada na loja sem custo (Q7) */

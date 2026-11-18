@@ -116,6 +116,19 @@ Tudo foi testado contra o banco de desenvolvimento como gestor (criar, editar e 
 
 Limites: as telas do canvas em `design/*.dc.html` continuam com o visual antigo; seguem valendo para estrutura, textos e comportamento (registrado em `DECISIONS.md`). Tema escuro não foi feito. Não há fotos de produto: os marcadores `[FOTO DO PRODUTO]` continuam.
 
+## Pedido da loja por WhatsApp (2026-11-18, D19)
+
+| Item | Situação |
+|---|---|
+| Fluxo do cliente | **Feito**: Sacola → "Enviar pedido" → uma tela (nome, celular, quando retirar, observação) → o pedido é salvo e abre o WhatsApp da casa com a mensagem pronta (itens, total, retirada, nome, celular, observação). A confirmação mostra "Abrir o WhatsApp e enviar" caso o navegador bloqueie a abertura. |
+| Só retirada | **Feito**: sem taxa, endereço, Pix ou cartão; pagamento na retirada (novo valor `on_pickup`). Entrega: o cliente escreve na observação e a casa combina pela conversa. |
+| Gestão | Pedidos aparecem em Pedidos como "Retirada · Pagar na retirada". Em Relatórios, a forma de pagamento "A receber na retirada" mostra o que ainda não tem forma definida. |
+| Banco | Migração aditiva `supabase/patches/2026-11-18_pay_on_pickup.sql` (valor novo no tipo de pagamento e `place_order` aceitando-o). Testada com reversão. |
+| Checkout completo | **Guardado**, não apagado. Para voltar: `checkoutMode: 'complete'` em `app/src/config/hypotheses.ts`. |
+| Sem número do WhatsApp | A tela avisa "atendimento ainda não configurado" e o botão fica desligado. |
+
+Limites: a observação do cliente vai só na mensagem do WhatsApp (não é gravada no pedido). Se o cliente salvar o pedido e não enviar a mensagem, o pedido aparece na gestão mesmo assim e o gestor decide aceitar ou cancelar. A tela de acompanhamento do pedido ainda mostra as etapas do fluxo completo.
+
 ## Próximos passos
 
 1. As linhas de Configurações (loja online, pagamentos, nota fiscal) que ainda não abrem nada: esperam as respostas Q6 a Q8 e Q12.
@@ -149,6 +162,8 @@ Itens que o código não resolve sozinho, por tipo.
 - **Senha do gestor**: o usuário de teste usa uma senha de desenvolvimento (`VITE_DEV_MANAGER_PIN`). O dono e cada gerente precisam definir a sua.
 
 ### Acessos e provedores
+
+- **Número do WhatsApp da loja** (só o dono tem): em Gestão → Configurações → Casa, campo "WhatsApp de atendimento". Sem ele o botão "Enviar pelo WhatsApp" da loja fica desligado. Use DDD e número (o 55 é colocado sozinho).
 
 - **Recuperação de senha por e-mail**: no painel do Supabase (Authentication → URL Configuration) cadastre o endereço do app em *Site URL* e em *Redirect URLs* (precisa incluir `/gestao/redefinir-senha`), do contrário o link do e-mail não abre a tela de senha nova. O envio usa o e-mail padrão do Supabase, que tem limite baixo de mensagens por hora: para uso real configure um SMTP próprio. O texto do e-mail (modelo "Reset Password") também pode ser traduzido lá.
 - **Regra de senha**: a tela exige 8 caracteres; o Supabase tem a própria regra (Authentication → Providers → Email). Decida se quer exigir letras e números.

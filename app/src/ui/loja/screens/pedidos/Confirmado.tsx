@@ -1,4 +1,9 @@
 import { useEffect } from 'react'
+import { Button } from '@/components/Button'
+import { hypotheses } from '@/config/hypotheses'
+import { getWhatsappText } from '@/lib/whatsappOrder'
+import { hasWhatsapp, whatsappLink } from '@/services/gestao/purchases'
+import { useEstablishment } from '../../state/storeInfo'
 import { useLocation, useParams } from 'react-router-dom'
 import { ButtonLink } from '@/components/Button'
 import { Panel, SummaryRow, SummaryTotal } from '@/components/Card'
@@ -19,6 +24,7 @@ export function Confirmado() {
   const order = useAsync(() => getOrder(id), [id])
   const { clear } = useCart()
   const placed = (useLocation().state as { placed?: boolean } | null)?.placed
+  const establishment = useEstablishment()
 
   useEffect(() => {
     if (placed) clear()
@@ -45,6 +51,50 @@ export function Confirmado() {
   }
 
   const delivery = o.fulfillment === 'delivery'
+
+  // D19 — modo WhatsApp: o pedido já está salvo, falta enviar a mensagem para a casa
+  if (hypotheses.checkoutMode === 'whatsapp') {
+    const link = whatsappLink(establishment.whatsapp, getWhatsappText(o, establishment.name))
+    return (
+      <div className={`${l.screen} ${l.narrow}`}>
+        <main className={l.main} style={{ gap: 20, paddingTop: 40 }}>
+          <div className={s.success}>
+            <div aria-hidden="true" className={s.check}>
+              <Icon name="confirmar" size={36} />
+            </div>
+            <h1 className={l.pageTitle}>Pedido {o.number} salvo</h1>
+            <div className={l.secondary}>Falta só enviar a mensagem no WhatsApp. A casa confirma o pedido por lá.</div>
+          </div>
+          {hasWhatsapp(establishment.whatsapp) && (
+            <Button size="l" block onClick={() => window.open(link, '_blank', 'noopener')}>
+              Abrir o WhatsApp e enviar
+            </Button>
+          )}
+          <Panel title="Resumo">
+            {o.items.map((i) => (
+              <SummaryRow key={i.productId} label={`${i.quantity} × ${i.name}`} value={formatCents(i.quantity * i.unitPriceCents)} />
+            ))}
+            <SummaryTotal value={formatCents(orderTotal(o))} />
+          </Panel>
+          <Panel>
+            <div className={l.secondary}>
+              Retirada na loja · {o.windowLabel}
+              <br />
+              Pagamento na retirada. Entrega? Combine pela conversa do WhatsApp.
+            </div>
+          </Panel>
+        </main>
+        <div className={`${l.footer} ${l.footerPlain}`}>
+          <ButtonLink to={`/pedidos/${o.id}`} variant="secondary" block>
+            Acompanhar pedido
+          </ButtonLink>
+          <ButtonLink to="/" variant="secondary" block>
+            Voltar ao início
+          </ButtonLink>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={`${l.screen} ${l.narrow}`}>

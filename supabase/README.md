@@ -21,3 +21,5 @@ O banco da Bodeleve é o projeto Supabase `afqcwqikkolyoowkozak` (organização 
 - **Migração `couriers_active` (2026-11-17)**: coluna `couriers.active`; `me_courier`, `courier_link` e `delivery_assign` só enxergam entregador ativo. SQL em `supabase/patches/2026-11-17_couriers_active.sql`.
 - **Migração `set_my_name` (2026-11-17)**: função `set_my_name(p_name)` (só usuário logado) que atualiza o próprio nome em `profiles` e `memberships`. SQL em `supabase/patches/2026-11-17_set_my_name.sql`.
 - **Auditoria de 2026-11-17**: os testes de saldo inicial e de ficha técnica rodaram em blocos que terminam em erro de propósito, para o banco desfazer tudo; nada ficou gravado. O cliente "TESTE Cliente Manual" criado no teste foi removido.
+
+- `patches/2026-11-18_pay_on_pickup.sql`: valor `on_pickup` no tipo `payment_method` e `place_order` aceitando-o (pedido da loja por WhatsApp, D19). Testado com `raise exception 'ROLLBACK_TESTE'`.
