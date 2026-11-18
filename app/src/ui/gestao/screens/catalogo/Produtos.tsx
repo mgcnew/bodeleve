@@ -1,3 +1,4 @@
+import { Pagination, usePagination } from '@/components/Pagination'
 import { useState } from 'react'
 import { Box } from '@/components/Card'
 import { ButtonLink } from '@/components/Button'
@@ -35,9 +36,27 @@ export function Produtos() {
   const [filter, setFilter] = useState<Filter>('all')
   const visible = items.filter((i) => match(i, filter) && normalize(i.name).includes(normalize(q.trim())))
 
+  const pg = usePagination(visible, `${q}|${filter}`)
   return (
     <div className={o.screen}>
-      <Bar title="Produtos" back="/gestao/mais" />
+      <Bar
+        title="Produtos"
+        back="/gestao/mais"
+        action={
+          <>
+            <ButtonLink to="/gestao/produtos/categorias" variant="secondary">
+              Categorias
+            </ButtonLink>
+            <ButtonLink to="/gestao/producao/fichas" variant="secondary">
+              Fichas técnicas
+            </ButtonLink>
+            <ButtonLink to="/gestao/produtos/novo">
+              <Icon name="adicionar" size={20} />
+              Novo produto
+            </ButtonLink>
+          </>
+        }
+      />
       <main className={`${o.main} ${o.mainTop}`}>
         <SearchBox label="Buscar produto" value={q} onChange={setQ} />
         <FilterChips
@@ -56,7 +75,7 @@ export function Produtos() {
           <EmptyState icon="buscar" title="Nenhum produto encontrado" text="Confira a escrita ou mude o filtro." />
         ) : (
           <Box>
-            {visible.map((i) => (
+            {pg.items.map((i) => (
               <Link key={i.id} to={`/gestao/produtos/${i.id}`} className={o.row} style={{ minHeight: 76 }}>
                 <span className={o.rowText}>
                   <span className={o.rowTitle}>{i.name}</span>
@@ -73,7 +92,8 @@ export function Produtos() {
             ))}
           </Box>
         )}
-        <div style={{ display: 'flex', gap: 8, maxWidth: 480 }}>
+        <Pagination {...pg} />
+        <div className={o.hideDesk} style={{ display: 'flex', gap: 8, maxWidth: 480 }}>
           <ButtonLink to="/gestao/produtos/categorias" variant="secondary" block>
             Categorias
           </ButtonLink>
@@ -85,7 +105,7 @@ export function Produtos() {
           {items.length} itens cadastrados{visible.length !== items.length ? `; a lista mostra ${visible.length}` : ''}.
         </p>
       </main>
-      <div className={o.footer}>
+      <div className={`${o.footer} ${o.hideDesk}`}>
         <ButtonLink to="/gestao/produtos/novo" size="l" block>
           Novo produto
         </ButtonLink>

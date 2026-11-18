@@ -66,6 +66,12 @@ Todo preço, saldo e valor usa números tabulares.
 - Toque: mínimo 44 px; botões comuns 48 px; ação principal de rodapé, PDV e entregas 56 px.
 - Ícones: 24 no conjunto, traço 1,75 px, grade 24 px; sem emoji.
 
+## Ações e listas (computador)
+
+- **Ação principal e secundárias da tela ficam sempre à direita do cabeçalho** (`Bar` e `PageHeader` aceitam `action`). No celular continuam no corpo ou no rodapé fixo. Formulários mantêm o botão de salvar no rodapé.
+- **Listas paginadas** em 20 por página (`components/Pagination`): "21–40 de 87", Anterior e Próxima; some quando cabe numa página; a busca ou o filtro voltam à página 1.
+- Espaçamento do computador: conteúdo com 24 px de margem e 16 px entre blocos; cabeçalho de 72 px.
+
 ## Movimento
 
 `--dur-1` 120 ms (cor, borda, escala do botão) · `--dur-2` 200 ms (entrada de tela, folha, cartão) · `--ease-saida` exponencial. Entrada de tela: opacidade e 6 px, uma vez por rota. Esqueleto: faixa de brilho só com `transform`. Hover só onde existe ponteiro (`@media (hover: hover)`).

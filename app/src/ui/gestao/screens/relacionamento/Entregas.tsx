@@ -1,3 +1,4 @@
+import { Pagination, usePagination } from '@/components/Pagination'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
@@ -27,9 +28,18 @@ export function Entregas() {
   }
   const visible = groups[tab]
 
+  const pg = usePagination(visible, tab)
   return (
     <div className={o.screen}>
-      <Bar title="Entregas" back="/gestao/mais" />
+      <Bar
+        title="Entregas"
+        back="/gestao/mais"
+        action={
+          <ButtonLink to="/gestao/entregas/entregadores" variant="secondary">
+            Cadastro de entregadores
+          </ButtonLink>
+        }
+      />
       <main className={`${o.main} ${o.mainTop} ${o.narrow}`}>
         <FilterChips
           label="Filtrar entregas"
@@ -41,14 +51,14 @@ export function Entregas() {
             { value: 'done', label: `Entregues · ${groups.done.length}` },
           ]}
         />
-        <ButtonLink to="/gestao/entregas/entregadores" variant="secondary" block>
+        <ButtonLink to="/gestao/entregas/entregadores" variant="secondary" block className={o.hideDesk}>
           Cadastro de entregadores
         </ButtonLink>
         {visible.length === 0 ? (
           <EmptyState icon="entregas" title="Nenhuma entrega aqui" text="Pedidos com entrega aparecem nesta lista conforme avançam." />
         ) : (
           <div className={o.list}>
-            {visible.map((x) => {
+            {pg.items.map((x) => {
               const place = [x.address?.line2, x.distanceKm ? `${x.distanceKm.toLocaleString('pt-BR')} km` : null].filter(Boolean).join(' · ')
               const line =
                 x.status === 'ready'
@@ -82,6 +92,7 @@ export function Entregas() {
             })}
           </div>
         )}
+        <Pagination {...pg} />
         <section className={o.section}>
           <h2 className={o.h2}>Entregadores</h2>
           <Box>

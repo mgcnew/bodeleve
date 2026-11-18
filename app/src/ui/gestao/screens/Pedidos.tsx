@@ -1,3 +1,4 @@
+import { Pagination, usePagination } from '@/components/Pagination'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tag, type Tone } from '@/components/Badges'
@@ -41,6 +42,7 @@ export function Pedidos() {
   const [tab, setTab] = useState<Tab>('new')
   const visible = orders.filter((x) => x.status === tab).sort((a, b) => a.createdAt.localeCompare(b.createdAt))
 
+  const pg = usePagination(visible, tab)
   return (
     <div className={o.screen}>
       <PageHeader title="Pedidos" sub="Loja e balcão, do dia" />
@@ -55,11 +57,12 @@ export function Pedidos() {
           <EmptyState icon="pedidos" title={`Nenhum pedido ${tabs.find((t) => t.value === tab)?.label.toLowerCase()}`} text={emptyText[tab]} />
         ) : (
           <div className={o.list} aria-live="polite">
-            {visible.map((x) => (
+            {pg.items.map((x) => (
               <OrderCard key={x.id} order={x} />
             ))}
           </div>
         )}
+        <Pagination {...pg} />
         {/* H-G5 — venda de balcão entra concluída e não aparece na fila */}
         <p className={o.muted}>Vendas de balcão já entram concluídas e aparecem no histórico do PDV.</p>
       </main>

@@ -1,3 +1,4 @@
+import { Pagination, usePagination } from '@/components/Pagination'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Box } from '@/components/Card'
@@ -27,6 +28,7 @@ export function Movimentacoes() {
 
   if (!item) return <EmptyState bare icon="estoque" title="Item não encontrado" />
 
+  const pg = usePagination(visible, filter)
   return (
     <div className={o.screen}>
       <Bar title="Movimentações" back={`/gestao/estoque/${id}`} />
@@ -49,7 +51,7 @@ export function Movimentacoes() {
           <EmptyState icon="historico" title="Nenhuma movimentação" text="Entradas e saídas deste item aparecem aqui." />
         ) : (
           <Box>
-            {visible.map((m) => {
+            {pg.items.map((m) => {
               const entry = m.qty > 0
               const lot = lots.find((l) => l.id === m.lotId)
               return (
@@ -80,6 +82,7 @@ export function Movimentacoes() {
             })}
           </Box>
         )}
+        <Pagination {...pg} />
         <p className={o.muted}>Reservas de pedidos online não são movimentação: só baixam o estoque quando o pedido sai.</p>
       </main>
     </div>

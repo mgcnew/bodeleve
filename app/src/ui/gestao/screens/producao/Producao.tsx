@@ -39,9 +39,18 @@ export function Producao() {
 
   return (
     <div className={o.screen}>
-      <Bar title="Produção" back="/gestao/mais" />
+      <Bar
+        title="Produção"
+        back="/gestao/mais"
+        action={
+          <ButtonLink to="/gestao/producao/fichas">
+            <Icon name="producao" size={20} />
+            Fichas técnicas e nova ordem
+          </ButtonLink>
+        }
+      />
       <main className={`${o.main} ${o.mainTop}`}>
-        <ButtonLink to="/gestao/producao/fichas" block style={{ maxWidth: 420 }}>
+        <ButtonLink to="/gestao/producao/fichas" block className={o.hideDesk} style={{ maxWidth: 420 }}>
           <Icon name="producao" size={20} />
           Fichas técnicas e nova ordem
         </ButtonLink>

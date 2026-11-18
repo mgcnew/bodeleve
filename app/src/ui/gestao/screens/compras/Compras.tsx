@@ -1,3 +1,4 @@
+import { Pagination, usePagination } from '@/components/Pagination'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
@@ -22,11 +23,21 @@ export function Compras() {
   const done = purchases.filter((p) => !isOpen(p)).sort((a, b) => (b.receivedAt ?? '').localeCompare(a.receivedAt ?? ''))
   const visible = tab === 'open' ? open : done
 
+  const pg = usePagination(visible, tab)
   return (
     <div className={o.screen}>
-      <Bar title="Compras" back="/gestao/mais" />
+      <Bar
+        title="Compras"
+        back="/gestao/mais"
+        action={
+          <ButtonLink to="/gestao/compras/nova">
+            <Icon name="adicionar" size={20} />
+            Novo pedido de compra
+          </ButtonLink>
+        }
+      />
       <main className={`${o.main} ${o.mainTop}`}>
-        <ButtonLink to="/gestao/compras/nova" block style={{ maxWidth: 420 }}>
+        <ButtonLink to="/gestao/compras/nova" block className={o.hideDesk} style={{ maxWidth: 420 }}>
           <Icon name="adicionar" size={20} />
           Novo pedido de compra
         </ButtonLink>
@@ -47,7 +58,7 @@ export function Compras() {
           />
         ) : (
           <div className={o.list}>
-            {visible.map((p) => {
+            {pg.items.map((p) => {
               const tag = purchaseTag(p)
               return (
                 <Link key={p.id} to={`/gestao/compras/${p.id}`} className={o.card}>
@@ -66,6 +77,7 @@ export function Compras() {
             })}
           </div>
         )}
+        <Pagination {...pg} />
         <Link to="/gestao/fornecedores" className={o.linkInline}>
           Ver fornecedores
           <Icon name="avancar" size={18} />

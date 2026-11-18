@@ -1,3 +1,4 @@
+import { Pagination, usePagination } from '@/components/Pagination'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
@@ -56,16 +57,31 @@ export function Clientes() {
   }
   const visible = customers.filter((c) => normalize(c.name).includes(normalize(q.trim())) || (digits.length > 1 && c.phone.replace(/\D/g, '').includes(digits)))
 
+  const pg = usePagination(visible, q)
   return (
     <div className={o.screen}>
-      <Bar title="Clientes" back="/gestao/mais" />
+      <Bar
+        title="Clientes"
+        back="/gestao/mais"
+        action={
+          <Button
+            onClick={() => {
+              setErrors({})
+              setAdding(true)
+            }}
+          >
+            <Icon name="adicionar" size={20} />
+            Cadastrar cliente
+          </Button>
+        }
+      />
       <main className={`${o.main} ${o.mainTop} ${o.narrow}`}>
         <SearchBox label="Nome ou celular" value={q} onChange={setQ} />
         {visible.length === 0 ? (
           <EmptyState icon="buscar" title={`Nada encontrado para “${q}”`} text="Confira a escrita ou busque pelo celular." />
         ) : (
           <Box>
-            {visible.map((c) => (
+            {pg.items.map((c) => (
               <Link key={c.id} to={`/gestao/clientes/${c.id}`} className={o.row}>
                 <span aria-hidden="true" className={o.rowIcon} style={{ borderRadius: 999, background: 'var(--fundo-suave)', fontWeight: 700 }}>
                   {c.name[0]}
@@ -85,7 +101,8 @@ export function Clientes() {
             ))}
           </Box>
         )}
-        <Button variant="secondary" block style={{ maxWidth: 480 }} onClick={() => { setErrors({}); setAdding(true) }}>
+        <Pagination {...pg} />
+        <Button variant="secondary" block className={o.hideDesk} style={{ maxWidth: 480 }} onClick={() => { setErrors({}); setAdding(true) }}>
           Cadastrar cliente
         </Button>
         <Sheet open={adding} onClose={() => setAdding(false)} title="Novo cliente">

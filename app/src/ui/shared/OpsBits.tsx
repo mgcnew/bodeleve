@@ -6,17 +6,19 @@ import type { Tone } from '@/components/Badges'
 import o from '@/styles/ops.module.css'
 
 /** Barra superior das telas internas (fundo branco, divisória) */
-export function Bar({ title, back, end }: { title: ReactNode; back: string; end?: ReactNode }) {
+/** `action`: botões da tela; no computador ficam sempre à direita do cabeçalho (no celular a tela mostra os seus no corpo ou no rodapé) */
+export function Bar({ title, back, end, action }: { title: ReactNode; back: string; end?: ReactNode; action?: ReactNode }) {
   return (
     <header className={o.bar}>
       <IconLink to={back} icon="voltar" label="Voltar" className={back === '/gestao/mais' ? o.backMobile : undefined} />
       <h1 className={o.barTitle}>{title}</h1>
       {end}
+      {action && <div className={o.deskAction}>{action}</div>}
     </header>
   )
 }
 
-export function PageHeader({ title, sub, end }: { title: string; sub?: ReactNode; end?: ReactNode }) {
+export function PageHeader({ title, sub, end, action }: { title: string; sub?: ReactNode; end?: ReactNode; action?: ReactNode }) {
   return (
     <header className={o.pageHeader}>
       <div>
@@ -24,6 +26,7 @@ export function PageHeader({ title, sub, end }: { title: string; sub?: ReactNode
         {sub && <div className={o.muted}>{sub}</div>}
       </div>
       {end}
+      {action && <div className={o.deskAction}>{action}</div>}
     </header>
   )
 }

@@ -1,3 +1,4 @@
+import { Pagination, usePagination } from '@/components/Pagination'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tag, type Tone } from '@/components/Badges'
@@ -27,6 +28,7 @@ export function Vendas() {
   const total = done.reduce((n, s) => n + s.totalCents, 0)
   const visible = all.filter((s) => filter === 'all' || s.payments.some((p) => payGroup(p.method) === filter))
 
+  const pg = usePagination(visible, filter)
   return (
     <div className={o.screen}>
       <PageHeader title="Vendas" sub={`Vendas de hoje · ${done.length} ${done.length === 1 ? 'venda' : 'vendas'} · ${formatCents(total)} no balcão`} />
@@ -46,7 +48,7 @@ export function Vendas() {
           <EmptyState icon="historico" title="Nenhuma venda aqui" text="As vendas feitas no balcão aparecem nesta lista." />
         ) : (
           <Box>
-            {visible.map((s) => {
+            {pg.items.map((s) => {
               const t = payTone(s)
               const items = s.lines.length
               return (
@@ -67,6 +69,7 @@ export function Vendas() {
             })}
           </Box>
         )}
+        <Pagination {...pg} />
       </main>
     </div>
   )

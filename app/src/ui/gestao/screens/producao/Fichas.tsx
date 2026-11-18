@@ -1,3 +1,4 @@
+import { Pagination, usePagination } from '@/components/Pagination'
 import { Link } from 'react-router-dom'
 import { Box } from '@/components/Card'
 import { ButtonLink } from '@/components/Button'
@@ -12,13 +13,23 @@ import { ItemSeal } from '../../components/ItemSeal'
 export function Fichas() {
   const recipes = recipesStore.useStore()
   const items = itemsStore.useStore()
+  const pg = usePagination(recipes)
   return (
     <div className={o.screen}>
-      <Bar title="Fichas técnicas" back="/gestao/producao" />
+      <Bar
+        title="Fichas técnicas"
+        back="/gestao/producao"
+        action={
+          <ButtonLink to="/gestao/producao/fichas/nova">
+            <Icon name="adicionar" size={20} />
+            Nova ficha técnica
+          </ButtonLink>
+        }
+      />
       <main className={`${o.main} ${o.mainTop} ${o.narrow}`}>
         <p className={o.muted}>A ficha diz o que entra, quanto rende e quanto custa cada unidade. É dela que sai a ordem de produção.</p>
         <Box>
-          {recipes.map((r) => {
+          {pg.items.map((r) => {
             const product = items.find((i) => i.id === r.productId)!
             const cost = unitCostCents(r, items)
             const m = margin(cost, product.priceCents)
@@ -44,7 +55,8 @@ export function Fichas() {
             )
           })}
         </Box>
-        <ButtonLink to="/gestao/producao/fichas/nova" variant="secondary" block style={{ maxWidth: 480 }}>
+        <Pagination {...pg} />
+        <ButtonLink to="/gestao/producao/fichas/nova" variant="secondary" block className={o.hideDesk} style={{ maxWidth: 480 }}>
           Nova ficha técnica
         </ButtonLink>
         <p className={o.muted}>Produtos de revenda não têm ficha. A Rapadura da Linha Bodeleve é feita por parceiro (Engenho Boa Vista) e entra por compra.</p>

@@ -29,8 +29,11 @@
 
 @media (min-width: 1024px) {
   .main {
-    padding: var(--esp-8);
-    gap: var(--esp-6);
+    padding: var(--esp-6);
+    gap: var(--esp-4);
+  }
+  .mainTop {
+    padding-top: var(--esp-6);
   }
 }
 
@@ -54,15 +57,15 @@
 
 @media (min-width: 768px) {
   .pageHeader {
-    padding: var(--esp-6) var(--esp-6) var(--esp-4);
+    padding: var(--esp-4) var(--esp-6) var(--esp-4);
     border-radius: 0;
   }
 }
 
 @media (min-width: 1024px) {
   .pageHeader {
-    padding: var(--esp-6) var(--esp-8) var(--esp-4);
-    min-height: 88px;
+    padding: var(--esp-4) var(--esp-6);
+    min-height: 72px;
     align-items: center;
   }
 }
@@ -332,7 +335,7 @@ a.card {
     margin-top: 0;
     flex-direction: row-reverse;
     justify-content: flex-start;
-    padding: 0 var(--esp-8) var(--esp-6);
+    padding: 0 var(--esp-6) var(--esp-4);
     background: transparent;
     border-top: 0;
     box-shadow: none;
@@ -437,8 +440,8 @@ a.card {
 @media (min-width: 1024px) {
   .bar {
     height: auto;
-    min-height: 88px;
-    padding: var(--esp-4) var(--esp-8);
+    min-height: 72px;
+    padding: var(--esp-3) var(--esp-6);
     gap: var(--esp-3);
   }
   .barTitle {
@@ -459,4 +462,27 @@ a.card {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* botões de ação da tela: só no cabeçalho, só no computador; o resto do tempo ficam no corpo */
+.deskAction {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .deskAction {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-2);
+    margin-left: auto;
+    flex: none;
+  }
+  .deskAction > * {
+    height: var(--toque-min);
+    padding: 0 var(--esp-4);
+    font-size: 15px;
+  }
+  .hideDesk {
+    display: none !important;
+  }
 }

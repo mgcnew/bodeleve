@@ -1,3 +1,4 @@
+import { Pagination, usePagination } from '@/components/Pagination'
 import { useState } from 'react'
 import { Box } from '@/components/Card'
 import { ButtonLink } from '@/components/Button'
@@ -42,9 +43,19 @@ export function Fornecedores() {
     return last?.receivedAt ? `Última compra ${new Date(last.receivedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}` : 'Sem compras'
   }
 
+  const pg = usePagination(visible, q)
   return (
     <div className={o.screen}>
-      <Bar title="Fornecedores" back="/gestao/mais" />
+      <Bar
+        title="Fornecedores"
+        back="/gestao/mais"
+        action={
+          <ButtonLink to="/gestao/fornecedores/novo">
+            <Icon name="adicionar" size={20} />
+            Novo fornecedor
+          </ButtonLink>
+        }
+      />
       <main className={`${o.main} ${o.mainTop}`}>
         <SearchBox label="Buscar fornecedor" value={q} onChange={setQ} />
         {suppliers.length === 0 ? (
@@ -53,7 +64,7 @@ export function Fornecedores() {
           <EmptyState icon="buscar" title={`Nada encontrado para “${q}”`} text="Confira a escrita ou busque pelo que o fornecedor vende." />
         ) : (
           <Box>
-            {visible.map((s) => (
+            {pg.items.map((s) => (
               <ListRow
                 key={s.id}
                 title={s.name}
@@ -63,9 +74,10 @@ export function Fornecedores() {
             ))}
           </Box>
         )}
+        <Pagination {...pg} />
         <p className={o.muted}>{suppliers.length} fornecedores ativos</p>
       </main>
-      <div className={o.footer}>
+      <div className={`${o.footer} ${o.hideDesk}`}>
         <ButtonLink to="/gestao/fornecedores/novo" size="l" block>
           Novo fornecedor
         </ButtonLink>

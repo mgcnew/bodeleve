@@ -78,7 +78,11 @@ export function Entregadores() {
 
   return (
     <div className={o.screen}>
-      <Bar title="Entregadores" back="/gestao/entregas" />
+      <Bar
+        title="Entregadores"
+        back="/gestao/entregas"
+        action={<Button onClick={() => open()}>Novo entregador</Button>}
+      />
       <main className={`${o.main} ${o.mainTop} ${o.narrow}`}>
         {list.length === 0 ? (
           <EmptyState icon="entregas" title="Nenhum entregador cadastrado" text="Cadastre o primeiro com o botão abaixo. Ele entra no app de entregas com o celular informado aqui." />
@@ -128,7 +132,7 @@ export function Entregadores() {
           </>
         )}
       </Sheet>
-      <div className={o.footer}>
+      <div className={`${o.footer} ${o.hideDesk}`}>
         <Button size="l" block onClick={() => open()}>
           Novo entregador
         </Button>

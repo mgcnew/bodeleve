@@ -112,6 +112,8 @@ Tudo foi testado contra o banco de desenvolvimento como gestor (criar, editar e 
 | Teclado no computador | **Feito**: Ctrl/⌘ + K ou `/` abre "Buscar ou ir para" na gestão; `G` + letra vai ao módulo; PDV: `/` ou `F2` busca, `F4` cobra. |
 | Peso da página | **Melhorou**: gestão, PDV e entregas viraram arquivos separados, baixados só na primeira visita à área (a página inicial caiu de 914 para 654 kB, 190 kB comprimidos). |
 
+| Ajustes pedidos depois | **Feito**: espaçamentos menores no computador; botões de ação sempre à direita do cabeçalho (Produtos, Fornecedores, Compras, Clientes, Fichas, Produção, Entregas, Entregadores, Estoque); paginação de 20 em Produtos, Fornecedores, Compras, Clientes, Fichas, Pedidos, Estoque, Lançamentos, Movimentações, Vendas do PDV e Entregas. As Contas, que são agrupadas por vencimento, ainda não têm paginação. |
+
 Limites: as telas do canvas em `design/*.dc.html` continuam com o visual antigo; seguem valendo para estrutura, textos e comportamento (registrado em `DECISIONS.md`). Tema escuro não foi feito. Não há fotos de produto: os marcadores `[FOTO DO PRODUTO]` continuam.
 
 ## Próximos passos

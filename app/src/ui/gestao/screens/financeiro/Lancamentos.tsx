@@ -1,3 +1,4 @@
+import { Pagination, usePagination } from '@/components/Pagination'
 import { useState } from 'react'
 import { Box } from '@/components/Card'
 import { EmptyState } from '@/components/Feedback'
@@ -21,6 +22,7 @@ export function Lancamentos() {
   const ins = ledger.filter((t) => t.kind === 'in').reduce((n, t) => n + t.amountCents, 0)
   const outs = ledger.filter((t) => t.kind === 'out').reduce((n, t) => n + t.amountCents, 0)
 
+  const pg = usePagination(visible, filter)
   return (
     <div className={o.screen}>
       <Bar title="Lançamentos" back="/gestao/financeiro" />
@@ -39,7 +41,7 @@ export function Lancamentos() {
           <EmptyState icon="financeiro" title="Nenhum lançamento" text="Vendas, compras e pagamentos aparecem aqui." />
         ) : (
           <Box>
-            {visible.map((t) => {
+            {pg.items.map((t) => {
               const entry = t.kind === 'in'
               const transfer = t.kind === 'transfer'
               return (
@@ -66,6 +68,7 @@ export function Lancamentos() {
             })}
           </Box>
         )}
+        <Pagination {...pg} />
         <div className={o.card}>
           <SumRow label="Entradas no período" value={`+ ${formatCents(ins)}`} />
           <SumRow label="Saídas no período" value={`− ${formatCents(Math.abs(outs))}`} />

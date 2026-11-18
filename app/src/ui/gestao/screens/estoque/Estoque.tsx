@@ -1,3 +1,4 @@
+import { Pagination, usePagination } from '@/components/Pagination'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
@@ -49,9 +50,25 @@ export function Estoque() {
     .slice()
     .sort((a, b) => Number(b.low || b.expiring.length > 0) - Number(a.low || a.expiring.length > 0))
 
+  const pg = usePagination(visible, filter)
   return (
     <div className={o.screen}>
-      <PageHeader title="Estoque" sub="Saldo disponível = físico menos reservado" />
+      <PageHeader
+        title="Estoque"
+        sub="Saldo disponível = físico menos reservado"
+        action={
+          <>
+            <ButtonLink to="/gestao/estoque/inventario" variant="secondary">
+              <Icon name="confirmar" size={20} />
+              Contar estoque
+            </ButtonLink>
+            <ButtonLink to="/gestao/estoque/ajuste" variant="secondary">
+              <Icon name="remover" size={20} />
+              Registrar perda
+            </ButtonLink>
+          </>
+        }
+      />
       <main className={o.main} style={{ gap: 16 }}>
         <div className={s.summary}>
           <button type="button" className={s.sum} style={{ background: 'var(--atencao-fundo)', color: 'var(--atencao)' }} onClick={() => setFilter('low')}>
@@ -67,7 +84,7 @@ export function Estoque() {
             <b>{compactCents(value)}</b>
           </div>
         </div>
-        <div className={s.actions}>
+        <div className={`${s.actions} ${o.hideDesk}`}>
           <ButtonLink to="/gestao/estoque/inventario" variant="secondary" block>
             <Icon name="confirmar" size={20} />
             Contar estoque
@@ -91,7 +108,7 @@ export function Estoque() {
           <EmptyState icon="estoque" title="Nada por aqui" text={filter === 'low' ? 'Nenhum item abaixo do mínimo.' : 'Nenhum lote vence nos próximos 7 dias.'} />
         ) : (
           <Box>
-            {visible.map(({ item, balance, expiring: exp, low: isLow }) => {
+            {pg.items.map(({ item, balance, expiring: exp, low: isLow }) => {
               const extra = exp[0]?.expiry
                 ? `Lote vence ${shortDate(exp[0].expiry)}${daysUntil(exp[0].expiry) < 0 ? ' · vencido' : ''}`
                 : balance.incoming > 0
@@ -118,6 +135,7 @@ export function Estoque() {
             })}
           </Box>
         )}
+        <Pagination {...pg} />
         <p className={o.muted}>Itens à venda e matérias-primas ficam juntos; o selo mostra o tipo de cada um.</p>
       </main>
     </div>
