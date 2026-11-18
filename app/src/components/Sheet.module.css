@@ -9,7 +9,28 @@
 }
 
 .dialog::backdrop {
-  background: rgb(41 38 33 / 0.5);
+  background: rgb(10 30 22 / 0.5);
+  animation: veu var(--dur-2) var(--ease-saida) both;
+}
+
+@keyframes veu {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes sobe {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+@keyframes abre {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
 }
 
 /* folha de baixo no celular; janela central a partir de 768 px (DESIGN_SYSTEM.md) */
@@ -17,12 +38,16 @@
   margin: auto 0 0;
   width: 100%;
   border-radius: var(--raio-folha) var(--raio-folha) 0 0;
+  box-shadow: var(--sombra-3);
+  animation: sobe var(--dur-2) var(--ease-saida) both;
 }
 
 .modal {
   margin: auto;
   width: min(92vw, 420px);
   border-radius: var(--raio-folha);
+  box-shadow: var(--sombra-3);
+  animation: abre var(--dur-2) var(--ease-saida) both;
 }
 
 @media (min-width: 768px) {
@@ -30,6 +55,7 @@
     margin: auto;
     width: 440px;
     border-radius: var(--raio-folha);
+    animation: abre var(--dur-2) var(--ease-saida) both;
   }
 }
 

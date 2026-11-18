@@ -1,5 +1,6 @@
 .banner {
   display: flex;
+  animation: entra var(--dur-2) var(--ease-saida) both;
   gap: 10px;
   align-items: flex-start;
   padding: var(--esp-3) 14px;
@@ -47,8 +48,8 @@
   width: 56px;
   height: 56px;
   border-radius: var(--raio-pilula);
-  background: var(--cor-terracota-suave);
-  color: var(--cor-terracota-pressionado);
+  background: var(--cor-primaria-suave);
+  color: var(--cor-primaria-pressionado);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,6 +71,29 @@
 }
 
 .skeleton {
+  position: relative;
+  overflow: hidden;
   border-radius: 6px;
-  background: var(--linha);
+  background: var(--fundo-suave);
+}
+
+/* brilho suave: uma faixa clara que cruza o bloco (só transform) */
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.65), transparent);
+  animation: brilho 1.4s var(--ease-saida) infinite;
+}
+
+/* sobre a faixa de cor (celular); no computador a faixa é branca */
+.onBar {
+  background: rgb(127 140 131 / 0.3);
+}
+
+@media (min-width: 768px) {
+  .onBar {
+    background: var(--fundo-suave);
+  }
 }

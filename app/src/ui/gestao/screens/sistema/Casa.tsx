@@ -29,7 +29,7 @@ export function Casa() {
       <Bar title="A casa" back="/gestao/configuracoes" />
       <main className={`${o.main} ${o.mainTop} ${o.narrow}`}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <div role="img" aria-label="Espaço para o logotipo" style={{ flex: 'none', width: 72, height: 72, borderRadius: 16, background: 'var(--cor-creme)', border: '1px dashed var(--texto-secundario)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '600 12px var(--fonte-texto)', color: 'var(--texto-secundario)' }}>
+          <div role="img" aria-label="Espaço para o logotipo" style={{ flex: 'none', width: 72, height: 72, borderRadius: 16, background: 'var(--fundo-suave)', border: '1px dashed var(--texto-secundario)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '600 12px var(--fonte-texto)', color: 'var(--texto-secundario)' }}>
             [LOGO]
           </div>
           <p className={o.muted}>Logotipo oficial ainda não aprovado. Até lá, a marca aparece só como texto.</p>

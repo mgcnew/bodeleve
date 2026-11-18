@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { Link, NavLink, Outlet, useMatches, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation, useMatches, useNavigate } from 'react-router-dom'
 import { BottomNav } from '@/components/BottomNav'
 import { IconButton, IconLink } from '@/components/Button'
 import { Icon } from '@/components/Icon'
@@ -35,11 +35,14 @@ export function LojaShell() {
 
 function ShellFrame() {
   const matches = useMatches()
+  const { pathname } = useLocation()
   const handle = (matches.at(-1)?.handle ?? {}) as LojaHandle
   return (
     <div className={l.shell}>
       <DesktopHeader />
-      <Outlet />
+      <div key={pathname} className="rota entra">
+        <Outlet />
+      </div>
       {/* a barra inferior some em checkout, pagamento e telas de tarefa */}
       {(handle.tabs || handle.cartBar) && (
         <div className={`${l.bottomStack} ${s.mobileOnly}`}>

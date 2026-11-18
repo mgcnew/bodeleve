@@ -3,6 +3,7 @@
 // caches alimentados aqui, e as ações chamam `pos_open_session`, `pos_checkout`, `pos_cancel_sale`,
 // `pos_cash_movement`, `pos_close_session` e `pos_reopen_session`, que fazem a baixa pelo lote, o
 // lançamento do dinheiro e a conferência da senha do gestor.
+import { markLoaded } from '@/services/firstLoad'
 import type { CashSession, Payment, PayMethod, PosCart, Sale } from '@/domain/pdv'
 import { cartSubtotal, cartTotal, lineTotal } from '@/domain/pdv'
 import { supabase } from '@/lib/supabase'
@@ -231,6 +232,7 @@ export async function refreshPdv(): Promise<void> {
     if (!sales.error && sales.data) publishSales((sales.data as unknown as SaleRow[]).map(toSale))
   })().finally(() => {
     loading = null
+    markLoaded('pdv')
   })
   return loading
 }

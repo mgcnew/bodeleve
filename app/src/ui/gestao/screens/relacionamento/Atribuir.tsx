@@ -174,7 +174,7 @@ export function Atribuir() {
                   minHeight: 64,
                   padding: '10px 14px',
                   borderRadius: 12,
-                  border: choice === opt.value ? '2px solid var(--cor-grafite)' : '1.5px solid var(--linha)',
+                  border: choice === opt.value ? '2px solid var(--cor-tinta)' : '1.5px solid var(--linha)',
                   background: 'var(--superficie)',
                   textAlign: 'left',
                   font: '400 14px var(--fonte-texto)',

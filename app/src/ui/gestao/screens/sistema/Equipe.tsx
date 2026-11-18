@@ -96,14 +96,14 @@ export function Equipe() {
         <Box>
           {team.map((m) => (
             <div key={m.id} className={o.row} style={{ minHeight: 56 }}>
-              <span aria-hidden="true" className={o.rowIcon} style={{ borderRadius: 999, background: 'var(--cor-creme)', width: 36, height: 36, fontWeight: 700 }}>
+              <span aria-hidden="true" className={o.rowIcon} style={{ borderRadius: 999, background: 'var(--fundo-suave)', width: 36, height: 36, fontWeight: 700 }}>
                 {m.name[0] === '[' ? 'D' : m.name[0].toUpperCase()}
               </span>
               <span className={o.rowText}>
                 <span className={o.rowTitle}>{m.name}</span>
                 <span className={o.small}>{m.pending ? `Convite pendente · ${m.detail}` : m.detail}</span>
               </span>
-              <span style={{ padding: '4px 10px', borderRadius: 8, background: 'var(--cor-creme)', border: '1px solid var(--linha)', font: '600 13px/18px var(--fonte-texto)' }}>{roleLabels[m.role]}</span>
+              <span style={{ padding: '4px 10px', borderRadius: 8, background: 'var(--fundo-suave)', border: '1px solid var(--linha)', font: '600 13px/18px var(--fonte-texto)' }}>{roleLabels[m.role]}</span>
               {editable(m) && (
                 <Button variant="quiet" aria-label={`Alterar ${m.name}`} onClick={() => manage(m)}>
                   Alterar
@@ -117,7 +117,7 @@ export function Equipe() {
             Convidar pessoa
           </Button>
         ) : (
-          <div style={{ padding: 16, borderRadius: 12, background: 'var(--cor-terracota-suave)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ padding: 16, borderRadius: 12, background: 'var(--cor-primaria-suave)', display: 'flex', flexDirection: 'column', gap: 12 }}>
             <TextField label="E-mail" type="email" placeholder="nome@exemplo.com" value={email} error={error} onChange={(e) => setEmail(e.target.value)} />
             <SelectField label="Papel" value={inviteRole} onChange={(e) => setInviteRole(e.target.value as Role)} options={inviteRoles.map((r) => ({ value: r, label: roleLabels[r] }))} />
             <Button onClick={() => void invite()}>Registrar convite</Button>

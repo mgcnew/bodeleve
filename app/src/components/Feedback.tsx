@@ -57,6 +57,7 @@ export function ErrorState({ title, text, action }: Omit<StateProps, 'icon' | 'b
   )
 }
 
-export function Skeleton({ width, height = 14, radius, style }: { width: string; height?: number; radius?: number; style?: CSSProperties }) {
-  return <div className={styles.skeleton} style={{ width, height, borderRadius: radius, ...style }} />
+/** `tone="dark"`: bloco claro sobre a faixa colorida do celular */
+export function Skeleton({ width, height = 14, radius, style, tone }: { width: string; height?: number; radius?: number; style?: CSSProperties; tone?: 'dark' }) {
+  return <div className={`${styles.skeleton} ${tone === 'dark' ? styles.onBar : ''}`} style={{ width, height, borderRadius: radius, ...style }} />
 }

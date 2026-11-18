@@ -1,0 +1,77 @@
+.screen {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
+
+/* a faixa de topo já nasce com a cor do ambiente, então a tela não "pisca" ao carregar */
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  padding: var(--esp-4) var(--esp-4) var(--esp-6);
+  background: var(--barra-fundo);
+  border-bottom: 1px solid var(--barra-linha);
+  border-radius: 0 0 var(--raio-folha) var(--raio-folha);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  padding: var(--esp-4);
+  width: 100%;
+  max-width: 1200px;
+}
+
+.box {
+  padding: var(--esp-1) var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  min-height: 64px;
+  border-bottom: 1px solid var(--linha);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.rowText {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--esp-2);
+}
+
+@media (min-width: 768px) {
+  .head {
+    border-radius: 0;
+    padding: var(--esp-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .body {
+    padding: var(--esp-8);
+    gap: var(--esp-6);
+  }
+  .kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--esp-4);
+  }
+}

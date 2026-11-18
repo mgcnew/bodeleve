@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Button, ButtonLink } from '@/components/Button'
 import { EmptyState } from '@/components/Feedback'
 import { FilterChips } from '@/components/Field'
@@ -29,6 +29,24 @@ export function Vender() {
   const [weighing, setWeighing] = useState<Sellable | null>(null)
   const [grams, setGrams] = useState(500)
   const [editing, setEditing] = useState<string | null>(null)
+  const navigate = useNavigate()
+
+  // teclado no balcão: "/" ou F2 busca o produto; F4 vai cobrar
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      const typing = !!t && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName))
+      if (e.key === 'F2' || (e.key === '/' && !typing)) {
+        e.preventDefault()
+        setTab('search')
+      } else if (e.key === 'F4' && cartStore.get().lines.length > 0) {
+        e.preventDefault()
+        navigate('/pdv/sacola')
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [navigate])
 
   const visible = useMemo(() => {
     if (tab === 'fav') return sellable.filter((x) => x.item.favoritePos)
@@ -85,9 +103,9 @@ export function Vender() {
             <FilterChips label="Categoria" value={cat} onChange={setCat} options={categories.filter((c) => !['temperos', 'bebidas'].includes(c.id)).map((c) => ({ value: c.id, label: c.name }))} />
           )}
           {tab === 'search' && (
-            <div role="search" style={{ display: 'flex', alignItems: 'center', gap: 10, height: 48, padding: '0 16px', borderRadius: 999, background: 'var(--superficie)', border: '1.5px solid var(--cor-grafite)' }}>
+            <div role="search" style={{ display: 'flex', alignItems: 'center', gap: 10, height: 48, padding: '0 16px', borderRadius: 999, background: 'var(--superficie)', border: '1px solid var(--cor-primaria)', boxShadow: '0 0 0 3px var(--cor-primaria-suave)' }}>
               <Icon name="buscar" size={20} />
-              <input type="search" aria-label="Buscar produto" placeholder="Nome do produto" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: '1 1 0', minWidth: 0, border: 0, background: 'transparent', font: 'var(--corpo)', outline: 'none' }} />
+              <input autoFocus type="search" aria-label="Buscar produto" placeholder="Nome do produto" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: '1 1 0', minWidth: 0, border: 0, background: 'transparent', font: 'var(--corpo)', outline: 'none' }} />
             </div>
           )}
           {visible.length > 0 ? (
@@ -115,6 +133,9 @@ export function Vender() {
             <EmptyState icon="buscar" title={tab === 'search' && !q.trim() ? 'Digite o nome do produto' : 'Nenhum produto aqui'} text={tab === 'fav' ? 'Marque produtos como favoritos no cadastro.' : undefined} />
           )}
           <p className={o.muted}>Toque para somar 1. Produtos por peso pedem o peso antes.</p>
+          <p className={`${o.muted} ${s.keysHelp}`}>
+            Teclado: <kbd>/</kbd> busca · <kbd>F4</kbd> cobra
+          </p>
         </main>
 
         <aside className={s.aside} aria-label="Sacola">

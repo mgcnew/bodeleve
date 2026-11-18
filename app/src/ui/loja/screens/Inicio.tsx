@@ -58,8 +58,8 @@ export function Inicio() {
 
         <div className={s.hero}>
           <div className={s.heroText}>
-            <div className={l.eyebrow}>{establishment.tagline}</div>
-            <div className={s.heroTitle}>{establishment.heroTitle}</div>
+            <h1 className={s.heroTitle}>{establishment.heroTitle}</h1>
+            <p className={s.heroSub}>{establishment.tagline}</p>
             <a href="#casa" className={s.heroCta}>
               Ver o que é feito aqui
             </a>
@@ -69,14 +69,14 @@ export function Inicio() {
           </div>
         </div>
 
-        <nav aria-label="Atalhos" className={l.stack} style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          <a href="#pedidos" className={chipClass}>
+        <nav aria-label="Atalhos" className={s.rail}>
+          <a href="#pedidos" className={`${chipClass} ${s.tintOrange}`}>
             Mais pedidos
           </a>
-          <a href="#casa" className={chipClass}>
+          <a href="#casa" className={`${chipClass} ${s.tintGreen}`}>
             Feitos na casa
           </a>
-          <a href="#marca" className={chipClass}>
+          <a href="#marca" className={`${chipClass} ${s.tintYellow}`}>
             Linha Bodeleve
           </a>
         </nav>

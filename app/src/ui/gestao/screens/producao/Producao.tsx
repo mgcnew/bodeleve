@@ -67,7 +67,7 @@ export function Producao() {
                   <span className={o.cardHead}>
                     <span style={{ fontWeight: 600, fontSize: 17 }}>{items.find((i) => i.id === op.productId)?.name}</span>
                     {t.tone === 'neutral' ? (
-                      <span style={{ padding: '4px 10px', borderRadius: 8, background: 'var(--cor-grafite)', color: 'var(--cor-creme)', font: '600 13px/18px var(--fonte-texto)' }}>{t.label}</span>
+                      <span style={{ padding: '4px 10px', borderRadius: 8, background: 'var(--cor-tinta)', color: 'var(--fundo-suave)', font: '600 13px/18px var(--fonte-texto)' }}>{t.label}</span>
                     ) : (
                       <Tag tone={t.tone}>{t.label}</Tag>
                     )}
@@ -75,7 +75,7 @@ export function Producao() {
                   <span className={`${o.muted} ${o.num}`}>
                     {op.number} · {whenText(op)}
                   </span>
-                  <span style={{ font: '600 12px/16px var(--fonte-texto)', color: forOrder ? 'var(--cor-terracota-pressionado)' : 'var(--texto-secundario)' }}>
+                  <span style={{ font: '600 12px/16px var(--fonte-texto)', color: forOrder ? 'var(--cor-primaria-pressionado)' : 'var(--texto-secundario)' }}>
                     {op.destination.kind === 'order' ? `Para pedido #${op.destination.orderNumber}` : 'Para estoque'}
                   </span>
                 </Link>

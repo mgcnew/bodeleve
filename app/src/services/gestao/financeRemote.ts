@@ -2,6 +2,7 @@
 // As telas continuam lendo `accountsStore`, `entriesStore` e `ledgerStore`; com o Supabase ligado
 // eles são caches alimentados aqui, e pagar uma conta chama `pay_entry` (valida saldo, registra
 // multa e juros e lança a próxima despesa fixa) e `undo_payment`.
+import { markLoaded } from '@/services/firstLoad'
 import type { Account, FinancialEntry, LedgerTx } from '@/domain/backoffice'
 import { supabase } from '@/lib/supabase'
 import { accountsStore, entriesStore, ledgerStore } from './backoffice'
@@ -114,6 +115,7 @@ export async function refreshFinance(): Promise<void> {
     entriesStore.set(list)
   })().finally(() => {
     loading = null
+    markLoaded('finance')
   })
   return loading
 }

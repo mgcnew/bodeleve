@@ -134,8 +134,8 @@ div.sum {
 }
 
 .balStrong {
-  background: var(--cor-terracota);
-  border-color: var(--cor-terracota);
+  background: var(--cor-primaria);
+  border-color: var(--cor-primaria);
   color: var(--superficie);
 }
 
@@ -158,7 +158,7 @@ div.sum {
 
 .next {
   font: 600 13px/18px var(--fonte-texto);
-  color: var(--cor-terracota-pressionado);
+  color: var(--cor-primaria-pressionado);
 }
 
 .mv {
@@ -210,7 +210,7 @@ div.sum {
   width: 64px;
   height: 64px;
   border-radius: var(--raio-pilula);
-  background: var(--cor-verde);
+  background: var(--cor-primaria);
   color: var(--superficie);
   display: flex;
   align-items: center;

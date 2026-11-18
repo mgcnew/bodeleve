@@ -57,7 +57,7 @@ export function Movimentacoes() {
                   <span
                     aria-hidden="true"
                     className={s.mvIcon}
-                    style={{ background: entry ? 'var(--sucesso-fundo)' : 'var(--cor-creme)', color: entry ? 'var(--sucesso)' : 'var(--texto-secundario)' }}
+                    style={{ background: entry ? 'var(--sucesso-fundo)' : 'var(--fundo-suave)', color: entry ? 'var(--sucesso)' : 'var(--texto-secundario)' }}
                   >
                     <Icon name={entry ? 'adicionar' : 'remover'} size={18} />
                   </span>

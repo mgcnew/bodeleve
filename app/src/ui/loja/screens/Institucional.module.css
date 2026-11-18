@@ -1,7 +1,7 @@
 .hero {
   padding: 28px 20px;
   border-radius: var(--raio-folha);
-  background: var(--cor-terracota);
+  background: var(--cor-primaria);
   color: var(--superficie);
   display: flex;
   flex-direction: column;
@@ -34,7 +34,7 @@
 }
 
 .fact > svg {
-  color: var(--cor-terracota);
+  color: var(--cor-primaria);
 }
 
 .housePhoto {
@@ -44,7 +44,7 @@
 }
 
 .eyebrowBrand {
-  color: var(--cor-terracota);
+  color: var(--cor-primaria);
 }
 
 .aboutTitle {

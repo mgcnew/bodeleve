@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { IconLink } from '@/components/Button'
 import { Icon, type IconName } from '@/components/Icon'
@@ -89,12 +89,15 @@ export function Kpi({ label, value, sub, tone, to }: { label: string; value: Rea
       {sub && <span className={o.kpiSub}>{sub}</span>}
     </>
   )
+  const style = tone ? ({ '--kpi-fundo': toneColors[tone].bg } as CSSProperties) : undefined
   return to ? (
-    <Link to={to} className={o.kpi}>
+    <Link to={to} className={o.kpi} style={style}>
       {inner}
     </Link>
   ) : (
-    <div className={o.kpi}>{inner}</div>
+    <div className={o.kpi} style={style}>
+      {inner}
+    </div>
   )
 }
 
@@ -124,7 +127,7 @@ export function StepBars({ total, done, current }: { total: number; done: number
         <span
           key={i}
           className={o.stepBar}
-          style={{ background: i < done ? 'var(--cor-verde)' : i === current ? 'var(--cor-terracota)' : undefined }}
+          style={{ background: i < done ? 'var(--cor-primaria)' : i === current ? 'var(--cor-primaria)' : undefined }}
         />
       ))}
     </div>

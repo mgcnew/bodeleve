@@ -1,6 +1,7 @@
 // Pedidos da gestão no banco. As telas continuam lendo `staffOrdersStore`; com o Supabase ligado
 // ele é um cache alimentado aqui (busca, Realtime e atualização a cada 15 s) e as ações chamam
 // as funções `order_*` do banco, que fazem a baixa por lote, a conferência e o aviso ao cliente.
+import { markLoaded } from '@/services/firstLoad'
 import type { StaffOrder, StaffOrderItem, StaffOrderStatus } from '@/domain/staffOrder'
 import { refreshCouriers, refreshPeople } from './peopleRemote'
 import { supabase } from '@/lib/supabase'
@@ -126,6 +127,7 @@ export async function refreshStaffOrders(): Promise<void> {
     staffOrdersStore.set(next)
   })().finally(() => {
     loading = null
+    markLoaded('orders')
   })
   return loading
 }

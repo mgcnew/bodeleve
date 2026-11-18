@@ -1,0 +1,71 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--fundo-operacao);
+}
+
+.brandPanel {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  padding: var(--esp-12) var(--esp-6) var(--esp-8);
+  background: var(--cor-floresta);
+  color: #FFFFFF;
+  border-radius: 0 0 var(--raio-folha) var(--raio-folha);
+}
+
+.brand {
+  font: 700 40px/44px var(--fonte-titulo);
+  letter-spacing: -0.035em;
+}
+
+.area {
+  font: 500 16px/24px var(--fonte-texto);
+  color: #BFE3CF;
+}
+
+.panel {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: var(--esp-8) var(--esp-6);
+}
+
+.inner {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+}
+
+@media (min-width: 900px) {
+  .page {
+    flex-direction: row;
+  }
+
+  .brandPanel {
+    flex: 0 0 44%;
+    justify-content: flex-end;
+    padding: var(--esp-12);
+    border-radius: 0;
+    min-height: 100dvh;
+  }
+
+  .brand {
+    font-size: 56px;
+    line-height: 60px;
+  }
+
+  .area {
+    font-size: 20px;
+  }
+
+  .panel {
+    align-items: center;
+    padding: var(--esp-12);
+  }
+}

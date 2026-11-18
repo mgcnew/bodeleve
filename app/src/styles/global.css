@@ -12,12 +12,45 @@ body {
   padding: 0;
 }
 
+html {
+  color-scheme: light;
+  scrollbar-color: var(--linha-forte) transparent;
+}
+
 body {
   font: var(--corpo);
+  font-feature-settings: 'tnum' 0;
   color: var(--texto);
   background: var(--fundo-operacao);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--cor-primaria-suave);
+  color: var(--cor-tinta);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--linha-forte);
+  border-radius: var(--raio-pilula);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+input,
+textarea {
+  caret-color: var(--cor-primaria);
+}
+
+a {
+  text-underline-offset: 3px;
 }
 
 h1,
@@ -25,6 +58,13 @@ h2,
 h3,
 p {
   margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.015em;
+  text-wrap: balance;
 }
 
 button,
@@ -40,7 +80,7 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--cor-grafite);
+  outline: 2px solid var(--cor-primaria);
   outline-offset: 2px;
 }
 
@@ -65,4 +105,55 @@ a {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* entrada curta de tela: uma única animação, só opacidade e 6 px */
+@keyframes entra {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.entra {
+  animation: entra var(--dur-2) var(--ease-saida) both;
+}
+
+/* contêiner da tela atual: ocupa a altura toda e anima a entrada ao trocar de rota */
+.rota {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* brilho do esqueleto: só transform, barato em aparelho simples */
+@keyframes brilho {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+kbd {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--linha-forte);
+  border-bottom-width: 2px;
+  background: var(--superficie);
+  color: var(--texto-secundario);
+  font: 600 11px/1 var(--fonte-texto);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

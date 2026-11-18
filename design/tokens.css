@@ -1,38 +1,46 @@
 /*
  * Bodeleve — tokens do design system (fonte: docs/DESIGN_SYSTEM.md)
  * Use estas variáveis no código; não redigite valores soltos.
- * Fontes: Bricolage Grotesque (títulos, 500/700) e Inter (interface, 400/500/600), via Google Fonts.
+ * Fonte: Geist (títulos e interface, 400–700), via Google Fonts.
+ * Renovação visual de 2026-11-18 (D18): paleta nova, verde-folha como ação.
  */
 :root {
   /* Marca */
-  --cor-terracota: #A9482C;              /* ação principal, destino ativo, selo Marca Bodeleve */
-  --cor-terracota-pressionado: #8A3920;
-  --cor-terracota-suave: #F4E1D8;
-  --cor-verde: #315C46;                  /* positivo, selo Feito na casa */
-  --cor-mostarda: #D9A441;               /* só preenchimento; nunca texto */
-  --cor-creme: #F7F2E8;
-  --cor-grafite: #292621;
+  --cor-primaria: #0F7A43;               /* ação principal, destino ativo, selo Feito na casa */
+  --cor-primaria-pressionado: #0B6236;
+  --cor-primaria-suave: #E4F4EA;
+  --cor-floresta: #0A3D2A;               /* faixa de topo e destaques no celular */
+  --cor-laranja: #E8590C;                /* destaque e selo Marca Bodeleve (só preenchimento) */
+  --cor-laranja-texto: #B4470A;
+  --cor-laranja-suave: #FFEDD5;
+  --cor-amarelo: #F6C343;                /* só preenchimento; nunca texto */
+  --cor-tinta: #141B17;                  /* foco, seleção, texto */
 
   /* Superfícies e texto */
-  --fundo-loja: #F7F2E8;
-  --fundo-operacao: #FBFAF6;             /* gestão, PDV, entregas */
+  --fundo-loja: #F6F8F5;
+  --fundo-operacao: #F4F6F4;             /* gestão, PDV, entregas */
+  --fundo-suave: #EBEFEB;                /* campos desligados, marcadores de foto */
   --superficie: #FFFFFF;
-  --linha: #E4DCCB;
-  --texto: #292621;
-  --texto-secundario: #5E584E;
+  --linha: #E1E6E1;
+  --linha-forte: #C8D0C9;
+  --texto: #141B17;
+  --texto-secundario: #4E5A52;
 
   /* Semânticos (texto / fundo) */
-  --sucesso: #315C46;     --sucesso-fundo: #E3EDE6;
-  --atencao: #7A5A12;     --atencao-fundo: #F8EBC9;
-  --erro: #8C1D18;        --erro-fundo: #F6E0DC;
-  --info: #2F5D7C;        --info-fundo: #DDE8EF;
+  --sucesso: #0B6236;     --sucesso-fundo: #E1F3E8;
+  --atencao: #8A5A00;     --atencao-fundo: #FFF1CC;
+  --erro: #B3173A;        --erro-fundo: #FDE6EA;
+  --info: #1D5FA8;        --info-fundo: #E3EEFA;
+
+  /* Matizes de categoria (texto / fundo): cor nos chips, atalhos e ícones */
+  --matiz-rosa: #A3265B;  --matiz-rosa-fundo: #FCE7F0;
 
   /* Tipografia */
-  --fonte-titulo: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
-  --fonte-texto: 'Inter', system-ui, sans-serif;
-  --titulo-xl: 700 34px/40px var(--fonte-titulo);
-  --titulo-l: 700 28px/34px var(--fonte-titulo);
-  --titulo-m: 700 22px/28px var(--fonte-titulo);
+  --fonte-titulo: 'Geist', system-ui, sans-serif;
+  --fonte-texto: 'Geist', system-ui, sans-serif;
+  --titulo-xl: 700 32px/38px var(--fonte-titulo);
+  --titulo-l: 700 26px/32px var(--fonte-titulo);
+  --titulo-m: 650 21px/28px var(--fonte-titulo);
   --titulo-s: 600 18px/26px var(--fonte-texto);
   --corpo: 400 16px/24px var(--fonte-texto);
   --apoio: 400 14px/20px var(--fonte-texto);
@@ -42,18 +50,53 @@
   /* Espaço (base 4) */
   --esp-1: 4px; --esp-2: 8px; --esp-3: 12px; --esp-4: 16px; --esp-6: 24px; --esp-8: 32px; --esp-12: 48px;
 
-  /* Raios */
-  --raio-campo: 8px;     /* campos, etiquetas */
-  --raio-cartao: 12px;   /* botões, cartões */
-  --raio-folha: 20px;    /* bottom sheets, modais */
+  /* Raios: mais macios no celular, mais firmes no computador (ver abaixo) */
+  --raio-campo: 10px;    /* campos, etiquetas */
+  --raio-cartao: 16px;   /* botões, cartões */
+  --raio-folha: 24px;    /* bottom sheets, modais */
   --raio-pilula: 999px;  /* chips, selos */
+
+  /* Profundidade: só em menus, folhas e hover */
+  --sombra-1: 0 1px 2px rgb(20 27 23 / 0.06), 0 1px 1px rgb(20 27 23 / 0.04);
+  --sombra-2: 0 6px 16px rgb(20 27 23 / 0.1), 0 2px 4px rgb(20 27 23 / 0.06);
+  --sombra-3: 0 18px 48px rgb(20 27 23 / 0.18), 0 4px 12px rgb(20 27 23 / 0.08);
+
+  /* Movimento: curto, ease-out; desligado com prefers-reduced-motion */
+  --ease-saida: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
 
   /* Toque */
   --toque-min: 44px;      /* mínimo de qualquer controle */
   --toque-acao: 48px;     /* botões comuns */
   --toque-principal: 56px;/* ação principal de rodapé, PDV, entregas */
 
+  /* Barra de topo: faixa de cor no celular, branca e sóbria no computador */
+  --barra-fundo: var(--cor-floresta);
+  --barra-texto: #FFFFFF;
+  --barra-texto-suave: #BFE3CF;
+  --barra-linha: transparent;
+
   /* Pontos de quebra */
   --bp-tablet: 768px;
   --bp-desktop: 1024px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --barra-fundo: var(--superficie);
+    --barra-texto: var(--texto);
+    --barra-texto-suave: var(--texto-secundario);
+    --barra-linha: var(--linha);
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --raio-campo: 8px;
+    --raio-cartao: 12px;
+    --raio-folha: 16px;
+    --titulo-xl: 700 30px/36px var(--fonte-titulo);
+    --titulo-l: 700 24px/30px var(--fonte-titulo);
+  }
 }

@@ -67,7 +67,7 @@ export function Clientes() {
           <Box>
             {visible.map((c) => (
               <Link key={c.id} to={`/gestao/clientes/${c.id}`} className={o.row}>
-                <span aria-hidden="true" className={o.rowIcon} style={{ borderRadius: 999, background: 'var(--cor-creme)', fontWeight: 700 }}>
+                <span aria-hidden="true" className={o.rowIcon} style={{ borderRadius: 999, background: 'var(--fundo-suave)', fontWeight: 700 }}>
                   {c.name[0]}
                 </span>
                 <span className={o.rowText}>

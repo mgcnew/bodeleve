@@ -5,6 +5,7 @@ import { Banner } from '@/components/Feedback'
 import { TextField } from '@/components/Field'
 import { accountErrorMessage, requestPasswordReset } from '@/services/account'
 import o from '@/styles/ops.module.css'
+import { AuthLayout } from '../../shared/AuthLayout'
 
 // Recuperar senha (equipe e entregador): manda um link por e-mail que abre /gestao/redefinir-senha
 export function EsqueciSenha() {
@@ -31,10 +32,10 @@ export function EsqueciSenha() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', justifyContent: 'center', background: 'var(--fundo-operacao)' }}>
-      <form onSubmit={(e) => void submit(e)} noValidate style={{ flex: '1 1 auto', maxWidth: 420, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 24, padding: '24px 20px' }}>
+    <AuthLayout area={area === 'entregas' ? 'Entregas' : 'Gestão da casa'}>
+      <form onSubmit={(e) => void submit(e)} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div>
-          <div style={{ font: 'var(--titulo-xl)', letterSpacing: '-0.01em' }}>Esqueci minha senha</div>
+          <div style={{ font: 'var(--titulo-xl)' }}>Esqueci minha senha</div>
           <div className={o.muted}>Enviamos um link para você criar uma senha nova.</div>
         </div>
         {sent ? (
@@ -51,6 +52,6 @@ export function EsqueciSenha() {
           Voltar para entrar
         </Link>
       </form>
-    </div>
+    </AuthLayout>
   )
 }

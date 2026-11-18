@@ -89,7 +89,7 @@ export function Recebimento() {
         <Bar title={`Receber ${p.number}`} back={`/gestao/compras/${p.id}`} />
         <main className={`${o.main} ${o.narrow}`} style={{ paddingTop: 24, gap: 16 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 8 }}>
-            <div aria-hidden="true" style={{ width: 64, height: 64, borderRadius: 999, background: 'var(--cor-verde)', color: 'var(--superficie)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div aria-hidden="true" style={{ width: 64, height: 64, borderRadius: 999, background: 'var(--cor-primaria)', color: 'var(--superficie)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="confirmar" size={32} />
             </div>
             <h2 style={{ font: '700 24px/30px var(--fonte-titulo)' }}>Recebimento confirmado</h2>

@@ -8,11 +8,12 @@
 }
 
 .house_made {
-  background: var(--cor-verde);
+  background: var(--cor-primaria);
 }
 
+/* laranja escuro: branco sobre #E8590C não chega a 4,5 : 1 */
 .bodeleve_brand {
-  background: var(--cor-terracota);
+  background: #C2410C;
 }
 
 .third_party {
@@ -22,7 +23,7 @@
 .tag {
   display: inline-block;
   padding: 4px 10px;
-  border-radius: var(--raio-campo);
+  border-radius: var(--raio-pilula);
   font: 600 13px/18px var(--fonte-texto);
   white-space: nowrap;
 }

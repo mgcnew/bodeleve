@@ -8,7 +8,7 @@ const outline = (label: string, filled?: boolean) => (
       padding: '2px 10px',
       borderRadius: 999,
       border: `1px solid ${filled ? 'var(--linha)' : 'var(--texto-secundario)'}`,
-      background: filled ? 'var(--cor-creme)' : undefined,
+      background: filled ? 'var(--fundo-suave)' : undefined,
       color: filled ? 'var(--texto)' : 'var(--texto-secundario)',
       font: '600 12px/18px var(--fonte-texto)',
       whiteSpace: 'nowrap',

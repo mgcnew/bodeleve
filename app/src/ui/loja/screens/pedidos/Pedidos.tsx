@@ -44,7 +44,7 @@ export function Pedidos() {
         <div className={l.soft}>
           <div style={{ fontWeight: 600 }}>Comprou sem conta?</div>
           <p style={{ font: 'var(--apoio)' }}>Estes são os pedidos feitos neste aparelho. Entre para ver todos.</p>
-          <Link to="/entrar" className={l.linkArrow} style={{ color: 'var(--cor-terracota-pressionado)' }}>
+          <Link to="/entrar" className={l.linkArrow} style={{ color: 'var(--cor-primaria-pressionado)' }}>
             Entrar
             <Icon name="avancar" size={18} />
           </Link>

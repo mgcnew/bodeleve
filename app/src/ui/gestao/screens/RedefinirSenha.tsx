@@ -5,6 +5,7 @@ import { Banner } from '@/components/Feedback'
 import { TextField } from '@/components/Field'
 import { supabase } from '@/lib/supabase'
 import { accountErrorMessage, finishPasswordReset } from '@/services/account'
+import { AuthLayout } from '../../shared/AuthLayout'
 
 // Destino do link do e-mail de recuperação: o Supabase abre uma sessão temporária e aqui se grava a senha nova
 export function RedefinirSenha() {
@@ -42,9 +43,9 @@ export function RedefinirSenha() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', justifyContent: 'center', background: 'var(--fundo-operacao)' }}>
-      <form onSubmit={(e) => void submit(e)} noValidate style={{ flex: '1 1 auto', maxWidth: 420, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 24, padding: '24px 20px' }}>
-        <div style={{ font: 'var(--titulo-xl)', letterSpacing: '-0.01em' }}>Senha nova</div>
+    <AuthLayout area={area === 'entregas' ? 'Entregas' : 'Gestão da casa'}>
+      <form onSubmit={(e) => void submit(e)} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ font: 'var(--titulo-xl)' }}>Senha nova</div>
         {ready === false ? (
           <>
             <Banner tone="error">Este link venceu ou já foi usado. Peça um novo.</Banner>
@@ -62,6 +63,6 @@ export function RedefinirSenha() {
           </>
         )}
       </form>
-    </div>
+    </AuthLayout>
   )
 }

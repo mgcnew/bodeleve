@@ -17,7 +17,7 @@
 }
 
 .done {
-  background: var(--cor-terracota);
+  background: var(--cor-primaria);
 }
 
 /* linha do tempo do pedido */
@@ -50,14 +50,14 @@
 }
 
 .dotOk {
-  background: var(--cor-verde);
+  background: var(--cor-primaria);
   color: var(--superficie);
-  border-color: var(--cor-verde);
+  border-color: var(--cor-primaria);
 }
 
 .dotNow {
-  color: var(--cor-terracota);
-  border-color: var(--cor-terracota);
+  color: var(--cor-primaria);
+  border-color: var(--cor-primaria);
 }
 
 .stepTitle {
@@ -76,7 +76,7 @@
 .code {
   padding: var(--esp-4);
   border-radius: var(--raio-cartao);
-  background: var(--cor-terracota-suave);
+  background: var(--cor-primaria-suave);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -85,13 +85,13 @@
 
 .codeTitle {
   font-weight: 600;
-  color: var(--cor-terracota-pressionado);
+  color: var(--cor-primaria-pressionado);
 }
 
 .codeValue {
   font: 700 34px/40px var(--fonte-titulo);
   letter-spacing: 0.08em;
-  color: var(--cor-terracota-pressionado);
+  color: var(--cor-primaria-pressionado);
   font-variant-numeric: tabular-nums;
 }
 
@@ -125,7 +125,7 @@
   display: flex;
   gap: var(--esp-3);
   align-items: flex-start;
-  color: var(--cor-terracota);
+  color: var(--cor-primaria);
 }
 
 .placeText {
@@ -139,7 +139,7 @@
   justify-content: space-between;
   padding: 14px var(--esp-4);
   border-radius: var(--raio-cartao);
-  background: var(--cor-terracota-suave);
+  background: var(--cor-primaria-suave);
   font-variant-numeric: tabular-nums;
 }
 

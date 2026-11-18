@@ -58,7 +58,7 @@ export function RelatorioVendas() {
             <div className={s.chart}>
               {days.map((v, i) => (
                 <button key={i} type="button" className={s.barBtn} aria-label={`${day(i)}: ${money(v)}`} aria-pressed={i === sel} onClick={() => setSel(i)}>
-                  <span className={s.bar} style={{ height: `${Math.round((v / max) * 140)}px`, background: i === sel ? 'var(--cor-terracota)' : 'var(--texto-secundario)' }} />
+                  <span className={s.bar} style={{ height: `${Math.round((v / max) * 140)}px`, background: i === sel ? 'var(--cor-primaria)' : 'var(--texto-secundario)' }} />
                   <span className={s.barLabel}>{day(i).slice(0, 2)}</span>
                 </button>
               ))}

@@ -5,6 +5,7 @@ import { Banner } from '@/components/Feedback'
 import { TextField } from '@/components/Field'
 import { sessionStore, signIn } from '@/services/gestao/session'
 import o from '@/styles/ops.module.css'
+import { AuthLayout } from '../../shared/AuthLayout'
 
 // H-G1 — equipe entra com e-mail e senha; só dono ou gestor cadastra pessoas
 export function Entrar() {
@@ -33,16 +34,9 @@ export function Entrar() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', justifyContent: 'center', background: 'var(--fundo-operacao)' }}>
-      <form
-        onSubmit={submit}
-        noValidate
-        style={{ flex: '1 1 auto', maxWidth: 420, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 24, padding: '24px 20px' }}
-      >
-        <div>
-          <div style={{ font: 'var(--titulo-xl)', letterSpacing: '-0.01em' }}>Bodeleve</div>
-          <div className={o.muted}>Gestão da casa</div>
-        </div>
+    <AuthLayout area="Gestão da casa">
+      <form onSubmit={submit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ font: 'var(--titulo-xl)' }}>Entrar</div>
         <TextField label="E-mail" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
         <TextField label="Senha" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         {failed && <Banner tone="error">E-mail ou senha não conferem. Confira e tente de novo.</Banner>}
@@ -60,6 +54,6 @@ export function Entrar() {
         </Link>
         <p className={o.muted}>Acesso só para a equipe. Quem cadastra novas pessoas é o dono ou o gestor.</p>
       </form>
-    </div>
+    </AuthLayout>
   )
 }

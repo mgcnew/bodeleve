@@ -9,6 +9,7 @@ import { applyCodeInput } from '@/lib/otp'
 import { supabase } from '@/lib/supabase'
 import { courierSessionStore, findCourierByPhone, signInCourier, signInCourierWithPassword } from '@/services/entregas'
 import o from '@/styles/ops.module.css'
+import { AuthLayout } from '../../shared/AuthLayout'
 
 // H-E1 — entregador entra com celular e código pelo WhatsApp; só entra quem a casa cadastrou
 export function Entrar() {
@@ -67,12 +68,9 @@ export function Entrar() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', justifyContent: 'center', background: 'var(--fundo-operacao)' }}>
-      <div style={{ flex: '1 1 auto', maxWidth: 420, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 24, padding: '24px 20px' }}>
-        <div>
-          <div style={{ font: 'var(--titulo-xl)', letterSpacing: '-0.01em' }}>Bodeleve</div>
-          <div className={o.muted}>Entregas</div>
-        </div>
+    <AuthLayout area="Entregas">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ font: 'var(--titulo-xl)' }}>Entrar</div>
         {supabase ? (
           <form onSubmit={(e) => void enterWithPassword(e)} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <TextField label="E-mail" type="email" autoComplete="username" value={email} onChange={(e) => { setEmail(e.target.value); setError(undefined) }} />
@@ -128,6 +126,6 @@ export function Entrar() {
           Só entra quem a casa cadastrou: entregadores próprios e parceiros.
         </p>
       </div>
-    </div>
+    </AuthLayout>
   )
 }

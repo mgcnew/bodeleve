@@ -63,7 +63,7 @@ export function Historico() {
           </Box>
         )}
         {partner ? (
-          <div className={o.card} style={{ background: 'var(--cor-terracota-suave)', border: 0 }}>
+          <div className={o.card} style={{ background: 'var(--cor-primaria-suave)', border: 0 }}>
             <div className={`${o.cardHead} ${o.num}`} style={{ fontWeight: 600, fontSize: 18 }}>
               <span>A receber hoje</span>
               <span>{formatCents(earned)}</span>

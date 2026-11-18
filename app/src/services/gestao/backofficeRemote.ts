@@ -2,6 +2,7 @@
 // com o Supabase ligado eles são caches alimentados aqui, e as ações chamam as funções do banco
 // (`stock_adjust`, `stock_count_apply`, `create_purchase_order`, `receive_purchase`...), que fazem a
 // baixa pelo lote, a conta a pagar e a trilha de auditoria.
+import { markLoaded } from '@/services/firstLoad'
 import type { Item, ItemType, Lot, Movement, ProductionOrder, Purchase, Recipe, StockUnit, Supplier } from '@/domain/backoffice'
 import type { ProductOrigin } from '@/domain/catalog'
 import { supabase } from '@/lib/supabase'
@@ -231,6 +232,7 @@ export async function refreshBackoffice(): Promise<void> {
     purchasesStore.set(purchases)
   })().finally(() => {
     loading = null
+    markLoaded('backoffice')
   })
   return loading
 }

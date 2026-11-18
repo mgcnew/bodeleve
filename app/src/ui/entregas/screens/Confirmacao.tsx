@@ -92,7 +92,7 @@ export function Confirmacao() {
               setCode(ev.target.value.replace(/\D/g, ''))
               setError(false)
             }}
-            style={{ height: 72, borderRadius: 12, border: `2px solid ${error ? 'var(--erro)' : 'var(--cor-grafite)'}`, background: 'var(--superficie)', font: '700 32px var(--fonte-texto)', letterSpacing: '0.4em', textAlign: 'center', width: '100%' }}
+            style={{ height: 72, borderRadius: 12, border: `2px solid ${error ? 'var(--erro)' : 'var(--cor-tinta)'}`, background: 'var(--superficie)', font: '700 32px var(--fonte-texto)', letterSpacing: '0.4em', textAlign: 'center', width: '100%' }}
           />
           {error && (
             <div id="cod-erro" role="alert" className={o.iconLine} style={{ color: 'var(--erro)', alignItems: 'center' }}>

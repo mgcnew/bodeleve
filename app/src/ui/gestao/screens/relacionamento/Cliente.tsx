@@ -67,7 +67,7 @@ export function Cliente() {
             <h2 className={o.h2}>Mais compra</h2>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {c.topItems.map((t) => (
-                <span key={t.name} style={{ padding: '4px 10px', borderRadius: 8, background: 'var(--cor-creme)', border: '1px solid var(--linha)', font: '600 13px/18px var(--fonte-texto)' }}>
+                <span key={t.name} style={{ padding: '4px 10px', borderRadius: 8, background: 'var(--fundo-suave)', border: '1px solid var(--linha)', font: '600 13px/18px var(--fonte-texto)' }}>
                   {t.name} · {t.times}×
                 </span>
               ))}

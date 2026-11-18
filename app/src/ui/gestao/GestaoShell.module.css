@@ -34,14 +34,14 @@
 
   .side {
     flex: none;
-    width: 240px;
+    width: 248px;
     height: 100dvh;
     position: sticky;
     top: 0;
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding: 20px 12px;
+    padding: 20px 12px 12px;
     background: var(--superficie);
     border-right: 1px solid var(--linha);
     overflow-y: auto;
@@ -49,25 +49,78 @@
 }
 
 .brand {
-  padding: 4px 12px 16px;
-  font: 700 24px/30px var(--fonte-titulo);
+  padding: 2px 12px 14px;
+  font: 700 22px/28px var(--fonte-titulo);
+  letter-spacing: -0.03em;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  height: 40px;
+  margin-bottom: var(--esp-3);
+  padding: 0 var(--esp-3);
+  border: 1px solid var(--linha-forte);
+  border-radius: var(--raio-campo);
+  background: var(--fundo-operacao);
+  color: var(--texto-secundario);
+  font: 400 14px/20px var(--fonte-texto);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color var(--dur-1) var(--ease-saida),
+    background-color var(--dur-1) var(--ease-saida);
+}
+
+.search span {
+  flex: 1 1 0;
+}
+
+.search:hover {
+  border-color: var(--texto-secundario);
+  background: var(--superficie);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--esp-3);
+}
+
+.groupTitle {
+  padding: 0 var(--esp-3) var(--esp-1);
+  font: var(--legenda);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
 }
 
 .side a {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--esp-3);
-  min-height: var(--toque-min);
+  min-height: 40px;
   padding: 0 var(--esp-3);
-  border-radius: 10px;
+  border-radius: var(--raio-campo);
   text-decoration: none;
+  color: var(--texto-secundario);
+  font: 500 14px/20px var(--fonte-texto);
+  transition:
+    background-color var(--dur-1) var(--ease-saida),
+    color var(--dur-1) var(--ease-saida);
+}
+
+.side a:hover {
+  background: var(--fundo-operacao);
   color: var(--texto);
-  font: 500 15px/20px var(--fonte-texto);
 }
 
 .side a[aria-current='page'] {
-  background: var(--cor-terracota-suave);
-  color: var(--cor-terracota-pressionado);
+  background: var(--cor-primaria-suave);
+  color: var(--cor-primaria-pressionado);
   font-weight: 600;
 }
 
@@ -92,15 +145,18 @@
 }
 
 .sideFoot button {
-  min-height: var(--toque-min);
+  min-height: 40px;
   padding: 0 var(--esp-3);
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--raio-campo);
   background: transparent;
   color: var(--texto-secundario);
-  font: 500 15px/20px var(--fonte-texto);
+  font: 500 14px/20px var(--fonte-texto);
   text-align: left;
   cursor: pointer;
+  transition:
+    background-color var(--dur-1) var(--ease-saida),
+    color var(--dur-1) var(--ease-saida);
 }
 
 .sideFoot button:hover {

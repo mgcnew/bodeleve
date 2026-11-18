@@ -29,7 +29,7 @@ export function StepHeader({ step }: { step: 1 | 2 | 3 | 4 }) {
 
 export function Destino({ order }: { order: StaffOrder }) {
   return (
-    <div className={o.iconLine} style={{ color: 'var(--cor-terracota)' }}>
+    <div className={o.iconLine} style={{ color: 'var(--cor-primaria)' }}>
       <Icon name="local" size={22} />
       <div style={{ color: 'var(--texto)' }}>
         <b>{order.customer.name}</b>

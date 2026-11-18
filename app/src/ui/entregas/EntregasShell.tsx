@@ -3,6 +3,8 @@ import { Navigate, Outlet, useLocation, useMatches } from 'react-router-dom'
 import { BottomNav } from '@/components/BottomNav'
 import { courierSessionStore } from '@/services/entregas'
 import { startCourierSync } from '@/services/entregasRemote'
+import { resetLoaded, useFirstLoad } from '@/services/firstLoad'
+import { ScreenSkeleton } from '@/components/ScreenSkeleton'
 
 export type EntHandle = { tabs?: boolean }
 
@@ -18,11 +20,16 @@ export function EntregasShell() {
   const location = useLocation()
   const handle = (useMatches().at(-1)?.handle ?? {}) as EntHandle
   const signedIn = !!session
+  const ready = useFirstLoad(['courier'])
 
   // com o Supabase, mantém as entregas livres e as minhas em dia (a cada 10 s)
   useEffect(() => {
     if (!signedIn) return
-    return startCourierSync()
+    const stop = startCourierSync()
+    return () => {
+      stop()
+      resetLoaded()
+    }
   }, [signedIn])
 
   if (!session) return <Navigate to="/entregas/entrar" replace state={{ from: location.pathname }} />
@@ -30,7 +37,13 @@ export function EntregasShell() {
   return (
     <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--fundo-operacao)' }}>
       <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <Outlet />
+        {ready ? (
+          <div key={location.pathname} className="rota entra">
+            <Outlet />
+          </div>
+        ) : (
+          <ScreenSkeleton kind="list" tabs={handle.tabs} />
+        )}
       </div>
       {handle.tabs && (
         <div style={{ position: 'sticky', bottom: 0 }}>

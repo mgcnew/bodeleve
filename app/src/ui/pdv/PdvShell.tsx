@@ -12,6 +12,8 @@ import { startBackofficeSync } from '@/services/gestao/backofficeRemote'
 import { sessionStore, signOut } from '@/services/gestao/session'
 import { cartStore, cashStore, queueStore } from '@/services/pdv'
 import { startPdvSync } from '@/services/pdvRemote'
+import { resetLoaded, useFirstLoad } from '@/services/firstLoad'
+import { ScreenSkeleton } from '@/components/ScreenSkeleton'
 import { Tag } from '@/components/Badges'
 import s from './PdvShell.module.css'
 
@@ -30,6 +32,7 @@ export function PdvShell() {
   const location = useLocation()
   const handle = (useMatches().at(-1)?.handle ?? {}) as PdvHandle
   const signedIn = !!session
+  const ready = useFirstLoad(['backoffice', 'pdv'])
 
   // com o Supabase, mantém itens, estoque, caixa e vendas em dia
   useEffect(() => {
@@ -39,6 +42,7 @@ export function PdvShell() {
     return () => {
       stopBackoffice()
       stopPdv()
+      resetLoaded()
     }
   }, [signedIn])
 
@@ -48,7 +52,13 @@ export function PdvShell() {
   return (
     <div className={s.shell}>
       <div className={s.content}>
-        <Outlet />
+        {ready ? (
+          <div key={location.pathname} className="rota entra">
+            <Outlet />
+          </div>
+        ) : (
+          <ScreenSkeleton kind="list" tabs={handle.tabs} />
+        )}
       </div>
       {(handle.tabs || handle.cartBar) && (
         <div className={s.bottom}>
@@ -59,7 +69,7 @@ export function PdvShell() {
               <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatCents(cartTotal(cart))}</span>
             </Link>
           )}
-          {handle.tabs && <BottomNav items={[...tabs]} />}
+          {handle.tabs && <BottomNav items={[...tabs]} rail />}
         </div>
       )}
     </div>

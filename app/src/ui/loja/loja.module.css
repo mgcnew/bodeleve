@@ -56,13 +56,23 @@
 }
 
 .pageHeader {
-  padding: var(--esp-4) var(--esp-4) var(--esp-2);
+  padding: var(--esp-4) var(--esp-4) var(--esp-6);
   flex: none;
+  background: var(--barra-fundo);
+  color: var(--barra-texto);
+  border-bottom: 1px solid var(--barra-linha);
+  border-radius: 0 0 var(--raio-folha) var(--raio-folha);
+}
+
+@media (min-width: 768px) {
+  .pageHeader {
+    border-radius: 0;
+  }
 }
 
 .pageTitle {
   font: var(--titulo-l);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .h1 {
@@ -70,7 +80,7 @@
 }
 
 .h2 {
-  font: 700 20px/26px var(--fonte-titulo);
+  font: 650 19px/26px var(--fonte-titulo);
 }
 
 .h2Section {
@@ -163,7 +173,7 @@
   gap: 6px;
   font-weight: 600;
   text-decoration: none;
-  color: var(--cor-terracota);
+  color: var(--cor-primaria);
 }
 
 .linkInline {
@@ -172,13 +182,13 @@
   align-items: center;
   font-weight: 600;
   text-decoration: none;
-  color: var(--cor-terracota);
+  color: var(--cor-primaria);
 }
 
 .soft {
   padding: 14px var(--esp-4);
   border-radius: var(--raio-cartao);
-  background: var(--cor-terracota-suave);
+  background: var(--cor-primaria-suave);
   display: flex;
   flex-direction: column;
   gap: var(--esp-1);
@@ -192,15 +202,27 @@
 }
 
 .photo {
-  border-radius: 10px;
-  background: var(--cor-creme);
-  border: 1px dashed var(--texto-secundario);
+  border-radius: var(--raio-campo);
+  background: var(--fundo-suave);
+  border: 1px dashed var(--linha-forte);
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   font: 600 12px/16px var(--fonte-texto);
   color: var(--texto-secundario);
+}
+
+.photo[data-origin='house_made'] {
+  background: var(--cor-primaria-suave);
+  color: var(--cor-primaria-pressionado);
+  border-color: transparent;
+}
+
+.photo[data-origin='bodeleve_brand'] {
+  background: var(--cor-laranja-suave);
+  color: var(--cor-laranja-texto);
+  border-color: transparent;
 }
 
 .photoWhite {
@@ -221,7 +243,7 @@
 
 .searchBox:focus-within,
 .searchStrong {
-  border-color: var(--cor-grafite);
+  border-color: var(--cor-tinta);
 }
 
 .searchInput {

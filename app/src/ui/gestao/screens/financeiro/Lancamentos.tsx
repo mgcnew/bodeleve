@@ -47,7 +47,7 @@ export function Lancamentos() {
                   <span
                     aria-hidden="true"
                     className={s.mvIcon}
-                    style={{ background: entry ? 'var(--sucesso-fundo)' : 'var(--cor-creme)', color: entry ? 'var(--sucesso)' : 'var(--texto-secundario)' }}
+                    style={{ background: entry ? 'var(--sucesso-fundo)' : 'var(--fundo-suave)', color: entry ? 'var(--sucesso)' : 'var(--texto-secundario)' }}
                   >
                     <Icon name={entry ? 'adicionar' : transfer ? 'avancar' : 'remover'} size={18} />
                   </span>

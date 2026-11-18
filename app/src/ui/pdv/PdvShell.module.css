@@ -25,18 +25,31 @@
   height: var(--toque-principal);
   padding: 0 var(--esp-4);
   border-radius: var(--raio-cartao);
-  background: var(--cor-terracota);
+  background: var(--cor-primaria);
   color: var(--superficie);
   text-decoration: none;
   display: flex;
   align-items: center;
   gap: var(--esp-3);
   font-weight: 600;
-  box-shadow: 0 4px 12px rgb(41 38 33 / 0.16);
+  box-shadow: var(--sombra-2);
 }
 
 .cartBar > span:first-of-type {
   flex: 1 1 0;
+}
+
+/* computador: coluna de navegação à esquerda, conteúdo e sacola ao lado */
+@media (min-width: 1024px) {
+  .shell {
+    flex-direction: row-reverse;
+  }
+  .bottom {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    flex: none;
+  }
 }
 
 @media (min-width: 768px) {
@@ -52,16 +65,17 @@
   justify-content: space-between;
   gap: var(--esp-3);
   padding: var(--esp-3) var(--esp-4);
-  background: var(--superficie);
-  border-bottom: 1px solid var(--linha);
+  background: var(--barra-fundo);
+  color: var(--barra-texto);
+  border-bottom: 1px solid var(--barra-linha);
 }
 
 .headTitle {
-  font: 700 18px/24px var(--fonte-titulo);
+  font: 650 18px/24px var(--fonte-titulo);
 }
 
 .headSub {
   font: var(--apoio);
-  color: var(--texto-secundario);
+  color: var(--barra-texto-suave);
   font-variant-numeric: tabular-nums;
 }

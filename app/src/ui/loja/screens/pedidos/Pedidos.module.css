@@ -42,7 +42,7 @@
   width: 72px;
   height: 72px;
   border-radius: var(--raio-pilula);
-  background: var(--cor-verde);
+  background: var(--cor-primaria);
   color: var(--superficie);
   display: flex;
   align-items: center;
@@ -52,7 +52,7 @@
 .eta {
   padding: 20px;
   border-radius: var(--raio-folha);
-  background: var(--cor-verde);
+  background: var(--cor-primaria);
   color: var(--superficie);
   display: flex;
   flex-direction: column;

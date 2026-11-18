@@ -7,8 +7,8 @@ import l from '../loja.module.css'
 import s from './Institucional.module.css'
 
 const kinds = [
-  { title: 'Feito na casa', text: 'Produtos preparados aqui, em pequenos lotes.', bg: 'var(--cor-verde)', fg: 'var(--superficie)' },
-  { title: 'Marca Bodeleve', text: 'A linha que leva o nome da casa.', bg: 'var(--cor-terracota)', fg: 'var(--superficie)' },
+  { title: 'Feito na casa', text: 'Produtos preparados aqui, em pequenos lotes.', bg: 'var(--cor-primaria)', fg: 'var(--superficie)' },
+  { title: 'Marca Bodeleve', text: 'A linha que leva o nome da casa.', bg: 'var(--cor-primaria)', fg: 'var(--superficie)' },
   {
     title: 'Escolhidos pela casa',
     text: 'Produtos regionais de fornecedores selecionados.',

@@ -90,7 +90,7 @@ export function Entregas() {
                 key={c.id}
                 title={c.name}
                 sub={`${c.kind === 'own' ? 'Próprio' : 'Avulsos'} · ${c.note}`}
-                end={c.status === 'en_route' ? <Tag tone="info">Em rota</Tag> : c.status === 'available' ? <Tag tone="success">Disponível</Tag> : c.status === 'offline' ? <Tag tone="warning">Indisponível</Tag> : <span style={{ padding: '4px 10px', borderRadius: 8, background: 'var(--cor-creme)', border: '1px solid var(--linha)', font: '600 13px/18px var(--fonte-texto)' }}>{c.note.split(' com')[0]} online</span>}
+                end={c.status === 'en_route' ? <Tag tone="info">Em rota</Tag> : c.status === 'available' ? <Tag tone="success">Disponível</Tag> : c.status === 'offline' ? <Tag tone="warning">Indisponível</Tag> : <span style={{ padding: '4px 10px', borderRadius: 8, background: 'var(--fundo-suave)', border: '1px solid var(--linha)', font: '600 13px/18px var(--fonte-texto)' }}>{c.note.split(' com')[0]} online</span>}
               />
             ))}
           </Box>

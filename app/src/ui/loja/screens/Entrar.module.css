@@ -17,7 +17,7 @@
 
 .digit:focus-visible {
   outline: none;
-  border-color: var(--cor-grafite);
+  border-color: var(--cor-tinta);
 }
 
 .divider {

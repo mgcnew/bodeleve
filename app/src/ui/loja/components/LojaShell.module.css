@@ -23,7 +23,8 @@
 }
 
 .brand {
-  font: 700 28px/34px var(--fonte-titulo);
+  font: 700 24px/30px var(--fonte-titulo);
+  letter-spacing: -0.03em;
   text-decoration: none;
   color: var(--texto);
 }
@@ -46,21 +47,21 @@
 }
 
 .sections a[aria-current='page'] {
-  color: var(--cor-terracota);
+  color: var(--cor-primaria);
   font-weight: 700;
 }
 
 .search {
   flex: 1 1 240px;
   height: var(--toque-min);
-  background: var(--cor-creme);
+  background: var(--fundo-operacao);
 }
 
 .bag {
   height: var(--toque-min);
   padding: 0 var(--esp-4);
   border-radius: var(--raio-cartao);
-  background: var(--cor-terracota);
+  background: var(--cor-primaria);
   color: var(--superficie);
   text-decoration: none;
   display: inline-flex;
@@ -75,14 +76,14 @@
   height: var(--toque-principal);
   padding: 0 var(--esp-4);
   border-radius: var(--raio-cartao);
-  background: var(--cor-terracota);
+  background: var(--cor-primaria);
   color: var(--superficie);
   text-decoration: none;
   display: flex;
   align-items: center;
   gap: var(--esp-3);
   font-weight: 600;
-  box-shadow: 0 4px 12px rgb(41 38 33 / 0.16);
+  box-shadow: var(--sombra-2);
 }
 
 .cartBar > span:first-of-type {
@@ -97,12 +98,15 @@
   height: var(--toque-principal);
   padding: 0 6px;
   flex: none;
+  background: var(--barra-fundo);
+  color: var(--barra-texto);
+  border-bottom: 1px solid var(--barra-linha);
 }
 
 .topbarTitle {
   flex: 1 1 0;
   min-width: 0;
-  font: 700 20px/26px var(--fonte-titulo);
+  font: 650 19px/26px var(--fonte-titulo);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -116,7 +120,7 @@
   height: 20px;
   padding: 0 5px;
   border-radius: var(--raio-pilula);
-  background: var(--cor-terracota);
+  background: var(--cor-primaria);
   color: var(--superficie);
   font: 700 12px/20px var(--fonte-texto);
   text-align: center;

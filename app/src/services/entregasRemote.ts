@@ -3,6 +3,7 @@
 // já no formato de pedido) e `deliveryLogStore`; aqui eles são alimentados por `courier_list` e
 // `courier_history`, e cada ação chama `courier_take`, `courier_accept`, `courier_depart`, `courier_confirm`,
 // `courier_problem` e `courier_undo_problem`. O entregador só enxerga o que essas funções liberam.
+import { markLoaded } from '@/services/firstLoad'
 import type { CourierAccount, DeliveryLogEntry } from '@/domain/courier'
 import type { StaffOrder } from '@/domain/staffOrder'
 import { supabase } from '@/lib/supabase'
@@ -100,6 +101,7 @@ export async function refreshCourier(): Promise<void> {
     }
   })().finally(() => {
     loading = null
+    markLoaded('courier')
   })
   return loading
 }

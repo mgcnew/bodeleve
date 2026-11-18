@@ -176,7 +176,7 @@ export function Ficha() {
           </ButtonLink>
         </section>
 
-        <section className={o.section} style={{ padding: 16, borderRadius: 16, background: 'var(--cor-terracota-suave)', gap: 12 }}>
+        <section className={o.section} style={{ padding: 16, borderRadius: 16, background: 'var(--cor-primaria-suave)', gap: 12 }}>
           <h2 className={o.h2}>Produzir</h2>
           <div className={o.cardHead}>
             <span>

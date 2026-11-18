@@ -29,7 +29,7 @@ export function Perfil() {
       <PageHeader title="Perfil" />
       <main className={`${o.main} ${o.narrow}`} style={{ gap: 16 }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <span aria-hidden="true" style={{ width: 56, height: 56, borderRadius: 999, background: 'var(--cor-creme)', border: '1px solid var(--linha)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '700 22px var(--fonte-titulo)' }}>
+          <span aria-hidden="true" style={{ width: 56, height: 56, borderRadius: 999, background: 'var(--fundo-suave)', border: '1px solid var(--linha)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '700 22px var(--fonte-titulo)' }}>
             {account.name[0]}
           </span>
           <div>

@@ -17,8 +17,8 @@ export function BigChip({ children, active, onClick }: { children: ReactNode; ac
       style={{
         height: 48,
         borderRadius: 12,
-        border: '1.5px solid var(--cor-grafite)',
-        background: active ? 'var(--cor-grafite)' : 'var(--superficie)',
+        border: '1.5px solid var(--cor-tinta)',
+        background: active ? 'var(--cor-tinta)' : 'var(--superficie)',
         color: active ? 'var(--superficie)' : 'var(--texto)',
         font: '600 15px var(--fonte-texto)',
         cursor: 'pointer',

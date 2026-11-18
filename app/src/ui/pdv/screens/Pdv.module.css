@@ -47,8 +47,8 @@
 }
 
 .tab[aria-selected='true'] {
-  border-bottom-color: var(--cor-terracota);
-  color: var(--cor-terracota);
+  border-bottom-color: var(--cor-primaria);
+  color: var(--cor-primaria);
 }
 
 .tiles {
@@ -83,10 +83,23 @@
   font: 400 14px/20px var(--fonte-texto);
   min-width: 0;
   cursor: pointer;
+  transition:
+    background-color var(--dur-1) var(--ease-saida),
+    border-color var(--dur-1) var(--ease-saida),
+    box-shadow var(--dur-2) var(--ease-saida),
+    transform var(--dur-1) var(--ease-saida);
+}
+
+@media (hover: hover) {
+  .tile:hover {
+    border-color: var(--cor-primaria);
+    box-shadow: var(--sombra-2);
+  }
 }
 
 .tile:active {
-  background: var(--cor-terracota-suave);
+  background: var(--cor-primaria-suave);
+  transform: scale(0.98);
 }
 
 .tileName {
@@ -151,15 +164,22 @@
   min-height: var(--toque-principal);
   padding: 0 var(--esp-4);
   border-radius: var(--raio-cartao);
-  border: 1.5px solid var(--linha);
+  border: 1px solid var(--linha-forte);
   background: var(--superficie);
   font: 600 16px/24px var(--fonte-texto);
   cursor: pointer;
   text-align: left;
 }
 
+.method {
+  transition:
+    border-color var(--dur-1) var(--ease-saida),
+    background-color var(--dur-1) var(--ease-saida);
+}
+
 .method[aria-pressed='true'] {
-  border: 2px solid var(--cor-grafite);
+  border-color: var(--cor-primaria);
+  background: var(--cor-primaria-suave);
 }
 
 .methods {
@@ -182,8 +202,8 @@
 .panelBox {
   padding: 20px;
   border-radius: var(--raio-folha);
-  background: var(--cor-grafite);
-  color: var(--cor-creme);
+  background: var(--cor-floresta);
+  color: #FFFFFF;
   display: flex;
   flex-direction: column;
   gap: var(--esp-1);
@@ -192,7 +212,7 @@
 .change {
   padding: var(--esp-4);
   border-radius: var(--raio-cartao);
-  background: var(--cor-terracota-suave);
+  background: var(--cor-primaria-suave);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -201,13 +221,13 @@
 
 .changeValue {
   font: 700 28px/34px var(--fonte-titulo);
-  color: var(--cor-terracota-pressionado);
+  color: var(--cor-primaria-pressionado);
 }
 
 .qr {
   height: 160px;
   border-radius: var(--raio-cartao);
-  border: 1px dashed var(--texto-secundario);
+  border: 1px dashed var(--linha-forte);
   background: var(--superficie);
   display: flex;
   align-items: center;
@@ -215,4 +235,15 @@
   text-align: center;
   font: 600 12px/16px var(--fonte-texto);
   color: var(--texto-secundario);
+}
+
+/* dica de teclado: só onde há teclado de verdade */
+.keysHelp {
+  display: none;
+}
+
+@media (hover: hover) and (min-width: 1024px) {
+  .keysHelp {
+    display: block;
+  }
 }

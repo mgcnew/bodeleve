@@ -9,12 +9,13 @@ import l from '../loja.module.css'
 import s from './ProductCard.module.css'
 
 /** Espaço para foto até haver material próprio (P-P) */
-export function ProductPhoto({ className, white, label = '[FOTO DO PRODUTO]' }: { className?: string; white?: boolean; label?: string }) {
+export function ProductPhoto({ className, white, label = '[FOTO DO PRODUTO]', origin }: { className?: string; white?: boolean; label?: string; origin?: Product['origin'] }) {
   return (
     <div
       role="img"
       aria-label={label === '[FOTO DA CASA]' ? 'Espaço para foto da casa' : 'Espaço para foto do produto'}
       className={`${l.photo} ${white ? l.photoWhite : ''} ${className ?? ''}`}
+      data-origin={origin}
     >
       {label}
     </div>
@@ -31,7 +32,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <article className={s.card}>
       <Link to={`/produto/${product.id}`} className={s.link}>
-        <ProductPhoto className={s.photo} />
+        <ProductPhoto className={s.photo} origin={product.origin} />
         <div className={s.sealSlot}>
           <LojaSeal product={product} />
         </div>

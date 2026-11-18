@@ -11,6 +11,15 @@
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
+  transition:
+    background-color var(--dur-1) var(--ease-saida),
+    border-color var(--dur-1) var(--ease-saida),
+    box-shadow var(--dur-1) var(--ease-saida),
+    transform var(--dur-1) var(--ease-saida);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .l {
@@ -32,35 +41,54 @@
 }
 
 .primary {
-  background: var(--cor-terracota);
+  background: var(--cor-primaria);
   color: var(--superficie);
+  box-shadow: var(--sombra-1);
 }
 .primary:active {
-  background: var(--cor-terracota-pressionado);
+  background: var(--cor-primaria-pressionado);
 }
 
 .secondary {
-  background: transparent;
+  background: var(--superficie);
   color: var(--texto);
-  border: 1.5px solid var(--cor-grafite);
+  border: 1px solid var(--linha-forte);
+  box-shadow: var(--sombra-1);
 }
 
 .quiet {
   background: transparent;
-  color: var(--cor-terracota);
+  color: var(--cor-primaria);
 }
 
 .danger {
   background: var(--superficie);
   color: var(--erro);
-  border: 1.5px solid var(--erro);
+  border: 1px solid var(--erro);
+}
+
+@media (hover: hover) {
+  .primary:hover {
+    background: var(--cor-primaria-pressionado);
+  }
+  .secondary:hover {
+    background: var(--fundo-operacao);
+    border-color: var(--texto-secundario);
+  }
+  .quiet:hover {
+    background: var(--cor-primaria-suave);
+  }
+  .danger:hover {
+    background: var(--erro-fundo);
+  }
 }
 
 .btn:disabled,
 .btn[aria-disabled='true'] {
-  background: var(--linha);
+  background: var(--fundo-suave);
   color: var(--texto-secundario);
   border: 0;
+  box-shadow: none;
   cursor: not-allowed;
 }
 
@@ -87,25 +115,34 @@
   border-radius: var(--raio-cartao);
   border: 0;
   background: transparent;
-  color: var(--texto);
+  color: inherit;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   text-decoration: none;
+  transition: background-color var(--dur-1) var(--ease-saida);
+}
+
+@media (hover: hover) {
+  .icon:hover {
+    background: rgb(127 140 131 / 0.16);
+  }
 }
 
 .iconPrimary {
-  background: var(--cor-terracota);
+  background: var(--cor-primaria);
   color: var(--superficie);
 }
 
 .iconMuted {
-  background: var(--cor-creme);
+  background: var(--fundo-suave);
   border: 1px solid var(--linha);
+  color: var(--texto);
 }
 
 .iconOutlined {
   background: var(--superficie);
-  border: 1px solid var(--linha);
+  border: 1px solid var(--linha-forte);
+  color: var(--texto);
 }
