@@ -68,7 +68,7 @@ Todo preço, saldo e valor usa números tabulares.
 
 ## Ações e listas (computador)
 
-- **Gestão tem barra superior** (a partir de 768 px): busca "Buscar ou ir para…" (Ctrl/⌘ K) à esquerda e, a partir de 1024 px, as ações da tela à direita (`Bar` e `PageHeader` aceitam `action` e levam o conteúdo para a barra por `ActionSlotContext`). No celular e no tablet as ações continuam no corpo ou no rodapé fixo. Formulários mantêm o botão de salvar no rodapé. O título da tela fica sobre o fundo, sem faixa, a partir de 1024 px.
+- **Gestão tem barra superior** (a partir de 768 px) só com a busca "Buscar ou ir para…" (Ctrl/⌘ K). **As ações da tela ficam na linha do título, à direita**, a partir de 1024 px (`Bar` e `PageHeader` aceitam `action`), alinhadas com a borda direita do conteúdo. No celular e no tablet continuam no corpo ou no rodapé fixo. Formulários mantêm o botão de salvar no rodapé. O título fica sobre o fundo, sem faixa, a partir de 1024 px.
 - **Listas paginadas** em 20 por página (`components/Pagination`): "21–40 de 87", Anterior e Próxima; some quando cabe numa página; a busca ou o filtro voltam à página 1.
 - Espaçamento do computador: conteúdo com 24 px de margem e 16 px entre blocos; cabeçalho de 72 px.
 

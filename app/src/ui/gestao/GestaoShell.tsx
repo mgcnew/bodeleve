@@ -10,8 +10,6 @@ import { resetLoaded, useFirstLoad } from '@/services/firstLoad'
 import { ScreenSkeleton, type SkeletonKind } from '@/components/ScreenSkeleton'
 import { sessionStore, signOut } from '@/services/gestao/session'
 import { CommandPalette, isMac, useGestaoShortcuts } from './components/CommandPalette'
-import { ActionSlotContext } from '../shared/ActionSlot'
-import o from '@/styles/ops.module.css'
 import s from './GestaoShell.module.css'
 
 export type GestaoHandle = { tabs?: boolean }
@@ -73,7 +71,6 @@ export function GestaoShell() {
   const signedIn = !!session
   const ready = useFirstLoad(['orders', 'backoffice', 'finance'])
   const [palette, setPalette] = useState(false)
-  const [slot, setSlot] = useState<HTMLElement | null>(null)
   const openPalette = useCallback(() => setPalette(true), [])
   useGestaoShortcuts(session?.role, openPalette)
 
@@ -133,20 +130,17 @@ export function GestaoShell() {
       </nav>
       <CommandPalette open={palette} onClose={() => setPalette(false)} role={session.role} />
       <div className={s.content}>
-        {/* barra superior (tablet e computador): busca à esquerda, ações da tela à direita */}
+        {/* barra superior (tablet e computador): busca; as ações da tela ficam na linha do título */}
         <div className={s.topbar}>
           <button type="button" className={s.search} onClick={openPalette} aria-label="Buscar ou ir para, atalho Control K">
             <Icon name="buscar" size={18} />
             <span>Buscar ou ir para…</span>
             <kbd>{isMac ? '⌘ K' : 'Ctrl K'}</kbd>
           </button>
-          <div ref={setSlot} className={o.deskAction} />
         </div>
         {ready ? (
           <div key={location.pathname} className="rota entra">
-            <ActionSlotContext.Provider value={slot}>
-              <Outlet />
-            </ActionSlotContext.Provider>
+            <Outlet />
           </div>
         ) : (
           <ScreenSkeleton kind={skeletonKind(location.pathname)} tabs={handle.tabs} />

@@ -496,5 +496,8 @@ a.card {
     min-height: 0;
     padding: var(--esp-6) var(--esp-6) 0;
     position: static;
+    width: 100%;
+    max-width: 1200px;
+    align-items: center;
   }
 }
