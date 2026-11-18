@@ -88,7 +88,7 @@
   color: var(--barra-texto);
   border-bottom: 1px solid var(--barra-linha);
   position: sticky;
-  top: 0;
+  top: var(--topbar-h, 0px);
   z-index: 1;
 }
 
@@ -484,5 +484,17 @@ a.card {
   }
   .hideDesk {
     display: none !important;
+  }
+}
+
+/* computador: a barra superior da gestão já separa a tela; o título fica sobre o fundo da página */
+@media (min-width: 1024px) {
+  .pageHeader,
+  .bar {
+    background: transparent;
+    border-bottom: 0;
+    min-height: 0;
+    padding: var(--esp-6) var(--esp-6) 0;
+    position: static;
   }
 }

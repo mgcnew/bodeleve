@@ -50,18 +50,26 @@
 
 .brand {
   flex: none;
-  padding: 2px 12px 14px;
+  display: flex;
+  align-items: center;
+  height: 64px;
+  margin: -20px -12px var(--esp-3);
+  padding: 0 var(--esp-6);
+  border-bottom: 1px solid var(--linha);
   font: 700 22px/28px var(--fonte-titulo);
   letter-spacing: -0.03em;
 }
 
+.topbar {
+  display: none;
+}
+
 .search {
-  flex: none;
+  flex: 0 1 420px;
   display: flex;
   align-items: center;
   gap: var(--esp-2);
-  height: 44px;
-  margin-bottom: var(--esp-3);
+  height: 40px;
   padding: 0 var(--esp-3);
   border: 1px solid var(--linha-forte);
   border-radius: var(--raio-campo);
@@ -82,6 +90,26 @@
 .search:hover {
   border-color: var(--texto-secundario);
   background: var(--superficie);
+}
+
+@media (min-width: 768px) {
+  .content {
+    --topbar-h: 64px;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    height: var(--topbar-h);
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--esp-4);
+    padding: 0 var(--esp-6);
+    background: var(--superficie);
+    border-bottom: 1px solid var(--linha);
+  }
 }
 
 .group {
