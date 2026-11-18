@@ -1,26 +1,35 @@
 // Pedido da loja pelo WhatsApp (D19): a mensagem sai pronta, por escrito, para o WhatsApp da casa.
+import { plural } from '@/domain/catalog'
 import { formatCents } from '@/domain/money'
 import { orderTotal, type Order } from '@/domain/order'
 import { readJSON, writeJSON } from './storage'
 
 const KEY = 'bodeleve.whatsapp'
 
+/**
+ * Texto do pedido para o WhatsApp. Usa o que o WhatsApp entende: *negrito*, linhas em branco entre
+ * os blocos e um item por linha, com o produto em destaque.
+ */
 export function orderMessage(order: Order, note: string, storeName: string) {
-  const lines = order.items.map((i) => `• ${i.quantity} × ${i.name} — ${formatCents(i.quantity * i.unitPriceCents)}`)
-  return [
-    `Olá, ${storeName}! Quero fazer um pedido para retirar na loja.`,
-    '',
-    `Pedido ${order.number}`,
-    ...lines,
-    '',
-    `Total: ${formatCents(orderTotal(order))} (pagamento na retirada)`,
-    `Retirada: ${order.windowLabel}`,
-    `Nome: ${order.contact.name}`,
-    `Celular: ${order.contact.phone}`,
-    ...(note.trim() ? [`Observação: ${note.trim()}`] : []),
-    '',
-    'Se precisar de entrega, me avise por aqui que combinamos.',
-  ].join('\n')
+  const items = order.items.flatMap((i) => {
+    const line = formatCents(i.quantity * i.unitPriceCents)
+    return [
+      `• *${i.quantity} × ${i.name}*`,
+      i.quantity > 1 ? `   ${formatCents(i.unitPriceCents)} cada · ${line}` : `   ${line}`,
+    ]
+  })
+  const count = order.items.reduce((n, i) => n + i.quantity, 0)
+  const blocks = [
+    [`Olá, *${storeName}*! Gostaria de fazer um pedido para retirar na loja.`],
+    [`*PEDIDO ${order.number.startsWith('#') ? order.number : `#${order.number}`}*`],
+    ['*Itens*', ...items],
+    [`*Total: ${formatCents(orderTotal(order))}*`, `${plural(count, 'item', 'itens')} · pagamento na retirada`],
+    ['*Retirada na loja*', order.windowLabel],
+    ['*Meus dados*', `Nome: ${order.contact.name}`, `Celular: ${order.contact.phone}`],
+    ...(note.trim() ? [['*Observação*', note.trim()]] : []),
+    ['Precisa de entrega? Combinamos por aqui. Obrigado!'],
+  ]
+  return blocks.map((b) => b.join('\n')).join('\n\n')
 }
 
 /** Guarda o texto para o botão "Abrir WhatsApp" da confirmação funcionar mesmo depois de recarregar */
