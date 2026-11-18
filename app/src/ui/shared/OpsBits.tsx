@@ -10,7 +10,7 @@ import o from '@/styles/ops.module.css'
 export function Bar({ title, back, end, action }: { title: ReactNode; back: string; end?: ReactNode; action?: ReactNode }) {
   return (
     <header className={o.bar}>
-      <IconLink to={back} icon="voltar" label="Voltar" className={back === '/gestao/mais' ? o.backMobile : undefined} />
+      <IconLink to={back} icon="voltar" label="Voltar" className={back === '/gestao/mais' || back === '/gestao/configuracoes' ? o.backMobile : undefined} />
       <h1 className={o.barTitle}>{title}</h1>
       {end}
       {action && <div className={o.deskAction}>{action}</div>}

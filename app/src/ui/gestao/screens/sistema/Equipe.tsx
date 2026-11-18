@@ -28,7 +28,7 @@ const areas: { label: string; module: Module | null; own?: Role[] }[] = [
   { label: 'Produção', module: 'producao' },
   { label: 'Financeiro', module: 'financeiro' },
   { label: 'Entregas', module: 'entregas', own: ['courier'] },
-  { label: 'Equipe e configurações', module: 'configuracoes' },
+  { label: 'Dados da casa e equipe', module: 'configuracoes' },
 ]
 
 const hasAccess = (role: Role, a: (typeof areas)[number]) => !!a.own?.includes(role) || (a.module !== null && moduleAccess[role].includes(a.module))

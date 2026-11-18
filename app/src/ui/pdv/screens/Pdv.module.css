@@ -48,7 +48,7 @@
 
 .tab[aria-selected='true'] {
   border-bottom-color: var(--cor-primaria);
-  color: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
 }
 
 .tiles {
@@ -221,7 +221,7 @@
 
 .changeValue {
   font: 700 28px/34px var(--fonte-titulo);
-  color: var(--cor-primaria-pressionado);
+  color: var(--cor-primaria-sobre-suave);
 }
 
 .qr {

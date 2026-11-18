@@ -41,6 +41,10 @@ Fonte: `design/tokens.css`. Razões de contraste medidas contra o fundo em que o
 
 Regras: amarelo e laranja de preenchimento nunca são texto; erro sempre vem com ícone ou texto; cor nunca é o único sinal (destino ativo = pílula + peso).
 
+## Tema escuro
+
+Escolhido em Configurações > Aparência (claro, escuro ou automático); fica no aparelho e o padrão é claro. `lib/theme.ts` põe `data-theme` na raiz; os valores escuros estão no fim de `design/tokens.css`. Texto sobre preenchimento colorido usa `--branco` (igual nos dois temas); verde como texto usa `--cor-primaria-texto` e `--cor-primaria-sobre-suave`. Fundo `#0E1411`, superfície `#151D18`, texto `#E8EFEA`. Amarelo do destaque da loja e a faixa floresta não mudam.
+
 ## Tipografia
 
 Geist (títulos e interface, 400 a 700), via Google Fonts. Títulos com espaçamento -0.015em e `text-wrap: balance`.

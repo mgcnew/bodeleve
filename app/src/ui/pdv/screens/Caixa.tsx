@@ -109,7 +109,7 @@ export function Caixa() {
         </main>
       ) : (
         <main className={`${o.main} ${o.narrow}`} style={{ alignItems: 'center', textAlign: 'center', paddingTop: 40 }}>
-          <div aria-hidden="true" style={{ width: 64, height: 64, borderRadius: 999, background: 'var(--cor-primaria-suave)', color: 'var(--cor-primaria-pressionado)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div aria-hidden="true" style={{ width: 64, height: 64, borderRadius: 999, background: 'var(--cor-primaria-suave)', color: 'var(--cor-primaria-sobre-suave)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Icon name="caixa" size={32} />
           </div>
           <h1 className={o.h1}>Caixa fechado</h1>

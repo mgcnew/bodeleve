@@ -16,6 +16,9 @@
   --cor-laranja-selo: #C2410C;           /* fundo do selo Marca Bodeleve: texto branco passa de 4,5 : 1 */
   --cor-amarelo: #F6C343;                /* só preenchimento; nunca texto */
   --cor-tinta: #141B17;                  /* foco, seleção, texto */
+  --branco: #FFFFFF;                     /* texto sobre preenchimento colorido (igual nos dois temas) */
+  --cor-primaria-texto: #0F7A43;         /* verde usado como texto sobre fundo neutro */
+  --cor-primaria-sobre-suave: #0B6236;   /* verde usado como texto sobre o verde suave */
 
   /* Superfícies e texto */
   --fundo-loja: #F6F8F5;
@@ -63,6 +66,7 @@
   --sombra-3: 0 18px 48px rgb(20 27 23 / 0.18), 0 4px 12px rgb(20 27 23 / 0.08);
 
   /* Movimento: curto, ease-out; desligado com prefers-reduced-motion */
+  --brilho: rgb(255 255 255 / 0.65);      /* faixa de brilho do esqueleto */
   --ease-saida: cubic-bezier(0.22, 1, 0.36, 1);
   --dur-1: 120ms;
   --dur-2: 200ms;
@@ -100,4 +104,32 @@
     --titulo-xl: 700 30px/36px var(--fonte-titulo);
     --titulo-l: 700 24px/30px var(--fonte-titulo);
   }
+}
+
+/* Tema escuro (D20): escolhido em Configurações > Aparência; `data-theme` é posto na raiz por lib/theme.ts */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --cor-primaria-texto: #5FD497;
+  --cor-primaria-sobre-suave: #8FE6B5;
+  --cor-primaria-suave: #153525;
+  --cor-laranja-texto: #FFA36B;
+  --cor-laranja-suave: #3B2412;
+  --cor-tinta: #E8EFEA;
+  --fundo-loja: #0E1411;
+  --fundo-operacao: #0E1411;
+  --fundo-suave: #1B2620;
+  --superficie: #151D18;
+  --linha: #26332B;
+  --linha-forte: #3A4A40;
+  --texto: #E8EFEA;
+  --texto-secundario: #A6B5AB;
+  --sucesso: #6FDBA0;  --sucesso-fundo: #123223;
+  --atencao: #F3C65A;  --atencao-fundo: #36290B;
+  --erro: #FF8FA0;     --erro-fundo: #3E1820;
+  --info: #8FBDEB;     --info-fundo: #132B42;
+  --matiz-rosa: #F29BC0; --matiz-rosa-fundo: #3E1829;
+  --sombra-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --sombra-2: 0 6px 16px rgb(0 0 0 / 0.5), 0 2px 4px rgb(0 0 0 / 0.4);
+  --sombra-3: 0 18px 48px rgb(0 0 0 / 0.6), 0 4px 12px rgb(0 0 0 / 0.4);
+  --brilho: rgb(255 255 255 / 0.07);
 }

@@ -51,12 +51,12 @@
 
 .dotOk {
   background: var(--cor-primaria);
-  color: var(--superficie);
+  color: var(--branco);
   border-color: var(--cor-primaria);
 }
 
 .dotNow {
-  color: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
   border-color: var(--cor-primaria);
 }
 
@@ -85,13 +85,13 @@
 
 .codeTitle {
   font-weight: 600;
-  color: var(--cor-primaria-pressionado);
+  color: var(--cor-primaria-sobre-suave);
 }
 
 .codeValue {
   font: 700 34px/40px var(--fonte-titulo);
   letter-spacing: 0.08em;
-  color: var(--cor-primaria-pressionado);
+  color: var(--cor-primaria-sobre-suave);
   font-variant-numeric: tabular-nums;
 }
 
@@ -125,7 +125,7 @@
   display: flex;
   gap: var(--esp-3);
   align-items: flex-start;
-  color: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
 }
 
 .placeText {

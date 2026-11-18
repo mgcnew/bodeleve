@@ -168,7 +168,7 @@
   gap: 6px;
   font-weight: 600;
   text-decoration: none;
-  color: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
 }
 
 .linkInline {
@@ -177,7 +177,7 @@
   align-items: center;
   font-weight: 600;
   text-decoration: none;
-  color: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
 }
 
 .soft {
@@ -211,7 +211,7 @@
 
 .photo[data-origin='house_made'] {
   background: var(--cor-primaria-suave);
-  color: var(--cor-primaria-pressionado);
+  color: var(--cor-primaria-sobre-suave);
   border-color: transparent;
 }
 

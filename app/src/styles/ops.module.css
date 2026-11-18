@@ -416,7 +416,7 @@ a.card {
   gap: 6px;
   font-weight: 600;
   text-decoration: none;
-  color: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
 }
 
 .iconLine {

@@ -4,7 +4,10 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import '@/styles/global.css'
 import { lojaRoutes } from '@/ui/loja/routes'
 import { restoreSession } from '@/services/gestao/session'
+import { applyTheme, watchSystemTheme } from '@/lib/theme'
 
+applyTheme()
+watchSystemTheme()
 void restoreSession()
 
 // só a loja vem junto com a página; gestão, PDV e entregas carregam na primeira visita à área

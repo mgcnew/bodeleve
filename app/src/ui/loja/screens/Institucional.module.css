@@ -2,7 +2,7 @@
   padding: 28px 20px;
   border-radius: var(--raio-folha);
   background: var(--cor-primaria);
-  color: var(--superficie);
+  color: var(--branco);
   display: flex;
   flex-direction: column;
   gap: var(--esp-3);
@@ -34,7 +34,7 @@
 }
 
 .fact > svg {
-  color: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
 }
 
 .housePhoto {

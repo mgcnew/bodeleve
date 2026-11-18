@@ -42,7 +42,7 @@
 
 .primary {
   background: var(--cor-primaria);
-  color: var(--superficie);
+  color: var(--branco);
   box-shadow: var(--sombra-1);
 }
 .primary:active {
@@ -58,7 +58,7 @@
 
 .quiet {
   background: transparent;
-  color: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
 }
 
 .danger {
@@ -97,7 +97,7 @@
   height: 18px;
   border-radius: var(--raio-pilula);
   border: 2px solid rgb(255 255 255 / 0.45);
-  border-top-color: var(--superficie);
+  border-top-color: var(--branco);
   animation: spin 0.8s linear infinite;
 }
 
@@ -132,7 +132,7 @@
 
 .iconPrimary {
   background: var(--cor-primaria);
-  color: var(--superficie);
+  color: var(--branco);
 }
 
 .iconMuted {

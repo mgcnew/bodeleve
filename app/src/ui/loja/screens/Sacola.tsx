@@ -69,7 +69,7 @@ export function Sacola() {
           ))}
         </ul>
 
-        <Link to="/" className={l.linkArrow} style={{ color: 'var(--cor-primaria)' }}>
+        <Link to="/" className={l.linkArrow} style={{ color: 'var(--cor-primaria-texto)' }}>
           <Icon name="adicionar" size={18} />
           Adicionar mais produtos
         </Link>

@@ -1,3 +1,4 @@
+import { Navigate } from 'react-router-dom'
 import type { RouteObject } from 'react-router-dom'
 import { GestaoShell, type GestaoHandle } from './GestaoShell'
 import { Entrar } from './screens/Entrar'
@@ -30,7 +31,10 @@ import { Financeiro } from './screens/financeiro/Financeiro'
 import { Lancamentos } from './screens/financeiro/Lancamentos'
 import { SaldoInicial } from './screens/financeiro/SaldoInicial'
 import { Casa } from './screens/sistema/Casa'
-import { Configuracoes } from './screens/sistema/Configuracoes'
+import { Configuracoes, ConfiguracoesLista } from './screens/sistema/Configuracoes'
+import { Aparencia } from './screens/sistema/Aparencia'
+import { Horarios } from './screens/sistema/Horarios'
+import { Loja } from './screens/sistema/Loja'
 import { Equipe } from './screens/sistema/Equipe'
 import { RelatorioVendas } from './screens/sistema/RelatorioVendas'
 import { Relatorios } from './screens/sistema/Relatorios'
@@ -93,10 +97,20 @@ export const gestaoRoutes: RouteObject[] = [
       { path: 'entregas/entregadores', element: <Entregadores /> },
       { path: 'relatorios', element: <Relatorios /> },
       { path: 'relatorios/vendas', element: <RelatorioVendas /> },
-      { path: 'configuracoes', element: <Configuracoes /> },
-      { path: 'configuracoes/casa', element: <Casa /> },
-      { path: 'configuracoes/equipe', element: <Equipe /> },
-      { path: 'perfil', element: <Perfil /> },
+      {
+        path: 'configuracoes',
+        element: <Configuracoes />,
+        children: [
+          { index: true, element: <ConfiguracoesLista /> },
+          { path: 'perfil', element: <Perfil /> },
+          { path: 'aparencia', element: <Aparencia /> },
+          { path: 'casa', element: <Casa /> },
+          { path: 'horarios', element: <Horarios /> },
+          { path: 'loja', element: <Loja /> },
+          { path: 'equipe', element: <Equipe /> },
+        ],
+      },
+      { path: 'perfil', element: <Navigate to="/gestao/configuracoes/perfil" replace /> },
     ],
   },
 ]

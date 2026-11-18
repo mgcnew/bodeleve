@@ -219,7 +219,7 @@
 .chip[aria-pressed='true'] {
   background: var(--cor-primaria);
   border-color: var(--cor-primaria);
-  color: var(--superficie);
+  color: var(--branco);
 }
 
 .textarea {

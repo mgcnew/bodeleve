@@ -20,7 +20,7 @@ function skeletonKind(path: string): SkeletonKind {
   return depth === 0 ? 'dashboard' : depth === 1 ? 'list' : 'detail'
 }
 
-type MenuItem = { module: Module; to: string; label: string; icon: IconName }
+type MenuItem = { module?: Module; to: string; label: string; icon: IconName }
 
 // menu lateral do computador: os 12 módulos em quatro grupos de trabalho
 const menuGroups: { title: string; items: MenuItem[] }[] = [
@@ -50,7 +50,7 @@ const menuGroups: { title: string; items: MenuItem[] }[] = [
       { module: 'relatorios', to: '/gestao/relatorios', label: 'Relatórios', icon: 'historico' },
     ],
   },
-  { title: 'Sistema', items: [{ module: 'configuracoes', to: '/gestao/configuracoes', label: 'Configurações', icon: 'mais' }] },
+  { title: 'Sistema', items: [{ to: '/gestao/configuracoes', label: 'Configurações', icon: 'mais' }] },
 ]
 
 // A — Gestão no celular: 5 destinos com "Mais" (P-D)
@@ -95,7 +95,7 @@ export function GestaoShell() {
       <nav aria-label="Módulos" className={s.side}>
         <div className={s.brand}>Bodeleve</div>
         {menuGroups.map((g) => {
-          const items = g.items.filter((m) => canAccess(session.role, m.module))
+          const items = g.items.filter((m) => !m.module || canAccess(session.role, m.module))
           if (items.length === 0) return null
           return (
             <div key={g.title} className={s.group}>
@@ -110,7 +110,7 @@ export function GestaoShell() {
           )
         })}
         <div className={s.sideFoot}>
-          <NavLink to="/gestao/perfil">
+          <NavLink to="/gestao/configuracoes/perfil">
             <Icon name="perfil" size={20} />
             <span>
               {session.name}

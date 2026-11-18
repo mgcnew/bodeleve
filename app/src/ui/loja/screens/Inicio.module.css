@@ -46,7 +46,7 @@
   padding: 0 18px;
   border-radius: var(--raio-cartao);
   background: var(--cor-floresta);
-  color: var(--superficie);
+  color: var(--branco);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -102,7 +102,7 @@
   padding: 20px;
   border-radius: var(--raio-folha);
   background: var(--cor-floresta);
-  color: var(--superficie);
+  color: var(--branco);
   display: flex;
   flex-direction: column;
   gap: var(--esp-2);
@@ -113,7 +113,7 @@
 }
 
 .onDark {
-  color: var(--superficie);
+  color: var(--branco);
 }
 
 /* atalhos em cores diferentes: cada seção tem a sua */
@@ -126,7 +126,7 @@
 .tintGreen {
   background: var(--cor-primaria-suave);
   border-color: transparent;
-  color: var(--cor-primaria-pressionado);
+  color: var(--cor-primaria-sobre-suave);
 }
 
 .tintYellow {
@@ -143,6 +143,7 @@
   padding: 0 var(--esp-4);
   overflow-x: auto;
   scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--esp-4);
   scrollbar-width: none;
 }
 
@@ -166,7 +167,7 @@
 @media (min-width: 1024px) {
   .hero {
     background: var(--cor-floresta);
-    color: var(--superficie);
+    color: var(--branco);
   }
   .heroCta {
     background: var(--cor-amarelo);

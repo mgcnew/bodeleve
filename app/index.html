@@ -11,6 +11,14 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap"
     />
+    <script>
+      // aplica o tema antes da primeira pintura (evita piscar claro no tema escuro)
+      try {
+        var t = localStorage.getItem('bodeleve.tema')
+        var d = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = d ? 'dark' : 'light'
+      } catch (e) {}
+    </script>
     <title>Bodeleve</title>
   </head>
   <body>

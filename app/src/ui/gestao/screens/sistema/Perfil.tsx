@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Tag } from '@/components/Badges'
 import { Button } from '@/components/Button'
 import { Banner } from '@/components/Feedback'
-import { Box } from '@/components/Card'
-import { TextField, Toggle } from '@/components/Field'
+import { TextField } from '@/components/Field'
 import { supabase } from '@/lib/supabase'
 import { roleLabels } from '@/permissions/roles'
 import { accountErrorMessage, saveMyName, saveMyPin } from '@/services/account'
@@ -12,7 +11,6 @@ import { sessionStore, signOut } from '@/services/gestao/session'
 import o from '@/styles/ops.module.css'
 import { Bar } from '../../../shared/OpsBits'
 import { PasswordForm } from '../../../shared/PasswordForm'
-import { singleKeyShortcuts } from '../../components/CommandPalette'
 
 // Meu perfil: nome, senha e (dono e gestor) PIN para cancelar venda; Sair fica aqui e no menu Mais e no PDV
 export function Perfil() {
@@ -23,7 +21,6 @@ export function Perfil() {
   const [pin, setPin] = useState('')
   const [pinMsg, setPinMsg] = useState<{ tone: 'success' | 'error'; text: string }>()
   const [busy, setBusy] = useState(false)
-  const [keys, setKeys] = useState(singleKeyShortcuts.enabled())
   if (!session) return null
   const hasPin = session.role === 'owner' || session.role === 'manager'
 
@@ -57,7 +54,7 @@ export function Perfil() {
 
   return (
     <div className={o.screen}>
-      <Bar title="Meu perfil" back="/gestao/mais" />
+      <Bar title="Meu perfil" back="/gestao/configuracoes" />
       <main className={`${o.main} ${o.mainTop} ${o.narrow}`} style={{ gap: 28 }}>
         <div>
           <div style={{ font: '700 22px/28px var(--fonte-titulo)' }}>{session.name}</div>
@@ -92,20 +89,6 @@ export function Perfil() {
           </form>
         )}
 
-        <section className={o.section}>
-          <h2 className={o.caps}>Teclado</h2>
-          <Box>
-            <Toggle
-              label="Atalhos de uma tecla"
-              sub="“/” abre a busca e “G” mais uma letra vai ao módulo. Ctrl+K sempre funciona."
-              checked={keys}
-              onChange={(v) => {
-                singleKeyShortcuts.set(v)
-                setKeys(v)
-              }}
-            />
-          </Box>
-        </section>
         <Button
           variant="secondary"
           block

@@ -75,7 +75,7 @@
 
 .item[aria-selected='true'] {
   background: var(--cor-primaria-suave);
-  color: var(--cor-primaria-pressionado);
+  color: var(--cor-primaria-sobre-suave);
 }
 
 .label {

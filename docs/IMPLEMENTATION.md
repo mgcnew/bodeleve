@@ -114,7 +114,7 @@ Tudo foi testado contra o banco de desenvolvimento como gestor (criar, editar e 
 
 | Ajustes pedidos depois | **Feito**: espaçamentos menores no computador; botões de ação sempre à direita do cabeçalho (Produtos, Fornecedores, Compras, Clientes, Fichas, Produção, Entregas, Entregadores, Estoque); paginação de 20 em Produtos, Fornecedores, Compras, Clientes, Fichas, Pedidos, Estoque, Lançamentos, Movimentações, Vendas do PDV e Entregas. As Contas, que são agrupadas por vencimento, ainda não têm paginação. |
 
-Limites: as telas do canvas em `design/*.dc.html` continuam com o visual antigo; seguem valendo para estrutura, textos e comportamento (registrado em `DECISIONS.md`). Tema escuro não foi feito. Não há fotos de produto: os marcadores `[FOTO DO PRODUTO]` continuam.
+Limites: o tema escuro foi feito depois (D20). As telas do canvas em `design/*.dc.html` continuam com o visual antigo; seguem valendo para estrutura, textos e comportamento (registrado em `DECISIONS.md`). Tema escuro não foi feito. Não há fotos de produto: os marcadores `[FOTO DO PRODUTO]` continuam.
 
 ## Pedido da loja por WhatsApp (2026-11-18, D19)
 
@@ -128,6 +128,21 @@ Limites: as telas do canvas em `design/*.dc.html` continuam com o visual antigo;
 | Sem número do WhatsApp | A tela avisa "atendimento ainda não configurado" e o botão fica desligado. |
 
 Limites: a observação do cliente vai só na mensagem do WhatsApp (não é gravada no pedido). Se o cliente salvar o pedido e não enviar a mensagem, o pedido aparece na gestão mesmo assim e o gestor decide aceitar ou cancelar. A tela de acompanhamento do pedido ainda mostra as etapas do fluxo completo.
+
+## Configurações (2026-11-18, D20)
+
+| Seção | Quem vê | Situação |
+|---|---|---|
+| Meu perfil | todos | **Feito** (nome, senha, PIN); o endereço antigo `/gestao/perfil` leva para cá |
+| Aparência e teclado | todos | **Feito**: tema claro, escuro ou automático (por aparelho) e atalhos de uma tecla |
+| Dados da casa | dono | **Feito**: nome, CNPJ, endereço e **WhatsApp de atendimento** (com aviso quando falta) |
+| Horário de funcionamento | dono | **Feito**: antes ficava dentro de "A casa" |
+| Loja online | dono | **Feito, só leitura**: mostra como a loja recebe pedidos hoje e se o WhatsApp está cadastrado |
+| Equipe e permissões | dono | Já existia |
+
+No computador as seções ficam numa lista à esquerda; no celular, Configurações abre uma lista e cada seção é uma tela. Configurações aparece no menu de todos, mas as seções da casa só aparecem para o dono. Testado em dados de exemplo (salvar WhatsApp e horário, trocar tema); com o banco real, salvar os dados da casa só funciona com a conta do dono (a conta de teste é de gestor).
+
+Limites: o tema escuro foi conferido em amostra (Início, Pedidos, Estoque, PDV e loja), não em todas as telas. Faltam as opções de retirada ("quando retirar") editáveis, nota fiscal e logotipo.
 
 ## Próximos passos
 

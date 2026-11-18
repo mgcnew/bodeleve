@@ -105,7 +105,7 @@ export function CashHeader() {
       <Sheet open={menu} onClose={() => setMenu(false)} title={me?.name ?? 'Minha conta'}>
         {me && <p className={s.headSub}>{roleLabels[me.role]} · {me.email}</p>}
         <p className={s.headSub}>{queued > 0 ? `Há ${queued} ${queued === 1 ? 'venda' : 'vendas'} sem enviar neste aparelho. Saia só depois que forem enviadas.` : open ? 'O caixa continua aberto depois que você sair.' : 'O caixa está fechado.'}</p>
-        <ButtonLink to="/gestao/perfil" variant="secondary" block>
+        <ButtonLink to="/gestao/configuracoes/perfil" variant="secondary" block>
           Meu perfil e senha
         </ButtonLink>
         <Button

@@ -29,7 +29,7 @@
 /* destino ativo = pílula de cor + peso (cor nunca é o único sinal) */
 .item[aria-current='page'] {
   background: var(--cor-primaria-suave);
-  color: var(--cor-primaria-pressionado);
+  color: var(--cor-primaria-sobre-suave);
   font-weight: 700;
 }
 

@@ -136,7 +136,7 @@ div.sum {
 .balStrong {
   background: var(--cor-primaria);
   border-color: var(--cor-primaria);
-  color: var(--superficie);
+  color: var(--branco);
 }
 
 .lot {
@@ -158,7 +158,7 @@ div.sum {
 
 .next {
   font: 600 13px/18px var(--fonte-texto);
-  color: var(--cor-primaria-pressionado);
+  color: var(--cor-primaria-sobre-suave);
 }
 
 .mv {
@@ -211,7 +211,7 @@ div.sum {
   height: 64px;
   border-radius: var(--raio-pilula);
   background: var(--cor-primaria);
-  color: var(--superficie);
+  color: var(--branco);
   display: flex;
   align-items: center;
   justify-content: center;

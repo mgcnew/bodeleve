@@ -8,7 +8,7 @@ import { sessionStore, signOut } from '@/services/gestao/session'
 import o from '@/styles/ops.module.css'
 import { ListRow, PageHeader } from '../../shared/OpsBits'
 
-type Entry = { module: Module; icon: IconName; title: string; sub: string; to: string }
+type Entry = { module?: Module; icon: IconName; title: string; sub: string; to: string }
 
 // Hub agrupado (INFORMATION_ARCHITECTURE.md)
 const groups: { title: string; entries: Entry[] }[] = [
@@ -29,7 +29,7 @@ const groups: { title: string; entries: Entry[] }[] = [
     ],
   },
   { title: 'Análise', entries: [{ module: 'relatorios', icon: 'historico', title: 'Relatórios', sub: 'Vendas, estoque, financeiro', to: '/gestao/relatorios' }] },
-  { title: 'Sistema', entries: [{ module: 'configuracoes', icon: 'mais', title: 'Configurações', sub: 'Casa, equipe e permissões', to: '/gestao/configuracoes' }] },
+  { title: 'Sistema', entries: [{ icon: 'mais', title: 'Configurações', sub: 'Perfil, aparência, dados da casa e equipe', to: '/gestao/configuracoes' }] },
 ]
 
 export function Mais() {
@@ -44,11 +44,11 @@ export function Mais() {
         <section className={o.section}>
           <h2 className={o.caps}>Você</h2>
           <Box>
-            <ListRow icon="perfil" title={session?.name ?? 'Meu perfil'} sub={`${roleLabels[role]} · nome, senha e PIN`} to="/gestao/perfil" />
+            <ListRow icon="perfil" title={session?.name ?? 'Meu perfil'} sub={`${roleLabels[role]} · nome, senha e PIN`} to="/gestao/configuracoes/perfil" />
           </Box>
         </section>
         {groups.map((g) => {
-          const entries = g.entries.filter((e) => canAccess(role, e.module))
+          const entries = g.entries.filter((e) => !e.module || canAccess(role, e.module))
           if (entries.length === 0) return null
           return (
             <section key={g.title} className={o.section}>
