@@ -13,6 +13,7 @@
   --cor-laranja: #E8590C;                /* destaque e selo Marca Bodeleve (só preenchimento) */
   --cor-laranja-texto: #B4470A;
   --cor-laranja-suave: #FFEDD5;
+  --cor-laranja-selo: #C2410C;           /* fundo do selo Marca Bodeleve: texto branco passa de 4,5 : 1 */
   --cor-amarelo: #F6C343;                /* só preenchimento; nunca texto */
   --cor-tinta: #141B17;                  /* foco, seleção, texto */
 

@@ -1,0 +1,481 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-18T12:10:16.779004Z",
+  "title": "Design System: Bodeleve",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Verde-folha",
+        "canonical": "#0F7A43",
+        "tonalRamp": [
+          "#052514",
+          "#083D22",
+          "#0A552F",
+          "#0D6B3B",
+          "#0F7A43",
+          "#57A27B",
+          "#9FCAB4",
+          "#DBEBE3"
+        ]
+      },
+      "primary-pressed": {
+        "role": "primary",
+        "displayName": "Verde-folha pressionado",
+        "canonical": "#0B6236",
+        "tonalRamp": [
+          "#031D10",
+          "#06311B",
+          "#084526",
+          "#0A5630",
+          "#0B6236",
+          "#549172",
+          "#9DC0AF",
+          "#DAE7E1"
+        ]
+      },
+      "primary-soft": {
+        "role": "primary",
+        "displayName": "Verde suave",
+        "canonical": "#E4F4EA",
+        "tonalRamp": [
+          "#444946",
+          "#727A75",
+          "#A0ABA4",
+          "#C9D7CE",
+          "#E4F4EA",
+          "#ECF7F0",
+          "#F4FBF7",
+          "#FBFDFC"
+        ]
+      },
+      "forest": {
+        "role": "secondary",
+        "displayName": "Verde-floresta",
+        "canonical": "#0A3D2A",
+        "tonalRamp": [
+          "#03120D",
+          "#051E15",
+          "#072B1D",
+          "#093625",
+          "#0A3D2A",
+          "#54776A",
+          "#9DB1AA",
+          "#DAE2DF"
+        ]
+      },
+      "orange": {
+        "role": "secondary",
+        "displayName": "Laranja",
+        "canonical": "#E8590C",
+        "tonalRamp": [
+          "#461B04",
+          "#742C06",
+          "#A23E08",
+          "#CC4E0B",
+          "#E8590C",
+          "#EF8B55",
+          "#F6BD9E",
+          "#FCE6DB"
+        ]
+      },
+      "orange-text": {
+        "role": "secondary",
+        "displayName": "Laranja de texto",
+        "canonical": "#B4470A",
+        "tonalRamp": [
+          "#361503",
+          "#5A2405",
+          "#7E3207",
+          "#9E3E09",
+          "#B4470A",
+          "#CA7E54",
+          "#E1B59D",
+          "#F4E3DA"
+        ]
+      },
+      "orange-seal": {
+        "role": "secondary",
+        "displayName": "Laranja do selo",
+        "canonical": "#C2410C",
+        "tonalRamp": [
+          "#3A1404",
+          "#612006",
+          "#882E08",
+          "#AB390B",
+          "#C2410C",
+          "#D47A55",
+          "#E7B39E",
+          "#F6E2DB"
+        ]
+      },
+      "yellow": {
+        "role": "secondary",
+        "displayName": "Amarelo",
+        "canonical": "#F6C343",
+        "tonalRamp": [
+          "#4A3B14",
+          "#7B6222",
+          "#AC882F",
+          "#D8AC3B",
+          "#F6C343",
+          "#F9D57B",
+          "#FBE7B4",
+          "#FEF6E3"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "#141B17",
+        "tonalRamp": [
+          "#060807",
+          "#0A0E0C",
+          "#0E1310",
+          "#121814",
+          "#141B17",
+          "#5A5F5D",
+          "#A1A4A2",
+          "#DCDDDC"
+        ]
+      },
+      "ops-bg": {
+        "role": "neutral",
+        "displayName": "Fundo de operação",
+        "canonical": "#F4F6F4",
+        "tonalRamp": [
+          "#494A49",
+          "#7A7B7A",
+          "#ABACAB",
+          "#D7D8D7",
+          "#F4F6F4",
+          "#F7F9F7",
+          "#FBFBFB",
+          "#FDFEFD"
+        ]
+      },
+      "store-bg": {
+        "role": "neutral",
+        "displayName": "Fundo da loja",
+        "canonical": "#F6F8F5",
+        "tonalRamp": [
+          "#4A4A4A",
+          "#7B7C7A",
+          "#ACAEAC",
+          "#D8DAD8",
+          "#F6F8F5",
+          "#F9FAF8",
+          "#FBFCFB",
+          "#FEFEFE"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Linha forte",
+        "canonical": "#C8D0C9",
+        "tonalRamp": [
+          "#3C3E3C",
+          "#646864",
+          "#8C928D",
+          "#B0B7B1",
+          "#C8D0C9",
+          "#D8DED9",
+          "#E9ECE9",
+          "#F7F8F7"
+        ]
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Texto secundário",
+        "canonical": "#4E5A52",
+        "tonalRamp": [
+          "#171B19",
+          "#272D29",
+          "#373F39",
+          "#454F48",
+          "#4E5A52",
+          "#838C86",
+          "#B8BDBA",
+          "#E4E6E5"
+        ]
+      },
+      "error": {
+        "role": "semantic",
+        "displayName": "Erro",
+        "canonical": "#B3173A",
+        "tonalRamp": [
+          "#360711",
+          "#5A0C1D",
+          "#7D1029",
+          "#9E1433",
+          "#B3173A",
+          "#CA5D75",
+          "#E1A2B0",
+          "#F4DCE1"
+        ]
+      },
+      "info": {
+        "role": "semantic",
+        "displayName": "Info",
+        "canonical": "#1D5FA8",
+        "tonalRamp": [
+          "#091D32",
+          "#0E3054",
+          "#144276",
+          "#1A5494",
+          "#1D5FA8",
+          "#618FC2",
+          "#A5BFDC",
+          "#DDE7F2"
+        ]
+      },
+      "hue-pink": {
+        "role": "tertiary",
+        "displayName": "Rosa de categoria",
+        "canonical": "#A3265B",
+        "tonalRamp": [
+          "#310B1B",
+          "#52132E",
+          "#721B40",
+          "#8F2150",
+          "#A3265B",
+          "#BF678C",
+          "#DAA8BD",
+          "#F1DEE6"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "title-xl": {
+        "displayName": "Título XL",
+        "purpose": "Título de tela."
+      },
+      "body": {
+        "displayName": "Corpo",
+        "purpose": "Texto e campos."
+      },
+      "label": {
+        "displayName": "Legenda",
+        "purpose": "Legenda funcional de grupo em caixa alta."
+      },
+      "value": {
+        "displayName": "Valor",
+        "purpose": "KPI e totais, tabular."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sombra-1",
+        "value": "0 1px 2px rgb(20 27 23 / 0.06), 0 1px 1px rgb(20 27 23 / 0.04)",
+        "purpose": "Botões sólidos e segmento ativo."
+      },
+      {
+        "name": "sombra-2",
+        "value": "0 6px 16px rgb(20 27 23 / 0.1), 0 2px 4px rgb(20 27 23 / 0.06)",
+        "purpose": "Menus e hover de cartão."
+      },
+      {
+        "name": "sombra-3",
+        "value": "0 18px 48px rgb(20 27 23 / 0.18), 0 4px 12px rgb(20 27 23 / 0.08)",
+        "purpose": "Folha, modal e paleta de comandos."
+      },
+      {
+        "name": "foco-campo",
+        "value": "0 0 0 3px #E4F4EA",
+        "purpose": "Anel de foco de campo, com borda verde."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-saida",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Único easing do sistema."
+      },
+      {
+        "name": "dur-1",
+        "value": "120ms",
+        "purpose": "Cor, fundo, sombra e transform de controles."
+      },
+      {
+        "name": "dur-2",
+        "value": "200ms",
+        "purpose": "Entrada de tela, navegação, folha, modal, véu."
+      },
+      {
+        "name": "entra",
+        "value": "opacity 0 e translateY(6px) para o repouso, 200ms",
+        "purpose": "Entrada de tela ao trocar de rota."
+      },
+      {
+        "name": "brilho",
+        "value": "1.4s infinite, translateX(-100% a 100%)",
+        "purpose": "Esqueleto."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "prefers-reduced-motion zera animações e transições."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "tablet",
+        "value": "768px",
+        "note": "--barra-* passa de floresta para branca; folha vira janela; chips quebram linha"
+      },
+      {
+        "name": "desktop",
+        "value": "1024px",
+        "note": "raios 12/8/16, títulos menores, barra inferior vira coluna lateral de 88px, KPIs em 4 colunas"
+      },
+      {
+        "name": "barra-mobile",
+        "value": "--barra-fundo #0A3D2A, texto #FFFFFF, suave #BFE3CF, linha transparent",
+        "note": "abaixo de 768px"
+      },
+      {
+        "name": "barra-tablet-desktop",
+        "value": "--barra-fundo #FFFFFF, texto #141B17, suave #4E5A52, linha #E1E6E1",
+        "note": "a partir de 768px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão primário",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal, sempre verde.",
+      "html": "<button class=\"ds-btn-primary\">Fechar venda</button>",
+      "css": ".ds-btn-primary{font-family:Geist,system-ui,sans-serif;height:48px;padding:0 20px;border:0;border-radius:16px;background:var(--cor-primaria,#0F7A43);color:#fff;font-weight:600;font-size:16px;box-shadow:0 1px 2px rgb(20 27 23/.06);cursor:pointer;transition:background-color 120ms cubic-bezier(.22,1,.36,1),transform 120ms cubic-bezier(.22,1,.36,1)}.ds-btn-primary:hover{background:#0B6236}.ds-btn-primary:active{transform:scale(.98);background:#0B6236}.ds-btn-primary:focus-visible{outline:2px solid #0F7A43;outline-offset:2px}"
+    },
+    {
+      "name": "Botão secundário",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ação alternativa.",
+      "html": "<button class=\"ds-btn-sec\">Cancelar</button>",
+      "css": ".ds-btn-sec{font-family:Geist,system-ui,sans-serif;height:48px;padding:0 20px;border:1px solid #C8D0C9;border-radius:16px;background:#fff;color:#141B17;font-weight:600;font-size:16px;cursor:pointer;transition:background-color 120ms cubic-bezier(.22,1,.36,1)}.ds-btn-sec:hover{background:#F4F6F4;border-color:#4E5A52}.ds-btn-sec:focus-visible{outline:2px solid #0F7A43;outline-offset:2px}"
+    },
+    {
+      "name": "Campo",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo de texto de 48px com anel verde no foco.",
+      "html": "<label class=\"ds-f\"><span>Nome</span><input class=\"ds-in\" placeholder=\"Maria\"></label>",
+      "css": ".ds-f{font-family:Geist,system-ui,sans-serif;display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px}.ds-in{height:48px;padding:0 14px;border:1px solid #C8D0C9;border-radius:10px;background:#fff;font:400 16px Geist,system-ui,sans-serif;transition:border-color 120ms cubic-bezier(.22,1,.36,1)}.ds-in:hover{border-color:#4E5A52}.ds-in:focus-visible{outline:none;border-color:#0F7A43;box-shadow:0 0 0 3px #E4F4EA}"
+    },
+    {
+      "name": "Chip de filtro",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Filtro em pílula; selecionado fica verde.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"false\">Todos</button> <button class=\"ds-chip\" aria-pressed=\"true\">Feito na casa</button>",
+      "css": ".ds-chip{font-family:Geist,system-ui,sans-serif;height:44px;padding:0 16px;border:1px solid #C8D0C9;border-radius:999px;background:#fff;color:#141B17;font-weight:600;font-size:14px;cursor:pointer;transition:background-color 120ms cubic-bezier(.22,1,.36,1)}.ds-chip:hover{border-color:#0F7A43}.ds-chip[aria-pressed=true]{background:#0F7A43;border-color:#0F7A43;color:#fff}.ds-chip:focus-visible{outline:2px solid #0F7A43;outline-offset:2px}"
+    },
+    {
+      "name": "Cartão",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Cartão branco com linha fina, sem sombra.",
+      "html": "<div class=\"ds-card\"><strong>Pedido 1042</strong><span>2 itens, entrega hoje</span></div>",
+      "css": ".ds-card{font-family:Geist,system-ui,sans-serif;display:flex;flex-direction:column;gap:8px;padding:16px;border:1px solid #E1E6E1;border-radius:16px;background:#fff;color:#141B17}.ds-card span{font-size:14px;color:#4E5A52}"
+    },
+    {
+      "name": "Selos e etiquetas",
+      "kind": "chip",
+      "refersTo": "seal-house-made",
+      "description": "Origem do produto e estado.",
+      "html": "<span class=\"ds-seal\">Feito na casa</span> <span class=\"ds-tag\">Pago</span> <span class=\"ds-tag ds-w\">Vence em 3 dias</span>",
+      "css": ".ds-seal{font-family:Geist,system-ui,sans-serif;display:inline-block;padding:3px 10px;border-radius:999px;background:#0F7A43;color:#fff;font-weight:600;font-size:12px;line-height:18px}.ds-tag{font-family:Geist,system-ui,sans-serif;display:inline-block;padding:4px 10px;border-radius:999px;background:#E1F3E8;color:#0B6236;font-weight:600;font-size:13px;line-height:18px}.ds-w{background:#FFF1CC;color:#8A5A00}"
+    },
+    {
+      "name": "Navegação inferior em pílula",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Barra do celular; aba ativa em pílula verde suave com peso 700.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-it\" aria-current=\"page\" href=\"#\">Início</a><a class=\"ds-it\" href=\"#\">Pedidos</a><a class=\"ds-it\" href=\"#\">Estoque</a></nav>",
+      "css": ".ds-nav{font-family:Geist,system-ui,sans-serif;display:flex;gap:2px;padding:6px 8px;background:#fff;border-top:1px solid #E1E6E1}.ds-it{flex:1;height:56px;display:flex;align-items:center;justify-content:center;border-radius:16px;text-decoration:none;color:#4E5A52;font-weight:500;font-size:12px;transition:background-color 200ms cubic-bezier(.22,1,.36,1)}.ds-it[aria-current=page]{background:#E4F4EA;color:#0B6236;font-weight:700}.ds-it:hover:not([aria-current]){background:#F4F6F4;color:#141B17}"
+    },
+    {
+      "name": "Faixa de topo (celular)",
+      "kind": "custom",
+      "refersTo": "top-bar-mobile",
+      "description": "Faixa floresta com cantos inferiores arredondados; no computador vira branca com linha.",
+      "html": "<header class=\"ds-bar\"><h1>Início</h1><p>3 pedidos pedem ação</p></header>",
+      "css": ".ds-bar{font-family:Geist,system-ui,sans-serif;padding:16px 16px 24px;background:#0A3D2A;color:#fff;border-radius:0 0 24px 24px}.ds-bar h1{margin:0;font:700 26px/32px Geist,system-ui,sans-serif;letter-spacing:-.015em}.ds-bar p{margin:4px 0 0;color:#BFE3CF;font-size:14px}@media(min-width:768px){.ds-bar{background:#fff;color:#141B17;border-bottom:1px solid #E1E6E1;border-radius:0}.ds-bar p{color:#4E5A52}}"
+    },
+    {
+      "name": "Esqueleto",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Bloco cinza com brilho que cruza.",
+      "html": "<div class=\"ds-sk\"></div>",
+      "css": ".ds-sk{position:relative;overflow:hidden;height:64px;border-radius:12px;background:#EBEFEB}.ds-sk::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgb(255 255 255/.65),transparent);animation:ds-b 1.4s cubic-bezier(.22,1,.36,1) infinite}@keyframes ds-b{to{transform:translateX(100%)}}@media(prefers-reduced-motion:reduce){.ds-sk::after{animation:none}}"
+    },
+    {
+      "name": "Paleta de comandos",
+      "kind": "custom",
+      "refersTo": "sheet",
+      "description": "Ctrl/⌘ K; item ativo verde suave, teclas em kbd.",
+      "html": "<div class=\"ds-cp\"><div class=\"ds-cpf\">Buscar ou ir para...</div><div class=\"ds-cpi\">Pedidos <kbd>G</kbd><kbd>P</kbd></div></div>",
+      "css": ".ds-cp{font-family:Geist,system-ui,sans-serif;width:360px;border-radius:24px;background:#fff;box-shadow:0 18px 48px rgb(20 27 23/.18);overflow:hidden}.ds-cpf{height:56px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #E1E6E1;color:#4E5A52}.ds-cpi{display:flex;gap:4px;align-items:center;min-height:44px;margin:8px;padding:0 12px;border-radius:10px;background:#E4F4EA;color:#0B6236;font-weight:600}kbd{height:20px;padding:0 6px;border:1px solid #C8D0C9;border-bottom-width:2px;border-radius:6px;background:#fff;color:#4E5A52;font:600 11px/18px Geist,system-ui,sans-serif}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Casa em Folha e Floresta",
+    "overview": "**Creative North Star: \"A Casa em Folha e Floresta\"**\n\nO sistema é o padrão da categoria executado com rigor: referências de acabamento Linear e Stripe no painel, iFood e Shopify na loja. No celular, uma faixa verde-floresta no topo diz em um olhar onde a pessoa está, com chips, atalhos e cartões coloridos abaixo. No computador a mesma interface fica sóbria, clara e densa: barra de topo branca, menu lateral, tabelas com hover, teclado em primeiro plano. Uma única fonte (Geist), números tabulares, cartões brancos com linha fina e sombras só quando algo flutua.\n\nA ação principal é sempre verde-folha e fica no mesmo lugar. Laranja e amarelo são destaque e origem de produto; azul e rosa existem só como matiz de categoria e informação. O movimento é curto e some com `prefers-reduced-motion`. A direção recusa o painel cinza com um acento só e a loja de comida com textura regional decorativa. A marca aparece apenas como a palavra \"Bodeleve\"; não há logotipo.",
+    "keyCharacteristics": [
+      "Neutros frios com matiz de verde; verde-folha como única cor de ação.",
+      "Faixa de topo que muda por breakpoint (floresta no celular, branca a partir de 768 px).",
+      "Raios macios no celular (16 px), firmes no computador (12 px).",
+      "Profundidade tonal e por linha; sombra só em menu, folha, modal e botões sólidos leves.",
+      "Alvos de toque de 44, 48 e 56 px; cor nunca é o único sinal."
+    ],
+    "rules": [
+      {
+        "name": "The One Action Rule",
+        "body": "Verde-folha é a única cor de ação. Laranja e amarelo destacam, mas nunca recebem clique primário.",
+        "section": "colors"
+      },
+      {
+        "name": "The Fill-Only Rule",
+        "body": "`orange` e `yellow` não são cor de texto; texto laranja usa `orange-text`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Pair Rule",
+        "body": "Estado semântico é sempre texto escuro sobre o fundo suave do mesmo matiz, com palavra ou ícone junto.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Todo número que se compara ou soma usa `tabular-nums`.",
+        "section": "typography"
+      },
+      {
+        "name": "The Float-Only Rule",
+        "body": "Sombra marca o que flutua (menu, folha, modal) ou responde ao ponteiro. Cartão em repouso não tem sombra.",
+        "section": "elevation & depth"
+      }
+    ],
+    "dos": [
+      "**Do** usar os tokens de `design/tokens.css` por nome; nunca redigitar cor, raio ou espaço.",
+      "**Do** usar `primary` para a ação principal e manter a faixa de topo em `--barra-*` para a cor mudar por breakpoint.",
+      "**Do** manter alvos de 44 px no mínimo, 48 px em botão e campo, 56 px na ação principal.",
+      "**Do** combinar cor com texto, ícone ou peso em todo estado (aba ativa, erro, etiqueta).",
+      "**Do** limitar transições a 120 ou 200 ms com `--ease-saida`, em cor, fundo, sombra e transform; hover só dentro de `@media (hover: hover)`.",
+      "**Do** usar `tabular-nums` em números e dinheiro (em centavos no domínio).",
+      "**Do** usar `:focus-visible` com contorno de 2 px na cor de ação e deslocamento de 2 px.",
+      "**Do** manter `[textos entre colchetes]` como conteúdo editável."
+    ],
+    "donts": [
+      "**Don't** usar laranja ou amarelo como texto; texto laranja é `orange-text`.",
+      "**Don't** pôr sombra em cartão em repouso nem animar layout (largura, altura, posição).",
+      "**Don't** usar azul ou rosa como cor de ação; são só matizes de categoria e informação.",
+      "**Don't** usar textura regional decorativa, ilustração de folha, nem painel cinza de um acento só.",
+      "**Don't** escrever hex solto em componente quando existe token.",
+      "**Don't** usar a cor como único sinal nem botão de ícone sem nome acessível."
+    ]
+  }
+}

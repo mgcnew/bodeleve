@@ -13,7 +13,7 @@
 
 /* laranja escuro: branco sobre #E8590C não chega a 4,5 : 1 */
 .bodeleve_brand {
-  background: #C2410C;
+  background: var(--cor-laranja-selo);
 }
 
 .third_party {
