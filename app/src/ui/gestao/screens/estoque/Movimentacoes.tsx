@@ -26,9 +26,10 @@ export function Movimentacoes() {
   const withBalance = mine.map((m) => ({ ...m, balance: (running = Math.round((running + m.qty) * 1000) / 1000) }))
   const visible = withBalance.filter((m) => filter === 'all' || (filter === 'in' ? m.qty > 0 : m.qty < 0)).reverse()
 
+  const pg = usePagination(visible, filter)
+
   if (!item) return <EmptyState bare icon="estoque" title="Item não encontrado" />
 
-  const pg = usePagination(visible, filter)
   return (
     <div className={o.screen}>
       <Bar title="Movimentações" back={`/gestao/estoque/${id}`} />
