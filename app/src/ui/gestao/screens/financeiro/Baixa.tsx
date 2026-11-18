@@ -8,7 +8,6 @@ import { Icon } from '@/components/Icon'
 import { daysFromToday, fullDate } from '@/domain/dates'
 import { formatCents, parseCents } from '@/domain/money'
 import { accountsStore, entriesStore, ledgerStore } from '@/services/gestao/backoffice'
-import { supabase } from '@/lib/supabase'
 import { financeErrorMessage } from '@/services/gestao/financeRemote'
 import { accountBalance, overdueDays, remaining, settleEntry, undoSettlement, type Settlement } from '@/services/gestao/finance'
 import o from '@/styles/ops.module.css'
@@ -72,8 +71,6 @@ export function Baixa() {
     }
   }
 
-  // o banco ainda não tem a função de receber contas a receber (cartão a liquidar, fiado)
-  const unsupported = !!supabase && !pay
 
   if (done) {
     return (
@@ -165,7 +162,6 @@ export function Baixa() {
         </div>
         <SelectField label="Forma" value={method} onChange={(e) => setMethod(e.target.value)} options={methods.map((m) => ({ value: m, label: m }))} />
         <TextField label="Comprovante (opcional)" type="file" disabled help="Disponível quando o armazenamento de arquivos estiver ligado." />
-        {unsupported && <Banner tone="info">Receber contas a receber ainda não está ligado ao banco. Por enquanto só é possível pagar contas a pagar.</Banner>}
         {problem && <Banner tone="error">{problem}</Banner>}
         {insufficient ? (
           <Banner tone="error">{`${account.name} tem ${money(balance)}. Escolha ${accounts.find((a) => a.id !== accountId)?.name.toLowerCase()} ou pague só uma parte.`}</Banner>
@@ -184,7 +180,7 @@ export function Baixa() {
             Saldo insuficiente {accountId === 'caixa' ? 'no caixa' : 'no banco'}
           </Button>
         ) : (
-          <Button size="l" block loading={busy} onClick={submit} disabled={total <= 0 || busy || unsupported}>
+          <Button size="l" block loading={busy} onClick={submit} disabled={total <= 0 || busy}>
             {pay ? 'Registrar pagamento' : 'Registrar recebimento'}
           </Button>
         )}

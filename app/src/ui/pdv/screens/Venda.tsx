@@ -91,6 +91,7 @@ export function Venda() {
           </div>
         </Box>
         <div className={o.card}>
+          {sale.customerName && <SumRow label="Cliente" value={sale.customerName} />}
           {sale.payments.map((p, i) => (
             <SumRow key={i} label={i === 0 ? 'Pagamento' : ''} value={`${payLabels[p.method]} · ${formatCents(p.cents)}`} />
           ))}

@@ -12,12 +12,12 @@ export const seedCategories = (): Category[] => [
   { id: 'bebidas', name: 'Bebidas' },
 ]
 
-const cust = (c: Omit<Customer, 'notes' | 'fiadoCents' | 'history' | 'topItems'> & Partial<Customer>): Customer => ({ notes: '', fiadoCents: 0, history: [], topItems: [], ...c })
+const cust = (c: Omit<Customer, 'notes' | 'fiadoCents' | 'creditDays' | 'history' | 'topItems'> & Partial<Customer>): Customer => ({ notes: '', fiadoCents: 0, creditDays: null, history: [], topItems: [], ...c })
 
 export const seedCustomers = (): Customer[] => [
   cust({
     id: 'maria-lima', name: 'Maria Lima', phone: '(00) 90000-0001', address: 'Av. das Palmeiras, 455 · casa 2 — Centro', since: daysFromToday(-250), channel: 'compra pela loja online',
-    orderCount: 5, totalCents: 41230, lastOrderLabel: 'último hoje', notes: 'Prefere queijo mais curado.',
+    orderCount: 5, totalCents: 41230, creditDays: 15, lastOrderLabel: 'último hoje', notes: 'Prefere queijo mais curado.',
     topItems: [{ name: 'Queijo coalho', times: 5 }, { name: 'Farinha de mandioca', times: 3 }, { name: 'Tapioca', times: 2 }],
     history: [
       { number: '1021', date: daysFromToday(-8), line: 'Entrega · 4 itens', totalCents: 9840, status: 'Entregue' },
@@ -25,7 +25,7 @@ export const seedCustomers = (): Customer[] => [
     ],
   }),
   cust({ id: 'ana-souza', name: 'Ana Souza', phone: '(00) 90000-0000', address: 'Rua das Camélias, 120 · apto 34 — Jardim das Flores', since: daysFromToday(-120), channel: 'compra pela loja online', orderCount: 3, totalCents: 23610, lastOrderLabel: 'último hoje', topItems: [{ name: 'Queijo coalho', times: 3 }] }),
-  cust({ id: 'dona-zefa', name: 'Dona Zefa', phone: '(00) 90000-0006', address: '—', since: daysFromToday(-500), channel: 'compra no balcão', orderCount: 22, totalCents: 102000, fiadoCents: 16000, lastOrderLabel: 'balcão · compra fiado', topItems: [{ name: 'Carne de sol', times: 12 }, { name: 'Farinha de mandioca', times: 9 }] }),
+  cust({ id: 'dona-zefa', name: 'Dona Zefa', phone: '(00) 90000-0006', address: '—', since: daysFromToday(-500), channel: 'compra no balcão', orderCount: 22, totalCents: 102000, fiadoCents: 16000, creditDays: 30, lastOrderLabel: 'balcão · compra a prazo', topItems: [{ name: 'Carne de sol', times: 12 }, { name: 'Farinha de mandioca', times: 9 }] }),
   cust({ id: 'paula-reis', name: 'Paula Reis', phone: '(00) 90000-0003', address: 'Rua do Sol, 88 — Bairro Alto', since: daysFromToday(-400), channel: 'compra pela loja online', orderCount: 8, totalCents: 90470, lastOrderLabel: 'último hoje', topItems: [{ name: 'Queijo coalho', times: 8 }, { name: 'Doce de leite', times: 5 }] }),
   cust({ id: 'joao-pedro', name: 'João Pedro', phone: '(00) 90000-0002', address: '—', since: daysFromToday(-1), channel: 'compra pela loja online', orderCount: 1, totalCents: 4780, lastOrderLabel: 'hoje' }),
 ]

@@ -23,3 +23,5 @@ O banco da Bodeleve é o projeto Supabase `afqcwqikkolyoowkozak` (organização 
 - **Auditoria de 2026-11-17**: os testes de saldo inicial e de ficha técnica rodaram em blocos que terminam em erro de propósito, para o banco desfazer tudo; nada ficou gravado. O cliente "TESTE Cliente Manual" criado no teste foi removido.
 
 - `patches/2026-11-18_pay_on_pickup.sql`: valor `on_pickup` no tipo `payment_method` e `place_order` aceitando-o (pedido da loja por WhatsApp, D19). Testado com `raise exception 'ROLLBACK_TESTE'`.
+
+- `patches/2026-11-18_customer_credit.sql`: prazo por cliente, pagamento `on_account`, venda a prazo no `pos_checkout`, `receive_entry`, cancelamento (D21). Testado com `raise exception 'ROLLBACK_TESTE'`.

@@ -51,6 +51,7 @@ export function Concluida() {
           </div>
         )}
         <div className={o.card}>
+          {sale.customerName && <SumRow label="Cliente" value={sale.customerName} />}
           {sale.payments.map((p, i) => (
             <SumRow key={i} label={p.method === 'cash' ? 'Dinheiro recebido' : payLabels[p.method]} value={formatCents(p.method === 'cash' ? (cash?.receivedCents ?? p.cents) : p.cents)} />
           ))}

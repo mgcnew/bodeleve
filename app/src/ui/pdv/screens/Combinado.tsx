@@ -5,7 +5,7 @@ import { Banner } from '@/components/Feedback'
 import { Box } from '@/components/Card'
 import { TextField } from '@/components/Field'
 import { formatCents, parseCents } from '@/domain/money'
-import { cartTotal, payLabels, type PayMethod, type Payment } from '@/domain/pdv'
+import { cartTotal, payLabels, payMethodsFor, type PayMethod, type Payment } from '@/domain/pdv'
 import { cartStore, completeSale } from '@/services/pdv'
 import { posErrorMessage } from '@/services/pdvRemote'
 import { Bar } from '../../shared/OpsBits'
@@ -84,7 +84,7 @@ export function Combinado() {
         {!settled && (
           <>
             <div className={s.chipRow} role="group" aria-label="Forma" style={{ flexWrap: 'wrap' }}>
-              {(Object.keys(payLabels) as PayMethod[]).map((m) => (
+              {payMethodsFor(cart).map((m) => (
                 <BigChip key={m} active={method === m} onClick={() => setMethod(m)}>
                   {payLabels[m]}
                 </BigChip>

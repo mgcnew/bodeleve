@@ -1,11 +1,11 @@
 import type { Cents } from './money'
 
-export type PayMethod = 'cash' | 'pix' | 'debit' | 'credit'
+export type PayMethod = 'cash' | 'pix' | 'debit' | 'credit' | 'on_account'
 
-export const payLabels: Record<PayMethod, string> = { cash: 'Dinheiro', pix: 'Pix', debit: 'Débito', credit: 'Crédito' }
+export const payLabels: Record<PayMethod, string> = { cash: 'Dinheiro', pix: 'Pix', debit: 'Débito', credit: 'Crédito', on_account: 'A prazo' }
 
 /** Filtro do histórico agrupa débito e crédito em "Cartão" */
-export const payGroup = (m: PayMethod): 'cash' | 'pix' | 'card' => (m === 'debit' || m === 'credit' ? 'card' : m)
+export const payGroup = (m: PayMethod): 'cash' | 'pix' | 'card' | 'term' => (m === 'debit' || m === 'credit' ? 'card' : m === 'on_account' ? 'term' : m)
 
 export type SaleLine = {
   itemId: string
@@ -41,6 +41,8 @@ export type Sale = {
   totalCents: Cents
   payments: Payment[]
   changeCents: Cents
+  /** cliente da venda a prazo (quando houve) */
+  customerName?: string | null
   status: 'done' | 'cancelled'
   cancelledAt: string | null
   cancelledBy: string | null
@@ -67,7 +69,13 @@ export type CartLine = { itemId: string; name: string; grams: number | null; qua
 
 export type Discount = { label: string; cents: Cents; reason: string }
 
-export type PosCart = { lines: CartLine[]; discount: Discount | null }
+/** Cliente escolhido para a venda; `creditDays` preenchido libera a forma "A prazo" */
+export type PosCustomer = { id: string; name: string; creditDays: number | null }
+
+export type PosCart = { lines: CartLine[]; discount: Discount | null; customer?: PosCustomer | null }
+
+/** Formas de pagamento da venda: "A prazo" só aparece quando o cliente escolhido tem prazo */
+export const payMethodsFor = (c: PosCart): PayMethod[] => (c.customer?.creditDays ? ['cash', 'pix', 'debit', 'credit', 'on_account'] : ['cash', 'pix', 'debit', 'credit'])
 
 export const lineTotal = (l: CartLine): Cents => Math.round(l.grams !== null ? (l.unitPriceCents * l.grams) / 1000 : l.unitPriceCents * l.quantity)
 

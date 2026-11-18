@@ -37,7 +37,7 @@ export type SalesReport = {
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
 const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n)
 
-const method = (m: string): 'pix' | 'cash' | 'card' | 'pending' => (m === 'pix' ? 'pix' : m === 'cash' ? 'cash' : m === 'on_pickup' ? 'pending' : 'card')
+const method = (m: string): 'pix' | 'cash' | 'card' | 'pending' => (m === 'pix' ? 'pix' : m === 'cash' ? 'cash' : m === 'on_pickup' || m === 'on_account' ? 'pending' : 'card')
 
 const emptyPeriod = (): SalesPeriod => ({ total: 0, count: 0, counter: { count: 0, total: 0 }, online: { count: 0, total: 0 }, pix: 0, card: 0, cash: 0, pending: 0, top: [] })
 

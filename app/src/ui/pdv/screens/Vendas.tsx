@@ -13,12 +13,12 @@ import { salesStore } from '@/services/pdv'
 import { PageHeader } from '../../shared/OpsBits'
 import o from '@/styles/ops.module.css'
 
-type Filter = 'all' | 'cash' | 'pix' | 'card'
+type Filter = 'all' | 'cash' | 'pix' | 'card' | 'term'
 
 export const payTone = (s: Sale): { label: string; tone: Tone } => {
   const m = s.payments[0].method
   const label = s.payments.length > 1 ? 'Combinado' : payLabels[m]
-  return { label, tone: m === 'cash' ? 'success' : m === 'pix' ? 'info' : 'warning' }
+  return { label, tone: m === 'cash' ? 'success' : m === 'pix' || m === 'on_account' ? 'info' : 'warning' }
 }
 
 export function Vendas() {
@@ -42,6 +42,7 @@ export function Vendas() {
             { value: 'cash', label: 'Dinheiro' },
             { value: 'pix', label: 'Pix' },
             { value: 'card', label: 'Cartão' },
+            { value: 'term', label: 'A prazo' },
           ]}
         />
         {visible.length === 0 ? (
@@ -57,6 +58,7 @@ export function Vendas() {
                     <span className={o.rowTitle}>{s.number}</span>
                     <span className={`${o.small} ${o.num}`}>
                       {hourMinute(s.at)} · {items} {items === 1 ? 'item' : 'itens'}
+                      {s.customerName ? ` · ${s.customerName}` : ''}
                     </span>
                   </span>
                   <span className={o.rowEnd}>

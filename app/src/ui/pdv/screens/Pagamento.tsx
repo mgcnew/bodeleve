@@ -4,15 +4,18 @@ import { Button } from '@/components/Button'
 import { Banner } from '@/components/Feedback'
 import { Icon, type IconName } from '@/components/Icon'
 import { formatCents } from '@/domain/money'
-import { cartTotal, payLabels, type PayMethod } from '@/domain/pdv'
-import { cartStore, completeSale } from '@/services/pdv'
+import { cartTotal, payLabels, payMethodsFor, type PayMethod } from '@/domain/pdv'
+import { shortDate } from '@/domain/dates'
+import { daysFromToday } from '@/domain/dates'
+import { cartStore, completeSale, setCartCustomer } from '@/services/pdv'
+import { CustomerPicker } from '../components/CustomerPicker'
 import { posErrorMessage } from '@/services/pdvRemote'
 import { Bar } from '../../shared/OpsBits'
 import { BigChip } from '../components/PdvBits'
 import o from '@/styles/ops.module.css'
 import s from './Pdv.module.css'
 
-const icons: Record<PayMethod, IconName> = { cash: 'caixa', pix: 'confirmar', debit: 'financeiro', credit: 'financeiro' }
+const icons: Record<PayMethod, IconName> = { cash: 'caixa', pix: 'confirmar', debit: 'financeiro', credit: 'financeiro', on_account: 'historico' }
 
 /** Sugestões de valor recebido acima do total: próxima dezena, a seguinte e a nota redonda */
 export function cashSuggestions(total: number) {
@@ -29,7 +32,10 @@ export function Pagamento() {
   const cart = cartStore.useStore()
   const navigate = useNavigate()
   const total = cartTotal(cart)
-  const [method, setMethod] = useState<PayMethod>('cash')
+  const [picked, setMethod] = useState<PayMethod>('cash')
+  const methods = payMethodsFor(cart)
+  // sem cliente com prazo, "A prazo" some e a escolha volta para dinheiro
+  const method: PayMethod = methods.includes(picked) ? picked : 'cash'
   const [received, setReceived] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string>()
@@ -40,7 +46,7 @@ export function Pagamento() {
   const cashIn = received ?? total
   const change = cashIn - total
   const label =
-    method === 'cash' ? `Recebi ${formatCents(cashIn)} · concluir` : method === 'pix' ? 'Pix recebido · concluir' : 'Cartão aprovado · concluir'
+    method === 'cash' ? `Recebi ${formatCents(cashIn)} · concluir` : method === 'pix' ? 'Pix recebido · concluir' : method === 'on_account' ? 'Registrar venda a prazo' : 'Cartão aprovado · concluir'
 
   const finish = async () => {
     setBusy(true)
@@ -62,8 +68,9 @@ export function Pagamento() {
           <div>Total a cobrar</div>
           <div className={s.big}>{formatCents(total)}</div>
         </div>
+        <CustomerPicker value={cart.customer} onChange={setCartCustomer} />
         <div className={s.methods} role="group" aria-label="Forma de pagamento">
-          {(Object.keys(payLabels) as PayMethod[]).map((m) => (
+          {methods.map((m) => (
             <button key={m} type="button" className={s.method} aria-pressed={method === m} onClick={() => setMethod(m)}>
               <Icon name={icons[m]} size={22} />
               {payLabels[m]}
@@ -99,6 +106,17 @@ export function Pagamento() {
               [QR CODE PIX]
             </div>
             <p className={o.muted}>Mostre o código ao cliente. Confirme aqui quando o Pix cair; a confirmação é manual nesta versão.</p>
+          </div>
+        )}
+        {method === 'on_account' && cart.customer?.creditDays && (
+          <div className={o.card} style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}>
+            <Icon name="historico" size={22} />
+            <div>
+              <b>Venda a prazo para {cart.customer.name}</b>
+              <div className={o.muted}>
+                Nada entra no caixa agora. Vira uma conta a receber de {formatCents(total)} que vence em {shortDate(daysFromToday(cart.customer.creditDays))} ({cart.customer.creditDays} dias).
+              </div>
+            </div>
           </div>
         )}
         {(method === 'debit' || method === 'credit') && (

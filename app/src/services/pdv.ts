@@ -1,18 +1,19 @@
 // PDV: sacola, caixa e vendas. Hoje em stores no aparelho; com o Supabase vira `orders` (channel pos),
 // `payments`, `cash_sessions` e `cash_movements`, com fila local para funcionar em conexão ruim (H-P7).
 import { daysFromToday } from '@/domain/dates'
-import type { CartLine, CashSession, Discount, PayMethod, Payment, PosCart, Sale } from '@/domain/pdv'
+import type { CartLine, CashSession, Discount, PayMethod, Payment, PosCart, PosCustomer, Sale } from '@/domain/pdv'
 import { cartSubtotal, cartTotal, lineTotal } from '@/domain/pdv'
 import type { FinancialEntry, LedgerTx } from '@/domain/backoffice'
 import { createStore } from '@/lib/store'
 import { supabase } from '@/lib/supabase'
 import { seedCash, seedSales } from '@/mocks/pdv/seed'
 import { entriesStore, ledgerStore, newId, stockStore } from './gestao/backoffice'
+import { customersStore } from './gestao/people'
 import { sessionStore } from './gestao/session'
 import { fefoOut } from './gestao/stock'
 import { remoteCancelSale, remoteCashMovement, remoteCheckout, remoteCloseCash, remoteOpenCash, remoteReopenCash } from './pdvRemote'
 
-export const cartStore = createStore<PosCart>('bodeleve.pdv.sacola', () => ({ lines: [], discount: null }))
+export const cartStore = createStore<PosCart>('bodeleve.pdv.sacola', () => ({ lines: [], discount: null, customer: null }))
 // com o Supabase são cache do banco (alimentado por pdvRemote); sem ele, dados de exemplo no aparelho
 export const salesStore = createStore<Sale[]>(supabase ? 'bodeleve.pdv.vendas.remoto' : 'bodeleve.pdv.vendas', () => (supabase ? [] : seedSales()))
 export const cashStore = createStore<{ session: CashSession | null; lastClose: { at: string; diffCents: number } | null }>(supabase ? 'bodeleve.pdv.caixa.remoto' : 'bodeleve.pdv.caixa', () => (supabase ? { session: null, lastClose: null } : seedCash()))
@@ -41,6 +42,11 @@ export function setLineQty(itemId: string, quantity: number) {
 
 export function setLineGrams(itemId: string, grams: number) {
   cartStore.set((c) => ({ ...c, discount: null, lines: grams <= 0 ? c.lines.filter((l) => l.itemId !== itemId) : c.lines.map((l) => (l.itemId === itemId ? { ...l, grams } : l)) }))
+}
+
+/** Escolhe (ou tira) o cliente da venda; a forma "A prazo" depende do prazo dele */
+export function setCartCustomer(customer: PosCustomer | null) {
+  cartStore.set((c) => ({ ...c, customer }))
 }
 
 export function clearCart() {
@@ -167,7 +173,15 @@ export async function completeSale(cart: PosCart, payments: Payment[]): Promise<
   for (const p of payments) {
     if (p.method === 'cash') ledger.push({ id: newId('lx'), at: now, title: 'Vendas no balcão · dinheiro', sub: `Caixa · ${number}`, accountId: 'caixa', amountCents: p.cents, kind: 'in', entryId: null })
     else if (p.method === 'pix') ledger.push({ id: newId('lx'), at: now, title: 'Vendas no Pix', sub: `Banco · balcão · ${number}`, accountId: 'banco', amountCents: p.cents, kind: 'in', entryId: null })
-    else
+    else if (p.method === 'on_account' && cart.customer?.creditDays) {
+      // venda a prazo: conta a receber do cliente, vence daqui a `creditDays` dias
+      entries.push({
+        id: newId('fe'), direction: 'receivable', description: cart.customer.name, counterpart: cart.customer.name, categoryId: 'vendas', amountCents: p.cents,
+        dueDate: daysFromToday(cart.customer.creditDays), paidAt: null, paidAmountCents: 0, accountId: null, origin: 'venda', ref: id, recurring: false,
+      })
+      const cid = cart.customer.id
+      customersStore.set((all) => all.map((x) => (x.id === cid ? { ...x, fiadoCents: x.fiadoCents + p.cents } : x)))
+    } else
       entries.push({
         id: newId('fe'), direction: 'receivable', description: p.method === 'debit' ? 'Cartão de débito' : 'Cartão de crédito', counterpart: 'Maquininha', categoryId: 'vendas', amountCents: p.cents,
         dueDate: daysFromToday(p.method === 'debit' ? 1 : 30), paidAt: null, paidAmountCents: 0, accountId: null, origin: 'venda', ref: id, recurring: false,
@@ -178,7 +192,7 @@ export async function completeSale(cart: PosCart, payments: Payment[]): Promise<
   const sale: Sale = {
     id, number, at: now, by: seller, lines,
     subtotalCents: cartSubtotal(cart), discountCents: cart.discount?.cents ?? 0, discountLabel: cart.discount?.label ?? null, discountReason: cart.discount?.reason ?? null,
-    totalCents: total, payments,
+    totalCents: total, payments, customerName: cart.customer?.name ?? null,
     changeCents: cashPart?.receivedCents ? Math.max(0, cashPart.receivedCents - cashPart.cents) : 0,
     status: 'done', cancelledAt: null, cancelledBy: null,
     effects: { movementIds: movements.map((m) => m.id), ledgerIds: ledger.map((l) => l.id), entryIds: entries.map((e) => e.id) },

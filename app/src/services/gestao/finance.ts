@@ -2,7 +2,7 @@ import type { Account, FinancialEntry, LedgerTx } from '@/domain/backoffice'
 import { daysUntil } from '@/domain/dates'
 import { supabase } from '@/lib/supabase'
 import { accountsStore, entriesStore, ledgerStore, newId } from './backoffice'
-import { remotePay, remoteUndoPayment } from './financeRemote'
+import { remotePay, remoteReceive, remoteUndoPayment } from './financeRemote'
 
 export function accountBalance(account: Account, ledger: LedgerTx[]) {
   return ledger.reduce((n, t) => (t.accountId === account.id ? n + t.amountCents : n), account.openingCents)
@@ -39,6 +39,11 @@ export type Settlement = { entryId: string; previous?: FinancialEntry; ledgerId?
  */
 export async function settleEntry(input: { entryId: string; amountCents: number; extraCents: number; at: string; accountId: string; method: string }): Promise<Settlement> {
   if (supabase) {
+    const open = entriesStore.get().find((x) => x.id === input.entryId)
+    if (open?.direction === 'receivable') {
+      const r = await remoteReceive(input)
+      return { entryId: input.entryId, remoteTxId: r.transaction_id, nextRemoteId: null }
+    }
     const r = await remotePay(input)
     return { entryId: input.entryId, remoteTxId: r.transaction_id, nextRemoteId: r.next_entry_id }
   }

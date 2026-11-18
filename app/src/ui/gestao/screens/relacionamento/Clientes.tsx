@@ -26,6 +26,7 @@ export function Clientes() {
   const [adding, setAdding] = useState(false)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [days, setDays] = useState('')
   const [errors, setErrors] = useState<{ name?: string; phone?: string; form?: string }>({})
   const [busy, setBusy] = useState(false)
   const digits = q.replace(/\D/g, '')
@@ -35,19 +36,22 @@ export function Clientes() {
     const next: typeof errors = {}
     if (!name.trim()) next.name = 'Digite o nome do cliente.'
     if (phone.replace(/\D/g, '').length < 10) next.phone = 'Informe o celular com DDD.'
+    const creditDays = days.trim() === '' ? null : Number(days)
+    if (creditDays !== null && (!Number.isInteger(creditDays) || creditDays < 1 || creditDays > 365)) next.form = 'O prazo precisa ser de 1 a 365 dias, ou fique em branco para vender sem prazo.'
     setErrors(next)
-    if (next.name || next.phone) return
+    if (next.name || next.phone || next.form) return
     if (customers.some((c) => c.phone.replace(/\D/g, '') === phone.replace(/\D/g, ''))) return setErrors({ phone: 'Já existe um cliente com esse celular. Procure na lista pelo número.' })
     setBusy(true)
     try {
-      if (supabase) await remoteCreateCustomer({ name, phone, notes: '' })
+      if (supabase) await remoteCreateCustomer({ name, phone, notes: '', creditDays })
       else
         customersStore.set((all) => [
           ...all,
-          { id: newId('cli'), name: name.trim(), phone, address: '—', since: new Date().getFullYear().toString(), channel: 'cadastrado na gestão', orderCount: 0, totalCents: 0, fiadoCents: 0, lastOrderLabel: 'sem pedidos', topItems: [], history: [], notes: '' },
+          { id: newId('cli'), name: name.trim(), phone, address: '—', since: new Date().getFullYear().toString(), channel: 'cadastrado na gestão', orderCount: 0, totalCents: 0, fiadoCents: 0, creditDays, lastOrderLabel: 'sem pedidos', topItems: [], history: [], notes: '' },
         ])
       setName('')
       setPhone('')
+      setDays('')
       setAdding(false)
     } catch (err) {
       setErrors({ form: customerErrorMessage(err) })
@@ -94,7 +98,7 @@ export function Clientes() {
                 </span>
                 <span className={o.rowEnd}>
                   <b>{formatCents(c.totalCents)}</b>
-                  {c.fiadoCents > 0 ? <Tag tone="warning">Fiado {formatCents(c.fiadoCents)}</Tag> : c.orderCount === 1 ? <Tag tone="info">Novo</Tag> : null}
+                  {c.fiadoCents > 0 ? <Tag tone="warning">Deve {formatCents(c.fiadoCents)}</Tag> : c.creditDays ? <Tag tone="info">Prazo {c.creditDays} dias</Tag> : c.orderCount === 1 ? <Tag tone="info">Novo</Tag> : null}
                 </span>
                 <Icon name="avancar" size={18} />
               </Link>
@@ -109,6 +113,7 @@ export function Clientes() {
           <form onSubmit={(e) => void create(e)} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <TextField label="Nome" autoComplete="off" value={name} error={errors.name} onChange={(e) => { setName(e.target.value); setErrors({}) }} />
             <TextField label="Celular com DDD" type="tel" inputMode="tel" placeholder="(00) 90000-0000" value={phone} error={errors.phone} onChange={(e) => { setPhone(formatPhone(e.target.value)); setErrors({}) }} />
+            <TextField label="Prazo para pagar (dias)" inputMode="numeric" placeholder="Em branco = sem prazo" help="Cliente com prazo pode comprar a prazo no balcão. Exemplo: 15 ou 30." value={days} onChange={(e) => { setDays(e.target.value.replace(/\D/g, '')); setErrors({}) }} />
             {errors.form && <Banner tone="error">{errors.form}</Banner>}
             <Button type="submit" size="l" block disabled={busy}>
               Cadastrar cliente

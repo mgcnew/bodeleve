@@ -70,7 +70,7 @@ export function Contas() {
                       end={
                         <>
                           <b style={{ color: g === 'Atrasadas' ? 'var(--erro)' : undefined }}>{formatCents(remaining(e))}</b>
-                          {overdueDays(e) > 0 ? <Tag tone="error">Atrasado</Tag> : daysUntil(e.dueDate) === 0 && tab === 'payable' ? <Tag tone="warning">Vence hoje</Tag> : e.origin === 'venda' && e.counterpart !== 'Maquininha' ? <Tag tone="info">Fiado</Tag> : null}
+                          {overdueDays(e) > 0 ? <Tag tone="error">Atrasado</Tag> : daysUntil(e.dueDate) === 0 && tab === 'payable' ? <Tag tone="warning">Vence hoje</Tag> : e.origin === 'venda' && e.counterpart !== 'Maquininha' ? <Tag tone="info">A prazo</Tag> : null}
                         </>
                       }
                     />

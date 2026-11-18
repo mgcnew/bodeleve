@@ -273,7 +273,7 @@ export function courierRegistryErrorMessage(e: unknown) {
 }
 
 // ---------- clientes ----------
-type CustomerRow = { id: string; phone: string; name: string; since: string; notes: string | null; channel_note: string | null; baseline_orders: number | null; baseline_spent_cents: number | null; baseline_products: { name: string; times: number }[] | Record<string, never> | null }
+type CustomerRow = { id: string; credit_days: number | null; phone: string; name: string; since: string; notes: string | null; channel_note: string | null; baseline_orders: number | null; baseline_spent_cents: number | null; baseline_products: { name: string; times: number }[] | Record<string, never> | null }
 type CustomerOrder = {
   customer_id: string | null
   status: string
@@ -292,10 +292,14 @@ const lastLabel = (iso: string) => {
 
 export async function refreshCustomers() {
   if (!supabase) return
-  const [cs, os] = await Promise.all([
-    supabase.from('customers').select('id, phone, name, since, notes, channel_note, baseline_orders, baseline_spent_cents, baseline_products'),
+  const [cs, os, owed] = await Promise.all([
+    supabase.from('customers').select('id, credit_days, phone, name, since, notes, channel_note, baseline_orders, baseline_spent_cents, baseline_products'),
     supabase.from('orders').select('customer_id, status, channel, created_at, total_cents, address, order_items(name, qty)').not('customer_id', 'is', null).order('created_at', { ascending: false }).limit(1000),
+    // o que cada cliente ainda deve: contas a receber em aberto ligadas a ele
+    supabase.from('financial_entries').select('customer_id, amount_cents, paid_cents').eq('direction', 'receivable').is('paid_at', null).not('customer_id', 'is', null),
   ])
+  const owes = new Map<string, number>()
+  for (const e of (owed.data ?? []) as { customer_id: string; amount_cents: number; paid_cents: number }[]) owes.set(e.customer_id, (owes.get(e.customer_id) ?? 0) + Number(e.amount_cents) - Number(e.paid_cents))
   if (cs.error || !cs.data) return
   const orders = ((os.data ?? []) as unknown as CustomerOrder[]).filter((o) => o.status !== 'cancelled')
   const list: Customer[] = (cs.data as unknown as CustomerRow[]).map((c) => {
@@ -314,8 +318,8 @@ export async function refreshCustomers() {
       channel: c.channel_note || (counter ? 'compra no balcão' : 'compra pela loja online'),
       orderCount: Number(c.baseline_orders ?? 0) + mine.length,
       totalCents: Number(c.baseline_spent_cents ?? 0) + mine.reduce((n, o) => n + Number(o.total_cents ?? 0), 0),
-      // o banco ainda não tem venda fiada
-      fiadoCents: 0,
+      fiadoCents: owes.get(c.id) ?? 0,
+      creditDays: c.credit_days,
       lastOrderLabel: mine[0] ? lastLabel(mine[0].created_at) : 'sem pedidos',
       topItems: [...items].sort((x, y) => y[1] - x[1]).slice(0, 3).map(([name, times]) => ({ name, times })),
       history: [],
@@ -332,7 +336,14 @@ export async function remoteSaveCustomerNotes(customerId: string, notes: string)
 }
 
 /** Cliente cadastrado à mão (pelo celular, como a loja faz); celular repetido o banco recusa */
-export async function remoteCreateCustomer(input: { name: string; phone: string; notes: string }) {
+export async function remoteSetCustomerCredit(customerId: string, creditDays: number | null) {
+  const { data, error } = await supabase!.from('customers').update({ credit_days: creditDays }).eq('id', customerId).select('id')
+  if (error) throw error
+  if (!data?.length) throw new Error('forbidden')
+  await refreshCustomers()
+}
+
+export async function remoteCreateCustomer(input: { name: string; phone: string; notes: string; creditDays?: number | null }) {
   const { error } = await supabase!.from('customers').insert({
     establishment_id: await getEstablishmentId(),
     name: input.name.trim(),
@@ -340,6 +351,7 @@ export async function remoteCreateCustomer(input: { name: string; phone: string;
     notes: input.notes.trim(),
     since: new Date().toISOString().slice(0, 10),
     channel_note: 'cadastrado na gestão',
+    credit_days: input.creditDays ?? null,
   })
   if (error) throw error
   await refreshCustomers()
@@ -349,7 +361,8 @@ export function customerErrorMessage(e: unknown) {
   const code = String((e as { code?: string })?.code ?? '')
   const msg = String((e as { message?: string })?.message ?? '')
   if (code === '23505') return 'Já existe um cliente com esse celular. Procure na lista pelo número.'
-  if (code === '42501' || msg.includes('row-level security')) return 'Seu papel não permite cadastrar clientes.'
+  if (code === '23514') return 'O prazo precisa ser de 1 a 365 dias.'
+  if (code === '42501' || msg.includes('row-level security') || msg === 'forbidden') return 'Seu papel não permite alterar clientes.'
   return 'Não foi possível salvar. Nada foi alterado. Tente de novo.'
 }
 

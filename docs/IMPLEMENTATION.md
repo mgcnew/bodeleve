@@ -144,6 +144,20 @@ No computador as seções ficam numa lista à esquerda; no celular, Configuraç�
 
 Limites: o tema escuro foi conferido em amostra (Início, Pedidos, Estoque, PDV e loja), não em todas as telas. Faltam as opções de retirada ("quando retirar") editáveis, nota fiscal e logotipo.
 
+## Prazo por cliente (2026-11-18, D21)
+
+| Item | Situação |
+|---|---|
+| Cadastro do prazo | **Feito**: campo "Prazo para pagar (dias)" ao cadastrar cliente e a seção "Prazo para pagar" na tela do cliente. Em branco = sem prazo. A lista mostra "Prazo N dias" ou "Deve R$ …". |
+| PDV | **Feito**: na tela de pagamento, "Cliente (opcional)" abre a busca de clientes; se o escolhido tem prazo aparece **A prazo** junto de dinheiro, Pix, débito e crédito (e também em "Dividir em mais de uma forma"). |
+| Conta a receber | **Feito**: a venda a prazo cria uma conta a receber do cliente, com vencimento = hoje + prazo; nada entra no caixa. Aparece em Financeiro > Contas > A receber e em "Deve" do cliente. |
+| Receber depois | **Feito**: Contas > A receber > Receber (antes essa baixa não funcionava com o banco). Dá para desfazer. |
+| Cancelar a venda | Apaga a conta a receber; se o cliente já pagou parte, o cancelamento é recusado. |
+| Banco | `supabase/patches/2026-11-18_customer_credit.sql` (prazo no cliente, forma `on_account`, `pos_checkout`, `receive_entry`, cancelamento). Testado com reversão: recusa sem prazo, cria a conta, recebe e desfaz. |
+| Relatórios | O que ficou a prazo entra em "A receber (retirada e prazo)". |
+
+Limites: sem limite de crédito por cliente, sem juros e sem aviso de atraso; a loja online por WhatsApp ainda não oferece "a prazo" (o cliente da loja não é identificado, e mostrar o prazo por celular exporia quem tem crédito). Para isso, hoje o dono combina pelo WhatsApp e registra a venda no balcão.
+
 ## Próximos passos
 
 1. As linhas de Configurações (loja online, pagamentos, nota fiscal) que ainda não abrem nada: esperam as respostas Q6 a Q8 e Q12.

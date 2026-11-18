@@ -1,4 +1,8 @@
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { Button } from '@/components/Button'
+import { Banner } from '@/components/Feedback'
+import { TextField } from '@/components/Field'
 import { Tag } from '@/components/Badges'
 import { Box } from '@/components/Card'
 import { ButtonLink } from '@/components/Button'
@@ -9,7 +13,7 @@ import { formatCents } from '@/domain/money'
 import { staffTotal } from '@/domain/staffOrder'
 import { staffOrdersStore } from '@/services/gestao/orders'
 import { supabase } from '@/lib/supabase'
-import { remoteSaveCustomerNotes } from '@/services/gestao/peopleRemote'
+import { customerErrorMessage, remoteSaveCustomerNotes, remoteSetCustomerCredit } from '@/services/gestao/peopleRemote'
 import { customersStore } from '@/services/gestao/people'
 import o from '@/styles/ops.module.css'
 import { Bar, ListRow } from '../../../shared/OpsBits'
@@ -19,6 +23,29 @@ import s from '../estoque/Estoque.module.css'
 export function Cliente() {
   const { id = '' } = useParams()
   const c = customersStore.useStore().find((x) => x.id === id)
+  const [days, setDays] = useState('')
+  const [msg, setMsg] = useState<{ tone: 'success' | 'error'; text: string }>()
+  const [busy, setBusy] = useState(false)
+  // com o banco o cliente chega depois de abrir a tela: o campo copia o prazo quando ele aparece
+  const stored = c?.creditDays
+  useEffect(() => setDays(stored ? String(stored) : ''), [stored, c?.id])
+
+  const saveCredit = async () => {
+    if (!c) return
+    const value = days.trim() === '' ? null : Number(days)
+    if (value !== null && (!Number.isInteger(value) || value < 1 || value > 365)) return setMsg({ tone: 'error', text: 'O prazo precisa ser de 1 a 365 dias, ou fique em branco para tirar o prazo.' })
+    setBusy(true)
+    setMsg(undefined)
+    try {
+      if (supabase) await remoteSetCustomerCredit(c.id, value)
+      else customersStore.set((all) => all.map((x) => (x.id === c.id ? { ...x, creditDays: value } : x)))
+      setMsg({ tone: 'success', text: value ? `Prazo de ${value} dias salvo.` : 'Prazo removido. Este cliente não compra mais a prazo.' })
+    } catch (e) {
+      setMsg({ tone: 'error', text: customerErrorMessage(e) })
+    } finally {
+      setBusy(false)
+    }
+  }
   const orders = staffOrdersStore.useStore().filter((x) => x.customer.id === id)
 
   if (!c) {
@@ -62,6 +89,20 @@ export function Cliente() {
             {c.address}
           </div>
         </div>
+        <section className={o.section}>
+          <h2 className={o.h2}>Prazo para pagar</h2>
+          <div className={o.card}>
+            <p className={o.muted}>
+              Com prazo, este cliente aparece com a opção “A prazo” na hora de cobrar no balcão. A venda vira uma conta a receber que vence depois desse número de dias.
+              {c.fiadoCents > 0 ? ` Hoje ele deve ${formatCents(c.fiadoCents)}.` : ''}
+            </p>
+            <TextField label="Prazo (dias)" inputMode="numeric" placeholder="Em branco = sem prazo" value={days} onChange={(e) => { setDays(e.target.value.replace(/\D/g, '')); setMsg(undefined) }} />
+            {msg && <Banner tone={msg.tone}>{msg.text}</Banner>}
+            <Button variant="secondary" disabled={busy} onClick={() => void saveCredit()}>
+              Salvar prazo
+            </Button>
+          </div>
+        </section>
         {c.topItems.length > 0 && (
           <section className={o.section}>
             <h2 className={o.h2}>Mais compra</h2>

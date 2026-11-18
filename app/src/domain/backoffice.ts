@@ -179,6 +179,8 @@ export type Customer = {
   orderCount: number
   totalCents: Cents
   fiadoCents: Cents
+  /** prazo em dias para pagar (venda a prazo no balcão); null = sem prazo */
+  creditDays: number | null
   lastOrderLabel: string
   topItems: { name: string; times: number }[]
   history: { number: string; date: string; line: string; totalCents: Cents; status: string }[]

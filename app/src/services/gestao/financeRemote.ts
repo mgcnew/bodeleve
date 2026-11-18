@@ -97,7 +97,8 @@ export async function refreshFinance(): Promise<void> {
     const list: FinancialEntry[] = ((entries.data ?? []) as unknown as EntryRow[]).map((e) => ({
       id: e.id,
       direction: e.direction,
-      description: e.title ?? e.description,
+      // venda a prazo: o título é o cliente e a descrição diz de qual venda é
+      description: e.direction === 'receivable' && e.origin === 'sale' ? (e.title ?? e.description) : (e.title ?? e.description),
       counterpart: one(e.suppliers)?.name ?? e.title ?? e.description,
       categoryId: e.origin,
       amountCents: Number(e.amount_cents),
@@ -125,6 +126,19 @@ export function startFinanceSync() {
   void refreshFinance()
   const timer = setInterval(() => void refreshFinance(), 20_000)
   return () => clearInterval(timer)
+}
+
+export async function remoteReceive(input: { entryId: string; amountCents: number; accountId: string; method: string; at: string }) {
+  const { data, error } = await supabase!.rpc('receive_entry', {
+    p_entry: input.entryId,
+    p_amount_cents: input.amountCents,
+    p_account: accountKind(input.accountId),
+    p_method: input.method,
+    p_received_at: input.at,
+  })
+  if (error) throw error
+  await refreshFinance()
+  return data as { transaction_id: string }
 }
 
 export async function remotePay(input: { entryId: string; amountCents: number; extraCents: number; accountId: string; method: string; at: string }) {

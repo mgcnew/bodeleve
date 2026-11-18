@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase'
 import { itemsStore } from './gestao/backoffice'
 import { getEstablishmentId, refreshBackoffice } from './gestao/backofficeRemote'
 import { refreshFinance } from './gestao/financeRemote'
+import { refreshCustomers } from './gestao/peopleRemote'
 import { cashStore, queueStore, salesStore, type QueuedSale } from './pdv'
 import { sessionStore } from './gestao/session'
 
@@ -26,6 +27,7 @@ type SessionRow = {
 }
 
 type SaleRow = {
+  customers: { name: string } | { name: string }[] | null
   id: string
   number: string
   status: string
@@ -84,6 +86,7 @@ function toSale(r: SaleRow): Sale {
     discountReason: r.discount_reason,
     totalCents: Number(r.total_cents),
     payments: r.payments.map((p) => ({ method: p.method, cents: Number(p.cents), receivedCents: p.received_cents === null ? undefined : Number(p.received_cents) })),
+    customerName: (Array.isArray(r.customers) ? r.customers[0]?.name : r.customers?.name) ?? null,
     changeCents: cash.reduce((n, p) => n + Math.max(0, Number(p.received_cents ?? p.cents) - Number(p.cents)), 0),
     status: r.status === 'cancelled' ? 'cancelled' : 'done',
     cancelledAt: r.cancelled_at,
@@ -216,7 +219,7 @@ export async function refreshPdv(): Promise<void> {
       supabase!.from('cash_sessions').select('id, status, opened_at, opened_by_name, opening_cents, closed_at, counted_cents, expected_cents, cash_movements(id, kind, cents, reason, at)').order('opened_at', { ascending: false }).limit(2),
       supabase!
         .from('orders')
-        .select('id, number, status, created_at, created_by_name, subtotal_cents, discount_kind, discount_cents, discount_reason, total_cents, cancelled_at, approved_by_name, order_items(product_id, name, kind, qty, unit_price_cents, total_cents, lots), payments(method, cents, received_cents)')
+        .select('id, number, status, created_at, created_by_name, subtotal_cents, discount_kind, discount_cents, discount_reason, total_cents, cancelled_at, approved_by_name, customers(name), order_items(product_id, name, kind, qty, unit_price_cents, total_cents, lots), payments(method, cents, received_cents)')
         .eq('channel', 'pos')
         .order('created_at', { ascending: false })
         .limit(200),
@@ -241,9 +244,11 @@ export async function refreshPdv(): Promise<void> {
 export function startPdvSync() {
   if (!supabase) return () => undefined
   void flushQueue().then(() => refreshPdv())
+  void refreshCustomers()
   const timer = setInterval(() => {
     void flushQueue()
     void refreshPdv()
+    void refreshCustomers()
   }, 20_000)
   const onOnline = () => void flushQueue()
   window.addEventListener('online', onOnline)
@@ -297,7 +302,7 @@ function checkoutPayload(cart: PosCart, payments: Payment[], offline = false, cl
   }
   const lines = cart.lines.map((l) => (l.grams !== null ? { product_id: dbId(l.itemId), kind: 'weight', qty: l.grams / 1000 } : { product_id: dbId(l.itemId), kind: 'unit', qty: l.quantity }))
   const discount = cart.discount && cart.discount.cents > 0 ? { kind: discountKinds[cart.discount.label] ?? 'f500', reason: cart.discount.reason } : null
-  return { lines, discount, offline, client_ref: clientRef ?? null, payments: payments.map((p) => ({ method: p.method, cents: p.cents, received_cents: p.receivedCents ?? null })) }
+  return { lines, discount, offline, client_ref: clientRef ?? null, customer_id: cart.customer?.id ?? null, payments: payments.map((p) => ({ method: p.method, cents: p.cents, received_cents: p.receivedCents ?? null })) }
 }
 
 /** Sem internet (ou sem resposta), a venda fica guardada no aparelho e a tela segue como concluída */
@@ -337,6 +342,9 @@ export function posErrorMessage(e: unknown) {
   const msg = String((e as { message?: string })?.message ?? '')
   if (msg.includes('queue_pending')) return 'Há vendas aguardando envio neste aparelho. Espere a conexão voltar e enviarem antes de fechar o caixa.'
   if (msg.includes('no_session')) return 'Abra o caixa antes de continuar.'
+  if (msg.includes('credit_already_received')) return 'Esta venda a prazo já teve pagamento recebido. Não dá para cancelar; ajuste em Financeiro.'
+  if (msg.includes('no_credit')) return 'Este cliente não tem prazo cadastrado. Escolha outra forma de pagamento ou cadastre o prazo no cliente.'
+  if (msg.includes('unknown_customer')) return 'Cliente não encontrado. Escolha o cliente de novo.'
   if (msg.includes('session_open')) return 'Já existe um caixa aberto.'
   if (msg.includes('insufficient_stock')) return 'Falta estoque de um dos itens. Tire-o da sacola ou ajuste o estoque.'
   if (msg.includes('invalid_pin')) return 'Senha do gestor incorreta.'
