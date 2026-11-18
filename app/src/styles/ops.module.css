@@ -35,6 +35,7 @@
 }
 
 .pageHeader {
+  --foco: var(--barra-texto);
   padding: var(--esp-4) var(--esp-4) var(--esp-6);
   flex: none;
   display: flex;
@@ -73,6 +74,7 @@
 
 /* barra superior das telas internas */
 .bar {
+  --foco: var(--barra-texto);
   display: flex;
   align-items: center;
   gap: var(--esp-1);
@@ -112,9 +114,7 @@
 }
 
 .caps {
-  font: var(--legenda);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font: 650 15px/20px var(--fonte-texto);
   color: var(--texto-secundario);
 }
 
@@ -326,9 +326,16 @@ a.card {
 
 @media (min-width: 1024px) {
   .footer {
+    position: static;
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 0;
     flex-direction: row-reverse;
     justify-content: flex-start;
-    padding: var(--esp-4) var(--esp-8);
+    padding: 0 var(--esp-8) var(--esp-8);
+    background: transparent;
+    border-top: 0;
+    box-shadow: none;
   }
   .footer > * {
     width: auto;
@@ -419,4 +426,32 @@ a.card {
   .kpi {
     background: var(--superficie);
   }
+}
+
+/* computador: barra interna com a mesma altura e título do cabeçalho de página */
+@media (min-width: 1024px) {
+  .bar {
+    height: auto;
+    min-height: 88px;
+    padding: var(--esp-4) var(--esp-8);
+    gap: var(--esp-3);
+  }
+  .barTitle {
+    font: var(--titulo-l);
+    letter-spacing: -0.02em;
+  }
+  .backMobile {
+    display: none;
+  }
+}
+
+/* ladrilho pequeno de ícone ao lado de uma linha de informação */
+.metaTile {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

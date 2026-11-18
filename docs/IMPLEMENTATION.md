@@ -100,6 +100,20 @@ Conferência "o sistema pode ir para o uso?" feita sobre o código e o banco. Re
 
 Tudo foi testado contra o banco de desenvolvimento como gestor (criar, editar e arquivar produto e fornecedor; criar e desativar entregador; entregador inativo bloqueado em `courier_link` e `courier_list`; `set_my_name` recusa vazio e bloqueia anônimo) e pela tela (novo produto, arquivar, novo fornecedor, nome do perfil, menu do PDV). Os registros de teste foram apagados.
 
+## Renovação visual (2026-11-18, D18)
+
+| Pedido | Situação |
+|---|---|
+| Paleta nova, celular mais colorido | **Feito**: tokens novos em `design/tokens.css` (verde-folha, floresta, laranja, amarelo, neutros frios) e fonte Geist. No celular, faixa de topo em floresta, cartões e atalhos em matizes, marcador de foto tingido pela origem. A faixa vira branca a partir de 768 px (variáveis `--barra-*`). |
+| Desktop mais profissional | **Feito**: topo branco com linha fina, cartões sóbrios, raios menores, menu lateral da gestão em 4 grupos, coluna de navegação no PDV, app do entregador em coluna centralizada, entrada em duas colunas. |
+| Transições leves | **Feito**: 120 e 200 ms, ease-out, só cor, sombra, opacidade e transform; entrada de tela e folhas animadas; `prefers-reduced-motion` desliga tudo. |
+| Skeleton | **Feito**: `ScreenSkeleton` por ambiente (painel, lista, detalhe) enquanto a primeira busca do Supabase não termina (`services/firstLoad.ts`, libera após 8 s). Brilho do esqueleto só com `transform`. Conferido com resposta atrasada de propósito. |
+| Responsividade geral | **Conferido**: nenhuma página testada passa da largura da tela em 320, 375 e 768 px (loja, gestão, PDV, entregas, rotas principais). Telas de detalhe e de formulário seguem a mesma base, mas foram vistas só por amostragem. |
+| Teclado no computador | **Feito**: Ctrl/⌘ + K ou `/` abre "Buscar ou ir para" na gestão; `G` + letra vai ao módulo; PDV: `/` ou `F2` busca, `F4` cobra. |
+| Peso da página | **Melhorou**: gestão, PDV e entregas viraram arquivos separados, baixados só na primeira visita à área (a página inicial caiu de 914 para 654 kB, 190 kB comprimidos). |
+
+Limites: as telas do canvas em `design/*.dc.html` continuam com o visual antigo; seguem valendo para estrutura, textos e comportamento (registrado em `DECISIONS.md`). Tema escuro não foi feito. Não há fotos de produto: os marcadores `[FOTO DO PRODUTO]` continuam.
+
 ## Próximos passos
 
 1. As linhas de Configurações (loja online, pagamentos, nota fiscal) que ainda não abrem nada: esperam as respostas Q6 a Q8 e Q12.

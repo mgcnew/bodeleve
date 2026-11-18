@@ -5,6 +5,7 @@ import { courierSessionStore } from '@/services/entregas'
 import { startCourierSync } from '@/services/entregasRemote'
 import { resetLoaded, useFirstLoad } from '@/services/firstLoad'
 import { ScreenSkeleton } from '@/components/ScreenSkeleton'
+import s from './EntregasShell.module.css'
 
 export type EntHandle = { tabs?: boolean }
 
@@ -35,21 +36,23 @@ export function EntregasShell() {
   if (!session) return <Navigate to="/entregas/entrar" replace state={{ from: location.pathname }} />
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--fundo-operacao)' }}>
-      <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        {ready ? (
-          <div key={location.pathname} className="rota entra">
-            <Outlet />
+    <div className={s.page}>
+      <div className={s.column}>
+        <div className={s.content}>
+          {ready ? (
+            <div key={location.pathname} className="rota entra">
+              <Outlet />
+            </div>
+          ) : (
+            <ScreenSkeleton kind="list" tabs={handle.tabs} />
+          )}
+        </div>
+        {handle.tabs && (
+          <div className={s.bottom}>
+            <BottomNav items={[...tabs]} />
           </div>
-        ) : (
-          <ScreenSkeleton kind="list" tabs={handle.tabs} />
         )}
       </div>
-      {handle.tabs && (
-        <div style={{ position: 'sticky', bottom: 0 }}>
-          <BottomNav items={[...tabs]} />
-        </div>
-      )}
     </div>
   )
 }

@@ -23,6 +23,7 @@ Registro único de decisões. Outros documentos referenciam os IDs daqui em vez 
 | D15 | 2026-11-15 | Etapa 5 (PDV) entregue: 12 telas do mapa em 9 quadros (peso, desconto e sangria como folhas dentro de Vender, Sacola e Caixa) | — |
 | D16 | 2026-11-15 | Etapa 6 (Entregas) entregue: 9 telas; próprio × parceiro mostrado pelo ajuste “perfil” nos quadros | — |
 | D17 | 2026-11-15 | Etapa 7 (auditoria) concluída: alvo mínimo de toque passa a 44 px; referências de tablet e computador; pacote de passagem (CLAUDE.md, tokens.css, mapa tela → arquivo) | — |
+| D18 | 2026-11-18 | Renovação visual total pedida pelo dono: paleta nova, celular colorido, computador sóbrio com transições leves, esqueletos e responsividade. Escolhido "o padrão da categoria" (referências Linear/Stripe, iFood/Rappi, Shopify) | Usuário |
 | D14 | 2026-11-15 | Seguir até concluir todas as etapas sem parar; o que depender do usuário é documentado como pendência | Usuário |
 
 ## Propostas da Etapa 1 — aprovadas (D10)
@@ -163,4 +164,6 @@ Marcadores de conteúdo nas telas:
 
 ## Alterações de decisões aprovadas
 
-Nenhuma até o momento.
+| Data | Decisão alterada | Mudança | Motivo |
+|---|---|---|---|
+| 2026-11-18 | P-A (paleta), P-B (fontes), P-C (fundos), P-J (tokens), P-L/P-M (estados e navegação) | Terracota, creme e Bricolage/Inter saem. Entram verde-folha (#0F7A43), verde-floresta, laranja e amarelo, neutros frios e Geist. Sombras e movimento curto passam a fazer parte do sistema. Tokens renomeados (`--cor-terracota` → `--cor-primaria`). PDV ganha coluna de navegação no computador; app de entregas vira coluna centralizada no computador | Pedido do dono (D18). `design/*.dc.html` mostram o visual antigo e deixam de ser referência de cor e fonte; seguem valendo para estrutura, textos e comportamento |

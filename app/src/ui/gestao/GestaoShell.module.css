@@ -58,7 +58,7 @@
   display: flex;
   align-items: center;
   gap: var(--esp-2);
-  height: 40px;
+  height: 44px;
   margin-bottom: var(--esp-3);
   padding: 0 var(--esp-3);
   border: 1px solid var(--linha-forte);
@@ -102,7 +102,7 @@
   display: flex;
   align-items: center;
   gap: var(--esp-3);
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 var(--esp-3);
   border-radius: var(--raio-campo);
   text-decoration: none;
@@ -145,7 +145,7 @@
 }
 
 .sideFoot button {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 var(--esp-3);
   border: 0;
   border-radius: var(--raio-campo);

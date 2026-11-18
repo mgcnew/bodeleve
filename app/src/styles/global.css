@@ -53,6 +53,11 @@ a {
   text-underline-offset: 3px;
 }
 
+::placeholder {
+  color: var(--texto-secundario);
+  opacity: 1;
+}
+
 h1,
 h2,
 h3,
@@ -80,7 +85,7 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--cor-primaria);
+  outline: 2px solid var(--foco, var(--cor-primaria));
   outline-offset: 2px;
 }
 
@@ -125,13 +130,6 @@ a {
   display: flex;
   flex-direction: column;
   min-width: 0;
-}
-
-/* brilho do esqueleto: só transform, barato em aparelho simples */
-@keyframes brilho {
-  to {
-    transform: translateX(100%);
-  }
 }
 
 kbd {

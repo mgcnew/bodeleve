@@ -23,7 +23,6 @@ export function Linha() {
       <TopBar back="history" />
       <main className={l.main} style={{ paddingTop: 4 }}>
         <div className={s.hero}>
-          <div className={l.eyebrow}>Marca da casa</div>
           <h1 className={s.heroTitle}>Linha Bodeleve</h1>
           <p>{line.text}</p>
         </div>

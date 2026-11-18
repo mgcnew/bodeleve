@@ -24,7 +24,7 @@ div.sum {
 }
 
 .sum b {
-  font: 700 22px/28px var(--fonte-texto);
+  font: 700 clamp(18px, 5.2vw, 22px)/28px var(--fonte-texto);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }

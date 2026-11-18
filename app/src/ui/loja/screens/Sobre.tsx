@@ -26,7 +26,6 @@ export function Sobre() {
       <main className={l.main} style={{ paddingTop: 4 }}>
         <ProductPhoto className={s.housePhoto} white label="[FOTO DA CASA]" />
         <div className={l.stack}>
-          <div className={`${l.eyebrow} ${s.eyebrowBrand}`}>Sobre a Bodeleve</div>
           <h1 className={s.aboutTitle}>Uma {establishment.tagline}</h1>
           <p className={l.secondary}>{establishment.history}</p>
         </div>

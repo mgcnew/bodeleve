@@ -167,7 +167,28 @@
 .chips {
   display: flex;
   gap: var(--esp-2);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  /* esmaece a borda direita: indica que há mais chips ao rolar */
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chips > * {
+  scroll-snap-align: start;
+}
+
+@media (min-width: 768px) {
+  .chips {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    mask-image: none;
+  }
 }
 
 .chip {

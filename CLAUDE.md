@@ -13,7 +13,7 @@ Plataforma da Bodeleve (Casa do Norte): loja online, gestão, PDV e app de entre
 
 ## Regras
 
-- **Reproduza as telas de `design/` com fidelidade.** Cada `.dc.html` tem cores, tamanhos, espaçamentos, textos e comportamento escritos de forma explícita. É referência visual e de interação, não código para copiar: as marcações `<x-dc>`, `<sc-if>`, `<sc-for>` e `DCLogic` são do canvas de design e não rodam fora dele.
+- **Reproduza as telas de `design/` com fidelidade, menos cor e fonte.** Desde a renovação visual de 2026-11-18 (D18) as cores, a fonte, os raios e o movimento vêm de `design/tokens.css` e `docs/DESIGN_SYSTEM.md`; os `.dc.html` ficam como referência de estrutura, texto e comportamento. Cada `.dc.html` tem cores, tamanhos, espaçamentos, textos e comportamento escritos de forma explícita. É referência visual e de interação, não código para copiar: as marcações `<x-dc>`, `<sc-if>`, `<sc-for>` e `DCLogic` são do canvas de design e não rodam fora dele.
 - **Use `design/tokens.css`.** Não redigite valores de cor, fonte, espaço ou raio.
 - **Hipótese não é regra.** Itens H-* em `DECISIONS.md` foram usados para desenhar, mas podem mudar. Isole-os (configuração, constante ou tabela) para trocar sem refazer telas.
 - **Textos entre [colchetes]** são conteúdo que o dono ainda vai fornecer. Mantenha como conteúdo editável, nunca fixo no código.

@@ -154,7 +154,11 @@ export function TopBar({
         <IconLink to={back} icon="voltar" label="Voltar" />
       )}
       <div className={s.topbarTitle}>{title}</div>
-      {cart && <CartButton />}
+      {cart && (
+        <span className={s.mobileOnly}>
+          <CartButton />
+        </span>
+      )}
     </header>
   )
 }

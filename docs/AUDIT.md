@@ -35,6 +35,8 @@ Os seis fluxos do briefing têm protótipo navegável: Compras (F1), Produção 
 
 Todos os pares de texto e fundo usados passam AA (≥ 4,5 : 1):
 
+> Valores desta tabela são da paleta anterior (terracota e creme). Os da paleta nova, medidos em 2026-11-18 (D18), estão em `DESIGN_SYSTEM.md`, seção "Tokens de cor".
+
 | Par | Razão |
 |---|---|
 | Grafite sobre creme | 13,51 |

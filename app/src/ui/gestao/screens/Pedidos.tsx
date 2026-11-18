@@ -79,7 +79,13 @@ function OrderCard({ order }: { order: StaffOrder }) {
         <Tag tone={tag.tone}>{tag.label}</Tag>
       </span>
       <span className={o.cardMeta}>
-        <Icon name={delivery ? 'entregas' : 'local'} size={18} />
+        <span
+          aria-hidden="true"
+          className={o.metaTile}
+          style={{ background: delivery ? 'var(--info-fundo)' : 'var(--atencao-fundo)', color: delivery ? 'var(--info)' : 'var(--atencao)' }}
+        >
+          <Icon name={delivery ? 'entregas' : 'local'} size={16} />
+        </span>
         <span>
           {delivery ? 'Entrega' : 'Retirada'} · {plural(order.items.reduce((n, i) => n + i.quantity, 0), 'item', 'itens')} · {hourMinute(order.createdAt)}
           {order.courierName ? ` · com ${order.courierName}` : ''}

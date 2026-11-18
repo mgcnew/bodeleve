@@ -60,6 +60,7 @@
 }
 
 .head {
+  --foco: var(--barra-texto);
   display: flex;
   align-items: center;
   justify-content: space-between;

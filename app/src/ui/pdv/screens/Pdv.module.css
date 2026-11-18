@@ -247,3 +247,14 @@
     display: block;
   }
 }
+
+@media (min-width: 1024px) {
+  .tile {
+    height: 128px;
+    padding: var(--esp-4);
+  }
+  .tileName {
+    font-size: 17px;
+    line-height: 22px;
+  }
+}

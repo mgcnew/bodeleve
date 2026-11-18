@@ -44,7 +44,8 @@ export function Inicio() {
         <span className={s.chip}>{session?.establishment}</span>
       </header>
       <main className={o.main}>
-        <div className={o.cols} style={{ gridTemplateColumns: undefined }}>
+        <div className={s.cols}>
+          <div className={s.col}>
           {/* H-G3 — vendas do dia separadas em balcão e internet, comparadas com ontem no mesmo horário */}
           <Link to="/gestao/relatorios" className={s.sales}>
             <span className={s.salesHead}>
@@ -125,6 +126,7 @@ export function Inicio() {
             </Box>
           </section>
 
+          </div>
           <section className={o.section}>
             <h2 className={o.h2}>Hoje na casa</h2>
             <div className={o.grid2}>

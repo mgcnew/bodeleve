@@ -43,10 +43,6 @@
   background: var(--superficie);
 }
 
-.eyebrowBrand {
-  color: var(--cor-primaria);
-}
-
 .aboutTitle {
   font: var(--titulo-xl);
   letter-spacing: -0.01em;

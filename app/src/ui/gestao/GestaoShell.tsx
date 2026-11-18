@@ -9,7 +9,7 @@ import { startStaffSync } from '@/services/gestao/ordersRemote'
 import { resetLoaded, useFirstLoad } from '@/services/firstLoad'
 import { ScreenSkeleton, type SkeletonKind } from '@/components/ScreenSkeleton'
 import { sessionStore, signOut } from '@/services/gestao/session'
-import { CommandPalette, useGestaoShortcuts } from './components/CommandPalette'
+import { CommandPalette, isMac, useGestaoShortcuts } from './components/CommandPalette'
 import s from './GestaoShell.module.css'
 
 export type GestaoHandle = { tabs?: boolean }
@@ -97,7 +97,7 @@ export function GestaoShell() {
         <button type="button" className={s.search} onClick={openPalette} aria-label="Buscar ou ir para, atalho Control K">
           <Icon name="buscar" size={18} />
           <span>Buscar ou ir para…</span>
-          <kbd>Ctrl K</kbd>
+          <kbd>{isMac ? '⌘ K' : 'Ctrl K'}</kbd>
         </button>
         {menuGroups.map((g) => {
           const items = g.items.filter((m) => canAccess(session.role, m.module))

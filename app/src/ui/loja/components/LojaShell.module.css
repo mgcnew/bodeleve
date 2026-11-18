@@ -92,6 +92,7 @@
 
 /* barra superior das telas internas */
 .topbar {
+  --foco: var(--barra-texto);
   display: flex;
   align-items: center;
   gap: var(--esp-1);
@@ -129,4 +130,18 @@
 
 .relative {
   position: relative;
+}
+
+/* computador: o topo do site já tem a sacola; a barra interna vira só voltar + título, sem faixa */
+@media (min-width: 1024px) {
+  .topbar {
+    width: 100%;
+    max-width: 1200px;
+    margin: var(--esp-4) auto 0;
+    padding: 0 var(--esp-6);
+    background: transparent;
+    color: var(--texto);
+    border-bottom: 0;
+    --foco: var(--cor-primaria);
+  }
 }

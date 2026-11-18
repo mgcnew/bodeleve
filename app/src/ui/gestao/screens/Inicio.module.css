@@ -72,3 +72,27 @@
     border-top-color: var(--linha);
   }
 }
+
+/* computador: vendas e "pede ação" à esquerda, indicadores à direita */
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--esp-6);
+  align-items: start;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .cols {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+  .col {
+    gap: var(--esp-6);
+  }
+}

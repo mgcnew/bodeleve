@@ -45,6 +45,28 @@ const commands: Command[] = [
 ]
 
 /** Ctrl/⌘ + K abre a busca de comandos; "/" também; "g" e uma letra vão direto ao módulo */
+const SHORTCUTS_KEY = 'bodeleve.atalhos'
+
+/** Atalhos de uma tecla (WCAG 2.1.4): podem ser desligados em Meu perfil */
+export const singleKeyShortcuts = {
+  enabled: () => {
+    try {
+      return localStorage.getItem(SHORTCUTS_KEY) !== 'off'
+    } catch {
+      return true
+    }
+  },
+  set: (on: boolean) => {
+    try {
+      localStorage.setItem(SHORTCUTS_KEY, on ? 'on' : 'off')
+    } catch {
+      /* sem armazenamento, fica como está */
+    }
+  },
+}
+
+export const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
+
 export function useGestaoShortcuts(role: Role | undefined, openPalette: () => void) {
   const navigate = useNavigate()
   useEffect(() => {
@@ -57,7 +79,7 @@ export function useGestaoShortcuts(role: Role | undefined, openPalette: () => vo
         openPalette()
         return
       }
-      if (typing || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return
+      if (typing || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]') || !singleKeyShortcuts.enabled()) return
       if (e.key === '/') {
         e.preventDefault()
         openPalette()
@@ -92,6 +114,10 @@ export function CommandPalette({ open, onClose, role }: { open: boolean; onClose
     if (!term) return allowed
     return allowed.filter((c) => normalize(`${c.label} ${c.hint} ${c.words ?? ''}`).includes(term))
   }, [q, role])
+
+  useEffect(() => {
+    ref.current?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' })
+  }, [active, list])
 
   useEffect(() => {
     const d = ref.current

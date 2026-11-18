@@ -1,6 +1,6 @@
 .banner {
   display: flex;
-  animation: entra var(--dur-2) var(--ease-saida) both;
+  animation: bannerEntra var(--dur-2) var(--ease-saida) both;
   gap: 10px;
   align-items: flex-start;
   padding: var(--esp-3) 14px;
@@ -95,5 +95,18 @@
 @media (min-width: 768px) {
   .onBar {
     background: var(--fundo-suave);
+  }
+}
+
+@keyframes bannerEntra {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes brilho {
+  to {
+    transform: translateX(100%);
   }
 }
