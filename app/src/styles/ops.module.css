@@ -326,16 +326,21 @@ a.card {
 
 @media (min-width: 1024px) {
   .footer {
-    position: static;
+    /* ação principal sempre à vista, à direita, sem barra cheia */
     width: 100%;
     max-width: 1200px;
     margin-top: 0;
     flex-direction: row-reverse;
     justify-content: flex-start;
-    padding: 0 var(--esp-8) var(--esp-8);
+    padding: 0 var(--esp-8) var(--esp-6);
     background: transparent;
     border-top: 0;
     box-shadow: none;
+    pointer-events: none;
+  }
+  .footer > * {
+    pointer-events: auto;
+    box-shadow: var(--sombra-2);
   }
   .footer > * {
     width: auto;

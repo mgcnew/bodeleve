@@ -1,6 +1,6 @@
 .summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr 1fr 1.35fr;
   gap: var(--esp-2);
 }
 
