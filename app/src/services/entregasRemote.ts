@@ -29,7 +29,7 @@ type Card = {
 
 type CourierRow = { id: string; name: string; kind: 'own' | 'partner'; phone: string; vehicle: string | null; available: boolean; pix_key: string | null }
 
-const paymentLabels: Record<string, string> = { pix: 'Pix', card_on_delivery: 'Cartão na entrega', cash: 'Dinheiro na entrega', on_pickup: 'Pagar na retirada', debit: 'Débito', credit: 'Crédito' }
+const paymentLabels: Record<string, string> = { pix: 'Pix', card_on_delivery: 'Cartão na entrega', cash: 'Dinheiro na entrega', on_pickup: 'Pagar na retirada', on_account: 'A prazo', debit: 'Débito', credit: 'Crédito' }
 
 /** "14:35" (hora do passo "pronto") vira hoje às 14h35; sem hora, agora */
 function readyIso(readyAt: string | null, fallback: string | null) {

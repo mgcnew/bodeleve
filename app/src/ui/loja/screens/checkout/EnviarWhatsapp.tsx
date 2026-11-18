@@ -25,6 +25,7 @@ export function EnviarWhatsapp() {
   const establishment = useEstablishment()
   const navigate = useNavigate()
   const [note, setNote] = useState('')
+  const [payment, setPayment] = useState<'on_pickup' | 'on_account'>('on_pickup')
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({})
   const [sending, setSending] = useState(false)
   const [failMessage, setFailMessage] = useState<string>()
@@ -50,14 +51,14 @@ export function EnviarWhatsapp() {
           fulfillment: 'pickup',
           address: null,
           windowLabel,
-          payment: 'on_pickup',
+          payment,
           changeForCents: null,
           items: lines.map((li) => ({ productId: li.productId, name: li.name, quantity: li.quantity, unitPriceCents: li.unitPriceCents })),
           feeCents: 0,
         },
         windowId,
       )
-      const text = orderMessage(order, note, establishment.name)
+      const text = orderMessage(order, note, establishment.name, payment)
       saveWhatsappText(order.id, text)
       if (tab) tab.location.href = whatsappLink(establishment.whatsapp, text)
       // a sacola é esvaziada na confirmação; esvaziar aqui faria o guarda voltar para a sacola
@@ -74,7 +75,7 @@ export function EnviarWhatsapp() {
       <TopBar title="Enviar pedido" back="/sacola" cart={false} />
       <main className={`${l.main} ${l.mainForm}`}>
         <h1 className={l.h1}>Enviar pedido pelo WhatsApp</h1>
-        <p className={l.muted}>Você manda o pedido por escrito para a {establishment.name} e a casa confirma por lá. Nada é cobrado agora: o pagamento é na retirada.</p>
+        <p className={l.muted}>Você manda o pedido por escrito para a {establishment.name} e a casa confirma por lá. Nada é cobrado agora.</p>
 
         <TextField label="Nome" autoComplete="name" value={draft.name} error={errors.name} onChange={(e) => update({ name: e.target.value })} />
         <TextField
@@ -97,6 +98,17 @@ export function EnviarWhatsapp() {
           </div>
         </Place>
         <RadioGroup legend="Quando você pode retirar?" name="quando" value={windowId} onChange={(id) => update({ windowId: id })} options={windows.map((w) => ({ value: w.id, title: w.title, sub: w.sub }))} />
+
+        <RadioGroup<'on_pickup' | 'on_account'>
+          legend="Como vai pagar?"
+          name="pagamento"
+          value={payment}
+          onChange={setPayment}
+          options={[
+            { value: 'on_pickup', title: 'Na retirada', sub: 'Dinheiro, Pix ou cartão, quando buscar' },
+            { value: 'on_account', title: 'A prazo', sub: 'Só para quem já tem prazo combinado com a casa; a casa confirma pelo WhatsApp' },
+          ]}
+        />
 
         <TextAreaField
           label="Observação (opcional)"
@@ -124,6 +136,7 @@ export function EnviarWhatsapp() {
             },
             note,
             establishment.name,
+            payment,
           )}
         />
 

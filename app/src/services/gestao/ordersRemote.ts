@@ -50,7 +50,7 @@ const statusMap: Record<string, StaffOrderStatus | null> = {
   cancelled: null,
 }
 
-const paymentLabels: Record<string, string> = { pix: 'Pix', card_on_delivery: 'Cartão na entrega', cash: 'Dinheiro na entrega', on_pickup: 'Pagar na retirada', debit: 'Débito', credit: 'Crédito' }
+const paymentLabels: Record<string, string> = { pix: 'Pix', card_on_delivery: 'Cartão na entrega', cash: 'Dinheiro na entrega', on_pickup: 'Pagar na retirada', on_account: 'A prazo', debit: 'Débito', credit: 'Crédito' }
 const one = <T,>(v: T | T[] | null | undefined) => (Array.isArray(v) ? v[0] : v) ?? null
 
 /** `checked` é só estado da tela (conferência item a item); vem do que já estava no cache */
@@ -87,6 +87,7 @@ function toStaff(r: Row, previous: StaffOrder | undefined): StaffOrder | null {
     feeCents: Number(r.delivery_fee_cents),
     paymentLabel: paymentLabels[r.payment_method] ?? r.payment_method,
     paid: r.payment_paid,
+    onAccount: r.payment_method === 'on_account',
     courierName: r.courier_name ?? (delivery && delivery.status !== 'published' ? courierOf : null),
     deliveryCode: r.delivery_code ?? '',
     deliveryNote:
@@ -166,6 +167,7 @@ async function call(fn: string, args: Record<string, unknown>) {
   await refreshStaffOrders()
 }
 
+export const remoteSetPayment = (id: string, method: 'on_pickup' | 'on_account') => call('order_set_payment', { p_order: id, p_method: method })
 export const remoteAccept = (id: string) => call('order_accept', { p_order: id })
 export const remoteMarkReady = (id: string, checkedItemIds: string[]) => call('order_mark_ready', { p_order: id, p_checked: checkedItemIds })
 export const remoteUndoReady = (id: string) => call('order_undo_ready', { p_order: id })

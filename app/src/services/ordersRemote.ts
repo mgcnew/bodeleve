@@ -20,7 +20,7 @@ type Public = {
   address: { street?: string; number?: string; complement?: string; district?: string; cep?: string; reference?: string } | null
   window: { id?: string; label?: string; detail?: string } | null
   delivery_fee_cents: number
-  payment: { method: 'pix' | 'card_on_delivery' | 'cash' | 'on_pickup' | 'debit' | 'credit'; change_for_cents: number | null }
+  payment: { method: 'pix' | 'card_on_delivery' | 'cash' | 'on_pickup' | 'on_account' | 'debit' | 'credit'; change_for_cents: number | null }
   delivery_code: string
   eta_label: string | null
   courier_name: string | null
@@ -70,7 +70,7 @@ export function fromPublic(p: Public): Order {
     estimatedAt: null,
     etaLabel: p.eta_label,
     courierNote: p.courier_name ? `com ${p.courier_name}` : null,
-    payment: p.payment.method === 'cash' ? 'cash' : p.payment.method === 'pix' ? 'pix' : p.payment.method === 'on_pickup' ? 'on_pickup' : 'card_on_delivery',
+    payment: p.payment.method === 'cash' ? 'cash' : p.payment.method === 'pix' ? 'pix' : p.payment.method === 'on_pickup' ? 'on_pickup' : p.payment.method === 'on_account' ? 'on_account' : 'card_on_delivery',
     changeForCents: p.payment.change_for_cents,
     contact: p.contact,
     items: p.items.map((i) => ({ productId: i.slug ?? '', name: i.name, quantity: i.qty, unitPriceCents: i.unit_price_cents })),

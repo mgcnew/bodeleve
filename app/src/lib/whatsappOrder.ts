@@ -12,7 +12,7 @@ const KEY = 'bodeleve.whatsapp'
  */
 export type MessageOrder = Pick<Order, 'number' | 'windowLabel' | 'contact' | 'items' | 'feeCents'>
 
-export function orderMessage(order: MessageOrder, note: string, storeName: string) {
+export function orderMessage(order: MessageOrder, note: string, storeName: string, payment: 'on_pickup' | 'on_account' = 'on_pickup') {
   const items = order.items.flatMap((i) => {
     const line = formatCents(i.quantity * i.unitPriceCents)
     return [
@@ -25,7 +25,7 @@ export function orderMessage(order: MessageOrder, note: string, storeName: strin
     [`Olá, *${storeName}*! Gostaria de fazer um pedido para retirar na loja.`],
     [`*PEDIDO ${/^\d/.test(order.number) ? `#${order.number}` : order.number}*`],
     ['*Itens*', ...items],
-    [`*Total: ${formatCents(order.items.reduce((n, i) => n + i.quantity * i.unitPriceCents, 0) + order.feeCents)}*`, `${plural(count, 'item', 'itens')} · pagamento na retirada`],
+    [`*Total: ${formatCents(order.items.reduce((n, i) => n + i.quantity * i.unitPriceCents, 0) + order.feeCents)}*`, `${plural(count, 'item', 'itens')} · ${payment === 'on_account' ? 'pagamento a prazo (prazo combinado com a casa)' : 'pagamento na retirada'}`],
     ['*Retirada na loja*', order.windowLabel],
     ['*Meus dados*', `Nome: ${order.contact.name}`, `Celular: ${order.contact.phone}`],
     ...(note.trim() ? [['*Observação*', note.trim()]] : []),

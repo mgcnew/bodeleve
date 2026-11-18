@@ -9,7 +9,8 @@ import { fullDate, hourMinute, shortDate } from '@/domain/dates'
 import { formatCents } from '@/domain/money'
 import { staffStatusLabels, staffSubtotal, staffTotal, type StaffOrder } from '@/domain/staffOrder'
 import { staffOrdersStore, toggleChecked } from '@/services/gestao/orders'
-import { acceptOrder, actionErrorMessage, completePickup, markOrderReady, undoOrderReady } from '@/services/gestao/orderActions'
+import { acceptOrder, actionErrorMessage, completePickup, creditDaysOf, markOrderReady, setOrderPayment, undoOrderReady } from '@/services/gestao/orderActions'
+import { customersStore } from '@/services/gestao/people'
 import o from '@/styles/ops.module.css'
 import { Bar, StepBars, SumRow, SumTotal } from '../../shared/OpsBits'
 
@@ -31,6 +32,7 @@ const stepIndex = { new: 0, separating: 1, ready: 2, en_route: 3, delivered: 3 }
 export function Pedido() {
   const { id = '' } = useParams()
   const order = staffOrdersStore.useStore().find((x) => x.id === id)
+  const customers = customersStore.useStore()
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string>()
   const run = async (action: () => Promise<void>) => {
@@ -58,6 +60,11 @@ export function Pedido() {
   const checkedCount = order.checked.filter(Boolean).length
   const allChecked = checkedCount === order.items.length
   const conf = `${checkedCount} de ${order.items.length} conferidos`
+  const phoneDigits = order.customer.phone.replace(/\D/g, '')
+  const registered = customers.find((c) => c.phone.replace(/\D/g, '') === phoneDigits)
+  const credit = registered?.creditDays ?? creditDaysOf(order)
+  const open = order.status === 'new' || order.status === 'separating' || order.status === 'ready'
+  const needsCredit = !!order.onAccount && !credit
 
   return (
     <div className={o.screen}>
@@ -73,6 +80,36 @@ export function Pedido() {
             {hints[order.status](order)}
           </div>
         </div>
+
+        {order.onAccount && open && (
+          <section className={o.section}>
+            {credit ? (
+              <Banner tone="info">Pedido a prazo. Este cliente tem prazo de {credit} dias: a conta a receber é criada quando você marcar “Cliente retirou” e vence {credit} dias depois.</Banner>
+            ) : (
+              <Banner tone="warning">
+                O cliente pediu pagamento a prazo, mas não tem prazo cadastrado. Combine com ele pelo WhatsApp: cadastre o prazo no cliente ou mude o pagamento para “na retirada”.
+              </Banner>
+            )}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Button variant="secondary" disabled={busy} onClick={() => run(() => setOrderPayment(order.id, 'on_pickup'))}>
+                Mudar para pagar na retirada
+              </Button>
+              {registered && !credit && (
+                <ButtonLink to={`/gestao/clientes/${registered.id}`} variant="secondary">
+                  Cadastrar prazo do cliente
+                </ButtonLink>
+              )}
+            </div>
+          </section>
+        )}
+        {!order.onAccount && credit && open && order.fulfillment === 'pickup' && (
+          <div className={o.card}>
+            <div className={o.muted}>Este cliente tem prazo de {credit} dias. Se combinaram pagar a prazo, mude aqui.</div>
+            <Button variant="secondary" disabled={busy} onClick={() => run(() => setOrderPayment(order.id, 'on_account'))}>
+              Marcar como a prazo
+            </Button>
+          </div>
+        )}
 
         <section className={o.section}>
           <h2 className={o.h2}>Itens</h2>
@@ -139,7 +176,7 @@ export function Pedido() {
       <div className={o.footer}>
         {problem && <Banner tone="error">{problem}</Banner>}
         {order.status === 'new' && (
-          <Button size="l" block loading={busy} disabled={busy} onClick={() => run(() => acceptOrder(order.id))}>
+          <Button size="l" block loading={busy} disabled={busy || needsCredit} onClick={() => run(() => acceptOrder(order.id))}>
             Aceitar e começar a separar
           </Button>
         )}

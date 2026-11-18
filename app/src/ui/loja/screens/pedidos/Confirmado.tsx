@@ -80,7 +80,7 @@ export function Confirmado() {
             <div className={l.secondary}>
               Retirada na loja · {o.windowLabel}
               <br />
-              Pagamento na retirada. Entrega? Combine pela conversa do WhatsApp.
+              {o.payment === 'on_account' ? 'Pagamento a prazo, confirmado pela casa.' : 'Pagamento na retirada.'} Entrega? Combine pela conversa do WhatsApp.
             </div>
           </Panel>
         </main>

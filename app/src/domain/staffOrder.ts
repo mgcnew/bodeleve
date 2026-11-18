@@ -29,6 +29,8 @@ export type StaffOrder = {
   feeCents: Cents
   paymentLabel: string
   paid: boolean
+  /** pedido que pediu pagamento a prazo (o dono confere se o cliente tem prazo) */
+  onAccount?: boolean
   courierName: string | null
   distanceKm?: number
   /** H-E5 — código de 4 números que a cliente informa ao entregador */

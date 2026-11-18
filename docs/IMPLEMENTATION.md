@@ -156,7 +156,9 @@ Limites: o tema escuro foi conferido em amostra (Início, Pedidos, Estoque, PDV 
 | Banco | `supabase/patches/2026-11-18_customer_credit.sql` (prazo no cliente, forma `on_account`, `pos_checkout`, `receive_entry`, cancelamento). Testado com reversão: recusa sem prazo, cria a conta, recebe e desfaz. |
 | Relatórios | O que ficou a prazo entra em "A receber (retirada e prazo)". |
 
-Limites: sem limite de crédito por cliente, sem juros e sem aviso de atraso; a loja online por WhatsApp ainda não oferece "a prazo" (o cliente da loja não é identificado, e mostrar o prazo por celular exporia quem tem crédito). Para isso, hoje o dono combina pelo WhatsApp e registra a venda no balcão.
+Loja por WhatsApp: a tela de envio tem "Como vai pagar?" (na retirada ou **a prazo**). Todos veem as duas opções, então ninguém descobre quem tem prazo. O pedido a prazo chega à gestão com aviso: se o cliente (achado pelo celular) tem prazo, o dono aceita normalmente; se não tem, "Aceitar" fica desligado até ele **cadastrar o prazo** ou **mudar o pagamento para "na retirada"** (botão na tela do pedido; também há "Marcar como a prazo" para quem tem prazo e combinou). A conta a receber nasce quando o dono marca "Cliente retirou" (vence nessa data + prazo). Migração: `supabase/patches/2026-11-18_online_order_on_account.sql`, testada com reversão.
+
+Limites: sem limite de crédito por cliente, sem juros e sem aviso de atraso.
 
 ## Próximos passos
 
